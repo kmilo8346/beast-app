@@ -14,10 +14,16 @@ import Images from '../assets';
 
 import { scale } from '../util';
 
-const ProductItem = ({ product: { weigth, price, description } }) => {
+const ProductItem = ({
+  goToProduct,
+  product: { weigth, price, description },
+}) => {
   const [cant, setCant] = useState(0);
   return (
-    <View style={styles.productItemContainer}>
+    <TouchableOpacity
+      onPress={() => goToProduct()}
+      style={styles.productItemContainer}
+    >
       <Image source={Images.DefaultPie} style={styles.image} />
       <SimpleText text={`$ ${price}`} textStyles={styles.price} />
       <SimpleText text={`${description}`} textStyles={styles.title} />
@@ -51,16 +57,18 @@ const ProductItem = ({ product: { weigth, price, description } }) => {
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
-const ProductList = ({ products }) => {
+const ProductList = ({ products, goToProduct }) => {
   return (
     <View style={styles.container}>
       <FlatList
         data={products}
-        renderItem={({ item }) => <ProductItem product={item} />}
+        renderItem={({ item }) => (
+          <ProductItem goToProduct={goToProduct} product={item} />
+        )}
         keyExtractor={(item) => item.sku}
         numColumns={2}
       />

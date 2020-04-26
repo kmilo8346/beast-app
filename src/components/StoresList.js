@@ -1,13 +1,22 @@
 import React from 'react';
-import { Image, View, FlatList, StyleSheet } from 'react-native';
+import {
+  Image,
+  View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ClippingRectangle,
+} from 'react-native';
 import SimpleText from './SimpleText';
 import ScheduleInfo from './ScheduleInfo';
 
 const StoreItem = ({
   store: { title, openHour, closeHour, schedule, img },
+  goToStore,
 }) => {
+
   return (
-    <View style={styles.storeContainer}>
+    <TouchableOpacity onPress={() => goToStore()} style={styles.storeContainer}>
       <Image source={img} style={styles.imageBackground} />
       <View style={styles.imageContainer}>
         <SimpleText
@@ -19,21 +28,23 @@ const StoreItem = ({
             fontStyle: 'normal',
             letterSpacing: 0,
             color: '#ffffff',
-            marginBottom: 50
+            marginBottom: 50,
           }}
         />
-        <ScheduleInfo store={{openHour, closeHour, schedule}} />
+        <ScheduleInfo store={{ openHour, closeHour, schedule }} />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 const StoresList = (props) => {
-  const { data } = props;
+  const { data, goToStore } = props;
   return (
-    <View style={styles.container}>
+    <View style={styles.storesListContainer}>
       <FlatList
         data={data}
-        renderItem={({ item }) => <StoreItem store={item} />}
+        renderItem={({ item }) => (
+          <StoreItem goToStore={goToStore} store={item} />
+        )}
         keyExtractor={(item) => item.id}
       />
     </View>
@@ -41,9 +52,10 @@ const StoresList = (props) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  storesListContainer: {
     flex: 1,
     alignItems: 'center',
+    marginTop: 20
   },
   storeContainer: {
     width: 343,

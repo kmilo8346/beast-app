@@ -1,6 +1,6 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import {
   TutorialScreen,
@@ -14,7 +14,10 @@ import {
   SetEmailScreen,
   SetPhoneScreen,
   SetPaymentScreen,
-} from "./screens";
+} from './screens';
+import { SelectionHeader, InsideStoreHeader } from './components';
+
+import Stores from './services/data/dummyStores';
 
 function MainStackNavigator() {
   const MainStack = createStackNavigator();
@@ -30,8 +33,21 @@ function MainStackNavigator() {
         component={InitialDeliveryAddressScreen}
         options={{ headerShown: false }}
       />
-      <MainStack.Screen name="StoresScreen" component={StoresScreen} />
-      <MainStack.Screen name="StoreScreen" component={StoreScreen} />
+      <MainStack.Screen
+        name="StoresScreen"
+        component={StoresScreen}
+        options={({ navigation }) => ({
+          headerTitle: (props) => <SelectionHeader />,
+          headerLeft: false,
+        })}
+      />
+      <MainStack.Screen
+        name="StoreScreen"
+        component={StoreScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
       <MainStack.Screen
         key="product"
         name="ProductScreen"

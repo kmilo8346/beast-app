@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { scale } from '../../util';
 
 export default StyleSheet.create({
-  container: {
+  initialDeliveryAddressScreenContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

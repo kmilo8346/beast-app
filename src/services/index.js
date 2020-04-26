@@ -1,1 +1,1 @@
-export { default as Data } from './data';
+export { default as Stores } from './data/dummyStores';

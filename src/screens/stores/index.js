@@ -1,19 +1,24 @@
-import React from "react";
-import { View, Text, Button } from "react-native";
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import styles from './style';
 
-export default function StoresScreen({ navigation }) {
+import { StoresList } from '../../components';
+import Stores from '../../services/data/dummyStores';
+
+const StoresScreen = ({ navigation }) => {
+  const goToStore = () => {
+    return navigation.navigate('StoreScreen');
+  };
+  // TODO: Add vista abajo del cart abajo cuando tenga items
+  const goToCart = () => {
+    return navigation.navigate('CheckoutStack', { screen: 'CartScreen' });
+  };
+
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Button
-        title="Go to store screen"
-        onPress={() => navigation.navigate("StoreScreen")}
-      />
-      <Button
-        title="Go to cart screen"
-        onPress={() =>
-          navigation.navigate("CheckoutStack", { screen: "CartScreen" })
-        }
-      />
+    <View style={styles.storesScreenContainer}>
+      <StoresList goToStore={goToStore} data={Stores} />
     </View>
   );
-}
+};
+
+export default StoresScreen;

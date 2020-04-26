@@ -14,7 +14,7 @@ import { SimpleText, Button, BackArrow } from '../../components';
 import styles from './style';
 
 const InitialDeliveryAddressScreen = ({ navigation }) => {
-  const [dpto, setDepto] = useState('');
+  const [dpto, setDepto] = useState('926');
   const [focus, setFocus] = useState(false);
   const addressName = 'Edificio Europlaza ( Ave. Vicuña Mackenna 625 )';
 
@@ -49,7 +49,7 @@ const InitialDeliveryAddressScreen = ({ navigation }) => {
     </View>
   );
   return (
-    <View style={styles.container}>
+    <View style={styles.initialDeliveryAddressScreenContainer}>
       <View style={styles.header}>
           <SimpleText text="Dirección" textStyles={styles.headerTextStyles} />
       </View>

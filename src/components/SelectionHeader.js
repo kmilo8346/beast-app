@@ -13,9 +13,8 @@ const SelectionHeader = (props) => {
   const INITIAL_SELECTION = 'Depto 926';
   const [defaultSelection, setDefaultSelection] = useState(INITIAL_SELECTION);
   return (
-    <View style={styles.container}>
+    <View style={styles.selectionHeaderContainer}>
       <View style={styles.navBar}>
-        <BackArrow styles={styles.arrowBack} />
         <SimpleText text={defaultSelection} textStyles={styles.text} />
         <FontAwesomeIcon icon={faCaretDown} />
       </View>
@@ -24,15 +23,15 @@ const SelectionHeader = (props) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  selectionHeaderContainer: {
     height: scale(96),
-    width: scale(375),
-    marginBottom: scale(16),
+    marginBottom: scale(56),
   },
   navBar: {
     flexDirection: 'row',
     width: '100%',
     marginTop: scale(58),
+    alignItems: 'center',
   },
   text: {
     width: scale(93),
@@ -42,10 +41,6 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     letterSpacing: scale(0),
     color: '#171716',
-    marginLeft: scale(101),
-  },
-  arrowBack: {
-    marginLeft: scale(16),
   },
 });
 

@@ -8,6 +8,7 @@ import BackArrow from './BackArrow';
 import SimpleInput from './SimpleInput';
 import ScheduleInfo from './ScheduleInfo';
 import CategoriesList from './CategoriesList';
+import InsideStoreHeader from './InsideStoreHeader';
 
 export {
   SimpleText,
@@ -20,4 +21,5 @@ export {
   SimpleInput,
   ScheduleInfo,
   CategoriesList,
+  InsideStoreHeader,
 };
