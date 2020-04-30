@@ -4,18 +4,34 @@ import { Image, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { scale } from '../util';
 import Images from '../assets';
 import BackArrow from './BackArrow';
+import Close from './Close';
 import SimpleInput from './SimpleInput';
 import SimpleText from './SimpleText';
 import ScheduleInfo from './ScheduleInfo';
 
-const InsideStoreHeader = ({ storeData, goBack }) => {
+const InsideStoreHeader = ({ storeData, goBack, isSearch }) => {
+  const [searchFocused, setSearchFocused] = useState(false);
+  const onFocus = (isSearching) => {
+    setSearchFocused(isSearching);
+    isSearch(searchFocused);
+  };
   return (
-    <View style={styles.insideStoreHeader}>
+    <View
+      style={[
+        styles.insideStoreHeader,
+        searchFocused ? styles.insideStoreHeaderCont : {},
+      ]}
+    >
       <Image source={Images.VegetalesFrescos} style={styles.headerImg} />
       <View style={styles.headerInfo}>
         <View style={styles.searchNav}>
           <TouchableOpacity onPress={() => goBack()}>
-            <BackArrow styles={{ color: 'white', marginRigth: scale(20) }} />
+            {!searchFocused && (
+              <BackArrow styles={{ color: 'white', marginRigth: scale(20) }} />
+            )}
+            {searchFocused && (
+              <Close styles={{ color: 'white', marginRigth: scale(20) }} />
+            )}
           </TouchableOpacity>
           <SimpleInput
             placeholder="Buscar aquí..."
@@ -23,22 +39,27 @@ const InsideStoreHeader = ({ storeData, goBack }) => {
             isSearcher
             textAlign="center"
             inpStyles={styles.searchInput}
+            onSearch={onFocus}
           />
         </View>
-        <SimpleText
-          text={storeData.title}
-          textStyles={{
-            fontSize: scale(24),
-            fontWeight: '600',
-            fontStyle: 'normal',
-            letterSpacing: scale(0),
-            color: '#ffffff',
-            marginTop: scale(24),
-            marginBottom: scale(16),
-            marginLeft: scale(32),
-          }}
-        />
-        <ScheduleInfo store={storeData} styleSch={styles.schedulesInfo} />
+        {!searchFocused && (
+          <SimpleText
+            text={storeData.title}
+            textStyles={{
+              fontSize: scale(24),
+              fontWeight: '600',
+              fontStyle: 'normal',
+              letterSpacing: scale(0),
+              color: '#ffffff',
+              marginTop: scale(24),
+              marginBottom: scale(16),
+              marginLeft: scale(32),
+            }}
+          />
+        )}
+        {!searchFocused && (
+          <ScheduleInfo store={storeData} styleSch={styles.schedulesInfo} />
+        )}
       </View>
     </View>
   );
@@ -48,6 +69,9 @@ const styles = StyleSheet.create({
   insideStoreHeader: {
     width: scale(375),
     height: scale(197),
+  },
+  insideStoreHeaderCont: {
+    height: scale(104),
   },
   headerImg: {
     width: '100%',

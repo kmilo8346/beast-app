@@ -10,7 +10,6 @@ import SimpleText from './SimpleText';
 import { scale } from '../util';
 
 const CategoryItem = ({ title }) => {
-
   const [selected, setSelected] = useState(false);
 
   return (
@@ -27,10 +26,13 @@ const CategoryItem = ({ title }) => {
 };
 
 const CategoriesList = (props) => {
+  const { isSearching, categories } = props;
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, isSearching ? styles.categoriesSearch : {}]}
+    >
       <FlatList
-        data={props.categories}
+        data={categories}
         renderItem={({ item }) => <CategoryItem title={item.title} />}
         keyExtractor={(item) => String(item.id)}
         horizontal
@@ -44,6 +46,9 @@ const styles = StyleSheet.create({
     width: '98%',
     alignItems: 'center',
     marginTop: scale(16),
+  },
+  categoriesSearch: {
+    flexWrap: 'wrap',
   },
   category: {
     borderRadius: 5,

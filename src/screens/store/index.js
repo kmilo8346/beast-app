@@ -11,18 +11,33 @@ import styles from './style';
 import Stores from '../../services/data/dummyStores';
 
 export default function StoreScreen({ navigation }) {
+  const [isSearching, setIsSearching] = useState(false);
+
   const goToProduct = () => navigation.navigate('ProductScreen');
-  const goToCart = () =>
-    navigation.navigate('CheckoutStack', { screen: 'CartScreen' });
+  const goToCart = () => {
+    return navigation.navigate('CheckoutStack', { screen: 'CartScreen' });
+  };
+
+  const onSearching = (flag) => {
+    console.log(`isSearching(StoreScreen):${isSearching}`);
+    setIsSearching(flag);
+  };
+
+  const backToAddress = () => navigation.goBack();
+
   return (
     <View style={styles.storeScreenContainer}>
       <InsideStoreHeader
-        goBack={() => navigation.goBack()}
+        goBack={() => backToAddress}
         storeData={Stores[0]}
+        isSearch={() => onSearching}
       />
-      <CategoriesList categories={Stores[0].categories} />
+      <CategoriesList
+        isSearching={isSearching}
+        categories={Stores[0].categories}
+      />
       <ProductList
-        goToProduct={() => navigation.navigate('ProductScreen')}
+        goToProduct={() => goToProduct}
         products={Stores[0].products}
       />
     </View>

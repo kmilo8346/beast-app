@@ -14,14 +14,13 @@ import Images from '../assets';
 
 import { scale } from '../util';
 
-const ProductItem = ({
-  goToProduct,
-  product: { weigth, price, description },
-}) => {
+const ProductItem = ({ goToProduct, product }) => {
   const [cant, setCant] = useState(0);
+
+  const { weigth, price, description } = product;
   return (
     <TouchableOpacity
-      onPress={() => goToProduct()}
+      onPress={goToProduct()}
       style={styles.productItemContainer}
     >
       <Image source={Images.DefaultPie} style={styles.image} />

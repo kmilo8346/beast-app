@@ -52,6 +52,7 @@ function MainStackNavigator() {
         key="product"
         name="ProductScreen"
         component={ProductScreen}
+        options={{ headerShown: false }}
       />
     </MainStack.Navigator>
   );

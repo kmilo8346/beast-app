@@ -22,14 +22,21 @@ const SimpleInput = ({
   isSearcher,
   textAlign,
   inpStyles,
+  onSearch,
 }) => {
   const [search, setSearch] = useState(undefined);
   const [focus, setFocus] = useState(false);
 
-  blurTextInput = () => {
+  const blurTextInput = () => {
     setFocus(false);
+    onSearch(false);
     setSearch(undefined);
-    Keyboard.dismiss;
+    Keyboard.dismiss();
+  };
+
+  const onFocusInput = () => {
+    setFocus(true);
+    onSearch(true);
   };
 
   return (
@@ -41,7 +48,7 @@ const SimpleInput = ({
         textAlign={''}
         onChangeText={(searchTerm) => setSearch(searchTerm)}
         value={search}
-        onFocus={() => setFocus(true)}
+        onFocus={() => onFocusInput()}
       />
       {isSearcher && (
         <Image style={styles.searchIcon} source={Images.SearchIcon} />

@@ -5,6 +5,7 @@ import StoreHeader from './StoreHeader';
 import StoresList from './StoresList';
 import ProductList from './ProductList';
 import BackArrow from './BackArrow';
+import Close from './Close';
 import SimpleInput from './SimpleInput';
 import ScheduleInfo from './ScheduleInfo';
 import CategoriesList from './CategoriesList';
@@ -17,6 +18,7 @@ export {
   StoreHeader,
   StoresList,
   BackArrow,
+  Close,
   ProductList,
   SimpleInput,
   ScheduleInfo,

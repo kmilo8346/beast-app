@@ -1,15 +1,15 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { scale } from '../util';
 
-const BackArrow = ({ styles }) => {
+const BackArrow = ({ styles, onPress }) => {
   return (
-    <View style={defaultStyles.container}>
+    <TouchableOpacity onPress={() => onPress()} style={defaultStyles.container}>
       <FontAwesomeIcon size={17} icon={faArrowLeft} style={{ ...styles }} />
-    </View>
+    </TouchableOpacity>
   );
 };
 
