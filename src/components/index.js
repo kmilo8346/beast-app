@@ -10,6 +10,7 @@ import SimpleInput from './SimpleInput';
 import ScheduleInfo from './ScheduleInfo';
 import CategoriesList from './CategoriesList';
 import InsideStoreHeader from './InsideStoreHeader';
+import LowCart from './LowCart';
 
 export {
   SimpleText,
@@ -24,4 +25,5 @@ export {
   ScheduleInfo,
   CategoriesList,
   InsideStoreHeader,
+  LowCart,
 };
