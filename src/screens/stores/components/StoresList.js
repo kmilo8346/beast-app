@@ -7,14 +7,12 @@ import {
   TouchableOpacity,
   ClippingRectangle,
 } from 'react-native';
-import SimpleText from './SimpleText';
-import ScheduleInfo from './ScheduleInfo';
+import { SimpleText, ScheduleInfo } from '../../../components';
 
 const StoreItem = ({
   store: { title, openHour, closeHour, schedule, img },
   goToStore,
 }) => {
-
   return (
     <TouchableOpacity onPress={() => goToStore()} style={styles.storeContainer}>
       <Image source={img} style={styles.imageBackground} />
@@ -36,6 +34,7 @@ const StoreItem = ({
     </TouchableOpacity>
   );
 };
+
 const StoresList = (props) => {
   const { data, goToStore } = props;
   return (
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
   storesListContainer: {
     flex: 1,
     alignItems: 'center',
-    marginTop: 20
+    marginTop: 20,
   },
   storeContainer: {
     width: 343,

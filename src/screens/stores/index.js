@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React from 'react';
+import { View } from 'react-native';
 import styles from './style';
 
-import { StoresList } from '../../components';
+import { StoresList } from './components';
 import Stores from '../../services/data/dummyStores';
 
 const StoresScreen = ({ navigation }) => {
