@@ -21,7 +21,7 @@ export default function TutorialScreen({ navigation }) {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Button
         title="Seguir"
-        onPress={navigation.navigate({ name: 'StoresScreen' })}
+        onPress={() => navigation.navigate({ name: 'InitialDeliveryAddressScreen' })}
       />
       <Button
         title="Crear"
