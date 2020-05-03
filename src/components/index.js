@@ -1,27 +1,12 @@
-import SimpleText from './SimpleText';
-import Button from './Button';
-import SelectionHeader from './SelectionHeader';
-import StoreHeader from './StoreHeader';
-import ProductList from './ProductList';
-import BackArrow from './BackArrow';
-import Close from './Close';
-import SimpleInput from './SimpleInput';
-import ScheduleInfo from './ScheduleInfo';
-import CategoriesList from './CategoriesList';
-import InsideStoreHeader from './InsideStoreHeader';
-import LowCart from './LowCart';
-
-export {
-  SimpleText,
-  Button,
-  SelectionHeader,
-  StoreHeader,
-  BackArrow,
-  Close,
-  ProductList,
-  SimpleInput,
-  ScheduleInfo,
-  CategoriesList,
-  InsideStoreHeader,
-  LowCart,
-};
+export { default as SimpleText } from './SimpleText';
+export { default as Button } from './Button';
+export { default as SelectionHeader } from './SelectionHeader';
+export { default as StoreHeader } from './StoreHeader';
+export { default as ProductList } from './ProductList';
+export { default as BackArrow } from './BackArrow';
+export { default as Close } from './Close';
+export { default as SimpleInput } from './SimpleInput';
+export { default as ScheduleInfo } from './ScheduleInfo';
+export { default as CategoriesList } from './CategoriesList';
+export { default as InsideStoreHeader } from './InsideStoreHeader';
+export { default as LowCart } from './LowCart';
