@@ -4,8 +4,6 @@ import registerRootComponent from "expo/build/launch/registerRootComponent";
 
 import Boot from "./boot"
 
-
-
 function App() {
   return (
     <Boot />
