@@ -1,14 +1,14 @@
 import React from "react";
-import { StyleSheet, View,Text } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import registerRootComponent from "expo/build/launch/registerRootComponent";
+
+import Boot from "./boot"
 
 
 
 function App() {
   return (
-    <View>
-        <Text>Hello World!</Text>
-    </View>
+    <Boot />
   );
 }
 
