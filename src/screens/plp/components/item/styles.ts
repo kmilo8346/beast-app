@@ -9,6 +9,8 @@ interface Styles {
     image: ViewStyle;
     name: ViewStyle;
     format: ViewStyle;
+    price: ViewStyle;
+    inputNumber: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -16,8 +18,6 @@ export default StyleSheet.create<Styles>({
         flex: 1,
         flexDirection: 'row',
         maxHeight: 84,
-        borderStyle: 'solid',
-        borderWidth: 1
     },
     leftContainer: {
         width: 60,
@@ -31,7 +31,6 @@ export default StyleSheet.create<Styles>({
         paddingTop: 6
     },
     rightContainer: {
-        width: 85
     },
     badge: {
         position: 'absolute',
@@ -46,5 +45,12 @@ export default StyleSheet.create<Styles>({
     },
     format: {
         marginTop: 3,
+    },
+    price: {
+        marginTop: 7,
+        alignSelf: 'flex-end'
+    },
+    inputNumber: {
+        marginTop: 12
     }
 });

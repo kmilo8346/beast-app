@@ -1,15 +1,36 @@
 import React from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, ImageSourcePropType } from 'react-native';
 
-import { Text } from '../../../../components';
+import { Text, FriendlyInputNumber } from '../../../../components';
 import Badge from '../badge';
 import colors from '../../../../styles/colors';
 import styles from "./styles";
 
-export interface Props {
+export interface Service {
+    kind: string,
+    name: string,
+    description: string,
+    image: ImageSourcePropType,
+    price: number | false,
 }
 
-export default ({ }: Props) => {
+export interface Product {
+    kind: string,
+    id: string,
+    name: string,
+    brand: string;
+    format: string,
+    image: ImageSourcePropType,
+    price: number,
+    qty: number
+}
+
+export interface ItemProps {
+    data: Product | Service;
+}
+
+export default ({ data }: ItemProps) => {
+    console.log(data)
     return (
         <View style={styles.container}>
             <View style={styles.leftContainer}>
@@ -21,8 +42,10 @@ export default ({ }: Props) => {
                 <Text level={7} color={colors.blackLight3} style={styles.format}>1 un · $ 9.990</Text>
             </View>
             <View style={styles.rightContainer}>
-                <Text level={7}>$ 30.000</Text>
+                <Text level={7} style={styles.price}>$ 30.000</Text>
+                <FriendlyInputNumber defaultValue={0} onChange={(v) => { }} style={styles.inputNumber} />
             </View>
         </View>
     );
+
 }
