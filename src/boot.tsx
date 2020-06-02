@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackHeaderTitleProps } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { HomeScreen, PLPScreen, PDPScreen, ToSaleScreen, MenuScreen } from './screens';
 import { Icon, Text } from './components'
 import colors from './styles/colors';
 
+const commonStackOptions: any = {
+    headerBackImage: () => <Icon name="chevron-left" />,
+    headerBackTitleVisible: false,
+    headerLeftContainerStyle: {
+        marginLeft: 18,
+    },
+    title: '',
+    headerTitle: (props: StackHeaderTitleProps) => <Text level={2} style={props.style}>{props.children}</Text>,
+    headerStyle: {
+        shadowColor: 'transparent',
+    },
+    headerTitleAlign: 'center',
+};
+
 const HomeStack = createStackNavigator();
 
 function HomeStackScreen() {
     return (
-        <HomeStack.Navigator>
+        <HomeStack.Navigator screenOptions={commonStackOptions} initialRouteName="PLP">
             <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <HomeStack.Screen name="PLP" component={PLPScreen} />
             <HomeStack.Screen name="PDP" component={PDPScreen} />
@@ -24,7 +38,7 @@ const ToSaleStack = createStackNavigator();
 
 function ToSaleStackScreen() {
     return (
-        <ToSaleStack.Navigator>
+        <ToSaleStack.Navigator screenOptions={commonStackOptions}>
             <ToSaleStack.Screen name="ToSale" component={ToSaleScreen} options={{ headerShown: false }} />
         </ToSaleStack.Navigator>
     );
@@ -34,7 +48,7 @@ const MenuStack = createStackNavigator();
 
 function MenuStackScreen() {
     return (
-        <MenuStack.Navigator>
+        <MenuStack.Navigator screenOptions={commonStackOptions}>
             <MenuStack.Screen name="Menu" component={MenuScreen} options={{ headerShown: false }} />
         </MenuStack.Navigator>
     );

@@ -1,5 +1,5 @@
-import React, { FunctionComponent, ReactNode, Fragment } from 'react';
-import { View, ViewStyle } from "react-native";
+import React, { ReactNode, Fragment } from 'react';
+import { View, ViewStyle, StyleProp } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Space from '../space';
@@ -11,7 +11,7 @@ export interface Props {
     withMargin?: boolean,
     withPadding?: boolean,
     withFakeHeader?: boolean,
-    style?: ViewStyle,
+    style?: StyleProp<ViewStyle>,
     children: ReactNode
 }
 

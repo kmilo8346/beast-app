@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { Text, TextStyle } from "react-native";
+import { Text, TextStyle, StyleProp } from "react-native";
 
 import colors from '../../styles/colors';
 
@@ -7,7 +7,7 @@ export interface TextProps {
     level?: 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1,
     weight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900',
     ellipsis?: boolean,
-    style?: TextStyle,
+    style?: StyleProp<TextStyle>,
     color?: string,
     children: ReactNode
 }
