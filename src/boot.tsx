@@ -26,7 +26,7 @@ const HomeStack = createStackNavigator();
 
 function HomeStackScreen() {
     return (
-        <HomeStack.Navigator screenOptions={commonStackOptions} initialRouteName="PLP">
+        <HomeStack.Navigator screenOptions={commonStackOptions}>
             <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <HomeStack.Screen name="PLP" component={PLPScreen} />
             <HomeStack.Screen name="PDP" component={PDPScreen} />

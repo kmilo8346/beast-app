@@ -44,7 +44,7 @@ export default StyleSheet.create<Styles>({
         resizeMode: 'cover'
     },
     name: {
-        marginTop: 2,
+        marginTop: 10,
     },
     description: {
         marginTop: 3,

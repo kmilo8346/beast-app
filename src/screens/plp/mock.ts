@@ -93,7 +93,7 @@ export const sections: Section[] = [
                 type: 'product',
                 id: '239832kd',
                 name: 'Pie de gauyaba',
-                brand: 'Don Camilo',
+                brand: 'Don Pepe',
                 format: '1 un',
                 images: [require('../../../assets/items/cake.png')],
                 price: 2000,
@@ -103,135 +103,21 @@ export const sections: Section[] = [
                     name: 'Don Pepe'
                 },
                 tags: ['Don Pepe', 'dulce'],
-            }
+            },
+            {
+                type: 'service',
+                id: '234234kd',
+                name: 'Corte de cabello en torta',
+                description: 'Hacemos el mejor corte de cabello estilo torta de todo Santiago',
+                images: [require('../../../assets/items/barber.png')],
+                price: 7000,
+                qty: 1,
+                seller: {
+                    id: '234ADD',
+                    name: 'Don Camilo'
+                },
+                tags: ['Don Camilo'],
+            },
         ]
     },
 ]
-
-
-// export const sections: Section[] = [
-//     {
-//         tag: 'Don Camilo',
-//         data: [
-//             {
-//                 type: 'product',
-//                 id: '239832kd',
-//                 name: 'Pie de gauyaba',
-//                 brand: 'Don Camilo',
-//                 format: '1 un',
-//                 images: [require('../../../assets/items/cake.png')],
-//                 price: 2000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo', 'dulce'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234234kd',
-//                 name: 'Corte de cabello',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234235kd',
-//                 name: 'Corte de cabello2',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234236kd',
-//                 name: 'Corte de cabello',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234237kd',
-//                 name: 'Corte de cabello',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234238kd',
-//                 name: 'Corte de cabello',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '234ADD',
-//                     name: 'Don Camilo'
-//                 },
-//                 tags: ['Don Camilo'],
-//             }
-//         ]
-//     },
-//     {
-//         tag: 'Don Pepe',
-//         data: [
-//             {
-//                 type: 'product',
-//                 id: '239832kd',
-//                 name: 'Pie de gauyaba',
-//                 brand: 'Don Camilo',
-//                 format: '1 un',
-//                 images: [require('../../../assets/items/cake.png')],
-//                 price: 2000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '121AZZ',
-//                     name: 'Don Pepe'
-//                 },
-//                 tags: ['Don Pepe', 'dulce'],
-//             },
-//             {
-//                 type: 'service',
-//                 id: '234234kd',
-//                 name: 'Corte de cabello',
-//                 description: 'Hacemos todo tipo de cortes. Se atiende a domicilio de 8 am a 2 pm',
-//                 images: [require('../../../assets/items/barber.png')],
-//                 price: 7000,
-//                 qty: 1,
-//                 seller: {
-//                     id: '121AZZ',
-//                     name: 'Don Pepe'
-//                 },
-//                 tags: ['Don Pepe'],
-//             }
-//         ]
-//     },
-// ]

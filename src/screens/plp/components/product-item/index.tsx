@@ -4,6 +4,7 @@ import { View, Image, ViewStyle, StyleProp } from 'react-native';
 import { Text, FriendlyInputNumber, ButtonSmall } from '../../../../components';
 import Badge from '../badge';
 import { Item, ServiceItem, ProductItem } from '../../../../types';
+import numberFormatter from '../../../../lib/formatters/number-formatter';
 import colors from '../../../../styles/colors';
 import styles from "./styles";
 
@@ -21,7 +22,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
     const containerStyle = [styles.container, style];
     if (data.type === 'service') {
         const service: ServiceItem = data;
-        const price = service.price ? `${service.price}` : 'A convenir';
+        const price = service.price ? numberFormatter.toCurrency(service.price) : 'A convenir';
         return (
             <View style={containerStyle}>
                 <View style={styles.leftContainer}>
@@ -45,7 +46,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
 
     const product: ProductItem = data as ProductItem;
     const name = product.brand ? `${product.brand} · ${product.name}` : product.name;
-    const description = `${product.format} · ${product.price}`;
+    const description = `${product.format} · ${numberFormatter.toCurrency(product.price)}`;
     const price = product.qty > 0 ? product.price * product.qty : product.price;
     return (
         <View style={containerStyle}>
@@ -63,7 +64,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
             </View>
             <View style={styles.rightContainer}>
                 <Text level={7} style={styles.price}>
-                    {price}
+                    {numberFormatter.toCurrency(price)}
                 </Text>
                 <FriendlyInputNumber value={product.qty} onChange={(qty) => { onChange({ ...product, qty }) }} style={styles.action} />
             </View>
