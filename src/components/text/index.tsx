@@ -1,25 +1,24 @@
 import React, { ReactNode } from 'react';
-import { Text, TextStyle, StyleProp } from "react-native";
+import { Text, TextStyle, TextProps as RTextProps } from "react-native";
 
 import colors from '../../styles/colors';
 
-export interface TextProps {
+export interface TextProps extends RTextProps {
     level?: 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1,
     weight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900',
-    ellipsis?: boolean,
-    style?: StyleProp<TextStyle>,
     color?: string,
-    children: ReactNode
+    children: ReactNode;
 }
 
-export default ({ level = 1, weight = 'normal', ellipsis = false, style = {}, color = colors.black, children }: TextProps) => {
+export default ({ level = 1, weight = 'normal', style = {}, color = colors.black, ...otherProps }: TextProps) => {
     const baseSyle: TextStyle = {
         fontSize: getFontSize(level),
         fontWeight: weight,
         color
     };
+    const containerStyle = [baseSyle, style];
     return (
-        <Text style={[baseSyle, style]}>{children}</Text>
+        <Text style={containerStyle} {...otherProps}>{otherProps.children}</Text>
     );
 };
 

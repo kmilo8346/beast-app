@@ -1,4 +1,4 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, ImageStyle } from 'react-native';
 
 interface Styles {
     container: ViewStyle;
@@ -6,11 +6,11 @@ interface Styles {
     centerContainer: ViewStyle;
     rightContainer: ViewStyle;
     badge: ViewStyle;
-    image: ViewStyle;
+    image: ImageStyle;
     name: ViewStyle;
-    format: ViewStyle;
+    description: ViewStyle;
     price: ViewStyle;
-    inputNumber: ViewStyle;
+    action: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -38,19 +38,21 @@ export default StyleSheet.create<Styles>({
         left: -1
     },
     image: {
-        width: 55
+        maxWidth: 56,
+        borderRadius: 7,
+        resizeMode: 'cover'
     },
     name: {
         marginTop: 9,
     },
-    format: {
+    description: {
         marginTop: 3,
     },
     price: {
         marginTop: 7,
         alignSelf: 'flex-end'
     },
-    inputNumber: {
+    action: {
         marginTop: 12
     }
 });
