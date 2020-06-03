@@ -39,11 +39,12 @@ export default StyleSheet.create<Styles>({
     },
     image: {
         maxWidth: 56,
+        maxHeight: 54,
         borderRadius: 7,
         resizeMode: 'cover'
     },
     name: {
-        marginTop: 9,
+        marginTop: 2,
     },
     description: {
         marginTop: 3,

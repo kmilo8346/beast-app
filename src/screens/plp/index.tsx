@@ -5,8 +5,9 @@ import { ScreenView, Text } from '../../components';
 import { ProductItem } from './components';
 import { Item } from '../../types';
 import { sections, Section } from './mock';
-import styles from './styles';
+import globalStyle from '../../styles';
 import colors from '../../styles/colors';
+import styles from './styles';
 
 
 type Action = { type: 'change', tag: string, item: Item };
@@ -43,17 +44,18 @@ export default ({ navigation }: PLPScreenProps) => {
     const changeHandler = (tag: string, item: Item) => dispatch({ type: 'change', tag, item })
     const seeDetailHandler = (item: Item) => { navigation.navigate('PDP', item) }
     return (
-        <ScreenView withMargin style={{ justifyContent: "center" }}>
+        <ScreenView>
             <SectionList
+                style={[styles.sections, globalStyle.withPadding]}
                 stickySectionHeadersEnabled
                 sections={state.sections}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${index}-${item.id}`}
                 renderItem={({ item, index, section }) => {
-                    let style: ViewStyle = {};
+                    let style: ViewStyle = styles.item;
                     if (index === section.data.length - 1) {
                         style = styles.lastItem;
                     }
-                    return <ProductItem key={item.id} data={item} onChange={(item) => { changeHandler(section.tag, item) }} onSeeDetail={seeDetailHandler} style={style} />
+                    return <ProductItem data={item} onChange={(item) => { changeHandler(section.tag, item) }} onSeeDetail={seeDetailHandler} style={style} />
                 }
                 }
                 renderSectionHeader={({ section: { tag } }) => (
@@ -62,19 +64,6 @@ export default ({ navigation }: PLPScreenProps) => {
                     </View>
                 )}
             />
-
-
         </ScreenView>
     );
 }
-
-// {state.items.map(item => <ProductItem key={item.id} data={item} onChange={changeHandler} onSeeDetail={seeDetailHandler} />)}
-
-{/* <View style={{ height: 30 }}></View>
-<Button title="Llamar +56 9 64570608" icon="phone-call" />
-<View style={{ height: 30 }}></View>
-<Button title="Hacer Pedido" />
-<View style={{ height: 30 }}></View>
-<Button title="Cancelar" type="secondary" />
-<View style={{ height: 30 }}></View>
-<Button title="Vaciar carrito" type="link" /> */}
