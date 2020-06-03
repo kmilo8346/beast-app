@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, ViewStyle, StyleProp } from 'react-native';
 
-import { Text, FriendlyInputNumber, ButtonSmall } from '../../../../components';
+import { Text, FriendlyInputNumber, ButtonSmall, Touchable } from '../../../../components';
 import Badge from '../badge';
 import { Item, ServiceItem, ProductItem } from '../../../../types';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
@@ -24,7 +24,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
         const service: ServiceItem = data;
         const price = service.price ? numberFormatter.toCurrency(service.price) : 'A convenir';
         return (
-            <View style={containerStyle}>
+            <Touchable style={containerStyle} onPress={() => { onSeeDetail(service) }} >
                 <View style={styles.leftContainer}>
                     <Image source={image} style={styles.image} />
                 </View>
@@ -40,7 +40,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
                     <Text level={7} style={styles.price}>{price}</Text>
                     <ButtonSmall title="Ver" style={styles.action} onPress={() => { onSeeDetail(service) }} />
                 </View>
-            </View>
+            </Touchable>
         );
     }
 
@@ -49,7 +49,7 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
     const description = `${product.format} · ${numberFormatter.toCurrency(product.price)}`;
     const price = product.qty > 0 ? product.price * product.qty : product.price;
     return (
-        <View style={containerStyle}>
+        <Touchable style={containerStyle} onPress={() => { onSeeDetail(product) }}>
             <View style={styles.leftContainer}>
                 <Image source={image} style={styles.image} />
                 {product.qty > 0 && <Badge count={product.qty} style={styles.badge} />}
@@ -68,10 +68,6 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
                 </Text>
                 <FriendlyInputNumber value={product.qty} onChange={(qty) => { onChange({ ...product, qty }) }} style={styles.action} />
             </View>
-        </View>
+        </Touchable>
     );
-
-
-
-
 }

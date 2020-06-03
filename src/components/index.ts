@@ -2,6 +2,8 @@ export { default as Icon } from "./icon";
 export { default as Text } from "./text";
 export { default as Space } from "./space";
 export { default as ScreenView } from "./screen-view";
+export { default as Touchable } from "./touchable";
 export { default as Button } from "./button";
 export { default as ButtonSmall } from "./button-small";
 export { default as FriendlyInputNumber } from "./friendly-input-number";
+export { default as InputNumber } from "./input-number";

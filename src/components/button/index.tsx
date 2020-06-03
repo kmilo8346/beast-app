@@ -8,14 +8,14 @@ import styles from "./styles";
 import colors from '../../styles/colors';
 
 export interface ButtonProps extends Partial<TouchableProps> {
-    title: string,
+    title: string | ReactNode,
     icon?: string,
     disabled?: boolean,
     type?: 'primary' | 'secondary' | 'link',
     children?: ReactNode
 }
 
-export default ({ title, icon = undefined, disabled = false, type = 'primary' }: ButtonProps) => {
+export default ({ title, icon = undefined, type = 'primary', ...otherProps }: ButtonProps) => {
     const containerStyle = [styles.container];
     switch (type) {
         case 'secondary':
@@ -40,9 +40,13 @@ export default ({ title, icon = undefined, disabled = false, type = 'primary' }:
             titleStyle.push(styles['title_primary']);
             break;
     }
+    let titleComponent: any = <Text level={5} weight="bold" style={titleStyle}>{title}</Text>;
+    if (typeof title !== 'string') {
+        titleComponent = title;
+    }
     return (
-        <Touchable style={containerStyle}>
-            <Text level={5} weight="bold" style={titleStyle}>{title}</Text>
+        <Touchable style={containerStyle} {...otherProps}>
+            {titleComponent}
             <View style={styles.iconContainer}>
                 {icon && <Icon name={icon} color={colors.white} style={styles.icon} />}
             </View>

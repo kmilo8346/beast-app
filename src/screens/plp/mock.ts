@@ -10,6 +10,34 @@ export const sections: Section[] = [
         tag: 'Don Camilo',
         data: [
             {
+                type: 'service',
+                id: '-1',
+                name: 'Corte de cabello en torta',
+                description: 'Hacemos el mejor corte de cabello estilo torta de todo Santiago',
+                images: [require('../../../assets/items/barber.png')],
+                price: 7000,
+                qty: 1,
+                seller: {
+                    id: '234ADD',
+                    name: 'Don Camilo'
+                },
+                tags: ['Don Camilo'],
+            },
+            {
+                type: 'service',
+                id: '0',
+                name: 'Corte de cabello',
+                description: 'Hacemos todo tipo de corte de cabello. Atención a domicilio',
+                images: [require('../../../assets/items/barber.png')],
+                price: null,
+                qty: 1,
+                seller: {
+                    id: '234ADD',
+                    name: 'Don Camilo'
+                },
+                tags: ['Don Camilo'],
+            },
+            {
                 type: 'product',
                 id: '1',
                 name: 'Cake de Guayaba',
@@ -103,20 +131,6 @@ export const sections: Section[] = [
                     name: 'Don Pepe'
                 },
                 tags: ['Don Pepe', 'dulce'],
-            },
-            {
-                type: 'service',
-                id: '234234kd',
-                name: 'Corte de cabello en torta',
-                description: 'Hacemos el mejor corte de cabello estilo torta de todo Santiago',
-                images: [require('../../../assets/items/barber.png')],
-                price: 7000,
-                qty: 1,
-                seller: {
-                    id: '234ADD',
-                    name: 'Don Camilo'
-                },
-                tags: ['Don Camilo'],
             },
         ]
     },

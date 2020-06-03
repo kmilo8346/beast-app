@@ -15,7 +15,7 @@ export default ({ title, disabled = false, style = {}, onPress = () => null }: B
     const containerStyle = [styles.container, style];
     return (
         <Touchable style={containerStyle} onPress={onPress}>
-            <Text level={6} weight="bold" color={colors.blue}>{title}</Text>
+            <Text level={6} color={colors.blue}>{title}</Text>
         </Touchable>
     );
 }

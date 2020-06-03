@@ -1,19 +1,19 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import Touchable from '../../../touchable';
-import Icon from '../../../icon';
+import Touchable from '../touchable';
+import Icon from '../icon';
 import styles from "./styles";
-import colors from '../../../../styles/colors';
+import colors from '../../styles/colors';
 
-export interface NumberInputProps {
+export interface InputNumberProps {
     value: number,
     min?: number,
     max?: number,
     onChange?: (value: number) => void,
 }
 
-export default ({ value, min = 0, max = Number.MAX_SAFE_INTEGER, onChange = () => null }: NumberInputProps) => {
+export default ({ value, min = 0, max = Number.MAX_SAFE_INTEGER, onChange = () => null }: InputNumberProps) => {
 
     const minusPressHandler = () => {
         const decremented = value - 1;

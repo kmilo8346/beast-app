@@ -1,4 +1,5 @@
 import { StyleSheet, ViewStyle } from 'react-native';
+import colors from '../../styles/colors';
 
 interface Styles {
     container: ViewStyle;
@@ -8,7 +9,7 @@ interface Styles {
 
 const button: ViewStyle = {
     width: 41,
-    borderColor: '#C7D7FF',
+    borderColor: colors.blueLight1,
     borderStyle: 'solid',
     borderWidth: 1,
     alignItems: 'center',
