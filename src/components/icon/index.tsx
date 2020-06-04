@@ -1,6 +1,11 @@
 import React from 'react';
-import { Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome } from '@expo/vector-icons';
+
+const awesome = ['whatsapp']
 
 export default (props: any) => {
-    return <Feather name size={24} {...props} />
+    if (awesome.indexOf(props.name) !== -1) {
+        return <FontAwesome size={24} {...props} />
+    }
+    return <Feather size={24} {...props} />
 };

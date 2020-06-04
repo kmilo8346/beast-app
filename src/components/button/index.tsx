@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 
 import Touchable, { TouchableProps } from '../touchable';
 import Text from '../text';
@@ -40,12 +40,13 @@ export default ({ title, icon = undefined, type = 'primary', ...otherProps }: Bu
             titleStyle.push(styles['title_primary']);
             break;
     }
+    containerStyle.push(otherProps.style as ViewStyle);
     let titleComponent: any = <Text level={5} weight="bold" style={titleStyle}>{title}</Text>;
     if (typeof title !== 'string') {
         titleComponent = title;
     }
     return (
-        <Touchable style={containerStyle} {...otherProps}>
+        <Touchable {...otherProps} style={containerStyle}>
             {titleComponent}
             <View style={styles.iconContainer}>
                 {icon && <Icon name={icon} color={colors.white} style={styles.icon} />}

@@ -8,3 +8,4 @@ export { default as ButtonSmall } from "./button-small";
 export { default as FriendlyInputNumber } from "./friendly-input-number";
 export { default as InputNumber } from "./input-number";
 export { default as Modal } from "./modal";
+export { default as ActionSheet } from "./action-sheet";
