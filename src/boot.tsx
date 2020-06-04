@@ -18,6 +18,8 @@ const commonStackOptions: any = {
     headerTitle: (props: StackHeaderTitleProps) => <Text level={2} style={props.style}>{props.children}</Text>,
     headerStyle: {
         shadowColor: 'transparent',
+        elevation: 0,
+        shadowOpacity: 0
     },
     headerTitleAlign: 'center',
 };

@@ -3,9 +3,8 @@ import { View } from 'react-native';
 
 import Touchable from '../touchable';
 import Icon from '../icon';
-import styles from "./styles";
-import colors from '../../styles/colors';
 import Text from '../text';
+import styles from "./styles";
 
 export interface InputNumberProps {
   value: number,

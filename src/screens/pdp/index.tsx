@@ -75,8 +75,8 @@ export default ({ navigation, route }: PDPScreenProps) => {
     }
 
     return (
-        <ScreenView>
-            <ScrollView style={[globalStyle.withMargin]}>
+        <ScreenView style={{ position: 'relative' }}>
+            <ScrollView style={[globalStyle.withPadding]}>
                 <View style={{ alignSelf: 'center', width: 240, height: 216, borderRadius: 7 }}>
                     <Image source={state.item.images[0]} style={{ width: '100%', height: '100%', resizeMode: 'contain' }} />
                 </View>
@@ -85,8 +85,9 @@ export default ({ navigation, route }: PDPScreenProps) => {
                 {priceSection}
                 <Text level={6} weight="bold" style={{ marginTop: 20 }}>Descripción</Text>
                 <Text level={6} style={{ marginTop: 5 }}>Deliciosa torta de guayaba horneada con amor por los dioses</Text>
+                <View style={globalStyle.withScreenAir} />
             </ScrollView>
-            <View style={[globalStyle.withPadding, globalStyle.withMainActionAir]}>
+            <View style={[{ position: 'absolute', bottom: 0, left: 0, right: 0 }, globalStyle.withPadding, globalStyle.withMainActionAir]}>
                 {mainAction}
             </View>
         </ScreenView >

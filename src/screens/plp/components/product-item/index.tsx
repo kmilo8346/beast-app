@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, ViewStyle, StyleProp } from 'react-native';
+import { View, Image, ViewStyle, StyleProp, GestureResponderEvent } from 'react-native';
 
 import { Text, FriendlyInputNumber, ButtonSmall, Touchable } from '../../../../components';
 import Badge from '../badge';
@@ -24,7 +24,10 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
         const service: ServiceItem = data;
         const price = service.price ? numberFormatter.toCurrency(service.price) : 'A convenir';
         return (
-            <Touchable style={containerStyle} onPress={() => { onSeeDetail(service) }} >
+            <Touchable style={containerStyle} onPress={(event: GestureResponderEvent) => {
+                event.stopPropagation();
+                onSeeDetail(service);
+            }} >
                 <View style={styles.leftContainer}>
                     <Image source={image} style={styles.image} />
                 </View>
@@ -38,9 +41,12 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
                 </View>
                 <View style={styles.rightContainer}>
                     <Text level={7} style={styles.price}>{price}</Text>
-                    <ButtonSmall title="Ver" style={styles.action} onPress={() => { onSeeDetail(service) }} />
+                    <ButtonSmall title="Ver" style={styles.action} onPress={(event: GestureResponderEvent) => {
+                        event.stopPropagation();
+                        onSeeDetail(service)
+                    }} />
                 </View>
-            </Touchable>
+            </Touchable >
         );
     }
 
@@ -49,7 +55,10 @@ export default ({ data, style = {}, onChange, onSeeDetail }: ProductItemProps) =
     const description = `${product.format} · ${numberFormatter.toCurrency(product.price)}`;
     const price = product.qty > 0 ? product.price * product.qty : product.price;
     return (
-        <Touchable style={containerStyle} onPress={() => { onSeeDetail(product) }}>
+        <Touchable style={containerStyle} onPress={(event: GestureResponderEvent) => {
+            event.stopPropagation();
+            onSeeDetail(product);
+        }}>
             <View style={styles.leftContainer}>
                 <Image source={image} style={styles.image} />
                 {product.qty > 0 && <Badge count={product.qty} style={styles.badge} />}
