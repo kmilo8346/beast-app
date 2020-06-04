@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import Touchable from '../touchable';
 import Icon from '../icon';
+import Text from '../text';
 import styles from "./styles";
 import colors from '../../styles/colors';
 
@@ -10,10 +11,11 @@ export interface InputNumberProps {
     value: number,
     min?: number,
     max?: number,
+    showValue?: boolean,
     onChange?: (value: number) => void,
 }
 
-export default ({ value, min = 0, max = Number.MAX_SAFE_INTEGER, onChange = () => null }: InputNumberProps) => {
+export default ({ value, min = 0, max = Number.MAX_SAFE_INTEGER, showValue = false, onChange = () => null }: InputNumberProps) => {
 
     const minusPressHandler = () => {
         const decremented = value - 1;
@@ -34,6 +36,7 @@ export default ({ value, min = 0, max = Number.MAX_SAFE_INTEGER, onChange = () =
             <Touchable onPress={minusPressHandler} style={styles.minus}>
                 <Icon name="minus" color={colors.blue} />
             </Touchable>
+            {showValue && <Text level={5} style={styles.value}>{value}</Text>}
             <Touchable onPress={plusPressHandler} style={styles.plus}>
                 <Icon name="plus" color={colors.blue} />
             </Touchable>

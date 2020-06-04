@@ -1,9 +1,8 @@
 import React, { ReactNode } from 'react';
-import { ViewStyle, StyleProp } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ViewStyle, StyleProp, GestureResponderEvent, TouchableOpacity } from 'react-native';
 
 export interface TouchableProps {
-    onPress?: () => void
+    onPress?: (event: GestureResponderEvent) => void
     style?: StyleProp<ViewStyle>,
     children: ReactNode
 }
