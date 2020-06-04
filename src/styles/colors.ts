@@ -10,5 +10,6 @@ export default {
     blackLight6: '#F2F2F2',
     white: '#FFFFFF',
     red: '#EBF7F7',
-    green: '#27AE60'
+    green: '#27AE60',
+    modalBackdrop: 'rgba(0,0,0,0.3)',
 }
