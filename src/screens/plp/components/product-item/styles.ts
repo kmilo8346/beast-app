@@ -18,6 +18,7 @@ export default StyleSheet.create<Styles>({
         flex: 1,
         flexDirection: 'row',
         maxHeight: 84,
+        paddingLeft: 1
     },
     leftContainer: {
         width: 60,

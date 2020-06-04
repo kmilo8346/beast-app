@@ -48,7 +48,7 @@ export default ({ navigation, route }: PDPScreenProps) => {
         if (product.qty) {
             priceSection = (
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
-                    <InputNumber value={product.qty} onChange={changeQtyHandler} />
+                    <InputNumber showValue={true} type="dark" value={product.qty} onChange={changeQtyHandler} />
                     <Text level={2}>{numberFormatter.toCurrency(product.qty * product.price)}</Text>
                 </View>
             );
