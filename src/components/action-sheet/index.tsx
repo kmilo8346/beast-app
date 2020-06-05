@@ -38,8 +38,8 @@ export default ({ options, onCallAction, ...otherProps }: ActionSheetProps) => {
     }
 
     const pressActionHandler = (key: string) => {
-        onCallAction(key);
         setVisible(false)
+        onCallAction(key);
     }
     return (
         <Modal {...otherProps} visible={visible} draggable={false} modalStyle={{ backgroundColor: 'transparent' }}>
