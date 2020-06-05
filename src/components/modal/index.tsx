@@ -3,8 +3,7 @@ import { View, TouchableWithoutFeedback, Modal, NativeSyntheticEvent, ViewStyle 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Text from '../text';
-import Touchable from '../touchable';
-import Icon from '../icon';
+import ButtonIcon from '../button-icon';
 import styles from "./styles";
 
 
@@ -38,9 +37,7 @@ export default ({ type = 'auto', visible, title = '', draggable = true, modalSty
                     <View style={styles.header}>
                         {title && <Text level={2} weight="bold">{title}</Text>}
                         <View style={styles.closeContainer}>
-                            <Touchable style={styles.close} onPress={hide}>
-                                <Icon name="x" />
-                            </Touchable>
+                            <ButtonIcon name="x" onPress={hide} />
                         </View>
                     </View>
                     {children}
