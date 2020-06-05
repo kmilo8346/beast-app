@@ -15,7 +15,6 @@ interface Styles {
     title: ViewStyle;
     header: ViewStyle;
     closeContainer: ViewStyle;
-    close: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -68,8 +67,5 @@ export default StyleSheet.create<Styles>({
     closeContainer: {
         position: 'absolute',
         right: 0
-    },
-    close: {
-        margin: 24
-    },
+    }
 });

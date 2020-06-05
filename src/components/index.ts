@@ -9,3 +9,4 @@ export { default as FriendlyInputNumber } from "./friendly-input-number";
 export { default as InputNumber } from "./input-number";
 export { default as Modal } from "./modal";
 export { default as ActionSheet } from "./action-sheet";
+export { default as ButtonIcon } from "./button-icon";
