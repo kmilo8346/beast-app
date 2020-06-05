@@ -1,4 +1,5 @@
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import colors from '../../styles/colors';
 
 interface Styles {
     container: ViewStyle;
@@ -7,10 +8,10 @@ interface Styles {
 
 export default StyleSheet.create<Styles>({
     container: {
-        flex: 1,
-        margin: 24 /** Si todo el touchable es clickeable esto es un padding */
+        alignSelf: 'flex-start',
+        padding: 6
     },
     icon: {
-        color: 'black'
+        color: colors.black
     }
 });

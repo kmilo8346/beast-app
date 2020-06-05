@@ -1,7 +1,8 @@
-import React, { ReactNode, useState, useEffect } from 'react';
-import { View, TouchableWithoutFeedback, Modal, NativeSyntheticEvent, ViewStyle } from 'react-native';
+import React, { ReactNode } from 'react';
+import { View, TouchableWithoutFeedback, Modal, NativeSyntheticEvent, ViewStyle, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import ScreenView from '../screen-view';
 import Text from '../text';
 import ButtonIcon from '../button-icon';
 import styles from "./styles";
@@ -15,45 +16,37 @@ export interface ModalProps {
     modalStyle?: ViewStyle,
     children?: ReactNode,
     onShow?: (event: NativeSyntheticEvent<any>) => void,
-    onClose?: () => void,
+    onRequestClose?: () => void,
+    onDismiss?: () => void,
 }
 
-export default ({ type = 'auto', visible, title = '', draggable = true, modalStyle = {}, children = null, onShow = () => null, onClose = () => null }: ModalProps) => {
-    const [_visible, set_visible] = useState(visible);
-    useEffect(() => {
-        set_visible(visible)
-    }, [visible])
-
-    const hide = () => {
-        set_visible(false);
-        onClose()
-    }
+export default ({ type = 'auto', visible, title = '', draggable = true, modalStyle = {}, children = null, onShow = () => null, onRequestClose = () => null, onDismiss = () => null }: ModalProps) => {
 
     let content;
     switch (type) {
         case 'full':
             content = (
-                <SafeAreaView style={[styles.modal, styles.modal_full, modalStyle]}>
+                <ScreenView safeArea style={[styles.modal, styles.modal_full, modalStyle]}>
                     <View style={styles.header}>
                         {title && <Text level={2} weight="bold">{title}</Text>}
                         <View style={styles.closeContainer}>
-                            <ButtonIcon name="x" onPress={hide} />
+                            <ButtonIcon icon="x" onPress={onRequestClose} />
                         </View>
                     </View>
                     {children}
-                </SafeAreaView>
+                </ScreenView>
             )
             break;
 
         default:
             content = (
-                <View style={styles.containerBackdrop} >
-                    <TouchableWithoutFeedback onPress={hide} style={styles.backdrop}>
+                <ScreenView style={styles.containerBackdrop} >
+                    <TouchableWithoutFeedback onPress={onRequestClose} style={styles.backdrop}>
                         <View style={styles.containerModal}>
                             <TouchableWithoutFeedback onPress={(e) => { e.stopPropagation() }}>
                                 <View style={[styles.modal, styles.modal_auto, modalStyle]}>
                                     {draggable && (
-                                        <TouchableWithoutFeedback onPress={hide}>
+                                        <TouchableWithoutFeedback onPress={onRequestClose}>
                                             <View style={styles.containerDrag}>
                                                 <View style={styles.dragIndicator}></View>
                                             </View>
@@ -67,7 +60,7 @@ export default ({ type = 'auto', visible, title = '', draggable = true, modalSty
                             </TouchableWithoutFeedback>
                         </View>
                     </TouchableWithoutFeedback>
-                </View >
+                </ScreenView >
             )
             break;
     }
@@ -75,10 +68,10 @@ export default ({ type = 'auto', visible, title = '', draggable = true, modalSty
         <Modal
             animationType="slide"
             transparent={true}
-            visible={_visible}
+            visible={visible}
             onShow={onShow}
-            onRequestClose={onClose}
-            onDismiss={onClose}
+            onRequestClose={onRequestClose}
+            onDismiss={onDismiss}
         >
             {content}
         </Modal >

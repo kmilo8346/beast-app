@@ -17,6 +17,7 @@ export default ({ level = 1, weight = 'normal', style = {}, color = colors.black
         color
     };
     const containerStyle = [baseSyle, style];
+
     return (
         <Text style={containerStyle} {...otherProps}>{otherProps.children}</Text>
     );

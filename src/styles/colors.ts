@@ -9,7 +9,7 @@ export default {
     blackLight5: '#BDBDBD',
     blackLight6: '#F2F2F2',
     white: '#FFFFFF',
-    red: '#EBF7F7',
+    red: '#EB5757',
     green: '#27AE60',
     modalBackdrop: 'rgba(0,0,0,0.7)',
 }

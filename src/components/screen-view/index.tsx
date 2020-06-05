@@ -1,5 +1,5 @@
 import React, { ReactNode, Fragment } from 'react';
-import { View, ViewStyle, StyleProp } from "react-native";
+import { View, ViewStyle, StyleProp, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Space from '../space';
@@ -40,6 +40,9 @@ export default ({ safeArea = false, withMargin = false, withPadding = false, wit
     if (safeArea) {
         Container = <SafeAreaView style={containerStyle}>{content}</SafeAreaView>;
     }
-
-    return <View style={styles.wrapper}>{Container}</View>
+    let wrapper = <View style={styles.wrapper}>{Container}</View>
+    if (Platform.OS === 'ios') {
+        wrapper = <KeyboardAvoidingView behavior="padding" style={styles.wrapper}>{Container}</KeyboardAvoidingView>
+    }
+    return wrapper;
 };

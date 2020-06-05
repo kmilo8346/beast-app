@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import * as Linking from 'expo-linking'
 
-import { ScreenView, Text, Button, Modal, ActionSheet } from '../../components';
+import { ScreenView, Text, Button, Modal, ActionSheet, ModalManageAddress } from '../../components';
 import globalStyle from '../../styles';
 
 // import styles from "./styles";
@@ -15,6 +15,7 @@ export default ({ navigation }: Props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [fullScreenModalVisible, setFullScreenModalVisible] = useState(false);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [modalManageAddressVisible, setModalManageAddressVisible] = useState(false);
 
   return (
     <ScreenView safeArea withMargin withFakeHeader>
@@ -22,10 +23,11 @@ export default ({ navigation }: Props) => {
       <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
         <Button type="link" title="Open Modal" onPress={() => { setModalVisible(true) }} />
         <Button type="link" title="Open Full Screen Modal" onPress={() => { setFullScreenModalVisible(true) }} />
+        <Button type="link" title="Open Address Modal" onPress={() => { setModalManageAddressVisible(true) }} />
         <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} />
         <Button title="Go to PLP" onPress={() => { navigation.navigate('PLP') }} />
       </View>
-      <Modal type="auto" title="Agrega un dirección" visible={modalVisible} onClose={() => {
+      <Modal type="auto" title="Agrega un dirección" visible={modalVisible} onRequestClose={() => {
         setModalVisible(false)
       }}>
         <View style={globalStyle.withMargin}>
@@ -37,7 +39,7 @@ export default ({ navigation }: Props) => {
           <View style={globalStyle.withMainActionAir}></View>
         </View>
       </Modal>
-      <Modal type="full" title="Mi Carrito" visible={fullScreenModalVisible} onClose={() => {
+      <Modal type="full" title="Mi Carrito" visible={fullScreenModalVisible} onRequestClose={() => {
         setFullScreenModalVisible(false)
       }}>
         <View>
@@ -49,7 +51,9 @@ export default ({ navigation }: Props) => {
           { key: 'call_phone', text: 'Llamar +569 64570608', icon: 'phone-call' },
           { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' }]}
         visible={actionSheetVisible}
-        onClose={() => { setActionSheetVisible(false) }}
+        onRequestClose={() => {
+          setActionSheetVisible(false)
+        }}
         onCallAction={async (key) => {
           try {
             switch (key) {
@@ -68,9 +72,15 @@ export default ({ navigation }: Props) => {
             }
           } catch (error) {
             console.error(error)
+          } finally {
+            setActionSheetVisible(false)
           }
         }}
       />
+      {modalManageAddressVisible && <ModalManageAddress visible={modalManageAddressVisible} onRequestClose={() => {
+        setModalManageAddressVisible(false)
+      }} />}
+
     </ScreenView >
   );
 }

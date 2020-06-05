@@ -19,11 +19,6 @@ export interface ActionSheetProps extends ModalProps {
 }
 
 export default ({ options, onCallAction, ...otherProps }: ActionSheetProps) => {
-    const [visible, setVisible] = useState(otherProps.visible);
-    useEffect(() => {
-        setVisible(otherProps.visible)
-    }, [otherProps.visible])
-
     let cancelOption: ActionSheetOption | null = null;
     const actions: ActionSheetOption[] = [];
     options.forEach(option => {
@@ -38,11 +33,11 @@ export default ({ options, onCallAction, ...otherProps }: ActionSheetProps) => {
     }
 
     const pressActionHandler = (key: string) => {
-        setVisible(false)
         onCallAction(key);
     }
+
     return (
-        <Modal {...otherProps} visible={visible} draggable={false} modalStyle={{ backgroundColor: 'transparent' }}>
+        <Modal {...otherProps} draggable={false} modalStyle={{ backgroundColor: 'transparent' }}>
             <View style={[globalStyle.withMargin]}>
                 {actions.map(action => {
                     const buttonStyle: ViewStyle[] = [{ marginBottom: 5 }];

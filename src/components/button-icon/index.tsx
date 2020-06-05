@@ -1,24 +1,24 @@
 import React from 'react';
-import { StyleProp, ViewStyle, GestureResponderEvent } from 'react-native';
+import { StyleProp, ViewStyle, GestureResponderEvent, TextStyle } from 'react-native';
 
 import Icon from '../icon';
 import Touchable from '../touchable';
 import styles from "./styles";
 
 export interface ButtonIconProps {
-    name: string;
+    icon: string;
     style?: StyleProp<ViewStyle>;
-    iconStyles?: ViewStyle;
+    iconStyle?: TextStyle;
     onPress?: (event: GestureResponderEvent) => void;
 };
 
-export default ({ name, style = {}, iconStyles = {}, onPress = () => null }: ButtonIconProps) => {
+export default ({ icon, style = {}, iconStyle = {}, onPress = () => null }: ButtonIconProps) => {
     const touchableStyle = [styles.container, style];
-    const iconStyle = [styles.icon, iconStyles];
+    const _iconStyle = [styles.icon, iconStyle];
 
     return (
         <Touchable style={touchableStyle} onPress={onPress}>
-            <Icon name={name} style={iconStyle} />
+            <Icon name='x' style={_iconStyle} />
         </Touchable>
     );
 };

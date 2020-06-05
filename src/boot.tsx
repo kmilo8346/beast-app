@@ -1,10 +1,10 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackHeaderTitleProps } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { HomeScreen, PLPScreen, PDPScreen, ToSaleScreen, MenuScreen } from './screens';
+import { TestScreen, HomeScreen, PLPScreen, PDPScreen, ToSaleScreen, MenuScreen } from './screens';
 import { Icon, Text } from './components'
 import colors from './styles/colors';
 
@@ -29,6 +29,7 @@ const HomeStack = createStackNavigator();
 function HomeStackScreen() {
     return (
         <HomeStack.Navigator screenOptions={commonStackOptions}>
+            {/* <HomeStack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} /> */}
             <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <HomeStack.Screen name="PLP" component={PLPScreen} />
             <HomeStack.Screen name="PDP" component={PDPScreen} />
