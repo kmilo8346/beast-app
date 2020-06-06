@@ -11,11 +11,12 @@ export default StyleSheet.create<Styles>({
     wrapper: {
         flex: 1,
         height: '100%',
-        backgroundColor: colors.white
+        backgroundColor: 'transparent'
     },
     container: {
         flex: 1,
         height: '100%',
+        backgroundColor: colors.white
 
     }
 });

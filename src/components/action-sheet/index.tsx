@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, GestureResponderEvent, ViewStyle } from 'react-native';
 
 import Modal, { ModalProps } from '../modal';
 import Button from '../button';
 import globalStyle from '../../styles';
-import styles from "./styles";
 
 export interface ActionSheetOption {
     key: string,

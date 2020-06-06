@@ -26,14 +26,14 @@ export default ({ safeArea = false, withMargin = false, withPadding = false, wit
     }
 
     // creating style
-    const containerStyle = [styles.container];
+    const containerStyle: StyleProp<ViewStyle> = [styles.container];
     if (withMargin) {
-        containerStyle.push(globalStyles.withMargin)
+        containerStyle.push(globalStyles.withMargin);
     }
     if (withPadding) {
-        containerStyle.push(globalStyles.withPadding)
+        containerStyle.push(globalStyles.withPadding);
     }
-    containerStyle.push(style)
+    containerStyle.push(style);
 
     // creating container
     let Container: any = <View style={containerStyle}>{content}</View>;

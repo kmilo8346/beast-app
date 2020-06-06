@@ -10,7 +10,6 @@ import styles from "./styles";
 
 export interface ModalProps {
     type?: 'auto' | 'full',
-    visible: boolean,
     title?: string,
     draggable?: boolean,
     modalStyle?: ViewStyle,
@@ -20,8 +19,7 @@ export interface ModalProps {
     onDismiss?: () => void,
 }
 
-export default ({ type = 'auto', visible, title = '', draggable = true, modalStyle = {}, children = null, onShow = () => null, onRequestClose = () => null, onDismiss = () => null }: ModalProps) => {
-
+export default ({ type = 'auto', title = '', draggable = true, modalStyle = {}, children = null, onShow = () => null, onRequestClose = () => null, onDismiss = () => null }: ModalProps) => {
     let content;
     switch (type) {
         case 'full':
@@ -40,7 +38,7 @@ export default ({ type = 'auto', visible, title = '', draggable = true, modalSty
 
         default:
             content = (
-                <ScreenView style={styles.containerBackdrop} >
+                <ScreenView style={styles.containerBackdrop}>
                     <TouchableWithoutFeedback onPress={onRequestClose} style={styles.backdrop}>
                         <View style={styles.containerModal}>
                             <TouchableWithoutFeedback onPress={(e) => { e.stopPropagation() }}>
@@ -68,7 +66,7 @@ export default ({ type = 'auto', visible, title = '', draggable = true, modalSty
         <Modal
             animationType="slide"
             transparent={true}
-            visible={visible}
+            visible={true}
             onShow={onShow}
             onRequestClose={onRequestClose}
             onDismiss={onDismiss}
