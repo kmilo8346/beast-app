@@ -65,12 +65,22 @@ export default ({ navigation }: Props) => {
     )
   }
 
+  const saveHandler = (currentAddress: Address, addresses: Address[]) => {
+    user.setCurrentAddress(currentAddress);
+    user.setAddresses(addresses);
+    setModalManageAddressVisible(false);
+  }
+
   let modalManageAddress = null;
   if (modalManageAddressVisible) {
     modalManageAddress = (
-      <ModalManageAddress onRequestClose={() => {
-        setModalManageAddressVisible(false)
-      }} />
+      <ModalManageAddress
+        currentAddress={user.getCurrentAddress()}
+        addresses={user.getAddresses()}
+        onSave={saveHandler}
+        onRequestClose={() => {
+          setModalManageAddressVisible(false)
+        }} />
     )
   }
 
@@ -78,12 +88,13 @@ export default ({ navigation }: Props) => {
     <ScreenView safeArea withMargin withFakeHeader>
       <Text level={1} weight="bold">Buscar</Text>
       <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
-        <Text color="red">{JSON.stringify(user.getAddresses())}</Text>
+        {/*<Text color="red">{JSON.stringify(user.getAddresses())}</Text>*/}
         <Button type="link" title="Open Full Screen Modal" onPress={() => { setFullScreenModalVisible(true) }} />
         <Button type="link" title="Open Address Modal" onPress={() => { setModalManageAddressVisible(true) }} />
         <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} />
         <Button title="Go to PLP" onPress={() => { navigation.navigate('PLP') }} />
       </View>
+      {/*<Text level={8} weight="bold">{JSON.stringify(user.getUser())}</Text>*/}
       {fullScreenModal}
       {actionSheet}
       {modalManageAddress}
