@@ -1,12 +1,16 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import registerRootComponent from "expo/build/launch/registerRootComponent";
 
-import Boot from "./boot"
+import Boot from "./boot";
+import User from './containers/user'
 
 function App() {
   return (
-    <Boot />
+    <User.Provider>
+      <Boot />
+    </User.Provider>
+
   );
 }
 

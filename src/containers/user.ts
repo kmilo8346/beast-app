@@ -34,15 +34,15 @@ export default createContainer((): UserContainer => {
     return container.set("addresses", addresses);
   }
 
-  function getCurrentAddress(): Address {
+  const getCurrentAddress = (): Address => {
     return container.get("currentAddress");
   }
 
-  function getAddresses(): Address[] {
-    return container.get("full_name");
+  const getAddresses = (): Address[] => {
+    return container.get("addresses");
   }
 
-  function getUser(): User {
+  const getUser = (): User => {
     return container.getAll() as User;
   }
 

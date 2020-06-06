@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import * as Linking from 'expo-linking'
 
 import { ScreenView, Text, Button, Modal, ActionSheet, ModalManageAddress } from '../../components';
+import User, { Address } from '../../containers/user';
 
 export interface Props {
   navigation: any
 }
 
 export default ({ navigation }: Props) => {
+  const user = User.useContainer();
 
   const [fullScreenModalVisible, setFullScreenModalVisible] = useState(false);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
@@ -76,7 +78,7 @@ export default ({ navigation }: Props) => {
     <ScreenView safeArea withMargin withFakeHeader>
       <Text level={1} weight="bold">Buscar</Text>
       <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
-
+        <Text color="red">{JSON.stringify(user.getAddresses())}</Text>
         <Button type="link" title="Open Full Screen Modal" onPress={() => { setFullScreenModalVisible(true) }} />
         <Button type="link" title="Open Address Modal" onPress={() => { setModalManageAddressVisible(true) }} />
         <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} />

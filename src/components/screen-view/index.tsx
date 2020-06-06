@@ -12,10 +12,11 @@ export interface Props {
     withPadding?: boolean,
     withFakeHeader?: boolean,
     style?: StyleProp<ViewStyle>,
+    wrapperStyle?: StyleProp<ViewStyle>,
     children: ReactNode
 }
 
-export default ({ safeArea = false, withMargin = false, withPadding = false, withFakeHeader = false, style = {}, children }: Props) => {
+export default ({ safeArea = false, withMargin = false, withPadding = false, withFakeHeader = false, style = {}, wrapperStyle = {}, children }: Props) => {
     // creating content
     let content = children;
     if (withFakeHeader) {
@@ -40,9 +41,10 @@ export default ({ safeArea = false, withMargin = false, withPadding = false, wit
     if (safeArea) {
         Container = <SafeAreaView style={containerStyle}>{content}</SafeAreaView>;
     }
-    let wrapper = <View style={styles.wrapper}>{Container}</View>
+    const _wrapperStyle = [styles.wrapper, wrapperStyle];
+    let wrapper = <View style={_wrapperStyle}>{Container}</View>
     if (Platform.OS === 'ios') {
-        wrapper = <KeyboardAvoidingView behavior="padding" style={styles.wrapper}>{Container}</KeyboardAvoidingView>
+        wrapper = <KeyboardAvoidingView behavior="padding" style={_wrapperStyle}>{Container}</KeyboardAvoidingView>
     }
     return wrapper;
 };

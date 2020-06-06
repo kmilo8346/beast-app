@@ -14,7 +14,7 @@ export interface Container {
 }
 
 export default function useContainer(path: string): Container {
-  let [state, setState] = useState<{ [key: string]: any; }>({});
+  const [state, setState] = useState<{ [key: string]: any; }>({});
 
   const storagePath = `${STORAGE_KEY}/${path}`;
   const isInitialMount = useRef(true);

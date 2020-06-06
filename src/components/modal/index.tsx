@@ -38,7 +38,7 @@ export default ({ type = 'auto', title = '', draggable = true, modalStyle = {}, 
 
         default:
             content = (
-                <ScreenView style={styles.containerBackdrop}>
+                <ScreenView wrapperStyle={styles.containerBackdrop}>
                     <TouchableWithoutFeedback onPress={onRequestClose} style={styles.backdrop}>
                         <View style={styles.containerModal}>
                             <TouchableWithoutFeedback onPress={(e) => { e.stopPropagation() }}>
