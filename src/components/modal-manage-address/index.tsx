@@ -1,12 +1,16 @@
 import React, { useReducer, useEffect, Fragment } from 'react';
+import { View } from 'react-native';
 import validate from 'validate.js';
 
 import Modal, { ModalProps } from '../modal';
 import Input from '../input';
 import Button from '../button';
+import Icon from '../icon';
 import Text from '../text';
+import Touchable from '../touchable';
+import AddresItem from './address-item';
+
 import globalStyle from '../../styles';
-import { View, KeyboardAvoidingView } from 'react-native';
 
 interface Address {
     street: string;
@@ -81,28 +85,63 @@ export default ({ ...modalProps }: ModalManageAddresProps) => {
             errors={state.errors.department}
             onChangeText={(text) => { changeValueHandler('department', text) }}
         />
-        <Button
-            title="Guardar"
-            style={globalStyle.withMainActionAir}
-            onPress={() => {
-                dispatch({
-                    type: 'save_address',
-                    address: {
-                        street: state.form.street, department: state.form.department
-                    }
-                })
-            }} />
     </Fragment>
 
-    if (state.user.addresses.length) {
-        content = <Text>Vista multiples direcciones</Text>
+    // Borrar desde aquí ----------------
+    let savedAddresses = [
+        {
+            street: 'Ave. Vicuña Mackenna',
+            number: '625',
+            department: '926',
+            comunne: 'Santiago',
+            selected: true
+        },
+        {
+            street: 'Callejón de los pajeros',
+            number: '69',
+            department: '1',
+            comunne: 'Cojimar',
+            selected: false
+        },
+        {
+            street: 'Loma de Palo Cagao',
+            number: '35',
+            department: '50',
+            comunne: 'La Sabahana',
+            selected: false
+        },
+    ]
+
+    // Borrar hasta aquí ----------------
+
+    // if (state.user.addresses.length) {
+    if (!!savedAddresses.length) {
+        content = <>
+            {
+                savedAddresses.map((address, index) => <AddresItem style={index === savedAddresses.length - 1 ? { marginBottom: 19 } : {}} address={address} />)
+            }
+            <Touchable style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 50, paddingLeft: 18 }}>
+                <Icon name={'plus'} />
+                <Text level={6} style={{ marginLeft: 18 }}>Agregar una nueva dirección</Text>
+            </Touchable>
+        </>
     }
     return (
-        <Modal {...modalProps} title="Agrega una dirección">
+        <Modal {...modalProps} title={!savedAddresses.length ? "Agrega una dirección" : "Selecciona una dirección"}>
             <View style={[globalStyle.withMargin]}>
                 {content}
+                <Button
+                    title="Guardar"
+                    style={globalStyle.withMainActionAir}
+                    onPress={() => {
+                        dispatch({
+                            type: 'save_address',
+                            address: {
+                                street: state.form.street, department: state.form.department
+                            }
+                        })
+                    }} />
             </View>
-
         </Modal>
     );
 }

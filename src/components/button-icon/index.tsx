@@ -18,7 +18,7 @@ export default ({ icon, style = {}, iconStyle = {}, onPress = () => null }: Butt
 
     return (
         <Touchable style={touchableStyle} onPress={onPress}>
-            <Icon name='x' style={_iconStyle} />
+            <Icon name={icon} style={_iconStyle} />
         </Touchable>
     );
 };
