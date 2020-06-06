@@ -1,15 +1,12 @@
 import React, { ReactNode } from 'react';
-import { ViewStyle, StyleProp, GestureResponderEvent, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
 
-export interface TouchableProps {
-    onPress?: (event: GestureResponderEvent) => void;
-    style?: StyleProp<ViewStyle>;
-    children: ReactNode;
+export interface TouchableProps extends TouchableOpacityProps {
+    children: ReactNode,
 }
 
-export default ({ onPress = () => null, style = {}, children }: TouchableProps) => {
-    const containerStyle = [style];
+export default ({ children, ...otherProps }: TouchableProps) => {
     return (
-        <TouchableOpacity onPress={onPress} style={containerStyle}>{children}</TouchableOpacity>
+        <TouchableOpacity {...otherProps} >{children}</TouchableOpacity>
     );
 }

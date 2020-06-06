@@ -40,6 +40,9 @@ export default ({ title, icon = undefined, type = 'primary', ...otherProps }: Bu
             titleStyle.push(styles['title_primary']);
             break;
     }
+    if (otherProps.disabled) {
+        containerStyle.push({ backgroundColor: 'gray' })
+    }
     containerStyle.push(otherProps.style as ViewStyle);
     let titleComponent: any = <Text level={5} weight="bold" style={titleStyle}>{title}</Text>;
     if (typeof title !== 'string') {

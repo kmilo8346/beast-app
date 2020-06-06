@@ -10,23 +10,12 @@ export interface Props {
 }
 
 export default ({ navigation }: Props) => {
-  const user = User.useContainer();
-
-  const [fullScreenModalVisible, setFullScreenModalVisible] = useState(false);
+  const userContainer = User.useContainer();
+  const user = userContainer.getUser();
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
   const [modalManageAddressVisible, setModalManageAddressVisible] = useState(false);
 
-  let fullScreenModal = null;
-  if (fullScreenModalVisible) {
-    fullScreenModal = (
-      <Modal type="full" title="Mi Carrito" onRequestClose={() => {
-        setFullScreenModalVisible(false)
-      }}>
-        <View style={{ height: 200 }}>
-        </View>
-      </Modal>
-    )
-  }
+  // userContainer.setUser({})
 
   let actionSheet = null;
   if (actionSheetVisible) {
@@ -65,37 +54,33 @@ export default ({ navigation }: Props) => {
     )
   }
 
-  const saveHandler = (currentAddress: Address, addresses: Address[]) => {
-    user.setCurrentAddress(currentAddress);
-    user.setAddresses(addresses);
-    setModalManageAddressVisible(false);
-  }
-
   let modalManageAddress = null;
   if (modalManageAddressVisible) {
     modalManageAddress = (
       <ModalManageAddress
-        currentAddress={user.getCurrentAddress()}
-        addresses={user.getAddresses()}
-        onSave={saveHandler}
+        currentAddress={user.currentAddress}
+        addresses={user.addresses}
+        onSave={(currentAddress, addresses) => {
+          userContainer.setCurrentAddress(currentAddress);
+          userContainer.setAddresses(addresses);
+          setModalManageAddressVisible(false);
+        }}
         onRequestClose={() => {
           setModalManageAddressVisible(false)
-        }} />
+        }
+        } />
     )
   }
 
   return (
     <ScreenView safeArea withMargin withFakeHeader>
       <Text level={1} weight="bold">Buscar</Text>
-      <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
-        {/*<Text color="red">{JSON.stringify(user.getAddresses())}</Text>*/}
-        <Button type="link" title="Open Full Screen Modal" onPress={() => { setFullScreenModalVisible(true) }} />
+      <View style={{ flex: 1 }}>
         <Button type="link" title="Open Address Modal" onPress={() => { setModalManageAddressVisible(true) }} />
-        <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} />
+        <View style={{ flex: 1 }} />
+        <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} style={{ marginBottom: 5 }} />
         <Button title="Go to PLP" onPress={() => { navigation.navigate('PLP') }} />
       </View>
-      {/*<Text level={8} weight="bold">{JSON.stringify(user.getUser())}</Text>*/}
-      {fullScreenModal}
       {actionSheet}
       {modalManageAddress}
     </ScreenView >

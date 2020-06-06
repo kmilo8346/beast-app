@@ -33,7 +33,6 @@ export default function useContainer(path: string): Container {
     if (raw) {
       setState(JSON.parse(raw));
     }
-
   }
 
   async function save() {

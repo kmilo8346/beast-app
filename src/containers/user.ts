@@ -5,6 +5,7 @@ import useContainer from "./container";
 const STORAGE_KEY = "user";
 
 export interface Address {
+  id: string,
   street: string,
   number: string,
   apartment?: string,
@@ -18,6 +19,7 @@ export interface User {
 export interface UserContainer {
   setCurrentAddress: (address: Address) => void,
   setAddresses: (addresses: Address[]) => void,
+  setUser: (user: User) => void,
   getCurrentAddress: () => Address,
   getAddresses: () => Address[],
   getUser: () => User
@@ -34,6 +36,10 @@ export default createContainer((): UserContainer => {
     return container.set("addresses", addresses);
   }
 
+  const setUser = (user: User): void => {
+    return container.setAll(user)
+  }
+
   const getCurrentAddress = (): Address => {
     return container.get("currentAddress");
   }
@@ -46,5 +52,5 @@ export default createContainer((): UserContainer => {
     return container.getAll() as User;
   }
 
-  return { setCurrentAddress, setAddresses, getCurrentAddress, getAddresses, getUser };
+  return { setCurrentAddress, setAddresses, setUser, getCurrentAddress, getAddresses, getUser };
 });
