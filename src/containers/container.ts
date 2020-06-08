@@ -1,20 +1,23 @@
-import { useState, useEffect, useRef } from "react";
-import { AsyncStorage } from "react-native";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useRef } from 'react';
+import { AsyncStorage } from 'react-native';
 
-const STORAGE_KEY = "@global";
+const STORAGE_KEY = '@global';
 
 export interface Container {
-  set: (key: string, value: any) => void,
-  setAll: (state: { [key: string]: any; }) => void,
-  get: (key: string) => any,
-  getAll: () => { [key: string]: any; },
-  has: (key: string) => boolean,
-  remove: (key: string) => void,
-  clear: () => void,
+  set: (key: string, value: any) => void;
+  setAll: (state: { [key: string]: any }) => void;
+  get: (key: string) => any;
+  getAll: () => { [key: string]: any };
+  has: (key: string) => boolean;
+  remove: (key: string) => void;
+  clear: () => void;
 }
 
 export default function useContainer(path: string): Container {
-  const [state, setState] = useState<{ [key: string]: any; }>({});
+  const [state, setState] = useState<{ [key: string]: any }>({});
 
   const storagePath = `${STORAGE_KEY}/${path}`;
   const isInitialMount = useRef(true);
@@ -43,7 +46,7 @@ export default function useContainer(path: string): Container {
     setState((prevState) => ({ ...prevState, [key]: value }));
   }
 
-  function setAll(state: { [key: string]: any; }) {
+  function setAll(state: { [key: string]: any }) {
     setState(state);
   }
 

@@ -3,9 +3,10 @@ import { Feather, FontAwesome } from '@expo/vector-icons';
 
 const awesome = ['whatsapp'];
 
-export default (props: any) => {
-    if (awesome.indexOf(props.name) !== -1) {
-        return <FontAwesome size={24} {...props} />
-    }
-    return <Feather size={24} {...props} />
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default ({ name, ...otherProps }: any) => {
+  if (awesome.indexOf(name) !== -1) {
+    return <FontAwesome size={24} {...otherProps} />;
+  }
+  return <Feather size={24} {...otherProps} />;
 };

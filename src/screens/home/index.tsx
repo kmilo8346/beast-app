@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
-import * as Linking from 'expo-linking'
+import * as Linking from 'expo-linking';
 
-import { ScreenView, Text, Button, Modal, ActionSheet, ModalManageAddress } from '../../components';
-import User, { Address } from '../../containers/user';
+import {
+  ScreenView,
+  Text,
+  Button,
+  ActionSheet,
+  ModalManageAddress,
+} from '../../components';
+import User from '../../containers/user';
 
 export interface Props {
-  navigation: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  navigation: any;
 }
 
 export default ({ navigation }: Props) => {
   const userContainer = User.useContainer();
   const user = userContainer.getUser();
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
-  const [modalManageAddressVisible, setModalManageAddressVisible] = useState(false);
+  const [modalManageAddressVisible, setModalManageAddressVisible] = useState(
+    false
+  );
 
   // userContainer.setUser({})
 
@@ -22,11 +31,20 @@ export default ({ navigation }: Props) => {
     actionSheet = (
       <ActionSheet
         options={[
-          { key: 'message_whatsapp', text: 'Mensaje +569 64570608', icon: 'whatsapp' },
-          { key: 'call_phone', text: 'Llamar +569 64570608', icon: 'phone-call' },
-          { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' }]}
+          {
+            key: 'message_whatsapp',
+            text: 'Mensaje +569 64570608',
+            icon: 'whatsapp',
+          },
+          {
+            key: 'call_phone',
+            text: 'Llamar +569 64570608',
+            icon: 'phone-call',
+          },
+          { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
+        ]}
         onRequestClose={() => {
-          setActionSheetVisible(false)
+          setActionSheetVisible(false);
         }}
         onCallAction={async (key) => {
           try {
@@ -36,22 +54,20 @@ export default ({ navigation }: Props) => {
 
                 break;
               case 'message_whatsapp':
-                Linking.openURL(
-                  'https://wa.me/+56964570608'
-                );
+                Linking.openURL('https://wa.me/+56964570608');
                 break;
 
               default:
                 break;
             }
           } catch (error) {
-            console.error(error)
+            //
           } finally {
-            setActionSheetVisible(false)
+            setActionSheetVisible(false);
           }
         }}
       />
-    )
+    );
   }
 
   let modalManageAddress = null;
@@ -66,25 +82,42 @@ export default ({ navigation }: Props) => {
           setModalManageAddressVisible(false);
         }}
         onRequestClose={() => {
-          setModalManageAddressVisible(false)
-        }
-        } />
-    )
+          setModalManageAddressVisible(false);
+        }}
+      />
+    );
   }
 
   return (
     <ScreenView safeArea withMargin withFakeHeader>
-      <Text level={1} weight="bold">Buscar</Text>
+      <Text level={1} weight="bold">
+        Buscar
+      </Text>
       <View style={{ flex: 1 }}>
-        <Button type="link" title="Open Address Modal" onPress={() => { setModalManageAddressVisible(true) }} />
+        <Button
+          type="link"
+          title="Open Address Modal"
+          onPress={() => {
+            setModalManageAddressVisible(true);
+          }}
+        />
         <View style={{ flex: 1 }} />
-        <Button title="Contact kmilo :)" onPress={() => { setActionSheetVisible(true) }} style={{ marginBottom: 5 }} />
-        <Button title="Go to PLP" onPress={() => { navigation.navigate('PLP') }} />
+        <Button
+          title="Contact kmilo :)"
+          onPress={() => {
+            setActionSheetVisible(true);
+          }}
+          style={{ marginBottom: 5 }}
+        />
+        <Button
+          title="Go to PLP"
+          onPress={() => {
+            navigation.navigate('PLP');
+          }}
+        />
       </View>
       {actionSheet}
       {modalManageAddress}
-    </ScreenView >
+    </ScreenView>
   );
-}
-
-
+};
