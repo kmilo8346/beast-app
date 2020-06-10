@@ -14,16 +14,16 @@ import {
   Touchable,
 } from '../../../../components';
 import Badge from '../badge';
-import { Item, ServiceItem, ProductItem } from '../../../../types';
+import { Product, ServiceItem, ProductItem } from '../../../../types';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import colors from '../../../../styles/colors';
 import styles from './styles';
 
 export interface ProductItemProps {
-  data: Item;
+  data: Product;
   style?: StyleProp<ViewStyle>;
-  onChange: (item: Item) => void;
-  onSeeDetail: (item: Item) => void;
+  onChange: (product: Product) => void;
+  onSeeDetail: (product: Product) => void;
 }
 
 export default ({
@@ -34,6 +34,7 @@ export default ({
 }: ProductItemProps) => {
   const image = data.images[0];
   const containerStyle = [styles.container, style];
+
   if (data.type === 'service') {
     const service: ServiceItem = data;
     const price = service.price
@@ -48,7 +49,7 @@ export default ({
         }}
       >
         <View style={styles.leftContainer}>
-          <Image source={image} style={styles.image} />
+          <Image source={{ uri: image }} style={styles.image} />
         </View>
         <View style={styles.centerContainer}>
           <Text
@@ -103,7 +104,7 @@ export default ({
       }}
     >
       <View style={styles.leftContainer}>
-        <Image source={image} style={styles.image} />
+        <Image source={{ uri: image }} style={styles.image} />
         {product.qty > 0 && <Badge count={product.qty} style={styles.badge} />}
       </View>
       <View style={styles.centerContainer}>

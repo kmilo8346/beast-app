@@ -21,7 +21,6 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export interface PDPScreenProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   route: any;
 }
 

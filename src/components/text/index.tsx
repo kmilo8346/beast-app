@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { Text, TextStyle, TextProps as RTextProps } from 'react-native';
+import { Text, TextStyle, TextProps as RNTextProps } from 'react-native';
 
 import colors from '../../styles/colors';
 
@@ -24,7 +24,7 @@ const getFontSize = (level: number): number => {
   }
 };
 
-export interface TextProps extends RTextProps {
+export interface TextProps extends RNTextProps {
   level?: 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1;
   weight?:
     | 'normal'

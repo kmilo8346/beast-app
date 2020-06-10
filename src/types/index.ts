@@ -1,32 +1,45 @@
-import { ImageSourcePropType } from 'react-native';
-
-interface Seller {
-  id: string;
-  name: string;
+export interface IntegerRange {
+  lte: number;
+  gte: number;
 }
 
-interface CartItem {
+export interface Store {
   id: string;
+  name: string;
+  images: string[];
+  deliveryTime: IntegerRange;
+  deliveryArea: {
+    type: 'Polygon';
+    coordinates: Array<Array<number>>;
+  };
+}
+
+export interface ServiceItem {
+  id: string;
+  type: 'service';
+  name: string;
+  description: string;
+  images: string[];
+  price: number | null;
+  qty: 1;
+  store: Store;
+  tags: string[];
+  categories: string[];
+}
+
+export interface ProductItem {
+  id: string;
+  type: 'product';
   name: string;
   description?: string;
-  images: Array<ImageSourcePropType>;
-  price: number | null;
-  qty: number;
-  seller: Seller;
-  tags: string[];
-}
-
-export interface ServiceItem extends CartItem {
-  type: 'service';
-  description: string;
-  qty: 1;
-}
-
-export interface ProductItem extends CartItem {
-  type: 'product';
+  images: string[];
+  price: number;
   brand?: string;
   format: string;
-  price: number;
+  qty: number;
+  store: Store;
+  tags: string[];
+  categories: string[];
 }
 
-export type Item = ServiceItem | ProductItem;
+export type Product = ServiceItem | ProductItem;
