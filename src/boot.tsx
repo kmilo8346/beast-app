@@ -43,7 +43,6 @@ const HomeStack = createStackNavigator();
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={commonStackOptions}>
-      {/* <HomeStack.Screen name="Test" component={TestScreen} options={{ headerShown: false }} /> */}
       <HomeStack.Screen
         name="Home"
         component={HomeScreen}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import * as Linking from 'expo-linking';
 
@@ -10,9 +10,9 @@ import {
   ModalManageAddress,
 } from '../../components';
 import User from '../../containers/user';
+import productClient from '../../clients/product-client';
 
 export interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigation: any;
 }
 
@@ -24,7 +24,12 @@ export default ({ navigation }: Props) => {
     false
   );
 
-  // userContainer.setUser({})
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await productClient.search({ size: 1 });
+    }
+    fetchData();
+  }, []);
 
   let actionSheet = null;
   if (actionSheetVisible) {
