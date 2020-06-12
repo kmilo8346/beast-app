@@ -43,3 +43,16 @@ export interface ProductItem {
 }
 
 export type Product = ServiceItem | ProductItem;
+
+export interface SearchParams {
+  query?: string;
+  filters?: { [key: string]: any };
+  from?: number;
+  size?: number;
+  source?: string[];
+}
+
+export interface SearchResponse<T> {
+  total: number;
+  hits: T[];
+}

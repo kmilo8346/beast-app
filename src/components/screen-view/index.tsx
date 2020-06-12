@@ -1,4 +1,4 @@
-import React, { ReactNode, Fragment } from 'react';
+import React, { ReactNode } from 'react';
 import {
   View,
   ViewStyle,
@@ -13,27 +13,29 @@ import globalStyles from '../../styles';
 import styles from './styles';
 
 export interface Props {
-  safeArea?: boolean;
   withMargin?: boolean;
   withPadding?: boolean;
-  withFakeHeader?: boolean;
+  safeArea?: boolean;
+  fakeHeader?: boolean;
+  keyboardAvoiding?: boolean;
   style?: StyleProp<ViewStyle>;
   wrapperStyle?: StyleProp<ViewStyle>;
   children: ReactNode;
 }
 
 export default ({
-  safeArea = false,
   withMargin = false,
   withPadding = false,
-  withFakeHeader = false,
+  safeArea = false,
+  fakeHeader = false,
+  keyboardAvoiding = true,
   style = {},
   wrapperStyle = {},
   children,
 }: Props) => {
   // creating content
   let content = children;
-  if (withFakeHeader) {
+  if (fakeHeader) {
     content = (
       <>
         <Space.FakeHeader />
@@ -57,11 +59,11 @@ export default ({
   if (safeArea) {
     Container = <SafeAreaView style={containerStyle}>{content}</SafeAreaView>;
   }
-  const _wrapperStyle = [styles.wrapper, wrapperStyle];
-  let wrapper = <View style={_wrapperStyle}>{Container}</View>;
-  if (Platform.OS === 'ios') {
+  const wrapperFinalStyle = [styles.wrapper, wrapperStyle];
+  let wrapper = <View style={wrapperFinalStyle}>{Container}</View>;
+  if (Platform.OS === 'ios' && keyboardAvoiding) {
     wrapper = (
-      <KeyboardAvoidingView behavior="padding" style={_wrapperStyle}>
+      <KeyboardAvoidingView behavior="padding" style={wrapperFinalStyle}>
         {Container}
       </KeyboardAvoidingView>
     );

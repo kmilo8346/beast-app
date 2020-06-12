@@ -94,7 +94,7 @@ export default ({ navigation }: Props) => {
   }
 
   return (
-    <ScreenView safeArea withMargin withFakeHeader>
+    <ScreenView safeArea withMargin fakeHeader>
       <Text level={1} weight="bold">
         Buscar
       </Text>

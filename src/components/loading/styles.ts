@@ -1,20 +1,18 @@
 import { StyleSheet, ViewStyle } from 'react-native';
 
-import colors from '../../styles/colors';
-
 interface Styles {
-  wrapper: ViewStyle;
   container: ViewStyle;
+  horizontal: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
-  wrapper: {
-    flex: 1,
-    height: '100%',
-    backgroundColor: colors.white,
-  },
   container: {
     flex: 1,
-    height: '100%',
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   },
 });

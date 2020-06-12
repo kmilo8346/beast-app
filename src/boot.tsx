@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   HomeScreen,
   PLPScreen,
+  PLPInStoreScreen,
   PDPScreen,
   ToSaleScreen,
   MenuScreen,
@@ -20,13 +21,12 @@ import colors from './styles/colors';
 
 const commonStackOptions: StackNavigationOptions = {
   headerBackImage: () => <Icon name="chevron-left" />,
-  headerBackTitleVisible: false,
   headerLeftContainerStyle: {
     marginLeft: 18,
   },
-  title: '',
+  headerBackTitleVisible: false,
   headerTitle: ({ style, children }: StackHeaderTitleProps) => (
-    <Text level={2} style={style}>
+    <Text level={2} weight="bold" style={[{ marginTop: 5 }, style]}>
       {children}
     </Text>
   ),
@@ -48,8 +48,17 @@ function HomeStackScreen() {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <HomeStack.Screen name="PLP" component={PLPScreen} />
-      <HomeStack.Screen name="PDP" component={PDPScreen} />
+      <HomeStack.Screen
+        name="PLP"
+        component={PLPScreen}
+        options={{ title: 'Buscar' }}
+      />
+      <HomeStack.Screen name="PLPInStore" component={PLPInStoreScreen} />
+      <HomeStack.Screen
+        name="PDP"
+        component={PDPScreen}
+        options={{ title: '' }}
+      />
     </HomeStack.Navigator>
   );
 }

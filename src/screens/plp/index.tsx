@@ -2,8 +2,8 @@
 import React, { useReducer, useEffect, ReactNode } from 'react';
 import { View, FlatList, SectionList, ViewStyle } from 'react-native';
 
-import { ScreenView, Text, Input } from '../../components';
-import { StoreCard, ProductItem } from './components';
+import { ScreenView, Text, ErrorView, NotData } from '../../components';
+import { StoreCard, ProductItem, InputSearch } from './components';
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
 import { Product, Store } from '../../types';
@@ -245,44 +245,27 @@ export default ({ navigation }: PLPScreenProps) => {
     fetchFreshData();
   }, [state.query, state.filters.position, state.filters.store]);
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <View style={{ zIndex: 9999 }}>
-          <Input
-            placeholder="Buscar"
-            onChangeText={(text) => {
-              dispatch({ type: 'set_query', query: text });
-            }}
-            style={{ width: 350, height: '100%', marginRight: 10 }}
-          />
-        </View>
-      ),
-    });
-  }, [navigation]);
-
   let content: ReactNode;
   switch (state.view) {
     case 'ERROR':
-      content = (
-        <View>
-          <Text level={7}>Error view</Text>
-          <Text level={8}>{JSON.stringify(state.error)}</Text>
-        </View>
-      );
+      content = <ErrorView />;
       break;
     case 'NOT_STORES':
       content = (
-        <View>
-          <Text level={7}>Not store view</Text>
-          <Text level={8}>{JSON.stringify(state.storesTrack)}</Text>
-        </View>
+        <NotData
+          title="No hay tiendas registradas"
+          subtitle="Empieza a vender totalmente gratis"
+          action="Vender"
+          onCallAction={() => {
+            navigation.navigate('ToSale');
+          }}
+        />
       );
       break;
     case 'STORES':
       content = (
         <FlatList
-          style={[globalStyle.withPadding, { marginTop: 10 }]}
+          style={[globalStyle.withPadding]}
           columnWrapperStyle={{
             marginBottom: 10,
             justifyContent: 'space-between',
@@ -299,7 +282,7 @@ export default ({ navigation }: PLPScreenProps) => {
               name={item.name}
               image={item.images[0]}
               onPress={() => {
-                dispatch({ type: 'set_store', store: item.name });
+                navigation.navigate('PLPInStore', { store: item.name });
               }}
             />
           )}
@@ -308,12 +291,7 @@ export default ({ navigation }: PLPScreenProps) => {
       );
       break;
     case 'NOT_PRODUCTS':
-      content = (
-        <View>
-          <Text level={7}>Not products view</Text>
-          <Text level={8}>{JSON.stringify(state.productsTrack)}</Text>
-        </View>
-      );
+      content = <NotData />;
       break;
     case 'PRODUCTS':
       content = (
@@ -370,6 +348,13 @@ export default ({ navigation }: PLPScreenProps) => {
 
   return (
     <ScreenView style={{ width: '100%', borderStyle: 'solid', borderWidth: 0 }}>
+      <InputSearch
+        placeholder="Buscar productos"
+        onChangeText={(text) => {
+          dispatch({ type: 'set_query', query: text });
+        }}
+        containerStyle={[globalStyle.withMargin, { marginBottom: 15 }]}
+      />
       {content}
     </ScreenView>
   );

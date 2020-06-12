@@ -8,7 +8,7 @@ import styles from './styles';
 
 export default () => {
   return (
-    <ScreenView safeArea withFakeHeader>
+    <ScreenView safeArea fakeHeader>
       <Text level={1} weight="bold" style={globalStyle.withMargin}>
         Menú
       </Text>

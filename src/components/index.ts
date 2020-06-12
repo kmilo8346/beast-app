@@ -12,3 +12,6 @@ export { default as InputNumber } from './input-number';
 export { default as Modal } from './modal';
 export { default as ModalManageAddress } from './modal-manage-address';
 export { default as ActionSheet } from './action-sheet';
+export { default as ErrorView } from './error-view';
+export { default as NotData } from './not-data';
+export { default as Loading } from './loading';

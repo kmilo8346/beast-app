@@ -2,20 +2,9 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
 
+import { SearchParams, SearchResponse } from '../types';
+
 axios.defaults.baseURL = 'http://192.168.0.7:3000';
-
-export interface SearchParams {
-  query?: string;
-  filters?: { [key: string]: any };
-  from?: number;
-  size?: number;
-  source?: string[];
-}
-
-export interface SearchResponse<T> {
-  total: number;
-  hits: T[];
-}
 
 /**
  * REST Client to standarize api comunications
