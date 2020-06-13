@@ -14,35 +14,20 @@ export interface Store {
   };
 }
 
-export interface ServiceItem {
+export interface Product {
   id: string;
-  type: 'service';
-  name: string;
-  description: string;
-  images: string[];
-  price: number | null;
-  qty: 1;
-  store: Store;
-  tags: string[];
-  categories: string[];
-}
-
-export interface ProductItem {
-  id: string;
-  type: 'product';
+  type: 'product' | 'service';
   name: string;
   description?: string;
   images: string[];
-  price: number;
+  price: number | null;
   brand?: string;
-  format: string;
-  qty: number;
-  store: Store;
+  format?: string;
   tags: string[];
   categories: string[];
+  store: Store;
+  qty: number;
 }
-
-export type Product = ServiceItem | ProductItem;
 
 export interface SearchParams {
   query?: string;

@@ -1,13 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
-import { ViewStyle, View, FlatList } from 'react-native';
+import { ViewStyle } from 'react-native';
 
 import {
   ScreenView,
   ErrorView,
   NotData,
-  Text,
   Loading,
+  FlatList,
 } from '../../../components';
 import { InputSearch, ProductItem } from '../components';
 import { Product, SearchResponse } from '../../../types';
@@ -144,7 +144,7 @@ export default ({ navigation, route }: ScreenProps) => {
           store: state.filters.store,
         },
         from: state.productsTrack.from,
-        size: 8,
+        size: 10,
       });
       dispatch({ type: 'set_fetch_response', response });
     } catch (error) {
@@ -207,15 +207,11 @@ export default ({ navigation, route }: ScreenProps) => {
               />
             );
           }}
-          onEndReached={(info) => {
-            if (
-              info.distanceFromEnd > -100 &&
-              state.productsTrack.from < state.productsTrack.total
-            ) {
+          onBeastEndReached={() => {
+            if (state.productsTrack.from < state.productsTrack.total) {
               fetchMore();
             }
           }}
-          onEndReachedThreshold={0}
         />
       );
       break;
@@ -229,6 +225,7 @@ export default ({ navigation, route }: ScreenProps) => {
     <ScreenView keyboardAvoiding={false} style={{ flex: 1 }}>
       <InputSearch
         placeholder="Buscar productos"
+        value={state.query}
         onChangeText={(text) => {
           dispatch({ type: 'set_query', query: text });
         }}

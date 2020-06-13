@@ -24,7 +24,7 @@ export default ({
 }: NotDataProps) => {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <View style={{ marginTop: '30%', alignItems: 'center' }}>
+      <View style={{ marginTop: '20%', alignItems: 'center' }}>
         <Image
           source={image}
           style={{ width: 200, height: 200, marginBottom: 10 }}

@@ -1,104 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
-import { View, FlatList, SectionList, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 
-import { ScreenView, Text, ErrorView, NotData } from '../../components';
+import {
+  ScreenView,
+  Text,
+  ErrorView,
+  NotData,
+  Loading,
+  FlatList,
+  SectionList,
+} from '../../components';
 import { StoreCard, ProductItem, InputSearch } from './components';
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
-import { Product, Store } from '../../types';
+import { Product, Store, SearchResponse } from '../../types';
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
-
-interface Section {
-  tag: string;
-  data: Product[];
-}
-type ViewState =
-  | 'LOADING'
-  | 'ERROR'
-  | 'STORES'
-  | 'NOT_STORES'
-  | 'PRODUCTS'
-  | 'NOT_PRODUCTS';
-
-// actions
-type ChangeViewAction = {
-  type: 'change_view';
-  view: ViewState;
-  newState?: any;
-};
-type SetStoreAction = {
-  type: 'set_store';
-  store: string;
-};
-type SetQueryAction = {
-  type: 'set_query';
-  query: string;
-};
-type ChangeProductAction = {
-  type: 'change_product';
-  tag: string;
-  product: Product;
-};
-type Action =
-  | ChangeViewAction
-  | SetStoreAction
-  | SetQueryAction
-  | ChangeProductAction;
-
-type State = {
-  view: ViewState;
-  query: string;
-  filters: {
-    store: string;
-    position: number[];
-  };
-  storesTrack: {
-    from: number;
-    total: number;
-    stores: Store[];
-  };
-  productsTrack: {
-    from: number;
-    total: number;
-    products: Product[];
-    sections: Section[];
-  };
-  error: Error | null;
-};
-
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'change_view':
-      return { ...state, ...action.newState, view: action.view };
-    case 'set_store':
-      return { ...state, filters: { ...state.filters, store: action.store } };
-    case 'set_query':
-      return { ...state, query: action.query };
-    case 'change_product':
-      return {
-        ...state,
-        productsTrack: {
-          ...state.productsTrack,
-          sections: state.productsTrack.sections.map((section) => {
-            const modifiedSection = { ...section };
-            if (section.tag === action.tag) {
-              modifiedSection.data = section.data.map((product) => {
-                if (product.id === action.product.id) {
-                  return action.product;
-                }
-                return product;
-              });
-            }
-            return modifiedSection;
-          }),
-        },
-      };
-    default:
-      return state;
-  }
-};
 
 const mapProductsToSections = (products: Product[]): Section[] => {
   const sections: Section[] = [];
@@ -117,6 +35,141 @@ const mapProductsToSections = (products: Product[]): Section[] => {
   return sections;
 };
 
+interface Section {
+  tag: string;
+  data: Product[];
+}
+type ViewState =
+  | 'LOADING'
+  | 'STORES'
+  | 'NOT_STORES'
+  | 'FETCH_STORES_ERROR'
+  | 'PRODUCTS'
+  | 'NOT_PRODUCTS'
+  | 'FETCH_PRODUCTS_ERROR';
+
+// actions;
+type SetQueryAction = {
+  type: 'set_query';
+  query: string;
+};
+type ChangeProductAction = {
+  type: 'change_product';
+  tag: string;
+  product: Product;
+};
+type SetIsLoadingAction = {
+  type: 'set_is_loading';
+};
+type SetFetchStoresResponseAction = {
+  type: 'set_fetch_stores_response';
+  response: SearchResponse<Partial<Store>>;
+};
+type SetFetchStoresErrorAction = {
+  type: 'set_fetch_stores_error';
+};
+type SetFetchProductsResponseAction = {
+  type: 'set_fetch_products_response';
+  response: SearchResponse<Partial<Product>>;
+};
+type SetFetchProductsErrorAction = {
+  type: 'set_fetch_products_error';
+};
+type Action =
+  | SetQueryAction
+  | ChangeProductAction
+  | SetIsLoadingAction
+  | SetFetchStoresResponseAction
+  | SetFetchStoresErrorAction
+  | SetFetchProductsResponseAction
+  | SetFetchProductsErrorAction;
+
+type State = {
+  view: ViewState;
+  query: string;
+  filters: {
+    position: number[];
+  };
+  storesTrack: {
+    from: number;
+    total: number;
+    stores: Store[];
+  };
+  productsTrack: {
+    from: number;
+    total: number;
+    products: Product[];
+    sections: Section[];
+  };
+};
+
+const reducer = (state: State, action: Action): State => {
+  let storesTrack;
+  let products: Product[];
+  let productsTrack = null;
+  let view: ViewState;
+  switch (action.type) {
+    case 'set_query':
+      return {
+        ...state,
+        query: action.query,
+        productsTrack: { ...state.productsTrack, from: 0 },
+      };
+    case 'change_product':
+      return state;
+    case 'set_is_loading':
+      return {
+        ...state,
+        view: 'LOADING',
+      };
+    case 'set_fetch_stores_response':
+      storesTrack = {
+        from: state.storesTrack.from + action.response.hits.length,
+        total: action.response.total,
+        stores: Array.prototype.concat(
+          state.storesTrack.stores,
+          action.response.hits
+        ),
+      };
+      view = storesTrack.stores.length > 0 ? 'STORES' : 'NOT_STORES';
+      return {
+        ...state,
+        view,
+        storesTrack,
+      };
+    case 'set_fetch_stores_error':
+      return {
+        ...state,
+        view: 'FETCH_STORES_ERROR',
+      };
+    case 'set_fetch_products_response':
+      products = state.productsTrack.products;
+      if (state.productsTrack.from === 0) {
+        products = [];
+      }
+      products = Array.prototype.concat(products, action.response.hits);
+      productsTrack = {
+        from: state.productsTrack.from + action.response.hits.length,
+        total: action.response.total,
+        products,
+        sections: mapProductsToSections(products),
+      };
+      view = productsTrack.products.length > 0 ? 'PRODUCTS' : 'NOT_PRODUCTS';
+      return {
+        ...state,
+        view,
+        productsTrack,
+      };
+    case 'set_fetch_products_error':
+      return {
+        ...state,
+        view: 'FETCH_PRODUCTS_ERROR',
+      };
+    default:
+      return state;
+  }
+};
+
 export interface PLPScreenProps {
   navigation: any;
   route: any;
@@ -127,7 +180,6 @@ export default ({ navigation }: PLPScreenProps) => {
     view: 'LOADING',
     query: '',
     filters: {
-      store: '',
       position: [-70.63196182250977, -33.44933346731538],
     },
     storesTrack: {
@@ -141,127 +193,59 @@ export default ({ navigation }: PLPScreenProps) => {
       products: [],
       sections: [],
     },
-    error: null,
   });
 
-  const fetchProducts = async (
-    query: string,
-    filters: any,
-    from = 0,
-    size = 20
-  ) => {
-    const response = await productClient.search({
-      query,
-      filters,
-      from,
-      size,
-    });
-    if (!response.hits.length) {
-      dispatch({
-        type: 'change_view',
-        view: 'NOT_PRODUCTS',
-        newState: { productsTrack: { from: 0, total: 0, products: [] } },
-      });
-    } else {
-      let products = [...state.productsTrack.products];
-      // is a fresh fetching
-      if (from === 0) {
-        products = [];
-      }
-      products = Array.prototype.concat(products, response.hits);
-      const sections = mapProductsToSections(products);
-      dispatch({
-        type: 'change_view',
-        view: 'PRODUCTS',
-        newState: {
-          productsTrack: {
-            from: response.hits.length,
-            total: response.total,
-            products,
-            sections,
-          },
-        },
-      });
-    }
-  };
-
-  const fetchStores = async (filters: any, from = 0, size = 10) => {
-    const response = await storeClient.search({
-      filters,
-      from,
-      size,
-    });
-    if (!response.hits.length) {
-      dispatch({
-        type: 'change_view',
-        view: 'NOT_STORES',
-        newState: { storesTrack: { from: 0, total: 0, stores: [] } },
-      });
-      return;
-    }
-    let stores = [...state.storesTrack.stores];
-    // is a fresh fetching
-    if (from === 0) {
-      stores = [];
-    }
-    dispatch({
-      type: 'change_view',
-      view: 'STORES',
-      newState: {
-        storesTrack: {
-          from: response.hits.length,
-          total: response.total,
-          stores: Array.prototype.concat(stores, response.hits),
-        },
-      },
-    });
-  };
-
-  const fetchFreshData = async () => {
+  const fetchStores = async () => {
     try {
-      dispatch({ type: 'change_view', view: 'LOADING' });
-      if (state.query || state.filters.store) {
-        await fetchProducts(state.query, state.filters);
-        return;
-      }
-      await fetchStores({ position: state.filters.position });
-    } catch (error) {
-      console.log(error);
-      dispatch({
-        type: 'change_view',
-        view: 'ERROR',
-        newState: { error },
+      const response = await storeClient.search({
+        filters: {
+          position: state.filters.position,
+        },
+        from: state.storesTrack.from,
+        size: 10,
       });
+      dispatch({ type: 'set_fetch_stores_response', response });
+    } catch (error) {
+      dispatch({ type: 'set_fetch_stores_error' });
     }
   };
 
-  const changeHandler = (tag: string, product: Product) =>
-    dispatch({ type: 'change_product', tag, product });
-  const seeDetailHandler = (product: Product) => {
-    navigation.navigate('PDP', product);
+  const fetchStoresWithLoading = async () => {
+    dispatch({ type: 'set_is_loading' });
+    await fetchStores();
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await productClient.search({
+        query: state.query,
+        filters: {
+          position: state.filters.position,
+        },
+        from: state.productsTrack.from,
+        size: 10,
+      });
+      dispatch({ type: 'set_fetch_products_response', response });
+    } catch (error) {
+      dispatch({ type: 'set_fetch_products_error' });
+    }
+  };
+
+  const fetchProductsWithLoading = async () => {
+    dispatch({ type: 'set_is_loading' });
+    await fetchProducts();
   };
 
   useEffect(() => {
-    fetchFreshData();
-  }, [state.query, state.filters.position, state.filters.store]);
+    if (state.query) {
+      fetchProductsWithLoading();
+    } else {
+      fetchStoresWithLoading();
+    }
+  }, [state.query]);
 
   let content: ReactNode;
   switch (state.view) {
-    case 'ERROR':
-      content = <ErrorView />;
-      break;
-    case 'NOT_STORES':
-      content = (
-        <NotData
-          title="No hay tiendas registradas"
-          subtitle="Empieza a vender totalmente gratis"
-          action="Vender"
-          onCallAction={() => {
-            navigation.navigate('ToSale');
-          }}
-        />
-      );
-      break;
     case 'STORES':
       content = (
         <FlatList
@@ -287,11 +271,38 @@ export default ({ navigation }: PLPScreenProps) => {
             />
           )}
           keyExtractor={(item) => item.id}
+          onEndReached={(info) => {
+            if (
+              info.distanceFromEnd > -100 &&
+              state.productsTrack.from < state.productsTrack.total
+            ) {
+              fetchStores();
+            }
+          }}
+          onEndReachedThreshold={0}
         />
       );
       break;
-    case 'NOT_PRODUCTS':
-      content = <NotData />;
+    case 'NOT_STORES':
+      content = (
+        <NotData
+          title="No hay tiendas registradas"
+          subtitle="Empieza a vender totalmente gratis"
+          action="Vender"
+          onCallAction={() => {
+            navigation.navigate('ToSale');
+          }}
+        />
+      );
+      break;
+    case 'FETCH_STORES_ERROR':
+      content = (
+        <ErrorView
+          onRetry={() => {
+            fetchStoresWithLoading();
+          }}
+        />
+      );
       break;
     case 'PRODUCTS':
       content = (
@@ -309,9 +320,15 @@ export default ({ navigation }: PLPScreenProps) => {
               <ProductItem
                 data={item}
                 onChange={(data) => {
-                  changeHandler(section.tag, data);
+                  dispatch({
+                    type: 'change_product',
+                    tag: section.tag,
+                    product: data,
+                  });
                 }}
-                onSeeDetail={seeDetailHandler}
+                onSeeDetail={() => {
+                  navigation.navigate('PDP', item);
+                }}
                 style={style}
               />
             );
@@ -333,16 +350,32 @@ export default ({ navigation }: PLPScreenProps) => {
               </Text>
             </View>
           )}
+          onEndReached={(info) => {
+            if (
+              info.distanceFromEnd > -100 &&
+              state.productsTrack.from < state.productsTrack.total
+            ) {
+              fetchProducts();
+            }
+          }}
+          onEndReachedThreshold={0}
         />
       );
       break;
-
-    default:
+    case 'NOT_PRODUCTS':
+      content = <NotData />;
+      break;
+    case 'FETCH_PRODUCTS_ERROR':
       content = (
-        <View>
-          <Text level={7}>Loading view</Text>
-        </View>
+        <ErrorView
+          onRetry={() => {
+            fetchProductsWithLoading();
+          }}
+        />
       );
+      break;
+    default:
+      content = <Loading />;
       break;
   }
 
@@ -350,6 +383,7 @@ export default ({ navigation }: PLPScreenProps) => {
     <ScreenView style={{ width: '100%', borderStyle: 'solid', borderWidth: 0 }}>
       <InputSearch
         placeholder="Buscar productos"
+        value={state.query}
         onChangeText={(text) => {
           dispatch({ type: 'set_query', query: text });
         }}

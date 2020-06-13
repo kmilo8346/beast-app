@@ -6,15 +6,15 @@ import { ScreenView, Text, InputNumber, Button } from '../../components';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
-import { Item, ProductItem, ServiceItem } from '../../types';
+import { Product, ProductItem, ServiceItem } from '../../types';
 
 type ChangeQtyAction = { type: 'change_qty'; qty: number };
 type Action = ChangeQtyAction;
-type State = { item: Item };
+type State = { product: Product };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'change_qty':
-      return { item: { ...state.item, qty: action.qty } as Item };
+      return { product: { ...state.product, qty: action.qty } as Item };
     default:
       throw new Error(`Action ${action.type} is not valid`);
   }
@@ -25,7 +25,7 @@ export interface PDPScreenProps {
 }
 
 export default ({ route }: PDPScreenProps) => {
-  const [state, dispatch] = useReducer(reducer, { item: route.params });
+  const [state, dispatch] = useReducer(reducer, { product: route.params });
 
   const changeQtyHandler = (value: number) => {
     dispatch({ type: 'change_qty', qty: value });
@@ -34,8 +34,8 @@ export default ({ route }: PDPScreenProps) => {
   let format = null;
   let priceSection = null;
   let mainAction = null;
-  if (state.item.type === 'product') {
-    const product = state.item as ProductItem;
+  if (state.product.type === 'product') {
+    const product = state.product as ProductItem;
     format = (
       <Text
         level={2}
@@ -93,7 +93,7 @@ export default ({ route }: PDPScreenProps) => {
       );
     }
   } else {
-    const service = state.item as ServiceItem;
+    const service = state.product as ServiceItem;
     priceSection = (
       <Text style={{ marginTop: 15 }} level={2}>
         {service.price
@@ -116,12 +116,12 @@ export default ({ route }: PDPScreenProps) => {
           }}
         >
           <Image
-            source={state.item.images[0]}
+            source={{ uri: state.product.images[0] }}
             style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
           />
         </View>
         <Text weight="bold" style={{ marginTop: 17 }}>
-          {state.item.name}
+          {state.product.name}
         </Text>
         {format}
         {priceSection}

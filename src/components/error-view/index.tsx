@@ -14,7 +14,7 @@ export interface ErrorProps {
 export default ({ onRetry = () => null }: ErrorProps) => {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <View style={{ marginTop: '30%', alignItems: 'center' }}>
+      <View style={{ marginTop: '20%', alignItems: 'center' }}>
         <Image
           source={errorImage}
           style={{ width: 200, height: 200, marginBottom: 10 }}

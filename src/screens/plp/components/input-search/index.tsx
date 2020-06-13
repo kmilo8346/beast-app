@@ -6,6 +6,7 @@ import {
   TextInput,
   ViewStyle,
   StyleProp,
+  TextStyle,
 } from 'react-native';
 
 import { ButtonIcon } from '../../../../components';
@@ -18,6 +19,7 @@ export interface InputSearchProps extends TextInputProps {
 export default ({
   containerStyle = {},
   style = {},
+  value,
   ...inputProps
 }: InputSearchProps) => {
   const input = useRef<TextInput>(null);
@@ -29,10 +31,13 @@ export default ({
     },
     containerStyle,
   ];
-  const finalStyle = [{ marginVertical: 10, marginLeft: 3 }, style];
+  const finalStyle: StyleProp<TextStyle> = [
+    { marginVertical: 10, marginLeft: 3, paddingRight: 28 },
+    style,
+  ];
   return (
     <View style={finalContainerStyle}>
-      <TextInput {...inputProps} ref={input} style={finalStyle} />
+      <TextInput {...inputProps} value={value} ref={input} style={finalStyle} />
       <View
         style={{
           position: 'absolute',
@@ -42,13 +47,16 @@ export default ({
           justifyContent: 'center',
         }}
       >
-        <ButtonIcon
-          icon="x"
-          onPress={() => {
-            input.current?.clear();
-            inputProps.onChangeText && inputProps.onChangeText('');
-          }}
-        />
+        {!!value && (
+          <ButtonIcon
+            icon="x"
+            iconStyle={{ fontSize: 18 }}
+            onPress={() => {
+              input.current?.clear();
+              inputProps.onChangeText && inputProps.onChangeText('');
+            }}
+          />
+        )}
       </View>
     </View>
   );

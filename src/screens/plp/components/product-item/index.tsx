@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Image,
@@ -14,7 +14,7 @@ import {
   Touchable,
 } from '../../../../components';
 import Badge from '../badge';
-import { Product, ServiceItem, ProductItem } from '../../../../types';
+import { Product } from '../../../../types';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import colors from '../../../../styles/colors';
 import styles from './styles';
@@ -32,80 +32,57 @@ export default ({
   onChange,
   onSeeDetail,
 }: ProductItemProps) => {
-  const image = data.images[0];
+  const [qty, setQty] = useState(data.qty);
   const containerStyle = [styles.container, style];
 
-  if (data.type === 'service') {
-    const service: ServiceItem = data;
-    const price = service.price
-      ? numberFormatter.toCurrency(service.price)
-      : 'A convenir';
-    return (
-      <Touchable
-        style={containerStyle}
-        onPress={(event: GestureResponderEvent) => {
-          event.stopPropagation();
-          onSeeDetail(service);
+  const { type, name, description, images, price, brand, format } = data;
+
+  let pName = name;
+  let pDescription = description;
+  const pImage = images.length ? images[0] : undefined;
+  let pPrice: any = price ? numberFormatter.toCurrency(price) : 'A convenir';
+  let pBadge = null;
+  let action = (
+    <ButtonSmall
+      title="Ver"
+      style={styles.action}
+      onPress={(event: GestureResponderEvent) => {
+        event.stopPropagation();
+        onSeeDetail(data);
+      }}
+    />
+  );
+  if (type === 'product') {
+    pBadge = qty > 0 ? <Badge count={qty} style={styles.badge} /> : null;
+    pName = brand ? `${brand} · ${name}` : name;
+    pDescription = format
+      ? `${format} · ${numberFormatter.toCurrency(price)}`
+      : numberFormatter.toCurrency(price);
+    pPrice = qty > 0 ? (price as number) * qty : price;
+    pPrice = numberFormatter.toCurrency(pPrice);
+    action = (
+      <FriendlyInputNumber
+        value={qty}
+        onChange={(qty) => {
+          setQty(qty);
+          onChange({ ...data, qty });
         }}
-      >
-        <View style={styles.leftContainer}>
-          <Image source={{ uri: image }} style={styles.image} />
-        </View>
-        <View style={styles.centerContainer}>
-          <Text
-            level={7}
-            style={styles.name}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {service.name}
-          </Text>
-          <Text
-            level={7}
-            color={colors.blackLight3}
-            style={styles.description}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {service.description}
-          </Text>
-        </View>
-        <View style={styles.rightContainer}>
-          <Text level={7} style={styles.price}>
-            {price}
-          </Text>
-          <ButtonSmall
-            title="Ver"
-            style={styles.action}
-            onPress={(event: GestureResponderEvent) => {
-              event.stopPropagation();
-              onSeeDetail(service);
-            }}
-          />
-        </View>
-      </Touchable>
+        style={styles.action}
+      />
     );
   }
 
-  const product: ProductItem = data as ProductItem;
-  const name = product.brand
-    ? `${product.brand} · ${product.name}`
-    : product.name;
-  const description = `${product.format} · ${numberFormatter.toCurrency(
-    product.price
-  )}`;
-  const price = product.qty > 0 ? product.price * product.qty : product.price;
   return (
     <Touchable
       style={containerStyle}
       onPress={(event: GestureResponderEvent) => {
         event.stopPropagation();
-        onSeeDetail(product);
+        onSeeDetail(data);
       }}
     >
       <View style={styles.leftContainer}>
-        <Image source={{ uri: image }} style={styles.image} />
-        {product.qty > 0 && <Badge count={product.qty} style={styles.badge} />}
+        <Image source={{ uri: pImage }} style={styles.image} />
+        {pBadge}
       </View>
       <View style={styles.centerContainer}>
         <Text
@@ -114,7 +91,7 @@ export default ({
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {name}
+          {pName}
         </Text>
         <Text
           level={7}
@@ -123,20 +100,14 @@ export default ({
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {description}
+          {pDescription}
         </Text>
       </View>
       <View style={styles.rightContainer}>
         <Text level={7} style={styles.price}>
-          {numberFormatter.toCurrency(price)}
+          {pPrice}
         </Text>
-        <FriendlyInputNumber
-          value={product.qty}
-          onChange={(qty) => {
-            onChange({ ...product, qty });
-          }}
-          style={styles.action}
-        />
+        {action}
       </View>
     </Touchable>
   );
