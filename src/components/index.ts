@@ -6,6 +6,7 @@ export { default as Touchable } from './touchable';
 export { default as Button } from './button';
 export { default as ButtonSmall } from './button-small';
 export { default as ButtonIcon } from './button-icon';
+export { default as ButtonCart } from './button-cart';
 export { default as FriendlyInputNumber } from './friendly-input-number';
 export { default as Input } from './input';
 export { default as InputNumber } from './input-number';

@@ -12,6 +12,7 @@ import {
   Loading,
   FlatList,
   SectionList,
+  ButtonCart,
 } from '../../components';
 import { StoreCard, ProductItem, InputSearch } from './components';
 import { Product, Store, SearchResponse } from '../../types';
@@ -292,6 +293,7 @@ export default ({ navigation }: PLPScreenProps) => {
   }, [state.query]);
 
   let content: ReactNode;
+  let sections: Section[] = [];
   let listStoresFooter = null;
   let listProductsFooter = null;
   switch (state.view) {
@@ -321,15 +323,22 @@ export default ({ navigation }: PLPScreenProps) => {
           }
           numColumns={2}
           data={state.storesTrack.stores}
-          renderItem={({ item }) => (
-            <StoreCard
-              name={item.name}
-              image={item.images[0]}
-              onPress={() => {
-                navigation.navigate('PLPInStore', { store: item.name });
-              }}
-            />
-          )}
+          renderItem={({ item, index }) => {
+            let style = {};
+            if (index === state.storesTrack.stores.length - 1) {
+              style = globalStyle.withCartSpace;
+            }
+            return (
+              <StoreCard
+                style={style}
+                name={item.name}
+                image={item.images[0]}
+                onPress={() => {
+                  navigation.navigate('PLPInStore', { store: item.name });
+                }}
+              />
+            );
+          }}
           keyExtractor={(item) => item.id}
           onBeastEndReached={() => {
             if (state.productsTrack.from < state.productsTrack.total) {
@@ -373,16 +382,20 @@ export default ({ navigation }: PLPScreenProps) => {
           </Text>
         );
       }
+      sections = mapProductsToSections(state.productsTrack.products);
       content = (
         <SectionList
           style={[globalStyle.withPadding]}
           stickySectionHeadersEnabled
-          sections={mapProductsToSections(state.productsTrack.products)}
+          sections={sections}
           keyExtractor={(item, index) => `${index}-${item.id}`}
           renderItem={({ item, index, section }) => {
             let style: ViewStyle = { marginBottom: 5 };
             if (index === section.data.length - 1) {
-              style = { marginBottom: 50 };
+              style = { marginBottom: 15 };
+              if (section.tag === sections[sections.length - 1].tag) {
+                style = globalStyle.withCartSpace;
+              }
             }
             return (
               <ProductItem
@@ -438,7 +451,7 @@ export default ({ navigation }: PLPScreenProps) => {
   }
 
   return (
-    <ScreenView style={{ width: '100%', borderStyle: 'solid', borderWidth: 0 }}>
+    <ScreenView>
       <InputSearch
         placeholder="Buscar productos"
         value={state.query}
@@ -448,6 +461,7 @@ export default ({ navigation }: PLPScreenProps) => {
         containerStyle={[globalStyle.withMargin, { marginBottom: 15 }]}
       />
       {content}
+      <ButtonCart containerStyle={globalStyle.withMargin} />
     </ScreenView>
   );
 };

@@ -5,7 +5,6 @@ import {
   Modal,
   NativeSyntheticEvent,
   ViewStyle,
-  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

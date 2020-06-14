@@ -2,7 +2,13 @@ import React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { View, Image } from 'react-native';
 
-import { ScreenView, Text, InputNumber, Button } from '../../components';
+import {
+  ScreenView,
+  Text,
+  InputNumber,
+  Button,
+  ButtonCart,
+} from '../../components';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import Cart from '../../containers/cart';
 import globalStyle from '../../styles';
@@ -74,21 +80,9 @@ export default ({ route }: PDPScreenProps) => {
         </View>
       );
       mainAction = (
-        <Button
-          title={
-            <View style={{ flex: 1, flexDirection: 'row' }}>
-              <Text level={4} weight="bold" color={colors.white}>
-                (2){' '}
-              </Text>
-              <Text level={4} weight="bold" color={colors.white}>
-                Carrito
-              </Text>
-              <View style={{ flex: 1 }} />
-              <Text level={4} weight="bold" color={colors.white}>
-                {numberFormatter.toCurrency(21000)}
-              </Text>
-            </View>
-          }
+        <ButtonCart
+          containerStyle={globalStyle.withMargin}
+          style={{ marginBottom: 0 }}
         />
       );
     }
@@ -121,7 +115,7 @@ export default ({ route }: PDPScreenProps) => {
         <Text level={6} style={{ marginTop: 5 }}>
           {product.description}
         </Text>
-        <View style={globalStyle.withScreenAir} />
+        <View style={globalStyle.withCartSpace} />
       </ScrollView>
       <View
         style={[

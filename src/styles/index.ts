@@ -5,6 +5,7 @@ interface Styles {
   withPadding: ViewStyle;
   withMainActionAir: ViewStyle;
   withScreenAir: ViewStyle;
+  withCartSpace: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -18,6 +19,9 @@ export default StyleSheet.create<Styles>({
     marginBottom: 15,
   },
   withScreenAir: {
+    marginBottom: 90,
+  },
+  withCartSpace: {
     marginBottom: 90,
   },
 });

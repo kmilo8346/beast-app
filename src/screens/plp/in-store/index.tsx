@@ -9,6 +9,7 @@ import {
   Loading,
   FlatList,
   Text,
+  ButtonCart,
 } from '../../../components';
 import { InputSearch, ProductItem } from '../components';
 import { Product, SearchResponse } from '../../../types';
@@ -204,7 +205,7 @@ export default ({ navigation, route }: ScreenProps) => {
           renderItem={({ item, index }) => {
             let style: ViewStyle = { marginBottom: 5 };
             if (index === state.productsTrack.products.length - 1) {
-              style = { marginBottom: 50 };
+              style = globalStyle.withCartSpace;
             }
             return (
               <ProductItem
@@ -242,6 +243,7 @@ export default ({ navigation, route }: ScreenProps) => {
         containerStyle={[globalStyle.withMargin, { marginBottom: 15 }]}
       />
       {content}
+      <ButtonCart containerStyle={globalStyle.withPadding} />
     </ScreenView>
   );
 };

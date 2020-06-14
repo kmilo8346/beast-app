@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Image, GestureResponderEvent } from 'react-native';
+import {
+  View,
+  Image,
+  GestureResponderEvent,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
 
 import { Text, Touchable } from '../../../../components';
 import colors from '../../../../styles/colors';
@@ -7,18 +13,20 @@ import colors from '../../../../styles/colors';
 export interface StoreCardProps {
   name: string;
   image: string;
+  style?: StyleProp<ViewStyle>;
   onPress: (event: GestureResponderEvent) => void;
 }
 
-export default ({ name, image, onPress }: StoreCardProps) => {
+export default ({ name, image, style = {}, onPress }: StoreCardProps) => {
+  const finalStyle: StyleProp<ViewStyle> = [
+    {
+      position: 'relative',
+      width: '48.5%',
+    },
+    style,
+  ];
   return (
-    <Touchable
-      style={{
-        position: 'relative',
-        width: '48.5%',
-      }}
-      onPress={onPress}
-    >
+    <Touchable style={finalStyle} onPress={onPress}>
       <Image
         source={{ uri: image }}
         style={{ width: '100%', height: 135, borderRadius: 7 }}

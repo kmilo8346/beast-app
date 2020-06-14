@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 import * as Linking from 'expo-linking';
 
@@ -8,9 +8,9 @@ import {
   Button,
   ActionSheet,
   ModalManageAddress,
+  ButtonCart,
 } from '../../components';
 import User from '../../containers/user';
-import productClient from '../../clients/product-client';
 
 export interface Props {
   navigation: any;
@@ -23,13 +23,6 @@ export default ({ navigation }: Props) => {
   const [modalManageAddressVisible, setModalManageAddressVisible] = useState(
     false
   );
-
-  useEffect(() => {
-    async function fetchData() {
-      const { data } = await productClient.search({ size: 1 });
-    }
-    fetchData();
-  }, []);
 
   let actionSheet = null;
   if (actionSheetVisible) {
@@ -106,7 +99,6 @@ export default ({ navigation }: Props) => {
             setModalManageAddressVisible(true);
           }}
         />
-        <View style={{ flex: 1 }} />
         <Button
           title="Contact kmilo :)"
           onPress={() => {
@@ -123,6 +115,7 @@ export default ({ navigation }: Props) => {
       </View>
       {actionSheet}
       {modalManageAddress}
+      <ButtonCart />
     </ScreenView>
   );
 };

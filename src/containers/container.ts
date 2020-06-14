@@ -51,7 +51,9 @@ export default function useContainer(path: string): Container {
   }
 
   function remove(key: string) {
-    set(key, null);
+    const newState = { ...state };
+    delete newState[key];
+    setState(newState);
   }
 
   function clear() {
