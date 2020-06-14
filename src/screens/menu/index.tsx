@@ -1,14 +1,14 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { Text, ScreenView } from '../../components';
+import { Text, Container } from '../../components';
 import { Item } from './components';
 import globalStyle from '../../styles';
 import styles from './styles';
 
 export default () => {
   return (
-    <ScreenView safeArea fakeHeader>
+    <Container safeArea fakeHeader>
       <Text level={1} weight="bold" style={globalStyle.withMargin}>
         Menú
       </Text>
@@ -47,6 +47,6 @@ export default () => {
           onPress={() => null}
         />
       </ScrollView>
-    </ScreenView>
+    </Container>
   );
 };

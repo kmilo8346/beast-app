@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
 
-import ButtonIcon from '../button-icon';
+import ButtonIcon from '../buttons/button-icon';
 import Icon from '../icon';
 import Text from '../text';
 import Touchable from '../touchable';

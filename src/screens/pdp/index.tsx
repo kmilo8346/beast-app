@@ -3,7 +3,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { View, Image } from 'react-native';
 
 import {
-  ScreenView,
+  Container,
   Text,
   InputNumber,
   Button,
@@ -89,7 +89,7 @@ export default ({ route }: PDPScreenProps) => {
   }
 
   return (
-    <ScreenView style={{ position: 'relative' }}>
+    <Container style={{ position: 'relative' }}>
       <ScrollView style={[globalStyle.withPadding]}>
         <View
           style={{
@@ -126,6 +126,6 @@ export default ({ route }: PDPScreenProps) => {
       >
         {mainAction}
       </View>
-    </ScreenView>
+    </Container>
   );
 };

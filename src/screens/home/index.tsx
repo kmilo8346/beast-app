@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import * as Linking from 'expo-linking';
 
 import {
-  ScreenView,
+  Container,
   Text,
   Button,
   ActionSheet,
@@ -87,7 +87,7 @@ export default ({ navigation }: Props) => {
   }
 
   return (
-    <ScreenView safeArea withMargin fakeHeader>
+    <Container safeArea withMargin fakeHeader>
       <Text level={1} weight="bold">
         Buscar
       </Text>
@@ -116,6 +116,6 @@ export default ({ navigation }: Props) => {
       {actionSheet}
       {modalManageAddress}
       <ButtonCart />
-    </ScreenView>
+    </Container>
   );
 };

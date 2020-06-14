@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { ScreenView, Text } from '../../components';
+import { Container, Text } from '../../components';
 
 export default () => {
   return (
-    <ScreenView safeArea withMargin fakeHeader>
+    <Container safeArea withMargin fakeHeader>
       <Text weight="bold">Vender</Text>
-    </ScreenView>
+    </Container>
   );
 };

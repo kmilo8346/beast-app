@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Image, ImageSourcePropType } from 'react-native';
 
 import Text from '../text';
-import Button from '../button';
+import Button from '../buttons/button';
 
 const notDataImage = require('../../../assets/not_data.png');
 

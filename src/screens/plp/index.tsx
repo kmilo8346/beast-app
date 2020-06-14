@@ -5,7 +5,7 @@ import { View, ViewStyle } from 'react-native';
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
 import {
-  ScreenView,
+  Container,
   Text,
   ErrorView,
   NotData,
@@ -451,7 +451,7 @@ export default ({ navigation }: PLPScreenProps) => {
   }
 
   return (
-    <ScreenView>
+    <Container>
       <InputSearch
         placeholder="Buscar productos"
         value={state.query}
@@ -462,6 +462,6 @@ export default ({ navigation }: PLPScreenProps) => {
       />
       {content}
       <ButtonCart containerStyle={globalStyle.withMargin} />
-    </ScreenView>
+    </Container>
   );
 };

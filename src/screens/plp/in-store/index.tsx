@@ -3,7 +3,7 @@ import React, { useReducer, useEffect, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
 import {
-  ScreenView,
+  Container,
   ErrorView,
   NotData,
   Loading,
@@ -233,7 +233,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }
 
   return (
-    <ScreenView keyboardAvoiding={false} style={{ flex: 1 }}>
+    <Container keyboardAvoiding={false} style={{ flex: 1 }}>
       <InputSearch
         placeholder="Buscar productos"
         value={state.query}
@@ -244,6 +244,6 @@ export default ({ navigation, route }: ScreenProps) => {
       />
       {content}
       <ButtonCart containerStyle={globalStyle.withPadding} />
-    </ScreenView>
+    </Container>
   );
 };
