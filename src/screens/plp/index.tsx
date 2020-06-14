@@ -2,6 +2,8 @@
 import React, { useReducer, useEffect, ReactNode } from 'react';
 import { View, ViewStyle } from 'react-native';
 
+import productClient from '../../clients/product-client';
+import storeClient from '../../clients/store-client';
 import {
   ScreenView,
   Text,
@@ -12,8 +14,6 @@ import {
   SectionList,
 } from '../../components';
 import { StoreCard, ProductItem, InputSearch } from './components';
-import productClient from '../../clients/product-client';
-import storeClient from '../../clients/store-client';
 import { Product, Store, SearchResponse } from '../../types';
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
@@ -30,6 +30,7 @@ const mapProductsToSections = (products: Product[]): Section[] => {
       lastTag = product.store.name;
     }
     const currenSection = sections[sections.length - 1];
+
     currenSection.data.push(product);
   });
   return sections;
@@ -53,13 +54,16 @@ type SetQueryAction = {
   type: 'set_query';
   query: string;
 };
-type ChangeProductAction = {
-  type: 'change_product';
-  tag: string;
-  product: Product;
-};
 type SetIsLoadingAction = {
   type: 'set_is_loading';
+};
+type SetIsFetchingMoreStoresAction = {
+  type: 'set_is_fetching_more_stores';
+  isFetchingMoreStores: boolean;
+};
+type SetIsFetchingMoreProductsAction = {
+  type: 'set_is_fetching_more_products';
+  isFetchingMoreProducts: boolean;
 };
 type SetFetchStoresResponseAction = {
   type: 'set_fetch_stores_response';
@@ -70,15 +74,16 @@ type SetFetchStoresErrorAction = {
 };
 type SetFetchProductsResponseAction = {
   type: 'set_fetch_products_response';
-  response: SearchResponse<Partial<Product>>;
+  response: SearchResponse<Product>;
 };
 type SetFetchProductsErrorAction = {
   type: 'set_fetch_products_error';
 };
 type Action =
   | SetQueryAction
-  | ChangeProductAction
   | SetIsLoadingAction
+  | SetIsFetchingMoreStoresAction
+  | SetIsFetchingMoreProductsAction
   | SetFetchStoresResponseAction
   | SetFetchStoresErrorAction
   | SetFetchProductsResponseAction
@@ -87,6 +92,8 @@ type Action =
 type State = {
   view: ViewState;
   query: string;
+  isFetchingMoreStores: boolean;
+  isFetchingMoreProducts: boolean;
   filters: {
     position: number[];
   };
@@ -99,7 +106,6 @@ type State = {
     from: number;
     total: number;
     products: Product[];
-    sections: Section[];
   };
 };
 
@@ -115,12 +121,20 @@ const reducer = (state: State, action: Action): State => {
         query: action.query,
         productsTrack: { ...state.productsTrack, from: 0 },
       };
-    case 'change_product':
-      return state;
     case 'set_is_loading':
       return {
         ...state,
         view: 'LOADING',
+      };
+    case 'set_is_fetching_more_stores':
+      return {
+        ...state,
+        isFetchingMoreStores: action.isFetchingMoreStores,
+      };
+    case 'set_is_fetching_more_products':
+      return {
+        ...state,
+        isFetchingMoreProducts: action.isFetchingMoreProducts,
       };
     case 'set_fetch_stores_response':
       storesTrack = {
@@ -152,7 +166,6 @@ const reducer = (state: State, action: Action): State => {
         from: state.productsTrack.from + action.response.hits.length,
         total: action.response.total,
         products,
-        sections: mapProductsToSections(products),
       };
       view = productsTrack.products.length > 0 ? 'PRODUCTS' : 'NOT_PRODUCTS';
       return {
@@ -179,6 +192,8 @@ export default ({ navigation }: PLPScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',
     query: '',
+    isFetchingMoreStores: false,
+    isFetchingMoreProducts: false,
     filters: {
       position: [-70.63196182250977, -33.44933346731538],
     },
@@ -191,7 +206,6 @@ export default ({ navigation }: PLPScreenProps) => {
       from: 0,
       total: 0,
       products: [],
-      sections: [],
     },
   });
 
@@ -215,6 +229,21 @@ export default ({ navigation }: PLPScreenProps) => {
     await fetchStores();
   };
 
+  const fetchMoreStores = async () => {
+    dispatch({
+      type: 'set_is_fetching_more_stores',
+      isFetchingMoreStores: true,
+    });
+    try {
+      await fetchStores();
+    } finally {
+      dispatch({
+        type: 'set_is_fetching_more_stores',
+        isFetchingMoreStores: false,
+      });
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const response = await productClient.search({
@@ -225,7 +254,10 @@ export default ({ navigation }: PLPScreenProps) => {
         from: state.productsTrack.from,
         size: 10,
       });
-      dispatch({ type: 'set_fetch_products_response', response });
+      dispatch({
+        type: 'set_fetch_products_response',
+        response,
+      });
     } catch (error) {
       dispatch({ type: 'set_fetch_products_error' });
     }
@@ -234,6 +266,21 @@ export default ({ navigation }: PLPScreenProps) => {
   const fetchProductsWithLoading = async () => {
     dispatch({ type: 'set_is_loading' });
     await fetchProducts();
+  };
+
+  const fetchMoreProducts = async () => {
+    dispatch({
+      type: 'set_is_fetching_more_products',
+      isFetchingMoreProducts: true,
+    });
+    try {
+      await fetchProducts();
+    } finally {
+      dispatch({
+        type: 'set_is_fetching_more_products',
+        isFetchingMoreProducts: false,
+      });
+    }
   };
 
   useEffect(() => {
@@ -245,8 +292,21 @@ export default ({ navigation }: PLPScreenProps) => {
   }, [state.query]);
 
   let content: ReactNode;
+  let listStoresFooter = null;
+  let listProductsFooter = null;
   switch (state.view) {
     case 'STORES':
+      if (state.isFetchingMoreStores) {
+        listStoresFooter = (
+          <Text
+            level={6}
+            weight="bold"
+            style={{ textAlign: 'center', marginTop: -25 }}
+          >
+            Cargando..
+          </Text>
+        );
+      }
       content = (
         <FlatList
           style={[globalStyle.withPadding]}
@@ -271,15 +331,12 @@ export default ({ navigation }: PLPScreenProps) => {
             />
           )}
           keyExtractor={(item) => item.id}
-          onEndReached={(info) => {
-            if (
-              info.distanceFromEnd > -100 &&
-              state.productsTrack.from < state.productsTrack.total
-            ) {
-              fetchStores();
+          onBeastEndReached={() => {
+            if (state.productsTrack.from < state.productsTrack.total) {
+              fetchMoreStores();
             }
           }}
-          onEndReachedThreshold={0}
+          ListFooterComponent={listStoresFooter}
         />
       );
       break;
@@ -305,29 +362,33 @@ export default ({ navigation }: PLPScreenProps) => {
       );
       break;
     case 'PRODUCTS':
+      if (state.isFetchingMoreProducts) {
+        listProductsFooter = (
+          <Text
+            level={6}
+            weight="bold"
+            style={{ textAlign: 'center', marginTop: -25 }}
+          >
+            Cargando..
+          </Text>
+        );
+      }
       content = (
         <SectionList
           style={[globalStyle.withPadding]}
           stickySectionHeadersEnabled
-          sections={state.productsTrack.sections}
+          sections={mapProductsToSections(state.productsTrack.products)}
           keyExtractor={(item, index) => `${index}-${item.id}`}
           renderItem={({ item, index, section }) => {
             let style: ViewStyle = { marginBottom: 5 };
             if (index === section.data.length - 1) {
-              style = { marginBottom: 15 };
+              style = { marginBottom: 50 };
             }
             return (
               <ProductItem
                 data={item}
-                onChange={(data) => {
-                  dispatch({
-                    type: 'change_product',
-                    tag: section.tag,
-                    product: data,
-                  });
-                }}
-                onSeeDetail={() => {
-                  navigation.navigate('PDP', item);
+                onSeeDetail={(data) => {
+                  navigation.navigate('PDP', data);
                 }}
                 style={style}
               />
@@ -350,15 +411,12 @@ export default ({ navigation }: PLPScreenProps) => {
               </Text>
             </View>
           )}
-          onEndReached={(info) => {
-            if (
-              info.distanceFromEnd > -100 &&
-              state.productsTrack.from < state.productsTrack.total
-            ) {
-              fetchProducts();
+          onBeastEndReached={() => {
+            if (state.productsTrack.from < state.productsTrack.total) {
+              fetchMoreProducts();
             }
           }}
-          onEndReachedThreshold={0}
+          ListFooterComponent={listProductsFooter}
         />
       );
       break;

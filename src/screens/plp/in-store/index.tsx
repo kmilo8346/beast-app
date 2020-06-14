@@ -8,6 +8,7 @@ import {
   NotData,
   Loading,
   FlatList,
+  Text,
 } from '../../../components';
 import { InputSearch, ProductItem } from '../components';
 import { Product, SearchResponse } from '../../../types';
@@ -24,6 +25,10 @@ type SetQueryAction = {
 type SetIsLoadingAction = {
   type: 'set_is_loading';
 };
+type SetIsFetchingMoreAction = {
+  type: 'set_is_fetching_more';
+  isFetchingMore: boolean;
+};
 type SetFetchResponseAction = {
   type: 'set_fetch_response';
   response: SearchResponse<Partial<Product>>;
@@ -32,20 +37,17 @@ type SetErrorAction = {
   type: 'set_error';
   error: Error;
 };
-type ChangeProductAction = {
-  type: 'change_product';
-  product: Product;
-};
 type Action =
   | SetQueryAction
   | SetIsLoadingAction
+  | SetIsFetchingMoreAction
   | SetFetchResponseAction
-  | SetErrorAction
-  | ChangeProductAction;
+  | SetErrorAction;
 
 type State = {
   view: ViewState;
   query: string;
+  isFetchingMore: boolean;
   filters: {
     store: string;
     position: number[];
@@ -74,6 +76,11 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         view: 'LOADING',
       };
+    case 'set_is_fetching_more':
+      return {
+        ...state,
+        isFetchingMore: action.isFetchingMore,
+      };
     case 'set_fetch_response':
       products = state.productsTrack.products;
       if (state.productsTrack.from === 0) {
@@ -96,19 +103,6 @@ const reducer = (state: State, action: Action): State => {
         view: 'ERROR',
         error: action.error,
       };
-    case 'change_product':
-      return {
-        ...state,
-        productsTrack: {
-          ...state.productsTrack,
-          products: state.productsTrack.products.map((product) => {
-            if (product.id === action.product.id) {
-              return action.product;
-            }
-            return product;
-          }),
-        },
-      };
     default:
       return state;
   }
@@ -123,6 +117,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',
     query: '',
+    isFetchingMore: false,
     filters: {
       store: route.params.store,
       position: [-70.63196182250977, -33.44933346731538],
@@ -158,7 +153,12 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const fetchMore = async () => {
-    await fetchProducts();
+    dispatch({ type: 'set_is_fetching_more', isFetchingMore: true });
+    try {
+      await fetchProducts();
+    } finally {
+      dispatch({ type: 'set_is_fetching_more', isFetchingMore: false });
+    }
   };
 
   useEffect(() => {
@@ -170,6 +170,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.filters.store]);
 
   let content: ReactNode;
+  let listFooter = null;
   switch (state.view) {
     case 'ERROR':
       content = (
@@ -184,6 +185,17 @@ export default ({ navigation, route }: ScreenProps) => {
       content = <NotData />;
       break;
     case 'PRODUCTS':
+      if (state.isFetchingMore) {
+        listFooter = (
+          <Text
+            level={6}
+            weight="bold"
+            style={{ textAlign: 'center', marginTop: -25 }}
+          >
+            Cargando..
+          </Text>
+        );
+      }
       content = (
         <FlatList
           style={[globalStyle.withPadding]}
@@ -192,14 +204,11 @@ export default ({ navigation, route }: ScreenProps) => {
           renderItem={({ item, index }) => {
             let style: ViewStyle = { marginBottom: 5 };
             if (index === state.productsTrack.products.length - 1) {
-              style = { marginBottom: 15 };
+              style = { marginBottom: 50 };
             }
             return (
               <ProductItem
                 data={item}
-                onChange={(product) => {
-                  dispatch({ type: 'change_product', product });
-                }}
                 onSeeDetail={(product) => {
                   navigation.navigate('PDP', product);
                 }}
@@ -212,6 +221,7 @@ export default ({ navigation, route }: ScreenProps) => {
               fetchMore();
             }
           }}
+          ListFooterComponent={listFooter}
         />
       );
       break;

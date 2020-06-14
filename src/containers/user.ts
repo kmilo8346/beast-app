@@ -1,20 +1,9 @@
 import { createContainer } from 'unstated-next';
 
 import useContainer from './container';
+import { Address, User } from '../types';
 
 const STORAGE_KEY = 'user';
-
-export interface Address {
-  id: string;
-  street: string;
-  number: string;
-  apartment?: string;
-}
-
-export interface User {
-  currentAddress: Address;
-  addresses: Address[];
-}
 
 export interface UserContainer {
   setCurrentAddress: (address: Address) => void;

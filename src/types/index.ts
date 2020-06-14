@@ -29,6 +29,18 @@ export interface Product {
   qty: number;
 }
 
+export interface Address {
+  id: string;
+  street: string;
+  number: string;
+  apartment?: string;
+}
+
+export interface User {
+  currentAddress: Address;
+  addresses: Address[];
+}
+
 export interface SearchParams {
   query?: string;
   filters?: { [key: string]: any };

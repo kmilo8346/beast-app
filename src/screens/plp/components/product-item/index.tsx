@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Image,
@@ -14,6 +14,7 @@ import {
   Touchable,
 } from '../../../../components';
 import Badge from '../badge';
+import Cart from '../../../../containers/cart';
 import { Product } from '../../../../types';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import colors from '../../../../styles/colors';
@@ -22,20 +23,14 @@ import styles from './styles';
 export interface ProductItemProps {
   data: Product;
   style?: StyleProp<ViewStyle>;
-  onChange: (product: Product) => void;
   onSeeDetail: (product: Product) => void;
 }
 
-export default ({
-  data,
-  style = {},
-  onChange,
-  onSeeDetail,
-}: ProductItemProps) => {
-  const [qty, setQty] = useState(data.qty);
-  const containerStyle = [styles.container, style];
+export default ({ data, style = {}, onSeeDetail }: ProductItemProps) => {
+  const cartContainer = Cart.useContainer();
 
   const { type, name, description, images, price, brand, format } = data;
+  const qty = cartContainer.getItemQty(data);
 
   let pName = name;
   let pDescription = description;
@@ -48,7 +43,7 @@ export default ({
       style={styles.action}
       onPress={(event: GestureResponderEvent) => {
         event.stopPropagation();
-        onSeeDetail(data);
+        onSeeDetail({ ...data, qty });
       }}
     />
   );
@@ -64,20 +59,19 @@ export default ({
       <FriendlyInputNumber
         value={qty}
         onChange={(qty) => {
-          setQty(qty);
-          onChange({ ...data, qty });
+          cartContainer.setItem({ ...data, qty });
         }}
         style={styles.action}
       />
     );
   }
-
+  const containerStyle = [styles.container, style];
   return (
     <Touchable
       style={containerStyle}
       onPress={(event: GestureResponderEvent) => {
         event.stopPropagation();
-        onSeeDetail(data);
+        onSeeDetail({ ...data, qty });
       }}
     >
       <View style={styles.leftContainer}>

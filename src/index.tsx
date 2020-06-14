@@ -2,13 +2,16 @@ import React from 'react';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
 import Boot from './boot';
-import User from './containers/user';
+import UserContainer from './containers/user';
+import CartContainer from './containers/cart';
 
 function App() {
   return (
-    <User.Provider>
-      <Boot />
-    </User.Provider>
+    <UserContainer.Provider>
+      <CartContainer.Provider>
+        <Boot />
+      </CartContainer.Provider>
+    </UserContainer.Provider>
   );
 }
 

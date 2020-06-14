@@ -1,41 +1,37 @@
-import React, { useReducer } from 'react';
+import React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { View, Image } from 'react-native';
 
 import { ScreenView, Text, InputNumber, Button } from '../../components';
 import numberFormatter from '../../lib/formatters/number-formatter';
+import Cart from '../../containers/cart';
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
-import { Product, ProductItem, ServiceItem } from '../../types';
-
-type ChangeQtyAction = { type: 'change_qty'; qty: number };
-type Action = ChangeQtyAction;
-type State = { product: Product };
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'change_qty':
-      return { product: { ...state.product, qty: action.qty } as Item };
-    default:
-      throw new Error(`Action ${action.type} is not valid`);
-  }
-};
 
 export interface PDPScreenProps {
   route: any;
 }
 
 export default ({ route }: PDPScreenProps) => {
-  const [state, dispatch] = useReducer(reducer, { product: route.params });
+  const cartContainer = Cart.useContainer();
 
-  const changeQtyHandler = (value: number) => {
-    dispatch({ type: 'change_qty', qty: value });
+  // getting qty from cart
+  const product = {
+    ...route.params,
+    qty: cartContainer.getItemQty(route.params),
   };
 
+  // reendering logic
   let format = null;
-  let priceSection = null;
-  let mainAction = null;
-  if (state.product.type === 'product') {
-    const product = state.product as ProductItem;
+  let priceSection = (
+    <Text style={{ marginTop: 15 }} level={2}>
+      {product.price
+        ? numberFormatter.toCurrency(product.price)
+        : 'Precio a convenir'}
+    </Text>
+  );
+  let mainAction = <Button title="Contactar" />;
+  if (product.type === 'product') {
     format = (
       <Text
         level={2}
@@ -49,7 +45,7 @@ export default ({ route }: PDPScreenProps) => {
       <Button
         title="Agregar"
         onPress={() => {
-          changeQtyHandler(1);
+          cartContainer.setItem({ ...product, qty: 1 });
         }}
       />
     );
@@ -66,10 +62,14 @@ export default ({ route }: PDPScreenProps) => {
             showValue
             type="dark"
             value={product.qty}
-            onChange={changeQtyHandler}
+            onChange={(value) => {
+              cartContainer.setItem({ ...product, qty: value });
+            }}
           />
           <Text level={2}>
-            {numberFormatter.toCurrency(product.qty * product.price)}
+            {numberFormatter.toCurrency(
+              product.qty * (product.price as number)
+            )}
           </Text>
         </View>
       );
@@ -92,16 +92,6 @@ export default ({ route }: PDPScreenProps) => {
         />
       );
     }
-  } else {
-    const service = state.product as ServiceItem;
-    priceSection = (
-      <Text style={{ marginTop: 15 }} level={2}>
-        {service.price
-          ? numberFormatter.toCurrency(service.price)
-          : 'Precio a convenir'}
-      </Text>
-    );
-    mainAction = <Button title="Contactar" />;
   }
 
   return (
@@ -116,12 +106,12 @@ export default ({ route }: PDPScreenProps) => {
           }}
         >
           <Image
-            source={{ uri: state.product.images[0] }}
+            source={{ uri: product.images[0] }}
             style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
           />
         </View>
         <Text weight="bold" style={{ marginTop: 17 }}>
-          {state.product.name}
+          {product.name}
         </Text>
         {format}
         {priceSection}
@@ -129,7 +119,7 @@ export default ({ route }: PDPScreenProps) => {
           Descripción
         </Text>
         <Text level={6} style={{ marginTop: 5 }}>
-          Deliciosa torta de guayaba horneada con amor por los dioses
+          {product.description}
         </Text>
         <View style={globalStyle.withScreenAir} />
       </ScrollView>
