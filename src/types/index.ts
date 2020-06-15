@@ -6,14 +6,13 @@ export interface IntegerRange {
 export interface Store {
   id: string;
   name: string;
+  phone: string;
   images: string[];
   deliveryTime: IntegerRange;
   deliveryArea: {
     type: 'Polygon';
     coordinates: Array<Array<number>>;
   };
-  email?: string;
-  phone?: string;
 }
 
 export interface Product {

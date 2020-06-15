@@ -8,18 +8,19 @@ import colors from '../../../styles/colors';
 import globalStyle from '../../../styles';
 
 export interface ButtonContactProps {
+  phone: string;
   containerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
-  phone?: number;
-  email?: string;
 }
 
-export default ({ containerStyle = {}, style = {}, phone = 972359928, email = 'firedevs.team@gmail.com' }: ButtonContactProps) => {
+export default ({
+  phone,
+  containerStyle = {},
+  style = {},
+}: ButtonContactProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const finalContainerStyle: StyleProp<ViewStyle> = [
-    containerStyle,
-  ];
+  const finalContainerStyle: StyleProp<ViewStyle> = [containerStyle];
   const finalStyle: StyleProp<ViewStyle> = [
     globalStyle.withMainActionAir,
     style,
@@ -30,7 +31,7 @@ export default ({ containerStyle = {}, style = {}, phone = 972359928, email = 'f
         title={
           <Text level={4} weight="bold" color={colors.white}>
             Contactar al vendedor
-            </Text>
+          </Text>
         }
         style={finalStyle}
         onPress={() => {
@@ -55,11 +56,6 @@ export default ({ containerStyle = {}, style = {}, phone = 972359928, email = 'f
               text: 'Mensaje al vendedor',
               icon: 'whatsapp',
             },
-            {
-              key: 'email',
-              text: 'Correo al vendedor',
-              icon: 'mail',
-            },
             { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
           ]}
           onRequestClose={() => {
@@ -69,22 +65,19 @@ export default ({ containerStyle = {}, style = {}, phone = 972359928, email = 'f
             try {
               switch (key) {
                 case 'call_phone':
-                  await Linking.openURL(`tel: +56${phone}`);
+                  await Linking.openURL(`tel: ${phone}`);
                   break;
                 case 'sms':
-                  await Linking.openURL(`sms: +56${phone}`);
+                  await Linking.openURL(`sms: ${phone}`);
                   break;
                 case 'message_whatsapp':
-                  Linking.openURL(`https://wa.me/+56${phone}`);
-                  break;
-                case 'email':
-                  Linking.openURL(`gmailto: ${email}`);
+                  await Linking.openURL(`https://wa.me/${phone}`);
                   break;
                 default:
                   break;
               }
             } catch (error) {
-              console.log('Linking error', error);
+              // TODO: register error
             } finally {
               setIsVisible(false);
             }
