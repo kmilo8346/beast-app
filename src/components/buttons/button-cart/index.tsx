@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ViewStyle, StyleProp } from 'react-native';
 
 import Button from '../button';
 import Text from '../../text';
-import Modal from '../../modals/modal';
+import ModalCart from '../../modals/modal-cart';
 import Cart from '../../../containers/cart';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import colors from '../../../styles/colors';
@@ -18,6 +18,13 @@ export default ({ containerStyle = {}, style = {} }: ButtonCartProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const cartContainer = Cart.useContainer();
   const stats = cartContainer.getStats();
+  const isEmpty = cartContainer.isEmpty();
+
+  useEffect(() => {
+    if (isEmpty) {
+      setIsVisible(false);
+    }
+  }, [isEmpty]);
 
   const finalContainerStyle: StyleProp<ViewStyle> = [
     { position: 'absolute', bottom: 0, right: 0, left: 0 },
@@ -53,9 +60,7 @@ export default ({ containerStyle = {}, style = {} }: ButtonCartProps) => {
         }}
       />
       {isVisible && (
-        <Modal
-          title="Carrito"
-          type="full"
+        <ModalCart
           onRequestClose={() => {
             setIsVisible((prevIsVisible) => !prevIsVisible);
           }}

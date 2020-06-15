@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
-import { ViewStyle } from 'react-native';
+import { ViewStyle, View } from 'react-native';
 
 import {
   Container,
@@ -10,8 +10,9 @@ import {
   FlatList,
   Text,
   ButtonCart,
+  ProductItem,
 } from '../../../components';
-import { InputSearch, ProductItem } from '../components';
+import { InputSearch } from '../components';
 import { Product, SearchResponse } from '../../../types';
 import productClient from '../../../clients/product-client';
 import globalStyle from '../../../styles';
@@ -191,9 +192,11 @@ export default ({ navigation, route }: ScreenProps) => {
           <Text
             level={6}
             weight="bold"
-            style={{ textAlign: 'center', marginTop: -25 }}
+            style={{
+              textAlign: 'center',
+            }}
           >
-            Cargando..
+            ...
           </Text>
         );
       }
@@ -202,18 +205,14 @@ export default ({ navigation, route }: ScreenProps) => {
           style={[globalStyle.withPadding]}
           data={state.productsTrack.products}
           keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => {
-            let style: ViewStyle = { marginBottom: 5 };
-            if (index === state.productsTrack.products.length - 1) {
-              style = globalStyle.withCartSpace;
-            }
+          renderItem={({ item }) => {
             return (
               <ProductItem
                 data={item}
                 onSeeDetail={(product) => {
                   navigation.navigate('PDP', product);
                 }}
-                style={style}
+                style={{ marginBottom: 5 }}
               />
             );
           }}
@@ -222,7 +221,9 @@ export default ({ navigation, route }: ScreenProps) => {
               fetchMore();
             }
           }}
-          ListFooterComponent={listFooter}
+          ListFooterComponent={
+            <View style={globalStyle.withCartSpace}>{listFooter}</View>
+          }
         />
       );
       break;

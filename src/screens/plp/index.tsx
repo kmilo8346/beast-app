@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { View } from 'react-native';
 
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
@@ -13,8 +13,9 @@ import {
   FlatList,
   SectionList,
   ButtonCart,
+  ProductItem,
 } from '../../components';
-import { StoreCard, ProductItem, InputSearch } from './components';
+import { StoreCard, InputSearch } from './components';
 import { Product, Store, SearchResponse } from '../../types';
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
@@ -107,6 +108,7 @@ type State = {
     from: number;
     total: number;
     products: Product[];
+    sections: Section[];
   };
 };
 
@@ -167,6 +169,7 @@ const reducer = (state: State, action: Action): State => {
         from: state.productsTrack.from + action.response.hits.length,
         total: action.response.total,
         products,
+        sections: mapProductsToSections(products),
       };
       view = productsTrack.products.length > 0 ? 'PRODUCTS' : 'NOT_PRODUCTS';
       return {
@@ -207,6 +210,7 @@ export default ({ navigation }: PLPScreenProps) => {
       from: 0,
       total: 0,
       products: [],
+      sections: [],
     },
   });
 
@@ -293,19 +297,14 @@ export default ({ navigation }: PLPScreenProps) => {
   }, [state.query]);
 
   let content: ReactNode;
-  let sections: Section[] = [];
   let listStoresFooter = null;
   let listProductsFooter = null;
   switch (state.view) {
     case 'STORES':
       if (state.isFetchingMoreStores) {
         listStoresFooter = (
-          <Text
-            level={6}
-            weight="bold"
-            style={{ textAlign: 'center', marginTop: -25 }}
-          >
-            Cargando..
+          <Text level={6} weight="bold" style={{ textAlign: 'center' }}>
+            ...
           </Text>
         );
       }
@@ -323,14 +322,10 @@ export default ({ navigation }: PLPScreenProps) => {
           }
           numColumns={2}
           data={state.storesTrack.stores}
-          renderItem={({ item, index }) => {
-            let style = {};
-            if (index === state.storesTrack.stores.length - 1) {
-              style = globalStyle.withCartSpace;
-            }
+          renderItem={({ item }) => {
             return (
               <StoreCard
-                style={style}
+                id={item.id}
                 name={item.name}
                 image={item.images[0]}
                 onPress={() => {
@@ -345,7 +340,9 @@ export default ({ navigation }: PLPScreenProps) => {
               fetchMoreStores();
             }
           }}
-          ListFooterComponent={listStoresFooter}
+          ListFooterComponent={
+            <View style={globalStyle.withCartSpace}>{listStoresFooter}</View>
+          }
         />
       );
       break;
@@ -373,37 +370,26 @@ export default ({ navigation }: PLPScreenProps) => {
     case 'PRODUCTS':
       if (state.isFetchingMoreProducts) {
         listProductsFooter = (
-          <Text
-            level={6}
-            weight="bold"
-            style={{ textAlign: 'center', marginTop: -25 }}
-          >
-            Cargando..
+          <Text level={6} weight="bold" style={{ textAlign: 'center' }}>
+            ...
           </Text>
         );
       }
-      sections = mapProductsToSections(state.productsTrack.products);
       content = (
         <SectionList
           style={[globalStyle.withPadding]}
+          initialNumToRender={10}
           stickySectionHeadersEnabled
-          sections={sections}
+          sections={state.productsTrack.sections}
           keyExtractor={(item, index) => `${index}-${item.id}`}
-          renderItem={({ item, index, section }) => {
-            let style: ViewStyle = { marginBottom: 5 };
-            if (index === section.data.length - 1) {
-              style = { marginBottom: 15 };
-              if (section.tag === sections[sections.length - 1].tag) {
-                style = globalStyle.withCartSpace;
-              }
-            }
+          renderItem={({ item }) => {
             return (
               <ProductItem
                 data={item}
                 onSeeDetail={(data) => {
                   navigation.navigate('PDP', data);
                 }}
-                style={style}
+                style={{ marginBottom: 5 }}
               />
             );
           }}
@@ -429,7 +415,9 @@ export default ({ navigation }: PLPScreenProps) => {
               fetchMoreProducts();
             }
           }}
-          ListFooterComponent={listProductsFooter}
+          ListFooterComponent={
+            <View style={globalStyle.withCartSpace}>{listProductsFooter}</View>
+          }
         />
       );
       break;

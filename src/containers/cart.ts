@@ -5,7 +5,7 @@ import { Product, Store } from '../types';
 
 const STORAGE_KEY = 'user';
 
-export type Cart = { store: Store; items: Product[] }[];
+export type Cart = { store: Store; data: Product[] }[];
 
 export interface CartContainer {
   isEmpty: () => boolean;
@@ -25,23 +25,22 @@ export default createContainer(
 
     const getCart = (): Cart => {
       const db = container.getAll();
-
       const storesDb: { [key: string]: Product[] } = {};
       Object.keys(db).forEach((key) => {
-        const [storeId] = key.split('-');
+        const [storeId] = key.split('|');
         storesDb[storeId] = storesDb[storeId] || [];
         storesDb[storeId].push(db[key]);
       });
       return Object.keys(storesDb).map((storeId) => {
         return {
           store: storesDb[storeId][0].store,
-          items: storesDb[storeId],
+          data: storesDb[storeId],
         };
       });
     };
 
     const getItemQty = (product: Product): number => {
-      const key = `${product.store.id}-${product.id}`;
+      const key = `${product.store.id}|${product.id}`;
       const item = container.get(key);
       if (item) {
         return item.qty;
@@ -64,7 +63,7 @@ export default createContainer(
     };
 
     const setItem = (item: Product) => {
-      const key = `${item.store.id}-${item.id}`;
+      const key = `${item.store.id}|${item.id}`;
       container.set(key, item);
       if (item.qty <= 0) {
         container.remove(key);

@@ -19,3 +19,5 @@ export { default as NotData } from './not-data';
 export { default as Loading } from './loading';
 export { default as FlatList } from './flat-list';
 export { default as SectionList } from './section-list';
+export { default as ProductItem } from './product-item';
+export { default as Badge } from './badge';
