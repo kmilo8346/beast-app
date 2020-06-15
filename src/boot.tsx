@@ -13,10 +13,12 @@ import {
   PLPScreen,
   PLPInStoreScreen,
   PDPScreen,
+  CheckoutScreen,
   ToSaleScreen,
   MenuScreen,
 } from './screens';
 import { Icon, Text } from './components';
+import { navigationRef } from './lib/root-navigation';
 import colors from './styles/colors';
 
 const commonStackOptions: StackNavigationOptions = {
@@ -59,6 +61,11 @@ function HomeStackScreen() {
         component={PDPScreen}
         options={{ title: '' }}
       />
+      <HomeStack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Mi Pedido' }}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -99,7 +106,7 @@ const Tab = createBottomTabNavigator();
 function Boot() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {

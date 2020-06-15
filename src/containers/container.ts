@@ -43,7 +43,11 @@ export default function useContainer(path: string): Container {
   }
 
   function set(key: string, value: any) {
-    setState((prevState) => ({ ...prevState, [key]: value }));
+    setState((prevState) => {
+      const newState = { ...prevState };
+      newState[key] = value;
+      return newState;
+    });
   }
 
   function setAll(state: { [key: string]: any }) {
