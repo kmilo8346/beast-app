@@ -12,6 +12,8 @@ export interface Store {
     type: 'Polygon';
     coordinates: Array<Array<number>>;
   };
+  email?: string;
+  phone?: string;
 }
 
 export interface Product {

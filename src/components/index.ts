@@ -7,6 +7,7 @@ export { default as Button } from './buttons/button';
 export { default as ButtonSmall } from './buttons/button-small';
 export { default as ButtonIcon } from './buttons/button-icon';
 export { default as ButtonCart } from './buttons/button-cart';
+export { default as ButtonContact } from './buttons/button-contact';
 export { default as FriendlyInputNumber } from './inputs/friendly-input-number';
 export { default as Input } from './inputs/input';
 export { default as InputNumber } from './inputs/input-number';
