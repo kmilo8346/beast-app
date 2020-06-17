@@ -4,7 +4,7 @@ import snakeCaseKeys from 'snakecase-keys';
 
 import { SearchParams, SearchResponse } from '../types';
 
-axios.defaults.baseURL = 'http://104.198.252.111:3000';
+axios.defaults.baseURL = 'http://104.198.252.111';
 
 /**
  * REST Client to standarize api comunications
