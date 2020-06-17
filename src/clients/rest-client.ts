@@ -4,7 +4,7 @@ import snakeCaseKeys from 'snakecase-keys';
 
 import { SearchParams, SearchResponse } from '../types';
 
-axios.defaults.baseURL = 'http://104.198.252.111';
+axios.defaults.baseURL = 'http://104.198.252.111:3000';
 
 /**
  * REST Client to standarize api comunications
@@ -12,7 +12,7 @@ axios.defaults.baseURL = 'http://104.198.252.111';
 export default class RESTClient<T> {
   public axios: AxiosInstance;
 
-  private prefix: string;
+  public prefix: string;
 
   constructor(prefix: string, config?: AxiosRequestConfig) {
     this.prefix = prefix;
@@ -20,10 +20,17 @@ export default class RESTClient<T> {
 
     this.axios.interceptors.request.use(
       (config) => {
-        return {
-          ...config,
-          data: snakeCaseKeys(config.data, { deep: true }),
-        };
+        const newConfig = { ...config };
+        // axios url params ex: ?place_id=
+        if (config.params) {
+          newConfig.params = snakeCaseKeys(config.params, { deep: true });
+        }
+        // axios body data
+        if (config.data) {
+          newConfig.data = snakeCaseKeys(config.data, { deep: true });
+        }
+
+        return newConfig;
       },
       (error) => Promise.reject(error)
     );

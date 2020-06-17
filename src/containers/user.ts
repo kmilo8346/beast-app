@@ -1,16 +1,16 @@
 import { createContainer } from 'unstated-next';
 
 import useContainer from './container';
-import { Address, User } from '../types';
+import { Place, User } from '../types';
 
 const STORAGE_KEY = 'user';
 
 export interface UserContainer {
-  setCurrentAddress: (address: Address) => void;
-  setAddresses: (addresses: Address[]) => void;
+  setCurrentAddress: (address: Place) => void;
+  setAddresses: (addresses: Place[]) => void;
   setUser: (user: User) => void;
-  getCurrentAddress: () => Address;
-  getAddresses: () => Address[];
+  getCurrentAddress: () => Place;
+  getAddresses: () => Place[];
   getUser: () => User;
 }
 
@@ -18,11 +18,11 @@ export default createContainer(
   (): UserContainer => {
     const container = useContainer(STORAGE_KEY);
 
-    const setCurrentAddress = (address: Address): void => {
+    const setCurrentAddress = (address: Place): void => {
       return container.set('currentAddress', address);
     };
 
-    const setAddresses = (addresses: Address[]): void => {
+    const setAddresses = (addresses: Place[]): void => {
       return container.set('addresses', addresses);
     };
 
@@ -30,11 +30,11 @@ export default createContainer(
       return container.setAll(user);
     };
 
-    const getCurrentAddress = (): Address => {
+    const getCurrentAddress = (): Place => {
       return container.get('currentAddress');
     };
 
-    const getAddresses = (): Address[] => {
+    const getAddresses = (): Place[] => {
       return container.get('addresses');
     };
 

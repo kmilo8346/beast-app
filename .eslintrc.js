@@ -7,5 +7,6 @@ module.exports = {
     'no-shadow': 0,
     '@typescript-eslint/no-explicit-any': 0,
     'prefer-object-spread': 0,
+    'react/no-array-index-key': 0,
   },
 };

@@ -1,15 +1,18 @@
 import React, { useReducer } from 'react';
 import { View } from 'react-native';
 
-import { Address } from '../../../types';
+// components
 import Modal, { ModalProps } from '../modal';
 import SelectFriendly from '../../select-friendly';
 import Button from '../../buttons/button';
+// local components
 import { AddAddressForm } from './components';
-
+// types
+import { Place } from '../../../types';
+// styles
 import globalStyle from '../../../styles';
 
-type AddAddressAction = { type: 'add_address'; address: Address };
+type AddAddressAction = { type: 'add_address'; address: Place };
 type SelectAddressAction = { type: 'select_address'; key: string };
 type DeleteAddressAction = { type: 'delete_address'; key: string };
 type SetShowAddAction = { type: 'set_show_add'; showAdd: boolean };
@@ -20,19 +23,39 @@ type Action =
   | SetShowAddAction;
 
 type State = {
-  currentAddress: Address;
-  addresses: Address[];
+  currentAddress: Place | undefined;
+  addresses: Place[];
   showAdd: boolean;
 };
 
 const reducer = (state: State, action: Action): State => {
-  let currentAddress;
-  let addresses;
+  let currentAddress: Place | undefined;
+  let addresses: Place[];
+  let found = false;
   switch (action.type) {
     case 'add_address':
+      currentAddress = state.currentAddress;
+      addresses = [...state.addresses];
+
+      addresses = addresses.map((address) => {
+        if (address.id === action.address.id) {
+          found = true;
+          if (currentAddress?.id === action.address.id) {
+            // replace current address
+            currentAddress = action.address;
+          }
+          // replace in addresses
+          return action.address;
+        }
+        return address;
+      });
+      if (!found) {
+        addresses.push(action.address);
+      }
       return {
         ...state,
-        addresses: [...(state.addresses || []), action.address],
+        currentAddress,
+        addresses,
       };
     case 'select_address':
       currentAddress = state.addresses.find(
@@ -56,9 +79,9 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export interface ModalManageAddresProps extends ModalProps {
-  currentAddress: Address;
-  addresses: Address[];
-  onSave: (currentAddress: Address, addresses: Address[]) => void;
+  currentAddress: Place;
+  addresses: Place[];
+  onSave: (currentAddress: Place, addresses: Place[]) => void;
 }
 
 export default ({
@@ -73,22 +96,16 @@ export default ({
     showAdd: false,
   });
 
-  const addHandler = (address: Address) => {
+  const addHandler = (address: Place) => {
     try {
       if (!state.addresses?.length) {
         onSave(address, [address]);
       } else {
         dispatch({ type: 'add_address', address });
       }
-    } catch (error) {
-      //
     } finally {
       dispatch({ type: 'set_show_add', showAdd: false });
     }
-  };
-
-  const saveHandler = () => {
-    onSave(state.currentAddress, state.addresses);
   };
 
   let title = 'Agrega una dirección';
@@ -99,14 +116,16 @@ export default ({
 
     const options = state.addresses.map((address) => ({
       key: address.id,
-      title: address.street,
-      subtitle: `${address.number}, ${address.apartment}`,
+      title: `${address.route.shortName}`,
+      subtitle: `${address.streetNumber.shortName}${
+        address.apartment ? `, ${address.apartment}` : ''
+      }, ${address.locality.shortName}`,
     }));
     content = (
       <View>
         <SelectFriendly
           dontDeleteOne
-          value={state.currentAddress.id}
+          value={(state.currentAddress as Place).id}
           options={options}
           addMessage="Agrega una nueva dirección"
           onSelect={(key) => {
@@ -122,7 +141,9 @@ export default ({
         />
         <Button
           title="Guardar"
-          onPress={saveHandler}
+          onPress={() => {
+            onSave(state.currentAddress as Place, state.addresses);
+          }}
           style={globalStyle.withMainActionAir}
         />
       </View>

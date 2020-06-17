@@ -59,7 +59,7 @@ export default ({
         }
 
         const optionStyle: StyleProp<ViewStyle> = [
-          { flexDirection: 'row', marginBottom: 10 },
+          { flexDirection: 'row', marginBottom: 18 },
         ];
         if (index === array.length - 1) {
           optionStyle.push({ marginBottom: 12 });

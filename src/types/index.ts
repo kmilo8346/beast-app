@@ -30,16 +30,42 @@ export interface Product {
   qty: number;
 }
 
-export interface Address {
+export interface AddressProp {
+  shortName: string;
+  longName: string;
+}
+
+export interface Place {
   id: string;
-  street: string;
-  number: string;
-  apartment?: string;
+  url: string;
+  streetNumber: AddressProp;
+  route: AddressProp;
+  locality: AddressProp;
+  administrativeAreaLevel3: AddressProp;
+  administrativeAreaLevel2: AddressProp;
+  administrativeAreaLevel1: AddressProp;
+  apartment: string;
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+    viewport: {
+      northeast: {
+        lat: number;
+        lng: number;
+      };
+      southwest: {
+        lat: number;
+        lng: number;
+      };
+    };
+  };
 }
 
 export interface User {
-  currentAddress: Address;
-  addresses: Address[];
+  currentAddress: Place;
+  addresses: Place[];
 }
 
 export interface SearchParams {
@@ -54,3 +80,14 @@ export interface SearchResponse<T> {
   total: number;
   hits: T[];
 }
+
+export interface PlacesAutocompletePrediction {
+  description: string;
+  placeId: string;
+}
+
+export interface PlacesAutocompletResponse {
+  predictions: PlacesAutocompletePrediction[];
+}
+
+export type PlacesDetailsResponse = Place;
