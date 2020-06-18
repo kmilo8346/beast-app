@@ -1,7 +1,7 @@
 import { createContainer } from 'unstated-next';
 
 import useContainer from './container';
-import { Place, User } from '../types';
+import { Place, User, Payment } from '../types';
 
 const STORAGE_KEY = 'user';
 
@@ -12,6 +12,10 @@ export interface UserContainer {
   getCurrentAddress: () => Place;
   getAddresses: () => Place[];
   getUser: () => User;
+  setPayments: (payments: Payment[]) => void;
+  setCurrentPayment: (payment: Payment) => void;
+  getPayments: () => Payment[];
+  getCurrentPayment: () => Payment;
 }
 
 export default createContainer(
@@ -42,6 +46,31 @@ export default createContainer(
       return container.getAll() as User;
     };
 
+    // Payment
+    const defautPayment: Payment = {
+      id: 'cash',
+      type: 'Efectivo',
+      cardNumber: '',
+      cardHolder: '',
+      validDate: '',
+    };
+
+    const setPayments = (payments: Payment[]): void => {
+      return container.set('payments', payments);
+    };
+
+    const setCurrentPayment = (payment: Payment): void => {
+      return container.set('currentPayment', payment);
+    };
+
+    const getPayments = (): Payment[] => {
+      return container.get('payments') || [defautPayment];
+    };
+
+    const getCurrentPayment = (): Payment => {
+      return container.get('currentPayment') || defautPayment;
+    };
+
     return {
       setCurrentAddress,
       setAddresses,
@@ -49,6 +78,10 @@ export default createContainer(
       getCurrentAddress,
       getAddresses,
       getUser,
+      setPayments,
+      setCurrentPayment,
+      getPayments,
+      getCurrentPayment,
     };
   }
 );

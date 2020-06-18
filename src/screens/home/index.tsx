@@ -7,6 +7,7 @@ import {
   Button,
   ButtonCart,
   InputSelectAddress,
+  InputSelectPayment
 } from '../../components';
 
 export interface Props {
@@ -20,6 +21,8 @@ export default ({ navigation }: Props) => {
         Buscar
       </Text>
       <InputSelectAddress />
+      <Text level={1}>.</Text>
+      <InputSelectPayment />
       <Button
         title="Go to PLP"
         onPress={() => {

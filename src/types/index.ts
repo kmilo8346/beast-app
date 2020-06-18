@@ -63,7 +63,18 @@ export interface Place {
   };
 }
 
+export interface Payment {
+  id: string;
+  type: string;
+  cardNumber: string;
+  cardHolder: string;
+  validDate: string;
+}
+
 export interface User {
+  identificationType: 'RUT';
+  identificationNumber: string;
+  email: string;
   currentAddress: Place;
   addresses: Place[];
 }

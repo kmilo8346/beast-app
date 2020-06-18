@@ -25,6 +25,7 @@ export default StyleSheet.create<Styles>({
     backgroundColor: colors.blue,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 15,
   },
   content: {
     width: 291,
@@ -56,8 +57,7 @@ export default StyleSheet.create<Styles>({
   numbers: {
     width: 235,
     height: 33,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
