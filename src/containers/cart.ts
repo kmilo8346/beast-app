@@ -3,7 +3,7 @@ import { createContainer } from 'unstated-next';
 import useContainer from './container';
 import { Product, Store } from '../types';
 
-const STORAGE_KEY = 'user';
+const STORAGE_KEY = 'cart';
 
 export type Cart = { store: Store; data: Product[] }[];
 

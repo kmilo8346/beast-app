@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
-import { ViewStyle, View } from 'react-native';
+import { View } from 'react-native';
 
+// components
 import {
   Container,
   ErrorView,
@@ -9,12 +10,15 @@ import {
   Loading,
   FlatList,
   Text,
-  ButtonCart,
   ProductItem,
 } from '../../../components';
+// local components
 import { InputSearch } from '../components';
+// types
 import { Product, SearchResponse } from '../../../types';
+// clients
 import productClient from '../../../clients/product-client';
+// styles
 import globalStyle from '../../../styles';
 
 type ViewState = 'LOADING' | 'ERROR' | 'PRODUCTS' | 'NOT_PRODUCTS';
@@ -244,7 +248,6 @@ export default ({ navigation, route }: ScreenProps) => {
         containerStyle={[globalStyle.withMargin, { marginBottom: 15 }]}
       />
       {content}
-      <ButtonCart containerStyle={globalStyle.withPadding} />
     </Container>
   );
 };

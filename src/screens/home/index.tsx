@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 
 // components
 import {
@@ -17,9 +18,12 @@ export interface Props {
 export default ({ navigation }: Props) => {
   return (
     <Container safeArea withMargin fakeHeader>
-      <Text level={1} weight="bold" style={{ marginBottom: 10 }}>
-        Buscar
-      </Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text level={1} weight="bold" style={{ marginBottom: 10 }}>
+          Buscar
+        </Text>
+        <ButtonCart />
+      </View>
       <InputSelectAddress />
       <Text level={1}>.</Text>
       <InputSelectPayment />
@@ -30,7 +34,6 @@ export default ({ navigation }: Props) => {
         }}
         style={{ marginTop: 100 }}
       />
-      <ButtonCart />
     </Container>
   );
 };

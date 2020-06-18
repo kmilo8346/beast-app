@@ -12,7 +12,6 @@ import {
   Loading,
   FlatList,
   SectionList,
-  ButtonCart,
   ProductItem,
 } from '../../components';
 import { StoreCard, InputSearch } from './components';
@@ -449,7 +448,6 @@ export default ({ navigation }: PLPScreenProps) => {
         containerStyle={[globalStyle.withMargin, { marginBottom: 15 }]}
       />
       {content}
-      <ButtonCart containerStyle={globalStyle.withMargin} />
     </Container>
   );
 };

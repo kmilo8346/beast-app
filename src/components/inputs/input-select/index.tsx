@@ -6,7 +6,7 @@ import Touchable from '../../touchable';
 import Text from '../../text';
 import Icon from '../../icon';
 // styles
-import colors from '../../../styles/colors';
+import styles from './styles';
 
 export interface InputSelectProps {
   text: string;
@@ -15,26 +15,16 @@ export interface InputSelectProps {
 
 export default memo(({ text, onPress = () => null }: InputSelectProps) => {
   return (
-    <Touchable
-      onPress={onPress}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: 10,
-        paddingBottom: 10,
-        backgroundColor: colors.blackLight6,
-        borderRadius: 7,
-      }}
-    >
+    <Touchable onPress={onPress} style={styles.container}>
       <Text
         level={6}
-        style={{ marginLeft: 15, marginRight: 3, flex: 1 }}
+        style={styles.text}
         numberOfLines={1}
         ellipsizeMode="tail"
       >
         {text}
       </Text>
-      <Icon name="chevron-down" style={{ marginRight: 15 }} />
+      <Icon name="chevron-down" style={styles.icon} />
     </Touchable>
   );
 });

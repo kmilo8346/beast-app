@@ -7,7 +7,6 @@ import {
   Text,
   InputNumber,
   Button,
-  ButtonCart,
   ButtonContact,
 } from '../../components';
 import numberFormatter from '../../lib/formatters/number-formatter';
@@ -37,7 +36,9 @@ export default ({ route }: PDPScreenProps) => {
         : 'Precio a convenir'}
     </Text>
   );
-  let mainAction = <ButtonContact phone={product.store.phone} />;
+  let mainAction: JSX.Element | null = (
+    <ButtonContact phone={product.store.phone} />
+  );
   if (product.type === 'product') {
     format = (
       <Text
@@ -80,12 +81,7 @@ export default ({ route }: PDPScreenProps) => {
           </Text>
         </View>
       );
-      mainAction = (
-        <ButtonCart
-          containerStyle={globalStyle.withMargin}
-          style={{ marginBottom: 0 }}
-        />
-      );
+      mainAction = null;
     }
   }
 

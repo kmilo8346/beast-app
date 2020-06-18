@@ -1,71 +1,86 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { View, ViewStyle, StyleProp } from 'react-native';
 
-import Button from '../button';
-import Text from '../../text';
+// components
+import ButtonIcon from '../button-icon';
 import ModalCart from '../../modals/modal-cart';
+import Badge from '../../badge';
+// containers
 import Cart from '../../../containers/cart';
-import numberFormatter from '../../../lib/formatters/number-formatter';
-import colors from '../../../styles/colors';
-import globalStyle from '../../../styles';
+
+interface ContentProps {
+  ammount: number;
+  isEmpty: boolean;
+  isModalVisible: boolean;
+  containerStyle: StyleProp<ViewStyle>;
+  style: StyleProp<ViewStyle>;
+  onPressButton: () => void;
+  onModalClose: () => void;
+}
+
+const Content = memo(
+  ({
+    ammount,
+    isEmpty,
+    isModalVisible,
+    containerStyle,
+    style,
+    onPressButton,
+    onModalClose,
+  }: ContentProps) => {
+    if (isEmpty) {
+      return null;
+    }
+
+    const finalContainerStyle: StyleProp<ViewStyle> = [
+      { position: 'relative', alignSelf: 'flex-start' },
+      containerStyle,
+    ];
+    const finalStyle: StyleProp<ViewStyle> = [style];
+    return (
+      <View style={finalContainerStyle}>
+        <ButtonIcon
+          icon="shopping-cart"
+          style={finalStyle}
+          onPress={onPressButton}
+        />
+        <Badge
+          count={ammount}
+          style={{ position: 'absolute', top: -5, right: -5 }}
+        />
+        {isModalVisible && <ModalCart onRequestClose={onModalClose} />}
+      </View>
+    );
+  }
+);
 
 export interface ButtonCartProps {
   containerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
 }
 
-export default ({ containerStyle = {}, style = {} }: ButtonCartProps) => {
+export default ({ containerStyle, style }: ButtonCartProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const cartContainer = Cart.useContainer();
-  const stats = cartContainer.getStats();
+  const ammount = cartContainer.getStats().total;
   const isEmpty = cartContainer.isEmpty();
 
-  useEffect(() => {
-    if (isEmpty) {
-      setIsVisible(false);
-    }
-  }, [isEmpty]);
+  const pressButtonHandler = useCallback(() => {
+    setIsVisible((prevIsVisible) => !prevIsVisible);
+  }, []);
+  const modalCloseHandler = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
-  const finalContainerStyle: StyleProp<ViewStyle> = [
-    { position: 'absolute', bottom: 0, right: 0, left: 0 },
-    containerStyle,
-  ];
-  const finalStyle: StyleProp<ViewStyle> = [
-    globalStyle.withMainActionAir,
-    style,
-  ];
-  if (cartContainer.isEmpty()) {
-    return null;
-  }
   return (
-    <View style={finalContainerStyle}>
-      <Button
-        title={
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text level={4} weight="bold" color={colors.white}>
-              {`(${stats.total}) `}
-            </Text>
-            <Text level={4} weight="bold" color={colors.white}>
-              Carrito
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Text level={4} weight="bold" color={colors.white}>
-              {numberFormatter.toCurrency(stats.ammount)}
-            </Text>
-          </View>
-        }
-        style={finalStyle}
-        onPress={() => {
-          setIsVisible((prevIsVisible) => !prevIsVisible);
-        }}
-      />
-      {isVisible && (
-        <ModalCart
-          onRequestClose={() => {
-            setIsVisible((prevIsVisible) => !prevIsVisible);
-          }}
-        />
-      )}
-    </View>
+    <Content
+      ammount={ammount}
+      isEmpty={isEmpty}
+      isModalVisible={isVisible}
+      containerStyle={containerStyle}
+      style={style}
+      onPressButton={pressButtonHandler}
+      onModalClose={modalCloseHandler}
+    />
   );
 };
