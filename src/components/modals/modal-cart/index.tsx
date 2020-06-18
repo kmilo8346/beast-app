@@ -1,18 +1,28 @@
 import React, { ReactElement } from 'react';
 import { SectionList, View, ViewStyle } from 'react-native';
 
+// components
 import Modal from '../modal';
 import Text from '../../text';
 import Button from '../../buttons/button';
 import ProductItem from '../../product-item';
+import InputSelectAddress from '../../inputs/input-select-address';
+// containers
 import Cart from '../../../containers/cart';
+// libs
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import { navigate } from '../../../lib/root-navigation';
+// types
+import { Store } from '../../../types';
+// styles
 import globalStyle from '../../../styles';
 import colors from '../../../styles/colors';
-import { Store } from '../../../types';
 
-const renderHeader = (): ReactElement => <View style={{ marginBottom: 20 }} />;
+const renderHeader = (): ReactElement => (
+  <View style={{ marginBottom: 15 }}>
+    <InputSelectAddress />
+  </View>
+);
 
 const renderSectionHeader = (store: Store) => (
   <View

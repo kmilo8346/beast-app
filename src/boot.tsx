@@ -8,6 +8,7 @@ import {
 } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+// screens
 import {
   HomeScreen,
   PLPScreen,
@@ -17,8 +18,11 @@ import {
   ToSaleScreen,
   MenuScreen,
 } from './screens';
-import { Icon, Text } from './components';
+// components
+import { Icon, Text, ButtonCart } from './components';
+// libs
 import { navigationRef } from './lib/root-navigation';
+// styles
 import colors from './styles/colors';
 
 const commonStackOptions: StackNavigationOptions = {
@@ -53,13 +57,31 @@ function HomeStackScreen() {
       <HomeStack.Screen
         name="PLP"
         component={PLPScreen}
-        options={{ title: 'Buscar' }}
+        options={{
+          title: 'Buscar',
+          headerRight: () => (
+            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
+          ),
+        }}
       />
-      <HomeStack.Screen name="PLPInStore" component={PLPInStoreScreen} />
+      <HomeStack.Screen
+        name="PLPInStore"
+        component={PLPInStoreScreen}
+        options={{
+          headerRight: () => (
+            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
+          ),
+        }}
+      />
       <HomeStack.Screen
         name="PDP"
         component={PDPScreen}
-        options={{ title: '' }}
+        options={{
+          title: '',
+          headerRight: () => (
+            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
+          ),
+        }}
       />
       <HomeStack.Screen
         name="Checkout"

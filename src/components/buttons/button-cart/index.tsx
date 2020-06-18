@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, ViewStyle, StyleProp } from 'react-native';
 
-import Button from '../button';
-import Text from '../../text';
+// components
+import ButtonIcon from '../button-icon';
 import ModalCart from '../../modals/modal-cart';
+import Badge from '../../badge';
+// containers
 import Cart from '../../../containers/cart';
-import numberFormatter from '../../../lib/formatters/number-formatter';
-import colors from '../../../styles/colors';
-import globalStyle from '../../../styles';
 
 export interface ButtonCartProps {
   containerStyle?: StyleProp<ViewStyle>;
@@ -17,47 +16,29 @@ export interface ButtonCartProps {
 export default ({ containerStyle = {}, style = {} }: ButtonCartProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const cartContainer = Cart.useContainer();
-  const stats = cartContainer.getStats();
-  const isEmpty = cartContainer.isEmpty();
+  const ammount = cartContainer.getStats().total;
 
-  useEffect(() => {
-    if (isEmpty) {
-      setIsVisible(false);
-    }
-  }, [isEmpty]);
-
-  const finalContainerStyle: StyleProp<ViewStyle> = [
-    { position: 'absolute', bottom: 0, right: 0, left: 0 },
-    containerStyle,
-  ];
-  const finalStyle: StyleProp<ViewStyle> = [
-    globalStyle.withMainActionAir,
-    style,
-  ];
   if (cartContainer.isEmpty()) {
     return null;
   }
+
+  const finalContainerStyle: StyleProp<ViewStyle> = [
+    { position: 'relative', alignSelf: 'flex-start' },
+    containerStyle,
+  ];
+  const finalStyle: StyleProp<ViewStyle> = [style];
   return (
     <View style={finalContainerStyle}>
-      <Button
-        title={
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text level={4} weight="bold" color={colors.white}>
-              {`(${stats.total}) `}
-            </Text>
-            <Text level={4} weight="bold" color={colors.white}>
-              Carrito
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Text level={4} weight="bold" color={colors.white}>
-              {numberFormatter.toCurrency(stats.ammount)}
-            </Text>
-          </View>
-        }
+      <ButtonIcon
+        icon="shopping-cart"
         style={finalStyle}
         onPress={() => {
           setIsVisible((prevIsVisible) => !prevIsVisible);
         }}
+      />
+      <Badge
+        count={ammount}
+        style={{ position: 'absolute', top: -5, right: -5 }}
       />
       {isVisible && (
         <ModalCart
