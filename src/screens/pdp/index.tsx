@@ -7,7 +7,6 @@ import {
   Text,
   InputNumber,
   Button,
-  ButtonCart,
   ButtonContact,
 } from '../../components';
 import numberFormatter from '../../lib/formatters/number-formatter';

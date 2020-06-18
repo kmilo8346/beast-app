@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -8,11 +8,21 @@ import ModalManageAddress from '../../modals/modal-manage-address';
 import UserProvider from '../../../containers/user';
 
 export default () => {
+  // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-
   const currentAddress = userContainer.getCurrentAddress();
   const addresses = userContainer.getAddresses();
+
+  // event handlers
+  const inputPressHandler = useCallback(() => {
+    setIsVisible(true);
+  }, []);
+  const requestCloseHandler = useCallback(() => {
+    setIsVisible((prevIsVisible) => !prevIsVisible);
+  }, []);
+
+  // render logic
   let text = 'Selecciona una dirección';
   if (currentAddress) {
     text = `Enviar a - ${currentAddress.route.shortName} ${
@@ -21,12 +31,7 @@ export default () => {
   }
   return (
     <View>
-      <InputSelect
-        text={text}
-        onPress={() => {
-          setIsVisible(true);
-        }}
-      />
+      <InputSelect text={text} onPress={inputPressHandler} />
       {isVisible && (
         <ModalManageAddress
           currentAddress={currentAddress}
@@ -36,9 +41,7 @@ export default () => {
             userContainer.setAddresses(addresses);
             setIsVisible((prevIsVisible) => !prevIsVisible);
           }}
-          onRequestClose={() => {
-            setIsVisible((prevIsVisible) => !prevIsVisible);
-          }}
+          onRequestClose={requestCloseHandler}
         />
       )}
     </View>

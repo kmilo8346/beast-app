@@ -25,6 +25,7 @@ import { navigationRef } from './lib/root-navigation';
 // styles
 import colors from './styles/colors';
 
+const cartStyle = { marginRight: 20, marginTop: 5 };
 const commonStackOptions: StackNavigationOptions = {
   headerBackImage: () => <Icon name="chevron-left" />,
   headerLeftContainerStyle: {
@@ -59,18 +60,14 @@ function HomeStackScreen() {
         component={PLPScreen}
         options={{
           title: 'Buscar',
-          headerRight: () => (
-            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
-          ),
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
         }}
       />
       <HomeStack.Screen
         name="PLPInStore"
         component={PLPInStoreScreen}
         options={{
-          headerRight: () => (
-            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
-          ),
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
         }}
       />
       <HomeStack.Screen
@@ -78,9 +75,7 @@ function HomeStackScreen() {
         component={PDPScreen}
         options={{
           title: '',
-          headerRight: () => (
-            <ButtonCart containerStyle={{ marginRight: 20, marginTop: 5 }} />
-          ),
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
         }}
       />
       <HomeStack.Screen
