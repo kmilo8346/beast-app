@@ -4,8 +4,10 @@ import colors from '../../../styles/colors';
 interface Styles {
   container: ViewStyle;
   label: TextStyle;
-  inputContainer: ViewStyle;
+  inputWrapper: ViewStyle;
+  prefix: ViewStyle;
   input: TextStyle;
+  suffix: ViewStyle;
   error: TextStyle;
 }
 
@@ -16,8 +18,14 @@ export default StyleSheet.create<Styles>({
   label: {
     marginLeft: 4,
   },
-  inputContainer: {
+  inputWrapper: {
     position: 'relative',
+  },
+  prefix: {
+    position: 'absolute',
+    left: 0,
+    top: 6,
+    opacity: 0.7,
   },
   input: {
     borderStyle: 'solid',
@@ -28,6 +36,12 @@ export default StyleSheet.create<Styles>({
     paddingLeft: 4,
     paddingRight: 36,
     fontSize: 14,
+  },
+  suffix: {
+    position: 'absolute',
+    right: 0,
+    top: 6,
+    opacity: 0.7,
   },
   error: {
     marginTop: 3,

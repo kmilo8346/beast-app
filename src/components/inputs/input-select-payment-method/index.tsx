@@ -3,12 +3,12 @@ import { View } from 'react-native';
 
 // components
 import InputSelect from '../input-select';
-import ModalManagePayment from '../../modals/modal-manage-payment';
+import ModalManagePayment from '../../modals/modal-manage-payment-method';
 // containers
 import UserProvider from '../../../containers/user';
 
 export default () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const userContainer = UserProvider.useContainer();
 
   const currentPayment = userContainer.getCurrentPayment();
@@ -16,8 +16,12 @@ export default () => {
 
   let text = 'Selecciona un medio de pago';
   if (currentPayment) {
-    text = currentPayment.type === 'Efectivo' ? 'Paga en efectivo al recibir o añade tarjeta' :
-      `Tarjeta de ${currentPayment.type} terminada en ${currentPayment.cardNumber.slice(-4)}`;
+    text =
+      currentPayment.type === 'Efectivo'
+        ? 'Paga en efectivo al recibir o añade tarjeta'
+        : `Tarjeta de ${
+            currentPayment.type
+          } terminada en ${currentPayment.cardNumber.slice(-4)}`;
   }
   return (
     <View>

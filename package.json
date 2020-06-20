@@ -27,16 +27,20 @@
     "react-native-web": "~0.11.7",
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
-    "validate.js": "^0.13.1"
+    "validate.js": "^0.13.1",
+    "react-native-crypto": "^2.1.0",
+    "react-native-randombytes": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
+    "@types/node": "^14.0.13",
     "@types/react": "~16.9.23",
     "@types/react-native": "~0.61.17",
     "babel-preset-expo": "~8.1.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb-typescript-prettier": "^2.1.1",
     "prettier": "^2.0.5",
+    "rn-nodeify": "^10.2.0",
     "typescript": "~3.8.3"
   },
   "private": true
