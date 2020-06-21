@@ -1,10 +1,33 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
 import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
 
-import { SearchParams, SearchResponse } from '../types';
+import {
+  SearchParams,
+  SearchResponse,
+  CreateParams,
+  UpdateParams,
+  GetParams,
+  GetAllParams,
+} from '../types';
 
-axios.defaults.baseURL = 'http://104.198.252.111';
+axios.defaults.baseURL = 'http://192.168.0.2:3000';
+
+const interpolate = (
+  text: string,
+  variables: { [key: string]: any } | undefined
+) => {
+  if (!variables) return text;
+
+  let interpolatedText = text;
+  Object.keys(variables).forEach((key) => {
+    interpolatedText = interpolatedText.replace(
+      new RegExp(`:${key}`, 'g'),
+      variables[key]
+    );
+  });
+  return interpolatedText;
+};
 
 /**
  * REST Client to standarize api comunications
@@ -45,32 +68,63 @@ export default class RESTClient<T> {
     );
   }
 
-  async create(body: T): Promise<T> {
-    const response = await this.axios.post<T>(this.prefix, body);
+  async create(params: CreateParams<T>, cancelToken?: CancelToken): Promise<T> {
+    const { pathVars, ...data } = params;
+    const response = await this.axios.post<T>(
+      interpolate(this.prefix, pathVars),
+      data,
+      {
+        cancelToken,
+      }
+    );
     return response.data;
   }
 
-  async update(body: T): Promise<T> {
-    const response = await this.axios.put<T>(this.prefix, body);
-    return response.data;
-  }
-
-  async get(id: string): Promise<T> {
-    const response = await this.axios.get<T>(`${this.prefix}/${id}`);
-    return response.data;
-  }
-
-  async getAll(params: { from: 0; size: 10 }): Promise<T[]> {
-    const response = await this.axios.get<T[]>(this.prefix, {
-      params,
+  async update(
+    params: UpdateParams<T>,
+    cancelToken?: CancelToken
+  ): Promise<void> {
+    const { pathVars, ...data } = params;
+    await this.axios.put<T>(interpolate(this.prefix, pathVars), data, {
+      cancelToken,
     });
+  }
+
+  async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
+    const { pathVars, source } = params;
+    const response = await this.axios.get<T>(
+      interpolate(`${this.prefix}/:id`, pathVars),
+      {
+        params: {
+          source,
+        },
+        cancelToken,
+      }
+    );
     return response.data;
   }
 
-  async search(params?: SearchParams): Promise<SearchResponse<T>> {
+  async getAll(params: GetAllParams, cancelToken?: CancelToken): Promise<T[]> {
+    const { pathVars, ...data } = params;
+    const response = await this.axios.get<T[]>(
+      interpolate(this.prefix, pathVars),
+      {
+        params: data,
+        cancelToken,
+      }
+    );
+    return response.data;
+  }
+
+  async search(
+    params: SearchParams,
+    cancelToken?: CancelToken
+  ): Promise<SearchResponse<T>> {
+    const { pathVars, ...data } = params;
     const response = await this.axios.post<SearchResponse<T>>(
-      `${this.prefix}/search`,
-      params
+      interpolate(`${this.prefix}/search`, pathVars),
+      data,
+      { cancelToken }
     );
     return response.data;
   }

@@ -63,12 +63,39 @@ export interface Place {
   };
 }
 
-export interface Payment {
+export interface Card {
   id: string;
-  type: string;
-  cardNumber: string;
-  cardHolder: string;
-  validDate: string;
+  customerId: string;
+  mercadopagoCustomerId: string;
+  expirationMonth: number;
+  expirationYear: number;
+  firstSixDigits: string;
+  lastFourDigits: string;
+  paymentMethod: {
+    id: string;
+    name: string;
+    paymentTypeId: string;
+    thumbnail: string;
+    secureThumbnail: string;
+  };
+  securityCode: {
+    length: number;
+    cardLocation: string;
+  };
+  issuer: {
+    id: number;
+    name: string;
+  };
+  cardholder: {
+    name: string;
+    identification: {
+      number: string;
+      type: string;
+    };
+  };
+  liveMode: boolean;
+  dateCreated: string;
+  dateLastUpdated: string;
 }
 
 export interface User {
@@ -77,9 +104,38 @@ export interface User {
   email: string;
   currentAddress: Place;
   addresses: Place[];
+  currentCard: Card | null;
+  cards: Card[];
+}
+
+export interface CreateParams<T> {
+  pathVars?: { [key: string]: any };
+  body: T;
+  source?: string[];
+}
+
+export interface UpdateParams<T> {
+  pathVars?: { [key: string]: any };
+  body: Partial<T>;
+  source?: string[];
+}
+
+export interface GetParams {
+  pathVars: {
+    [key: string]: any;
+  };
+  source?: string[];
+}
+
+export interface GetAllParams {
+  pathVars?: { [key: string]: any };
+  from: number;
+  size: number;
+  source?: string[];
 }
 
 export interface SearchParams {
+  pathVars?: { [key: string]: any };
   query?: string;
   filters?: { [key: string]: any };
   from?: number;

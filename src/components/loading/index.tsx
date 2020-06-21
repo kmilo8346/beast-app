@@ -5,12 +5,12 @@ import colors from '../../styles/colors';
 import styles from './styles';
 
 export default ({
-  size = 'large',
-  color = colors.blue,
+  size = 'small',
+  color = colors.black,
 }: ActivityIndicatorProps) => {
   return (
-    <View style={[styles.container, styles.horizontal]}>
-      <ActivityIndicator size={size} color={color} />
+    <View style={[styles.container]}>
+      <ActivityIndicator size={size} color={color} style={styles.indicator} />
     </View>
   );
 };

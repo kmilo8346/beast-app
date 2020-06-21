@@ -11,13 +11,13 @@ export interface Option {
   key: string;
   title: string;
   subtitle: string;
+  readonly?: boolean;
 }
 
 export interface SelectProps {
-  value: string;
+  value?: string;
   options: Option[];
   addMessage: string;
-  dontDeleteOne?: boolean;
   style?: StyleProp<ViewStyle>;
   onSelect: (key: string) => void;
   onDelete: (key: string) => void;
@@ -28,7 +28,6 @@ export default ({
   value,
   options,
   addMessage,
-  dontDeleteOne = false,
   style = {},
   onSelect,
   onDelete,
@@ -44,17 +43,16 @@ export default ({
 
         if (isSelected) {
           selectIcon = <Icon name="check-circle" />;
-          deleteIcon = (
-            <ButtonIcon
-              icon="trash-2"
-              onPress={(e) => {
-                e.stopPropagation();
-                onDelete(option.key);
-              }}
-            />
-          );
-          if (dontDeleteOne && array.length < 2) {
-            deleteIcon = null;
+          if (!option.readonly) {
+            deleteIcon = (
+              <ButtonIcon
+                icon="trash-2"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onDelete(option.key);
+                }}
+              />
+            );
           }
         }
 

@@ -1,7 +1,7 @@
 import { createContainer } from 'unstated-next';
 
 import useContainer from './container';
-import { Place, User, Payment } from '../types';
+import { Place, User, Card } from '../types';
 
 const STORAGE_KEY = 'user';
 
@@ -12,10 +12,11 @@ export interface UserContainer {
   getCurrentAddress: () => Place;
   getAddresses: () => Place[];
   getUser: () => User;
-  setPayments: (payments: Payment[]) => void;
-  setCurrentPayment: (payment: Payment) => void;
-  getPayments: () => Payment[];
-  getCurrentPayment: () => Payment;
+  getCards: () => Card[];
+  getCurrentCard: () => Card | null | undefined;
+  addCard: (card: Card) => Card[];
+  deleteCard: (id: string) => void;
+  setCurrentCard: (id: string | null) => void;
 }
 
 export default createContainer(
@@ -46,29 +47,45 @@ export default createContainer(
       return container.getAll() as User;
     };
 
-    // Payment
-    const defautPayment: Payment = {
-      id: 'cash',
-      type: 'Efectivo',
-      cardNumber: '',
-      cardHolder: '',
-      validDate: '',
+    const getCards = (): Card[] => {
+      return container.get('cards') || [];
     };
 
-    const setPayments = (payments: Payment[]): void => {
-      return container.set('payments', payments);
+    const getCurrentCard = (): Card | null | undefined => {
+      return container.get('currentCard');
     };
 
-    const setCurrentPayment = (payment: Payment): void => {
-      return container.set('currentPayment', payment);
+    const addCard = (newCard: Card): Card[] => {
+      let cards = getCards();
+      let found = false;
+      cards = cards.map((card) => {
+        if (card.id === newCard.id) {
+          found = true;
+          return newCard;
+        }
+        return card;
+      });
+      if (!found) {
+        cards.push(newCard);
+      }
+      // set in db cards
+      container.set('cards', cards);
+      return cards;
     };
 
-    const getPayments = (): Payment[] => {
-      return container.get('payments') || [defautPayment];
+    const deleteCard = (id: string): void => {
+      let cards = getCards();
+      cards = cards.filter((card) => card.id !== id);
+      container.set('cards', cards);
     };
 
-    const getCurrentPayment = (): Payment => {
-      return container.get('currentPayment') || defautPayment;
+    const setCurrentCard = (id: string | null): void => {
+      if (id === null) {
+        container.set('currentCard', null);
+        return;
+      }
+      const match = getCards().find((card) => card.id === id);
+      container.set('currentCard', match);
     };
 
     return {
@@ -78,10 +95,11 @@ export default createContainer(
       getCurrentAddress,
       getAddresses,
       getUser,
-      setPayments,
-      setCurrentPayment,
-      getPayments,
-      getCurrentPayment,
+      addCard,
+      deleteCard,
+      setCurrentCard,
+      getCards,
+      getCurrentCard,
     };
   }
 );
