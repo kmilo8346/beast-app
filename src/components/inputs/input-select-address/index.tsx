@@ -12,7 +12,6 @@ export default () => {
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
   const currentAddress = userContainer.getCurrentAddress();
-  const addresses = userContainer.getAddresses();
 
   // event handlers
   const inputPressHandler = useCallback(() => {
@@ -27,20 +26,13 @@ export default () => {
   if (currentAddress) {
     text = `Enviar a - ${currentAddress.route.shortName} ${
       currentAddress.streetNumber.shortName
-    }${currentAddress.apartment ? ` · ${currentAddress.apartment}` : ''}`;
+      }${currentAddress.apartment ? ` · ${currentAddress.apartment}` : ''}`;
   }
   return (
     <View>
       <InputSelect text={text} onPress={inputPressHandler} />
       {isVisible && (
         <ModalManageAddress
-          currentAddress={currentAddress}
-          addresses={addresses}
-          onSave={(currentAddress, addresses) => {
-            userContainer.setCurrentAddress(currentAddress);
-            userContainer.setAddresses(addresses);
-            setIsVisible((prevIsVisible) => !prevIsVisible);
-          }}
           onRequestClose={requestCloseHandler}
         />
       )}

@@ -6,12 +6,16 @@ import { Place, User, Card } from '../types';
 const STORAGE_KEY = 'user';
 
 export interface UserContainer {
-  setCurrentAddress: (address: Place) => void;
-  setAddresses: (addresses: Place[]) => void;
   setUser: (user: User) => void;
-  getCurrentAddress: () => Place;
-  getAddresses: () => Place[];
   getUser: () => User;
+
+  setAddresses: (addresses: Place[]) => void;
+  setCurrentAddress: (address: Place | null) => void;
+  getAddresses: () => Place[];
+  addAddress: (newAddress: Place) => Place[];
+  getCurrentAddress: () => Place | null;
+  deleteAddress: (id: string) => Place[];
+
   getCards: () => Card[];
   getCurrentCard: () => Card | null | undefined;
   addCard: (card: Card) => Card[];
@@ -23,30 +27,59 @@ export default createContainer(
   (): UserContainer => {
     const container = useContainer(STORAGE_KEY);
 
-    const setCurrentAddress = (address: Place): void => {
-      return container.set('currentAddress', address);
-    };
-
-    const setAddresses = (addresses: Place[]): void => {
-      return container.set('addresses', addresses);
+    // user
+    const getUser = (): User => {
+      return container.getAll() as User;
     };
 
     const setUser = (user: User): void => {
       return container.setAll(user);
     };
 
-    const getCurrentAddress = (): Place => {
-      return container.get('currentAddress');
-    };
-
+    // address
     const getAddresses = (): Place[] => {
-      return container.get('addresses');
+      return container.get('addresses') || [];
     };
 
-    const getUser = (): User => {
-      return container.getAll() as User;
+    const getCurrentAddress = (): Place | null => {
+      return container.get('currentAddress') || null;
     };
 
+    const setAddresses = (addresses: Place[]): void => {
+      return container.set('addresses', addresses);
+    };
+
+    const setCurrentAddress = (address: Place | null): void => {
+      container.set('currentAddress', address);
+    };
+
+    const addAddress = (newAddress: Place) => {
+      let found = false;
+
+      const addresses = getAddresses().map((address) => {
+        if (address.id === newAddress.id) {
+          found = true;
+          return newAddress;
+        }
+        return address;
+      });
+      if (!found) {
+        addresses.push(newAddress);
+      }
+
+      // set in db address
+      setAddresses(addresses);
+      return addresses;
+    };
+
+    const deleteAddress = (id: string): Place[] => {
+      let addresses = getAddresses();
+      addresses = addresses.filter((address) => address.id !== id);
+      container.set('addresses', addresses);
+      return addresses;
+    };
+
+    // cards
     const getCards = (): Card[] => {
       return container.get('cards') || [];
     };
@@ -89,17 +122,19 @@ export default createContainer(
     };
 
     return {
+      setUser,
+      getUser,
       setCurrentAddress,
       setAddresses,
-      setUser,
       getCurrentAddress,
       getAddresses,
-      getUser,
+      addAddress,
+      deleteAddress,
       addCard,
-      deleteCard,
       setCurrentCard,
       getCards,
       getCurrentCard,
+      deleteCard,
     };
   }
 );
