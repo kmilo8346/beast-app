@@ -9,7 +9,7 @@ import UserProvider from '../../../containers/user';
 
 export default () => {
   // state
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
   const currentCard = userContainer.getCurrentCard();
 

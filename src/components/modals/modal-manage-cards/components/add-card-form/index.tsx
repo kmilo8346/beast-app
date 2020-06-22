@@ -258,7 +258,7 @@ export default ({ onAdd }: AddCardFormProps) => {
       // TODO: receive customerId and mercado pago customer id from props
       const card = await cardClient.create(
         {
-          pathVars: { customerId: '126' },
+          pathVars: { customerId: '178' },
           body: {
             mercadopago_customer_id: '588310597-iCbkpncHLFQgdM',
             token: response.id,
