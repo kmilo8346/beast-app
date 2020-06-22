@@ -16,23 +16,15 @@ class GooglePlacesClient extends RestClient<any> {
       sessiontoken: string;
     },
     cancelToken?: CancelToken
-  ): Promise<PlacesAutocompletResponse | null> {
-    let data = null;
-    try {
-      const response = await this.axios.get<PlacesAutocompletResponse>(
-        `${this.prefix}/autocomplete`,
-        {
-          cancelToken,
-          params,
-        }
-      );
-      data = response.data;
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        throw error;
+  ): Promise<PlacesAutocompletResponse> {
+    const response = await this.axios.get<PlacesAutocompletResponse>(
+      `${this.prefix}/autocomplete`,
+      {
+        cancelToken,
+        params,
       }
-    }
-    return data;
+    );
+    return response.data;
   }
 
   /**
@@ -47,23 +39,15 @@ class GooglePlacesClient extends RestClient<any> {
       sessiontoken: string;
     },
     cancelToken?: CancelToken
-  ): Promise<PlacesDetailsResponse | null> {
-    let data = null;
-    try {
-      const response = await this.axios.get<PlacesDetailsResponse>(
-        `${this.prefix}/details`,
-        {
-          cancelToken,
-          params,
-        }
-      );
-      data = response.data;
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        throw error;
+  ): Promise<PlacesDetailsResponse> {
+    const response = await this.axios.get<PlacesDetailsResponse>(
+      `${this.prefix}/details`,
+      {
+        cancelToken,
+        params,
       }
-    }
-    return data;
+    );
+    return response.data;
   }
 }
 

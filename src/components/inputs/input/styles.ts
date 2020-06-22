@@ -6,6 +6,7 @@ interface Styles {
   label: TextStyle;
   inputWrapper: ViewStyle;
   prefix: ViewStyle;
+  prefixComponent: ViewStyle;
   input: TextStyle;
   suffix: ViewStyle;
   error: TextStyle;
@@ -24,8 +25,14 @@ export default StyleSheet.create<Styles>({
   prefix: {
     position: 'absolute',
     left: 0,
-    top: 6,
+    top: 0,
+    bottom: 0,
     opacity: 0.7,
+    justifyContent: 'center',
+  },
+  prefixComponent: {
+    height: 24,
+    width: 24,
   },
   input: {
     borderStyle: 'solid',
@@ -40,8 +47,10 @@ export default StyleSheet.create<Styles>({
   suffix: {
     position: 'absolute',
     right: 0,
-    top: 6,
+    top: 0,
+    bottom: 0,
     opacity: 0.7,
+    justifyContent: 'center',
   },
   error: {
     marginTop: 3,

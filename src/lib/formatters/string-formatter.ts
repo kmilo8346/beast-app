@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 class StringFormatter {
   /**
    * Format text as credit card
@@ -5,7 +6,7 @@ class StringFormatter {
    * @param text
    * @return string
    */
-  toCreditCard(text: string) {
+  toCreditCard(text: string | undefined) {
     if (!text) {
       return text;
     }
@@ -24,39 +25,45 @@ class StringFormatter {
 
   /**
    * Format text as credit card expiration date
-   * @link https://stackoverflow.com/questions/45259196/javascript-regex-credit-card-expiry-date-auto-format
    * @param text
    * @return string
    */
-  toCreditCardExpirationDate(text: string) {
+  toCreditCardExpirationDate(text: string | undefined) {
     if (!text) return text;
-    return text
-      .replace(
-        /^([1-9]\/|[2-9])$/g,
-        '0$1/' // 3 > 03/
-      )
-      .replace(
-        /^(0[1-9]|1[0-2])$/g,
-        '$1/' // 11 > 11/
-      )
-      .replace(
-        /^1([3-9])$/g,
-        '01/$1' // 13 > 01/3 //UPDATED by NAVNEET
-        // ).replace(
-        //   /^(0?[1-9]|1[0-2])([0-9]{2})$/g, '$1/$2' // 141 > 01/41
-      )
-      .replace(
-        /^0\/|0+$/g,
-        '0' // 0/ > 0 and 00 > 0 //UPDATED by NAVNEET
-      )
-      .replace(
-        /[^\d|^\/]*/g,
-        '' // To allow only digits and `/` //UPDATED by NAVNEET
-      )
-      .replace(
-        /\/\//g,
-        '/' // Prevent entering more than 1 `/`
-      );
+
+    let formatted = '';
+
+    switch (text.length) {
+      case 1:
+        formatted = text;
+        if (text !== '0' && text !== '1') {
+          formatted = `0${formatted}`;
+        }
+        break;
+      case 2:
+        formatted = text;
+        if (
+          (text[0] === '0' && text[1] === '0') ||
+          (text[0] === '1' && parseInt(text, 10) > 12)
+        ) {
+          formatted = text[0];
+        }
+        break;
+      default:
+        formatted = `${text.substring(0, 2)}/${text.substring(2)}`;
+        if (parseInt(text.substring(0, 2), 10) > 12) {
+          formatted = `12/${text.substring(2)}`;
+        }
+        break;
+    }
+
+    return formatted;
+  }
+
+  toRut(text: string | undefined) {
+    if (!text || text.length <= 7) return text;
+
+    return `${text.slice(0, text.length - 1)}-${text.slice(text.length - 1)}`;
   }
 }
 

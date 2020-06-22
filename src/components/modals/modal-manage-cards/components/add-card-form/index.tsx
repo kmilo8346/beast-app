@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect } from 'react';
-import { View } from 'react-native';
-import validate from 'validate.js';
+import { View, Image } from 'react-native';
+import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Button from '../../../../buttons/button';
@@ -15,21 +15,39 @@ import cardClient from '../../../../../clients/card-client';
 // types
 import { Card, SearchResponse } from '../../../../../types';
 // libs
+import validate from '../../../../../lib/validate';
 import stringFormatter from '../../../../../lib/formatters/string-formatter';
+import stringParser from '../../../../../lib/parsers/string-parser';
+// constraints
+import constraints from './constraints';
 // styles
 import globalStyle from '../../../../../styles';
 
-// TODO: add to constants
+// extending validate validators
+validate.validators.paymentMethodIdPresence = (
+  _value: any,
+  _options: any,
+  _key: any,
+  attributes: { [key: string]: any }
+) => {
+  if (attributes.paymentMethodId) {
+    return null;
+  }
+  return '^Tarjeta inválida';
+};
 const indentificationTypes = [
   {
     key: 'RUT',
-    title: 'Rut',
+    title: 'RUT',
   },
   {
     key: 'Otro',
-    title: 'Otro',
+    title: 'OTRO',
   },
 ];
+let searchPaymentMethodsRequestSource: CancelTokenSource;
+let createCardTokenRequestSource: CancelTokenSource;
+let createCardRequestSource: CancelTokenSource;
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -54,13 +72,22 @@ type SetIsLoadingAction = {
 type SetErrorAction = {
   type: 'set_error';
 };
+type SetSubmittedAction = {
+  type: 'set_submitted';
+};
+type SetFormErrorsAction = {
+  type: 'set_form_errors';
+  errors: { [key: string]: string[] };
+};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
   | SetSearchPaymentMethodsResponseAction
   | SetSearchPaymentMethodsErrorAction
   | SetIsLoadingAction
-  | SetErrorAction;
+  | SetErrorAction
+  | SetSubmittedAction
+  | SetFormErrorsAction;
 
 type State = {
   view: 'FORM' | 'LOADING' | 'ERROR';
@@ -75,71 +102,26 @@ type State = {
     // hidden field
     paymentMethodId: string;
   };
+  submitted: boolean;
   errors: { [key: string]: string[] };
 };
 
 const reducer = (state: State, action: Action): State => {
-  let error;
   let value;
   let newState;
   switch (action.type) {
     case 'change_value':
       value = action.value;
-      // parsing logic
-      switch (action.attribute) {
-        case 'cardNumber':
-          // remove all white spaces
-          value = value.replace(/ /g, '');
-          break;
-
-        default:
-          break;
-      }
       return {
         ...state,
         form: { ...state.form, [action.attribute]: value },
       };
     case 'validate_value':
-      error = [];
-      switch (action.attribute) {
-        case 'cardNumber':
-          error = validate.single(action.value, {
-            presence: {
-              allowEmpty: false,
-              message: 'El número es requerido',
-            },
-            format: {
-              pattern: /^(34|37|4|5[1-5]).*$/, // Visa, Mastercard, American Express
-              message: 'Número incorrecto',
-            },
-            length: {
-              minimum: 16,
-              tooShort: 'Número incompleto',
-            },
-          });
-          break;
-        case 'validDate':
-          error = validate.single(action.value, {
-            presence: {
-              allowEmpty: false,
-              message: 'La fecha de validez es requerida',
-            },
-          });
-          break;
-        case 'cardHolder':
-          error = validate.single(action.value, {
-            presence: {
-              allowEmpty: false,
-              message: 'El nombre es requerido',
-            },
-          });
-          break;
-        default:
-          break;
-      }
+      if (!state.submitted) return state;
+
       return {
         ...state,
-        errors: { ...state.errors, [action.attribute]: error },
+        errors: validate(state.form, constraints),
       };
     case 'set_search_payment_methods_response':
       newState = { ...state };
@@ -150,6 +132,20 @@ const reducer = (state: State, action: Action): State => {
         newState.form.paymentMethodId = action.response.hits[0].id;
         newState.form.paymentMethodImage =
           action.response.hits[0].secureThumbnail;
+        // adding dynamics constraints
+        const settings = action.response.hits[0].settings[0];
+        if (settings.securityCode?.length) {
+          constraints.securityCode.length = {
+            is: settings.securityCode?.length,
+            message: '^Tamaño incorrecto',
+          };
+        }
+        if (settings.cardNumber?.length) {
+          constraints.cardNumber.length = {
+            is: settings.cardNumber?.length,
+            message: '^Tamaño incorrecto',
+          };
+        }
       }
       return newState;
     case 'set_search_payment_methods_error':
@@ -164,6 +160,14 @@ const reducer = (state: State, action: Action): State => {
     case 'set_error':
       newState = { ...state };
       newState.view = 'ERROR';
+      return newState;
+    case 'set_submitted':
+      newState = { ...state };
+      newState.submitted = true;
+      return newState;
+    case 'set_form_errors':
+      newState = { ...state };
+      newState.errors = action.errors;
       return newState;
     default:
       return state;
@@ -188,54 +192,85 @@ export default ({ onAdd }: AddCardFormProps) => {
       paymentMethodImage: '',
       paymentMethodId: '',
     },
+    submitted: false,
     errors: {},
   });
-  const formattedCardNumber = stringFormatter.toCreditCard(
-    state.form.cardNumber
-  );
-  const formattedExpirationDate = stringFormatter.toCreditCardExpirationDate(
-    state.form.expirationDate
-  );
   const bins = state.form.cardNumber.substring(0, 6);
+  let cardNumberPrefix: string | JSX.Element = 'credit-card';
+  if (state.form.paymentMethodImage) {
+    cardNumberPrefix = (
+      <Image
+        source={{
+          uri: state.form.paymentMethodImage,
+        }}
+        style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+      />
+    );
+  }
 
   // event handlers
   const pressAddHandler = async () => {
     try {
-      // TODO: add validate
+      // set submitted
+      dispatch({ type: 'set_submitted' });
+      // validate
+      const errors = validate(state.form, constraints);
+      if (errors) {
+        dispatch({ type: 'set_form_errors', errors });
+        return;
+      }
       dispatch({ type: 'set_is_loading' });
       // create token using form data
-      const [expirationMonth, expirationYear] = state.form.expirationDate.split(
-        '/'
-      );
-      const response = await cardTokenClient.create({
-        body: {
-          cardNumber: state.form.cardNumber,
-          securityCode: state.form.securityCode,
-          expirationMonth,
-          expirationYear: parseInt(`20${expirationYear}`, 10),
-          cardholder: {
-            name: state.form.cardHolderName,
-            identification: {
-              type: indentificationTypes.find(
-                (type) => type.key === state.form.dockTypeId
-              )?.title,
-              number: state.form.docNumber,
+      if (createCardTokenRequestSource) {
+        // cancel running request
+        createCardTokenRequestSource.cancel();
+      }
+      createCardTokenRequestSource = axios.CancelToken.source();
+      const expirationMonth = state.form.expirationDate.substr(0, 2);
+      const expirationYear = `20${state.form.expirationDate.substr(2)}`;
+      const response = await cardTokenClient.create(
+        {
+          body: {
+            cardNumber: state.form.cardNumber,
+            securityCode: state.form.securityCode,
+            expirationMonth,
+            expirationYear,
+            cardholder: {
+              name: state.form.cardHolderName,
+              identification: {
+                type: indentificationTypes.find(
+                  (type) => type.key === state.form.dockTypeId
+                )?.title,
+                number: state.form.docNumber,
+              },
             },
           },
+          source: ['id'],
         },
-        source: ['id'],
-      });
+        createCardTokenRequestSource.token
+      );
       // create card using mercado pago token
-      const card = await cardClient.create({
-        pathVars: { customerId: '126' },
-        body: {
-          mercadopago_customer_id: '588310597-iCbkpncHLFQgdM',
-          token: response.id,
+      if (createCardRequestSource) {
+        // cancel running request
+        createCardRequestSource.cancel();
+      }
+      createCardRequestSource = axios.CancelToken.source();
+      // TODO: receive customerId and mercado pago customer id from props
+      const card = await cardClient.create(
+        {
+          pathVars: { customerId: '126' },
+          body: {
+            mercadopago_customer_id: '588310597-iCbkpncHLFQgdM',
+            token: response.id,
+          },
         },
-      });
+        createCardRequestSource.token
+      );
       onAdd(card);
     } catch (error) {
-      dispatch({ type: 'set_error' });
+      if (!axios.isCancel(error)) {
+        dispatch({ type: 'set_error' });
+      }
     }
   };
   const changeHandler = (attribute: string, value: string) => {
@@ -244,51 +279,80 @@ export default ({ onAdd }: AddCardFormProps) => {
   };
   const searchPaymentMethods = async (bins: string) => {
     try {
-      const response = await paymentMethodClient.search({
-        filters: { bins },
-        source: ['id', 'secure_thumbnail'],
-      });
+      if (searchPaymentMethodsRequestSource) {
+        // cancel running request
+        searchPaymentMethodsRequestSource.cancel();
+      }
+      searchPaymentMethodsRequestSource = axios.CancelToken.source();
+      const response = await paymentMethodClient.search(
+        {
+          filters: { bins },
+          source: ['id', 'secure_thumbnail', 'settings'],
+        },
+        searchPaymentMethodsRequestSource.token
+      );
       dispatch({ type: 'set_search_payment_methods_response', response });
     } catch (error) {
-      dispatch({ type: 'set_search_payment_methods_error' });
+      if (!axios.isCancel(error)) {
+        dispatch({ type: 'set_search_payment_methods_error' });
+      }
     }
   };
-
   useEffect(() => {
     if (bins.length === 6) {
       searchPaymentMethods(bins);
     }
-    // TODO: cancel request
+    return () => {
+      if (searchPaymentMethodsRequestSource) {
+        // cancel running request
+        searchPaymentMethodsRequestSource.cancel();
+      }
+    };
   }, [bins]);
+  useEffect(() => {
+    return () => {
+      if (createCardTokenRequestSource) {
+        // cancel running request
+        createCardTokenRequestSource.cancel();
+      }
+      if (createCardRequestSource) {
+        // cancel running request
+        createCardRequestSource.cancel();
+      }
+    };
+  }, []);
 
   // render logic
   let content: JSX.Element | null = null;
   switch (state.view) {
     case 'LOADING':
       content = (
-        <View style={{ height: 150, maxHeight: 150 }}>
+        <View style={{ height: 150 }}>
           <Loading />
         </View>
       );
       break;
     case 'ERROR':
       content = (
-        <Text level={6} style={{ textAlign: 'center' }}>
-          Ocurrió un error, intenta de nuevo
-        </Text>
+        <View style={{ height: 150 }}>
+          <Text level={6} style={{ textAlign: 'center', marginTop: '10%' }}>
+            Ocurrió un error, intenta de nuevo
+          </Text>
+        </View>
       );
       break;
-
     default:
       content = (
         <>
           <Input
             label="No. Tarjeta"
             placeholder="XXXX XXXX XXXX XXXX"
-            prefix="credit-card"
+            prefix={cardNumberPrefix}
             keyboardType="number-pad"
-            maxLength={19}
-            value={formattedCardNumber}
+            value={state.form.cardNumber}
+            format={stringFormatter.toCreditCard}
+            parse={stringParser.fromCreditCard}
+            errors={state.errors?.cardNumber}
             onChangeText={(text) => {
               changeHandler('cardNumber', text);
             }}
@@ -301,7 +365,10 @@ export default ({ onAdd }: AddCardFormProps) => {
               placeholder="MM/AA"
               keyboardType="number-pad"
               maxLength={5}
-              value={formattedExpirationDate}
+              value={state.form.expirationDate}
+              format={stringFormatter.toCreditCardExpirationDate}
+              parse={stringParser.fromCreditCardExpirationDate}
+              errors={state.errors?.expirationDate}
               containerStyle={{ width: '40%' }}
               onChangeText={(text) => {
                 changeHandler('expirationDate', text);
@@ -311,8 +378,9 @@ export default ({ onAdd }: AddCardFormProps) => {
               label="CVV"
               placeholder="040"
               keyboardType="number-pad"
-              maxLength={3}
+              secureTextEntry
               value={state.form.securityCode}
+              errors={state.errors?.securityCode}
               containerStyle={{ width: '40%' }}
               onChangeText={(text) => {
                 changeHandler('securityCode', text);
@@ -323,7 +391,7 @@ export default ({ onAdd }: AddCardFormProps) => {
             label="Nombre en Tarjeta"
             placeholder="Jonathan Ramirez"
             value={state.form.cardHolderName}
-            errors={state.errors.cardHolder}
+            errors={state.errors?.cardHolderName}
             onChangeText={(text) => {
               changeHandler('cardHolderName', text);
             }}
@@ -342,6 +410,14 @@ export default ({ onAdd }: AddCardFormProps) => {
             <Input
               label="Num. Documento"
               value={state.form.docNumber}
+              format={(text) => {
+                if (state.form.dockTypeId === 'RUT') {
+                  return stringFormatter.toRut(text);
+                }
+                return text;
+              }}
+              parse={stringParser.fromRut}
+              errors={state.errors?.docNumber}
               containerStyle={{ width: '60%' }}
               onChangeText={(text) => {
                 changeHandler('docNumber', text);

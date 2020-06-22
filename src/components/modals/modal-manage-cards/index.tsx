@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 // components
 import Modal, { ModalProps } from '../modal';
-import SelectFriendly from '../../select-friendly';
+import SelectFriendly, { Option } from '../../select-friendly';
 // local components
 import { AddPaymentForm } from './components';
 // containers
@@ -26,6 +26,7 @@ export default (props: ModalProps) => {
   // event handlers
   const addHandler = (card: Card) => {
     userContainer.addCard(card);
+    userContainer.setCurrentCard(card);
     setIsFormVisible(false);
   };
   const selectHandler = (key: string) => {
@@ -33,7 +34,8 @@ export default (props: ModalProps) => {
       userContainer.setCurrentCard(null);
       return;
     }
-    userContainer.setCurrentCard(key);
+    const match = userContainer.getCards().find((card) => card.id === key);
+    userContainer.setCurrentCard(match as Card);
   };
   const deleteHandler = (key: string) => {
     userContainer.deleteCard(key);
@@ -45,7 +47,7 @@ export default (props: ModalProps) => {
 
   // render logic
   let title = 'Selecciona un medio de pago';
-  const options = [
+  const options: Option[] = [
     {
       key: 'TO_AGREE',
       title: 'A convenir',
@@ -63,7 +65,6 @@ export default (props: ModalProps) => {
   let content = (
     <View>
       <SelectFriendly
-        dontDeleteOne
         value={currentKey}
         options={options}
         addMessage="Agrega otro medio de pago"

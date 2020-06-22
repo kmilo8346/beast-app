@@ -11,7 +11,7 @@ import {
   GetAllParams,
 } from '../types';
 
-axios.defaults.baseURL = 'http://192.168.0.2:3000';
+axios.defaults.baseURL = 'http://104.198.252.111';
 
 const interpolate = (
   text: string,
@@ -73,9 +73,7 @@ export default class RESTClient<T> {
     const response = await this.axios.post<T>(
       interpolate(this.prefix, pathVars),
       data,
-      {
-        cancelToken,
-      }
+      { cancelToken }
     );
     return response.data;
   }

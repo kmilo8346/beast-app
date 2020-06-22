@@ -22,6 +22,8 @@ import {
 } from '../../../../../types';
 // libs
 import { v4 as uuidv4 } from '../../../../../lib/uuid';
+// constraints
+import constraints from './constraints';
 // styles
 import globalStyle from '../../../../../styles';
 import colors from '../../../../../styles/colors';
@@ -54,13 +56,22 @@ type SetDetailsResponseAction = {
   type: 'set_details_response';
   response: PlacesDetailsResponse;
 };
+type SetSubmittedAction = {
+  type: 'set_submitted';
+};
+type SetFormErrorsAction = {
+  type: 'set_form_errors';
+  errors: { [key: string]: string[] };
+};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
   | SetLoadingAction
   | SetAutoCompleteResponseAction
   | SetError
-  | SetDetailsResponseAction;
+  | SetDetailsResponseAction
+  | SetSubmittedAction
+  | SetFormErrorsAction;
 
 type State = {
   autocomplete: {
@@ -72,19 +83,18 @@ type State = {
     apartment: string;
     place: Place | null;
   };
+  submitted: boolean;
   errors: { [key: string]: string[] };
 };
 
 const reducer = (state: State, action: Action): State => {
   let autocomplete;
   let form;
-  let error;
   switch (action.type) {
     case 'change_value':
       autocomplete = { ...state.autocomplete };
       form = { ...state.form, [action.attribute]: action.value };
       if (action.attribute === 'address') {
-        // 4autocomplete.predictions = [];
         form.place = null;
       }
       return {
@@ -93,22 +103,11 @@ const reducer = (state: State, action: Action): State => {
         form,
       };
     case 'validate_value':
-      error = [];
-      switch (action.attribute) {
-        case 'street':
-          error = validate.single(action.value, {
-            presence: {
-              allowEmpty: false,
-              message: 'Dirección es requerida',
-            },
-          });
-          break;
-        default:
-          break;
-      }
+      if (!state.submitted) return state;
+
       return {
         ...state,
-        errors: { ...state.errors, [action.attribute]: error },
+        errors: validate(state.form, constraints),
       };
     case 'set_loading':
       return {
@@ -146,6 +145,10 @@ const reducer = (state: State, action: Action): State => {
         autocomplete,
         form,
       };
+    case 'set_submitted':
+      return { ...state, submitted: true };
+    case 'set_form_errors':
+      return { ...state, errors: action.errors };
     default:
       return state;
   }
@@ -156,6 +159,7 @@ export interface AddAddressFormProps {
 }
 
 export default ({ onAdd }: AddAddressFormProps) => {
+  // state
   const [state, dispatch] = useReducer(reducer, {
     autocomplete: {
       view: 'NO_PREDICTIONS',
@@ -166,9 +170,16 @@ export default ({ onAdd }: AddAddressFormProps) => {
       apartment: '',
       place: null,
     },
+    submitted: false,
     errors: {},
   });
+  const debouncedAddress = useDebounce(state.form.address, 200);
 
+  // event hanlders
+  const changeHandler = (attribute: string, value: string) => {
+    dispatch({ type: 'change_value', attribute, value });
+    dispatch({ type: 'validate_value', attribute, value });
+  };
   const fetchPredictions = async (input: string) => {
     try {
       if (autocompleteRequestSource) {
@@ -184,14 +195,13 @@ export default ({ onAdd }: AddAddressFormProps) => {
         },
         autocompleteRequestSource.token
       );
-      if (response) {
-        dispatch({ type: 'set_autocomplete_response', response });
-      }
+      dispatch({ type: 'set_autocomplete_response', response });
     } catch (error) {
-      dispatch({ type: 'set_error' });
+      if (!axios.isCancel(error)) {
+        dispatch({ type: 'set_error' });
+      }
     }
   };
-
   const fetchDetail = async (placeId: string) => {
     try {
       if (detailsRequestSource) {
@@ -212,27 +222,46 @@ export default ({ onAdd }: AddAddressFormProps) => {
         },
         autocompleteRequestSource.token
       );
-      if (response) {
-        dispatch({ type: 'set_details_response', response });
-      }
+      dispatch({ type: 'set_details_response', response });
     } catch (error) {
-      dispatch({ type: 'set_error' });
+      if (!axios.isCancel(error)) {
+        dispatch({ type: 'set_error' });
+      }
     }
   };
-
-  const debouncedAddress = useDebounce(state.form.address, 200);
-
+  const pressAddHandler = () => {
+    dispatch({ type: 'set_submitted' });
+    // validate
+    const errors = validate(state.form, constraints);
+    if (errors) {
+      dispatch({ type: 'set_form_errors', errors });
+      return;
+    }
+    onAdd({
+      ...state.form.place,
+      apartment: state.form.apartment,
+    } as Place);
+  };
   useEffect(() => {
     sessiontoken = uuidv4();
   }, []);
-
   useEffect(() => {
     if (debouncedAddress) {
       fetchPredictions(debouncedAddress);
     }
-    // todo add clean function
   }, [debouncedAddress]);
-
+  useEffect(() => {
+    return () => {
+      if (autocompleteRequestSource) {
+        // cancel running request
+        autocompleteRequestSource.cancel();
+      }
+      if (detailsRequestSource) {
+        // cancel running request
+        detailsRequestSource.cancel();
+      }
+    };
+  }, []);
   // render logic
   let content = (
     <>
@@ -241,22 +270,12 @@ export default ({ onAdd }: AddAddressFormProps) => {
         label="Departamento"
         value={state.form.apartment}
         onChangeText={(text) => {
-          dispatch({
-            type: 'change_value',
-            attribute: 'apartment',
-            value: text,
-          });
+          changeHandler('apartment', text);
         }}
       />
       <Button
-        disabled={!state.form.place}
         title="Agregar"
-        onPress={() => {
-          onAdd({
-            ...state.form.place,
-            apartment: state.form.apartment,
-          } as Place);
-        }}
+        onPress={pressAddHandler}
         style={globalStyle.withMainActionAir}
       />
     </>
@@ -312,7 +331,6 @@ export default ({ onAdd }: AddAddressFormProps) => {
           </Text>
         );
         break;
-
       default:
         innerContent = (
           <Text level={6} style={{ textAlign: 'center' }}>
@@ -331,9 +349,9 @@ export default ({ onAdd }: AddAddressFormProps) => {
         placeholder="Jose Pedro Alessandri 927"
         label="Dirección"
         value={state.form.address}
-        errors={state.errors.address}
+        errors={state.errors?.address}
         onChangeText={(text) => {
-          dispatch({ type: 'change_value', attribute: 'address', value: text });
+          changeHandler('address', text);
         }}
       />
       {content}

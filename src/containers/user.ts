@@ -20,7 +20,7 @@ export interface UserContainer {
   getCurrentCard: () => Card | null | undefined;
   addCard: (card: Card) => Card[];
   deleteCard: (id: string) => void;
-  setCurrentCard: (id: string | null) => void;
+  setCurrentCard: (card: Card | null) => void;
 }
 
 export default createContainer(
@@ -112,13 +112,8 @@ export default createContainer(
       container.set('cards', cards);
     };
 
-    const setCurrentCard = (id: string | null): void => {
-      if (id === null) {
-        container.set('currentCard', null);
-        return;
-      }
-      const match = getCards().find((card) => card.id === id);
-      container.set('currentCard', match);
+    const setCurrentCard = (card: Card | null): void => {
+      container.set('currentCard', card);
     };
 
     return {
