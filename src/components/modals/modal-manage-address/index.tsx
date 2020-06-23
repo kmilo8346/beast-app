@@ -4,7 +4,6 @@ import { View } from 'react-native';
 // components
 import Modal, { ModalProps } from '../modal';
 import SelectFriendly from '../../select-friendly';
-import Button from '../../buttons/button';
 // local components
 import { AddAddressForm } from './components';
 // containers

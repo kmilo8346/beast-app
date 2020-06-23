@@ -90,6 +90,7 @@ export default ({
         {prefixComponent}
         <TextInput
           {...inputProps}
+          placeholderTextColor={colors.blackLight4}
           ref={input}
           value={formmattedValue}
           onChangeText={changeTextHandler}

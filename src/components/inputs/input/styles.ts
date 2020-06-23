@@ -43,6 +43,7 @@ export default StyleSheet.create<Styles>({
     paddingLeft: 4,
     paddingRight: 36,
     fontSize: 14,
+    color: colors.black,
   },
   suffix: {
     position: 'absolute',
