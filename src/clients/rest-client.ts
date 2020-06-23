@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
 import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
+import Constants from 'expo-constants';
 
 import {
   SearchParams,
@@ -11,7 +12,7 @@ import {
   GetAllParams,
 } from '../types';
 
-axios.defaults.baseURL = 'http://104.198.252.111';
+axios.defaults.baseURL = Constants.manifest.extra.BEAST_API_URL;
 
 const interpolate = (
   text: string,

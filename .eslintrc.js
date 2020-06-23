@@ -10,5 +10,7 @@ module.exports = {
     'react/no-array-index-key': 0,
     'class-methods-use-this': 0,
     'import/prefer-default-export': 0,
+    'no-plusplus': 0,
+    'prefer-destructuring': 0,
   },
 };

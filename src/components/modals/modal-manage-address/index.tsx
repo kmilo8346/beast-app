@@ -27,7 +27,7 @@ export default (props: ModalProps) => {
     setIsFormVisible(false);
   };
   const selectHandler = (key: string) => {
-    const match = addresses.find(address => address.id === key);
+    const match = addresses.find((address: Place) => address.id === key);
     userContainer.setCurrentAddress(match as Place);
   };
   const deleteHandler = (key: string) => {
@@ -48,12 +48,12 @@ export default (props: ModalProps) => {
   if (addresses?.length && !isFormVisible) {
     title = 'Selecciona una dirección';
 
-    const options = addresses.map((address) => ({
+    const options = addresses.map((address: Place) => ({
       key: address.id,
       title: `${address.route.shortName}`,
       subtitle: `${address.streetNumber.shortName}${
         address.apartment ? `, ${address.apartment}` : ''
-        }, ${address.locality.shortName}`,
+      }, ${address.locality.shortName}`,
     }));
     content = (
       <View>

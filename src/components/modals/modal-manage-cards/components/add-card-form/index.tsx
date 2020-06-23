@@ -360,9 +360,7 @@ export default ({ onAdd }: AddCardFormProps) => {
               changeHandler('cardNumber', text);
             }}
           />
-          <View
-            style={styles.validDateCvvContainer}
-          >
+          <View style={styles.validDateCvvContainer}>
             <Input
               label="Fecha de vto."
               placeholder="MM/AA"
@@ -399,9 +397,7 @@ export default ({ onAdd }: AddCardFormProps) => {
               changeHandler('cardHolderName', text);
             }}
           />
-          <View
-            style={styles.optRutContainer}
-          >
+          <View style={styles.optRutContainer}>
             <InputSelectOptions
               label="Tipo Documento"
               value={state.form.dockTypeId}
