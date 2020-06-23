@@ -10,11 +10,11 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  env:
-    name: Create .env
+  configuration:
+    name: Create configuration
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ secrets.EXPO_CLI_USERNAME }}
+      - run: echo ${{ secrets.EXPO_CLI_USERNAME }} > .env
   publish:
     name: Install and publish
     runs-on: ubuntu-latest
