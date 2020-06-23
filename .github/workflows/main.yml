@@ -24,9 +24,7 @@ jobs:
           expo-version: 3.x
           expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
           expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
-      - run: pwd
       - run: echo "$ENV" > .env
-        shell: bash
         env:
           ENV: ${{ secrets.ENV }}
       - run: npm ci
