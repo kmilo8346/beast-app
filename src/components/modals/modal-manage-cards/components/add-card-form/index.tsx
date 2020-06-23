@@ -22,6 +22,7 @@ import stringParser from '../../../../../lib/parsers/string-parser';
 import constraints from './constraints';
 // styles
 import globalStyle from '../../../../../styles';
+import styles from './styles';
 
 // extending validate validators
 validate.validators.paymentMethodIdPresence = (
@@ -35,6 +36,8 @@ validate.validators.paymentMethodIdPresence = (
   }
   return '^Tarjeta inválida';
 };
+
+// TODO: extract to external source
 const indentificationTypes = [
   {
     key: 'RUT',
@@ -203,7 +206,7 @@ export default ({ onAdd }: AddCardFormProps) => {
         source={{
           uri: state.form.paymentMethodImage,
         }}
-        style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+        style={styles.cardNumberPrefixImage}
       />
     );
   }
@@ -327,15 +330,15 @@ export default ({ onAdd }: AddCardFormProps) => {
   switch (state.view) {
     case 'LOADING':
       content = (
-        <View style={{ height: 150 }}>
+        <View style={styles.loadingErrorContainer}>
           <Loading />
         </View>
       );
       break;
     case 'ERROR':
       content = (
-        <View style={{ height: 150 }}>
-          <Text level={6} style={{ textAlign: 'center', marginTop: '10%' }}>
+        <View style={styles.loadingErrorContainer}>
+          <Text level={6} style={styles.messageText}>
             Ocurrió un error, intenta de nuevo
           </Text>
         </View>
@@ -358,7 +361,7 @@ export default ({ onAdd }: AddCardFormProps) => {
             }}
           />
           <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+            style={styles.validDateCvvContainer}
           >
             <Input
               label="Fecha de vto."
@@ -369,7 +372,7 @@ export default ({ onAdd }: AddCardFormProps) => {
               format={stringFormatter.toCreditCardExpirationDate}
               parse={stringParser.fromCreditCardExpirationDate}
               errors={state.errors?.expirationDate}
-              containerStyle={{ width: '40%' }}
+              containerStyle={styles.inputValidDateContainer}
               onChangeText={(text) => {
                 changeHandler('expirationDate', text);
               }}
@@ -381,7 +384,7 @@ export default ({ onAdd }: AddCardFormProps) => {
               secureTextEntry
               value={state.form.securityCode}
               errors={state.errors?.securityCode}
-              containerStyle={{ width: '40%' }}
+              containerStyle={styles.inputCvvContainer}
               onChangeText={(text) => {
                 changeHandler('securityCode', text);
               }}
@@ -397,7 +400,7 @@ export default ({ onAdd }: AddCardFormProps) => {
             }}
           />
           <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+            style={styles.optRutContainer}
           >
             <InputSelectOptions
               label="Tipo Documento"
@@ -418,7 +421,7 @@ export default ({ onAdd }: AddCardFormProps) => {
               }}
               parse={stringParser.fromRut}
               errors={state.errors?.docNumber}
-              containerStyle={{ width: '60%' }}
+              containerStyle={styles.inputNumDocContainer}
               onChangeText={(text) => {
                 changeHandler('docNumber', text);
               }}

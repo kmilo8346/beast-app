@@ -1,15 +1,44 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 
 interface Styles {
-  container: ViewStyle;
-  text: TextStyle;
+  cardNumberPrefixImage: ImageStyle;
+  loadingErrorContainer: ViewStyle;
+  messageText: TextStyle;
+  validDateCvvContainer: ViewStyle;
+  inputValidDateContainer: ViewStyle;
+  inputCvvContainer: ViewStyle;
+  optRutContainer: ViewStyle;
+  inputNumDocContainer: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
-  container: {
-    flex: 1,
+  cardNumberPrefixImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
-  text: {
-    color: 'black',
+  loadingErrorContainer: {
+    height: 150,
+  },
+  messageText: {
+    textAlign: 'center',
+    marginTop: '10%',
+  },
+  validDateCvvContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputValidDateContainer: {
+    width: '40%',
+  },
+  inputCvvContainer: {
+    width: '40%',
+  },
+  optRutContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputNumDocContainer: {
+    width: '60%',
   },
 });

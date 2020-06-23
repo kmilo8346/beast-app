@@ -27,6 +27,7 @@ import constraints from './constraints';
 // styles
 import globalStyle from '../../../../../styles';
 import colors from '../../../../../styles/colors';
+import styles from './styles'
 
 let autocompleteRequestSource: CancelTokenSource;
 let detailsRequestSource: CancelTokenSource;
@@ -294,14 +295,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
               return (
                 <Touchable
                   key={`${prediction.description}-${index}`}
-                  style={{
-                    marginLeft: 5,
-                    marginRight: 10,
-                    borderBottomColor: colors.blackLight6,
-                    borderBottomWidth: 0,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
+                  style={styles.predictionContainer}
                   onPress={() => {
                     fetchDetail(prediction.placeId);
                   }}
@@ -309,12 +303,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
                   <Icon name="map-pin" size={18} />
                   <Text
                     level={6}
-                    style={{
-                      marginLeft: 10,
-                      marginTop: 10,
-                      marginBottom: 10,
-                      lineHeight: 20,
-                    }}
+                    style={styles.predictionText}
                   >
                     {prediction.description}
                   </Text>
@@ -326,21 +315,21 @@ export default ({ onAdd }: AddAddressFormProps) => {
         break;
       case 'ERROR':
         innerContent = (
-          <Text level={6} style={{ textAlign: 'center' }}>
+          <Text level={6} style={styles.messagesText}>
             Ocurrió un error, intenta de nuevo
           </Text>
         );
         break;
       default:
         innerContent = (
-          <Text level={6} style={{ textAlign: 'center' }}>
+          <Text level={6} style={styles.messagesText}>
             Busca tu dirección con calle y número
           </Text>
         );
         break;
     }
     content = (
-      <View style={{ minHeight: 150, maxHeight: 200 }}>{innerContent}</View>
+      <View style={styles.messagesContainer}>{innerContent}</View>
     );
   }
   return (
