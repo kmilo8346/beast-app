@@ -16,6 +16,7 @@
     "@react-navigation/stack": "^5.4.1",
     "axios": "^0.19.2",
     "camelcase-keys": "^6.2.2",
+    "dotenv-safe": "^8.2.0",
     "expo": "~37.0.3",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
@@ -28,11 +29,12 @@
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
     "validate.js": "^0.13.1",
-    "react-native-crypto": "^2.1.0",
-    "react-native-randombytes": "^3.0.0"
+    "expo-constants": "~9.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
+    "@expo/config": "^3.2.12",
+    "@types/dotenv-safe": "^8.1.0",
     "@types/node": "^14.0.13",
     "@types/react": "~16.9.23",
     "@types/react-native": "~0.61.17",
