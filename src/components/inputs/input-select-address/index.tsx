@@ -26,16 +26,12 @@ export default () => {
   if (currentAddress) {
     text = `Enviar a - ${currentAddress.route.shortName} ${
       currentAddress.streetNumber.shortName
-      }${currentAddress.apartment ? ` · ${currentAddress.apartment}` : ''}`;
+    }${currentAddress.apartment ? ` · ${currentAddress.apartment}` : ''}`;
   }
   return (
     <View>
       <InputSelect text={text} onPress={inputPressHandler} />
-      {isVisible && (
-        <ModalManageAddress
-          onRequestClose={requestCloseHandler}
-        />
-      )}
+      {isVisible && <ModalManageAddress onRequestClose={requestCloseHandler} />}
     </View>
   );
 };

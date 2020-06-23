@@ -2,7 +2,6 @@ export { default as Icon } from './icon';
 export { default as Text } from './text';
 export { default as Space } from './space';
 export { default as Container } from './container';
-export { default as Card } from './card';
 export { default as Touchable } from './touchable';
 export { default as Button } from './buttons/button';
 export { default as ButtonSmall } from './buttons/button-small';

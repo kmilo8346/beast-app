@@ -11,5 +11,6 @@ module.exports = {
     'class-methods-use-this': 0,
     'import/prefer-default-export': 0,
     'no-plusplus': 0,
+    'prefer-destructuring': 0,
   },
 };

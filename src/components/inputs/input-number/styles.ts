@@ -1,4 +1,4 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import colors from '../../../styles/colors';
 
 interface Styles {

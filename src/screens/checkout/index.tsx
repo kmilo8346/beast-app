@@ -3,11 +3,7 @@ import { View } from 'react-native';
 
 import { Container } from '../../components';
 
-export interface CheckoutScreenProps {
-  route: any;
-}
-
-export default ({ route }: CheckoutScreenProps) => {
+export default () => {
   return (
     <Container>
       <View />

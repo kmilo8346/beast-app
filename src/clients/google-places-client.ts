@@ -1,4 +1,4 @@
-import axios, { CancelToken } from 'axios';
+import { CancelToken } from 'axios';
 import RestClient from './rest-client';
 
 import { PlacesAutocompletResponse, PlacesDetailsResponse } from '../types';

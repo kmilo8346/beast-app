@@ -26,8 +26,7 @@ import { v4 as uuidv4 } from '../../../../../lib/uuid';
 import constraints from './constraints';
 // styles
 import globalStyle from '../../../../../styles';
-import colors from '../../../../../styles/colors';
-import styles from './styles'
+import styles from './styles';
 
 let autocompleteRequestSource: CancelTokenSource;
 let detailsRequestSource: CancelTokenSource;
@@ -301,10 +300,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
                   }}
                 >
                   <Icon name="map-pin" size={18} />
-                  <Text
-                    level={6}
-                    style={styles.predictionText}
-                  >
+                  <Text level={6} style={styles.predictionText}>
                     {prediction.description}
                   </Text>
                 </Touchable>
@@ -328,9 +324,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
         );
         break;
     }
-    content = (
-      <View style={styles.messagesContainer}>{innerContent}</View>
-    );
+    content = <View style={styles.messagesContainer}>{innerContent}</View>;
   }
   return (
     <View>
