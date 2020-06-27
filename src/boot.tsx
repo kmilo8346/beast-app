@@ -17,6 +17,7 @@ import {
   CheckoutScreen,
   ToSaleScreen,
   MenuScreen,
+  SignInScreen,
 } from './screens';
 // components
 import { Icon, Text, ButtonCart } from './components';
@@ -83,6 +84,11 @@ function HomeStackScreen() {
         component={CheckoutScreen}
         options={{ title: 'Mi Pedido' }}
       />
+      <HomeStack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ title: '' }}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -96,6 +102,11 @@ function ToSaleStackScreen() {
         name="ToSale"
         component={ToSaleScreen}
         options={{ headerShown: false }}
+      />
+      <HomeStack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ title: '' }}
       />
     </ToSaleStack.Navigator>
   );
@@ -111,6 +122,11 @@ function MenuStackScreen() {
         component={MenuScreen}
         options={{ headerShown: false }}
       />
+      <HomeStack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ title: '' }}
+      />
     </MenuStack.Navigator>
   );
 }
@@ -120,7 +136,7 @@ const Tab = createBottomTabNavigator();
 /**
  * Boot component control de navigation in boot time
  */
-function Boot() {
+export default () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef}>
@@ -169,6 +185,4 @@ function Boot() {
       </NavigationContainer>
     </SafeAreaProvider>
   );
-}
-
-export default Boot;
+};

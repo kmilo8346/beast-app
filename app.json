@@ -3,6 +3,7 @@
     "entryPoint": "./src/index.js",
     "name": "beast-app",
     "slug": "beast-app",
+    "scheme": "beast",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +18,14 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
-    }
+      "supportsTablet": true,
+      "bundleIdentifier": "com.firedevs.beast",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.firedevs.beast",
+      "versionCode": 1
+    },
+    "facebookScheme": "fb587498002202284"
   }
 }

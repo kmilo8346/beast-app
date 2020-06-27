@@ -2,6 +2,7 @@ import React from 'react';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
 import Boot from './boot';
+// containers
 import UserContainer from './containers/user';
 import CartContainer from './containers/cart';
 

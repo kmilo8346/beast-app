@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from 'react';
 import { AsyncStorage } from 'react-native';
 
@@ -7,16 +7,21 @@ const STORAGE_KEY = '@global';
 
 export interface Container {
   set: (key: string, value: any) => void;
-  setAll: (state: { [key: string]: any }) => void;
+  setAll: (state: { [key: string]: any } | null) => void;
   get: (key: string) => any;
-  getAll: () => { [key: string]: any };
+  getAll: () => { [key: string]: any } | null;
   has: (key: string) => boolean;
   remove: (key: string) => void;
   clear: () => void;
 }
 
-export default function useContainer(path: string): Container {
-  const [state, setState] = useState<{ [key: string]: any }>({});
+export default function useContainer(
+  path: string,
+  defaultValue: { [key: string]: any } | null = {}
+): Container {
+  const [state, setState] = useState<{ [key: string]: any } | null>(
+    defaultValue
+  );
 
   const storagePath = `${STORAGE_KEY}/${path}`;
   const isInitialMount = useRef(true);
@@ -49,7 +54,7 @@ export default function useContainer(path: string): Container {
     });
   }
 
-  function setAll(state: { [key: string]: any }) {
+  function setAll(state: { [key: string]: any } | null) {
     setState(state);
   }
 
@@ -60,10 +65,13 @@ export default function useContainer(path: string): Container {
   }
 
   function clear() {
-    setState({});
+    setState(defaultValue);
   }
 
   function get(key: string) {
+    if (!state) {
+      return null;
+    }
     return state[key];
   }
 
@@ -72,6 +80,9 @@ export default function useContainer(path: string): Container {
   }
 
   function has(key: string) {
+    if (!state) {
+      return false;
+    }
     return key in state;
   }
 

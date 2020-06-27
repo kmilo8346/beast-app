@@ -3,6 +3,9 @@ import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
 import Constants from 'expo-constants';
 
+// libs
+import firebase from '../lib/firebase';
+// types
 import {
   SearchParams,
   SearchResponse,
@@ -57,6 +60,21 @@ export default class RESTClient<T> {
         return newConfig;
       },
       (error) => Promise.reject(error)
+    );
+    this.axios.interceptors.request.use(
+      async (config) => {
+        const newConfig = { ...config };
+        const currentuser = firebase.auth().currentUser;
+        if (!currentuser) {
+          throw new Error('Error making request with no user logged');
+        }
+        const idToken = await currentuser.getIdToken(/* forceRefresh */ true);
+        newConfig.headers.Authorization = `Bearer ${idToken}`;
+        return config;
+      },
+      (error) => {
+        throw error;
+      }
     );
 
     // interceptor to transform backend response keys to came case

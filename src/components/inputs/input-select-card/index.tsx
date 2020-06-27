@@ -11,7 +11,9 @@ export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentCard = userContainer.getCurrentCard();
+  const currentCardId = userContainer.getCurrentCard();
+  const cards = userContainer.getCards();
+  const currentCard = cards.find((card) => card.id === currentCardId);
 
   // event handlers
   const pressHandler = useCallback(() => {
@@ -23,10 +25,10 @@ export default () => {
 
   // render logic
   let text = 'Selecciona un medio de pago';
-  if (currentCard === null) {
+  if (currentCardId === null) {
     text = 'El pago será convenir con el vendedor';
-  } else if (currentCard?.id) {
-    text = `Tarjeta de Crédito terminada en ${currentCard?.lastFourDigits}`;
+  } else if (currentCard) {
+    text = `Tarjeta de Crédito terminada en ${currentCard.lastFourDigits}`;
   }
   return (
     <View>

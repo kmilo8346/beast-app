@@ -11,7 +11,11 @@ export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentAddress = userContainer.getCurrentAddress();
+  const currentAddressId = userContainer.getCurrentAddress();
+  const adresses = userContainer.getAddresses();
+  const currentAddress = adresses.find(
+    (address) => address.id === currentAddressId
+  );
 
   // event handlers
   const inputPressHandler = useCallback(() => {

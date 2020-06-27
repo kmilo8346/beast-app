@@ -18,6 +18,9 @@
     "camelcase-keys": "^6.2.2",
     "dotenv-safe": "^8.2.0",
     "expo": "~37.0.3",
+    "expo-auth-session": "~1.2.1",
+    "expo-constants": "~9.0.0",
+    "firebase": "7.9.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.1.tar.gz",
@@ -28,8 +31,7 @@
     "react-native-web": "~0.11.7",
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
-    "validate.js": "^0.13.1",
-    "expo-constants": "~9.0.0"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

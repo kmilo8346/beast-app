@@ -99,12 +99,19 @@ export interface Card {
 }
 
 export interface User {
+  id: string;
+  email: string | null;
+  customerId: string | null;
   identificationType: 'RUT';
-  identificationNumber: string;
-  email: string;
-  currentAddress: Place;
+  identificationNumber: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  photoURL: string | null;
+
+  currentAddress: Place | null;
   addresses: Place[];
-  currentCard: Card | null;
+  currentCard: Card | null | undefined;
   cards: Card[];
 }
 

@@ -12,5 +12,7 @@ module.exports = {
     'import/prefer-default-export': 0,
     'no-plusplus': 0,
     'prefer-destructuring': 0,
+    'no-useless-catch': 0,
+    'react-hooks/exhaustive-deps': 0,
   },
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -23,20 +23,13 @@ export default (props: ModalProps) => {
   // event handlers
   const addHandler = (place: Place) => {
     userContainer.addAddress(place);
-    userContainer.setCurrentAddress(place);
     setIsFormVisible(false);
   };
   const selectHandler = (key: string) => {
-    const match = addresses.find((address: Place) => address.id === key);
-    userContainer.setCurrentAddress(match as Place);
+    userContainer.setCurrentAddress(key);
   };
   const deleteHandler = (key: string) => {
-    const addresses = userContainer.deleteAddress(key);
-    let currentAddress = null;
-    if (addresses.length) {
-      currentAddress = addresses[0];
-    }
-    userContainer.setCurrentAddress(currentAddress);
+    userContainer.deleteAddress(key);
   };
   const addOptionHandler = () => {
     setIsFormVisible(true);
@@ -45,7 +38,7 @@ export default (props: ModalProps) => {
   let title = 'Agrega una dirección';
   let content = <AddAddressForm onAdd={addHandler} />;
 
-  if (addresses?.length && !isFormVisible) {
+  if (!isFormVisible && addresses.length && currentAddress) {
     title = 'Selecciona una dirección';
 
     const options = addresses.map((address: Place) => ({
@@ -58,7 +51,7 @@ export default (props: ModalProps) => {
     content = (
       <View>
         <SelectFriendly
-          value={currentAddress?.id}
+          value={currentAddress}
           options={options}
           addMessage="Agrega una nueva dirección"
           onSelect={selectHandler}
