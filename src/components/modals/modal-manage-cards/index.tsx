@@ -17,6 +17,11 @@ export default (props: ModalProps) => {
   // state
   const [isFormVisible, setIsFormVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
+  let customerId = null;
+  if (user && user.customerId) {
+    customerId = user.customerId;
+  }
   const cards = userContainer.getCards();
   const currentCard = userContainer.getCurrentCard();
   let key = currentCard;
@@ -50,9 +55,11 @@ export default (props: ModalProps) => {
 
   // render logic
   let title = 'Agrega tarjeta de crédito';
-  let content = <AddPaymentForm onAdd={addHandler} />;
+  let content = (
+    <AddPaymentForm customerId={customerId as string} onAdd={addHandler} />
+  );
 
-  if (!isFormVisible && currentCard) {
+  if (!isFormVisible && key) {
     title = 'Selecciona un medio de pago';
     const options: Option[] = [
       {
@@ -72,7 +79,7 @@ export default (props: ModalProps) => {
     content = (
       <View>
         <SelectFriendly
-          value={currentCard}
+          value={key}
           options={options}
           addMessage="Agrega otro medio de pago"
           onSelect={selectHandler}

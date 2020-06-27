@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 
 // components
 import { Container, Text } from '../../components';
@@ -9,10 +9,14 @@ import { ButtonGoogle, ButtonFacebook } from './components';
 import firebase from '../../lib/firebase';
 // containes
 import UserProvider from '../../containers/user';
+import colors from '../../styles/colors';
 
 // instances outside component
 const auth = firebase.auth();
 
+type SetLoadingViewAction = {
+  type: 'set_loading';
+};
 type SetHasErrorAction = {
   type: 'set_has_error';
   hasError: boolean;
@@ -24,9 +28,9 @@ type ShowLinkFormAction = {
     credentialToLink: firebase.auth.OAuthCredential;
   };
 };
-type Action = SetHasErrorAction | ShowLinkFormAction;
+type Action = SetLoadingViewAction | SetHasErrorAction | ShowLinkFormAction;
 
-type ViewState = 'SIGN_IN_FORM' | 'LINK_FORM';
+type ViewState = 'LOADING' | 'SIGN_IN_FORM' | 'LINK_FORM';
 type State = {
   view: ViewState;
   linkFormInfo: {
@@ -38,10 +42,17 @@ type State = {
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case 'set_loading':
+      return {
+        ...state,
+        hasError: false,
+        view: 'LOADING',
+      };
     case 'set_has_error':
       return {
         ...state,
         hasError: action.hasError,
+        view: state.view === 'LOADING' ? 'SIGN_IN_FORM' : state.view,
       };
     case 'set_link_form':
       return {
@@ -74,7 +85,7 @@ export default ({ navigation, route }: ScreenProps) => {
     credentialToLink?: firebase.auth.OAuthCredential
   ) => {
     try {
-      dispatch({ type: 'set_has_error', hasError: false });
+      dispatch({ type: 'set_loading' });
 
       await userContainer.signInWithCredential(credential);
 
@@ -117,6 +128,13 @@ export default ({ navigation, route }: ScreenProps) => {
   let errorMessage = null;
   let linkButton = null;
   switch (state.view) {
+    case 'LOADING':
+      content = (
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <ActivityIndicator size="small" color={colors.black} />
+        </View>
+      );
+      break;
     case 'LINK_FORM':
       switch (state.linkFormInfo?.singInMethod) {
         case 'facebook.com':
@@ -148,7 +166,7 @@ export default ({ navigation, route }: ScreenProps) => {
           break;
       }
       content = (
-        <>
+        <View style={{ marginTop: '40%' }}>
           <Text level={3} weight="bold" style={{ marginBottom: 30 }}>
             Vinculación de cuentas
           </Text>
@@ -156,13 +174,13 @@ export default ({ navigation, route }: ScreenProps) => {
             {`Ya habías creado una cuenta anteriormente. Entra con ${state.linkFormInfo?.singInMethod} para una correcta vinculación`}
           </Text>
           {linkButton}
-        </>
+        </View>
       );
       break;
 
     default:
       content = (
-        <>
+        <View style={{ marginTop: '40%' }}>
           <Text level={3} weight="bold" style={{ marginBottom: 10 }}>
             !Hola¡
           </Text>
@@ -178,22 +196,22 @@ export default ({ navigation, route }: ScreenProps) => {
             onOK={signInWithProviderOkHandler}
             onFail={signInWithProviderFailHandler}
           />
-        </>
+          {errorMessage}
+        </View>
       );
       break;
   }
   if (state.hasError) {
-    if (state.hasError) {
-      errorMessage = (
-        <Text level={7} color="red" style={{ marginTop: 20 }}>
-          Ocurrió un error inesperado
-        </Text>
-      );
-    }
+    errorMessage = (
+      <Text level={7} color="red" style={{ marginTop: 20 }}>
+        Ocurrió un error inesperado
+      </Text>
+    );
   }
+
   return (
     <Container withMargin>
-      <View style={{ marginTop: '40%' }}>{content}</View>
+      {content}
       {errorMessage}
     </Container>
   );

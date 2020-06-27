@@ -1,9 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import React from 'react';
 
 // components
-import { Container } from '../../components';
+import { Container, InputSelectCard } from '../../components';
 // libs
 import useSecureScreen from '../../lib/hooks/use-secure-screen';
 
@@ -18,8 +16,8 @@ export default ({ navigation }: CheckoutProps) => {
   });
 
   return (
-    <Container>
-      <View />
+    <Container withMargin>
+      <InputSelectCard />
     </Container>
   );
 };

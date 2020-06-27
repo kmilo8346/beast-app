@@ -8,7 +8,6 @@ import {
   Button,
   ButtonCart,
   InputSelectAddress,
-  InputSelectCard,
 } from '../../components';
 
 export interface Props {
@@ -28,8 +27,6 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
-      <View style={{ height: 40 }} />
-      <InputSelectCard />
       <View style={{ height: 40 }} />
       <Button
         title="Go to PLP"

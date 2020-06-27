@@ -178,10 +178,11 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export interface AddCardFormProps {
+  customerId: string;
   onAdd: (card: Card) => void;
 }
 
-export default ({ onAdd }: AddCardFormProps) => {
+export default ({ customerId, onAdd }: AddCardFormProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
@@ -199,17 +200,6 @@ export default ({ onAdd }: AddCardFormProps) => {
     errors: {},
   });
   const bins = state.form.cardNumber.substring(0, 6);
-  let cardNumberPrefix: string | JSX.Element = 'credit-card';
-  if (state.form.paymentMethodImage) {
-    cardNumberPrefix = (
-      <Image
-        source={{
-          uri: state.form.paymentMethodImage,
-        }}
-        style={styles.cardNumberPrefixImage}
-      />
-    );
-  }
 
   // event handlers
   const pressAddHandler = async () => {
@@ -261,9 +251,9 @@ export default ({ onAdd }: AddCardFormProps) => {
       // TODO: receive customerId and mercado pago customer id from props
       const card = await cardClient.create(
         {
-          pathVars: { customerId: '178' },
+          pathVars: { customerId },
           body: {
-            mercadopago_customer_id: '588310597-iCbkpncHLFQgdM',
+            customerId,
             token: response.id,
           },
         },
@@ -326,6 +316,17 @@ export default ({ onAdd }: AddCardFormProps) => {
   }, []);
 
   // render logic
+  let cardNumberPrefix: string | JSX.Element = 'credit-card';
+  if (state.form.paymentMethodImage) {
+    cardNumberPrefix = (
+      <Image
+        source={{
+          uri: state.form.paymentMethodImage,
+        }}
+        style={styles.cardNumberPrefixImage}
+      />
+    );
+  }
   let content: JSX.Element | null = null;
   switch (state.view) {
     case 'LOADING':

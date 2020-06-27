@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import useContainer from './container';
 // libs
 import firebase from '../lib/firebase';
+// clients
+import customerClient from '../clients/customer-client';
 // types
 import { Place, User, Card } from '../types';
 
@@ -71,7 +73,6 @@ export default createContainer(
           .doc(id)
           .onSnapshot((doc) => {
             const data = doc.data() || null;
-            console.log('on snapshot', data);
             container.setAll(data);
           });
       }
@@ -240,13 +241,21 @@ export default createContainer(
               lastName = profile.family_name;
             }
           }
-
+          let customerId = null;
+          if (authUser.email) {
+            // get customer id if has email
+            const { id } = await customerClient.create({
+              body: { email: authUser.email },
+              source: ['id'],
+            });
+            customerId = id;
+          }
           // set user data from firebase authentication
           // can be a anonymously user too
           user = {
             id: authUser.uid,
             email: authUser.email,
-            customerId: null,
+            customerId,
             identificationNumber: null,
             firstName,
             lastName,
