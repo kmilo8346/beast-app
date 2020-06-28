@@ -7,6 +7,7 @@ import {
   useAutoDiscovery,
   ResponseType,
   AuthSessionResult,
+  generateHexStringAsync,
 } from 'expo-auth-session';
 import Constants from 'expo-constants';
 
@@ -18,6 +19,13 @@ import firebase from '../../../../lib/firebase';
 // instances outside component
 WebBrowser.maybeCompleteAuthSession();
 const useProxy = Platform.select({ web: false, default: true });
+function useNonce() {
+  const [nonce, setNonce] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    generateHexStringAsync(16).then((value) => setNonce(value));
+  }, []);
+  return nonce;
+}
 
 export interface ButtonGoogleProps {
   onOK?: (credential: firebase.auth.OAuthCredential) => void;
@@ -26,23 +34,28 @@ export interface ButtonGoogleProps {
 
 /**
  * @site https://github.com/expo/expo/issues/8185
+ * @site https://github.com/firebase/FirebaseUI-Android/issues/1180
  */
 export default ({
   onOK = () => null,
   onFail = () => null,
 }: ButtonGoogleProps) => {
   // state
+  const nonce = useNonce();
   const discovery = useAutoDiscovery('https://accounts.google.com');
   const [request, response, promptAsync] = useAuthRequest(
     {
-      responseType: ResponseType.Token,
+      responseType: ResponseType.IdToken,
       clientId: Constants.manifest.extra.GOOGLE_AUTH_CLIENT_ID,
       redirectUri: makeRedirectUri({
         // For usage in bare and standalone
         native: Constants.manifest.extra.GOOGLE_AUTH_NATIVE_REDIRECT,
         useProxy,
       }),
-      scopes: ['openid', 'profile', 'email'],
+      scopes: ['profile', 'email'],
+      extraParams: {
+        nonce: nonce as string,
+      },
       usePKCE: false,
     },
     discovery
@@ -53,10 +66,7 @@ export default ({
     switch (response.type) {
       case 'success':
         onOK(
-          firebase.auth.GoogleAuthProvider.credential(
-            null, // Pass the access_token as the second property
-            response.params.access_token
-          )
+          firebase.auth.GoogleAuthProvider.credential(response.params.id_token)
         );
         break;
       case 'error':
@@ -80,7 +90,7 @@ export default ({
   return (
     <Button
       title="Entrar con Google"
-      disabled={!request}
+      disabled={!request || !nonce}
       onPress={pressButtonHandler}
     />
   );

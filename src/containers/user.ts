@@ -57,6 +57,9 @@ export default createContainer(
           } catch (error) {
             // TODO: manage error
           }
+        } else {
+          // use this to fix fails
+          container.set('id', authUser.uid);
         }
       });
       return () => {
@@ -269,6 +272,19 @@ export default createContainer(
         if (prevSessionUser) {
           // merge with prev session
           // prev session objects have priority
+
+          // address
+          const addressIds = (prevSessionUser.addresses || []).map(
+            (address: Place) => address.id
+          );
+          user.addresses = Array.prototype.concat(
+            prevSessionUser.addresses || [],
+            (user.addresses || []).filter(
+              (address: Place) => addressIds.indexOf(address.id) === -1
+            )
+          );
+          user.currentAddress =
+            prevSessionUser.currentAddress || user.currentAddress || null;
         }
 
         // save data in firestore
