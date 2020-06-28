@@ -14,5 +14,7 @@ web-report/
 .DS_Store
 
 .env
+.env.staging
+.env.production
 
 android

@@ -8,6 +8,7 @@ import {
   ResponseType,
   AuthSessionResult,
 } from 'expo-auth-session';
+import Constants from 'expo-constants';
 
 // components
 import Button from '../../../../components/buttons/button';
@@ -35,12 +36,10 @@ export default ({
   const [request, response, promptAsync] = useAuthRequest(
     {
       responseType: ResponseType.Token,
-      clientId:
-        '7074171791-5e7cc1p910hise0666go5gncohunps8g.apps.googleusercontent.com',
+      clientId: Constants.manifest.extra.GOOGLE_AUTH_CLIENT_ID,
       redirectUri: makeRedirectUri({
         // For usage in bare and standalone
-        native:
-          'com.googleusercontent.apps.7074171791-5e7cc1p910hise0666go5gncohunps8g://redirect',
+        native: Constants.manifest.extra.GOOGLE_AUTH_NATIVE_REDIRECT,
         useProxy,
       }),
       scopes: ['openid', 'profile', 'email'],

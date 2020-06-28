@@ -7,6 +7,7 @@ import {
   useAuthRequest,
   AuthSessionResult,
 } from 'expo-auth-session';
+import Constants from 'expo-constants';
 
 // components
 import Button from '../../../../components/buttons/button';
@@ -34,14 +35,14 @@ export default ({
   const [request, response, promptAsync] = useAuthRequest(
     {
       responseType: ResponseType.Token,
-      clientId: '587498002202284',
+      clientId: Constants.manifest.extra.FACEBOOK_AUTH_CLIENT_ID,
       scopes: ['public_profile', 'email', 'user_likes'],
       // For usage in managed apps using the proxy
       redirectUri: makeRedirectUri({
         useProxy,
         // For usage in bare and standalone
         // Use your FBID here. The path MUST be `authorize`.
-        native: 'fb587498002202284://authorize',
+        native: Constants.manifest.extra.FACEBOOK_AUTH_NATIVE_REDIRECT,
       }),
       extraParams: {
         // Use `popup` on web for a better experience
