@@ -166,11 +166,12 @@ export default ({ navigation, route }: ScreenProps) => {
           break;
       }
       content = (
-        <View style={{ marginTop: '40%' }}>
-          <Text level={3} weight="bold" style={{ marginBottom: 30 }}>
+        <View>
+          <View style={{ height: '40%' }} />
+          <Text level={3} weight="bold" style={{ paddingBottom: 30 }}>
             Vinculación de cuentas
           </Text>
-          <Text level={6} numberOfLines={2} style={{ marginBottom: 20 }}>
+          <Text level={6} numberOfLines={2} style={{ paddingBottom: 20 }}>
             {`Ya habías creado una cuenta anteriormente. Entra con ${state.linkFormInfo?.singInMethod} para una correcta vinculación`}
           </Text>
           {linkButton}
