@@ -83,6 +83,7 @@ export default createContainer(
     }, [id]);
 
     return {
+      // user
       getUser,
       setUser,
       signInAnonymously,
