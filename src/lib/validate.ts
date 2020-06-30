@@ -62,4 +62,16 @@ validate.validators.rut = (
   return options.message;
 };
 
+validate.validators.fieldsPresence = (
+  _value: any,
+  options: any,
+  _key: any,
+  attributes: { [key: string]: any }
+) => {
+  if (options.fields.every((field: string) => field in attributes)) {
+    return null;
+  }
+  return options.message;
+};
+
 export default validate;

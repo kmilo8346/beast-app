@@ -20,12 +20,13 @@ const db = firebase.firestore();
 export interface UserContainer {
   // user
   getUser: () => User | null;
-  setUser: (user: User) => Promise<void>;
+  isLogged: () => boolean;
   signInAnonymously: () => Promise<void>;
   signInWithCredential: (
     credential: firebase.auth.AuthCredential
   ) => Promise<void>;
   signOut: () => Promise<void>;
+  updateUser: (data: Partial<User>) => Promise<void>;
 
   // addresses
   getCurrentAddress: () => string | null;
@@ -34,6 +35,7 @@ export interface UserContainer {
   addAddress: (newAddress: Place) => Promise<void>;
   deleteAddress: (id: string) => Promise<void>;
 
+  // cards
   getCurrentCard: () => string | null | undefined;
   getCards: () => Card[];
   setCurrentCard: (cardId: string | null) => Promise<void>;
@@ -87,11 +89,12 @@ export default createContainer(
 
     return {
       // user
+      isLogged,
       getUser,
-      setUser,
       signInAnonymously,
       signInWithCredential,
       signOut,
+      updateUser,
 
       // addresses
       getCurrentAddress,
@@ -109,19 +112,12 @@ export default createContainer(
     };
 
     // user
-    function getUser(): User {
-      return (container.getAll() as User) || null;
+    function isLogged(): boolean {
+      return !!user && !!user.email;
     }
 
-    async function setUser(user: User) {
-      try {
-        container.setAll(user);
-        await db.collection(COLLECTION).doc(user.id).set(user);
-      } catch (error) {
-        // TODO: log error
-        console.log(error);
-        throw error;
-      }
+    function getUser(): User {
+      return (container.getAll() as User) || null;
     }
 
     async function signInAnonymously() {
@@ -146,27 +142,17 @@ export default createContainer(
       const prevAuthUser = auth.currentUser;
       console.info(`${PREFIX} Prev user was saved as backup`, prevUserData);
       try {
-        // delete current user data to avoid
-        // permision issues with firestore
-        // beacuse request.auth is going to change
-        container.clear();
-        console.info(`${PREFIX} User container was clear`);
-        try {
-          if (prevAuthUser) {
-            await db.collection(COLLECTION).doc(prevUserData.id).delete();
-            console.info(
-              `${PREFIX} User doc ${prevUserData.id} was deleted in firestore`
-            );
-          }
-        } catch (error) {
-          // TODO: log error
-          // this error is not a real problem
-          // if not work a job must clean
-        }
+        // await db.collection(COLLECTION).doc(prevUserData.id).delete();
+        // console.info(
+        //   `${PREFIX} Prev anonymous user doc ${prevUserData.id} was deleted in firestore`
+        // );
 
         // signin
         const result = await auth.signInWithCredential(credential);
-        console.log(`${PREFIX} Sigin in firebase auth was ok`);
+        console.log(
+          `${PREFIX} Sigin in firebase auth was ok`,
+          result?.user?.uid
+        );
         // init
         await init(result, prevUserData);
         console.log(`${PREFIX} User initialization was ok`);
@@ -186,17 +172,6 @@ export default createContainer(
         }
         console.info(`${PREFIX} Signin with credential FINALIZED`);
       } catch (error) {
-        // TODO: log error
-        console.log(error);
-        if (
-          (error as firebase.auth.AuthError).code ===
-          'auth/account-exists-with-different-credential'
-        ) {
-          console.log(`${PREFIX} Restoring prev user`);
-          await setUser(prevUserData);
-          console.log(`${PREFIX} Prev user was restored`);
-        }
-        // TODO: signin prev user and restore prev user data
         throw error;
       }
     }
@@ -264,6 +239,7 @@ export default createContainer(
             firstName,
             lastName,
             phone: authUser.phoneNumber,
+            phoneVerified: false,
             photoURL: authUser.photoURL,
           };
         }
@@ -305,6 +281,13 @@ export default createContainer(
         // TODO: log error
         throw error;
       }
+    }
+
+    async function updateUser(data: Partial<User>) {
+      if (!user) {
+        throw new Error('User is not defined');
+      }
+      return db.collection(COLLECTION).doc(user.id).update(data);
     }
 
     // addresses

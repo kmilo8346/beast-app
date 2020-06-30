@@ -107,6 +107,7 @@ export interface User {
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
+  phoneVerified: boolean;
   photoURL: string | null;
 
   currentAddress: Place | null;

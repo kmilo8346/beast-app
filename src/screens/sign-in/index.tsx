@@ -1,12 +1,15 @@
 import React, { useReducer } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import validate from 'validate.js';
 
 // components
-import { Container, Text } from '../../components';
+import { Container, Text, Input, Button } from '../../components';
 // local components
 import { ButtonGoogle, ButtonFacebook } from './components';
 // libs
 import firebase from '../../lib/firebase';
+// constraints
+import constraints from './constraints';
 // containes
 import UserProvider from '../../containers/user';
 import colors from '../../styles/colors';
@@ -14,12 +17,26 @@ import colors from '../../styles/colors';
 // instances outside component
 const auth = firebase.auth();
 
-type SetLoadingViewAction = {
-  type: 'set_loading';
+type ChangeEmailAction = {
+  type: 'change_email';
+  email: string;
 };
-type SetHasErrorAction = {
-  type: 'set_has_error';
-  hasError: boolean;
+type ValidateEmailAction = {
+  type: 'validate_email';
+  email: string;
+};
+type SetFormSubmittedAction = {
+  type: 'set_form_submitted';
+};
+type SetFormErrorsAction = {
+  type: 'set_form_errors';
+  errors: { [key: string]: string[] };
+};
+type ShowLoadingAction = {
+  type: 'show_loading';
+};
+type ShowErrorAction = {
+  type: 'show_error';
 };
 type ShowLinkFormAction = {
   type: 'set_link_form';
@@ -28,31 +45,62 @@ type ShowLinkFormAction = {
     credentialToLink: firebase.auth.OAuthCredential;
   };
 };
-type Action = SetLoadingViewAction | SetHasErrorAction | ShowLinkFormAction;
+type Action =
+  | ChangeEmailAction
+  | ValidateEmailAction
+  | SetFormSubmittedAction
+  | SetFormErrorsAction
+  | ShowLoadingAction
+  | ShowErrorAction
+  | ShowLinkFormAction;
 
 type ViewState = 'LOADING' | 'SIGN_IN_FORM' | 'LINK_FORM';
 type State = {
   view: ViewState;
+  form: {
+    // fields
+    email: string;
+    // other states
+    submitted: boolean;
+    errors?: { [key: string]: string[] };
+  };
   linkFormInfo: {
     singInMethod: string;
     credentialToLink: firebase.auth.OAuthCredential;
   } | null;
-  hasError: boolean;
 };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'set_loading':
+    case 'change_email':
       return {
         ...state,
-        hasError: false,
+        form: { ...state.form, email: action.email },
+      };
+    case 'validate_email':
+      if (!state.form.submitted) return state;
+
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          errors: validate.single(state.form.email, constraints.email),
+        },
+      };
+    case 'set_form_submitted':
+      return { ...state, form: { ...state.form, submitted: true } };
+    case 'set_form_errors':
+      return { ...state, form: { ...state.form, errors: action.errors } };
+    case 'show_loading':
+      return {
+        ...state,
         view: 'LOADING',
       };
-    case 'set_has_error':
+    case 'show_error':
+      console.log('An error happened');
       return {
         ...state,
-        hasError: action.hasError,
-        view: state.view === 'LOADING' ? 'SIGN_IN_FORM' : state.view,
+        view: 'SIGN_IN_FORM',
       };
     case 'set_link_form':
       return {
@@ -73,8 +121,11 @@ export interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'SIGN_IN_FORM',
+    form: {
+      email: '',
+      submitted: false,
+    },
     linkFormInfo: null,
-    hasError: false,
   });
   const { redirect } = route.params;
   const userContainer = UserProvider.useContainer();
@@ -85,7 +136,7 @@ export default ({ navigation, route }: ScreenProps) => {
     credentialToLink?: firebase.auth.OAuthCredential
   ) => {
     try {
-      dispatch({ type: 'set_loading' });
+      dispatch({ type: 'show_loading' });
 
       await userContainer.signInWithCredential(credential);
 
@@ -93,6 +144,8 @@ export default ({ navigation, route }: ScreenProps) => {
         // linking current auth user with credential to link
         await auth.currentUser?.linkWithCredential(credentialToLink);
       }
+      // calling redirect
+      console.log('redirect name in sigin', redirect.name);
       navigation.replace(redirect.name, redirect.params);
     } catch (error) {
       if (
@@ -116,22 +169,38 @@ export default ({ navigation, route }: ScreenProps) => {
         }
         return;
       }
-      dispatch({ type: 'set_has_error', hasError: true });
+      dispatch({ type: 'show_error' });
     }
   };
   const signInWithProviderFailHandler = () => {
-    dispatch({ type: 'set_has_error', hasError: true });
+    dispatch({ type: 'show_error' });
+  };
+  const changeEmailHandler = (email: string) => {
+    dispatch({ type: 'change_email', email });
+  };
+  const submitHandler = () => {
+    dispatch({ type: 'set_form_submitted' });
+    // validate
+    const errors = validate(state.form, constraints);
+    if (errors) {
+      dispatch({ type: 'set_form_errors', errors });
+      return;
+    }
+    // TODO: implement signInWithEmail
+    console.log('signInWithEmail');
   };
 
   // render logic
   let content = null;
-  let errorMessage = null;
   let linkButton = null;
   switch (state.view) {
     case 'LOADING':
       content = (
-        <View style={{ flex: 1, justifyContent: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <ActivityIndicator size="small" color={colors.black} />
+          <Text level={7}>Conectándonos a la Matrix</Text>
         </View>
       );
       break;
@@ -178,42 +247,50 @@ export default ({ navigation, route }: ScreenProps) => {
         </View>
       );
       break;
-
     default:
       content = (
-        <View style={{ marginTop: '40%' }}>
-          <Text level={3} weight="bold" style={{ marginBottom: 10 }}>
+        <View>
+          <Text
+            level={1}
+            weight="bold"
+            style={{ marginBottom: 35, color: colors.blue }}
+          >
+            Logo
+          </Text>
+          <Text level={1} weight="bold" style={{ marginBottom: 15 }}>
             !Hola¡
           </Text>
-          <Text level={6} style={{ marginBottom: 20 }}>
-            Inicia sessión para continuar
+          <Text level={5} style={{ marginBottom: 50 }}>
+            Para empezar ingresa con tu email
           </Text>
+          <Input
+            placeholder="Email"
+            label=""
+            returnKeyType="done"
+            onSubmitEditing={submitHandler}
+            value={state.form.email}
+            errors={state.form.errors?.email}
+            onChangeText={changeEmailHandler}
+            containerStyle={{ marginBottom: 30 }}
+          />
+          <Button
+            title="Continuar"
+            onPress={submitHandler}
+            style={{ marginBottom: 15 }}
+          />
           <ButtonGoogle
             onOK={signInWithProviderOkHandler}
             onFail={signInWithProviderFailHandler}
           />
-          <View style={{ marginBottom: 10 }} />
+          <View style={{ marginBottom: 15 }} />
           <ButtonFacebook
             onOK={signInWithProviderOkHandler}
             onFail={signInWithProviderFailHandler}
           />
-          {errorMessage}
         </View>
       );
       break;
   }
-  if (state.hasError) {
-    errorMessage = (
-      <Text level={7} color="red" style={{ marginTop: 20 }}>
-        Ocurrió un error inesperado
-      </Text>
-    );
-  }
 
-  return (
-    <Container withMargin>
-      {content}
-      {errorMessage}
-    </Container>
-  );
+  return <Container withMargin>{content}</Container>;
 };

@@ -10,6 +10,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // screens
 import {
+  OnboardingScreen,
+  TermsScreen,
+  SignInScreen,
+  SetPhoneScreen,
+  VerifyPhoneScreen,
+  SetAddressScreen,
   HomeScreen,
   PLPScreen,
   PLPInStoreScreen,
@@ -17,10 +23,12 @@ import {
   CheckoutScreen,
   ToSaleScreen,
   MenuScreen,
-  SignInScreen,
+  SignInFlow,
 } from './screens';
 // components
 import { Icon, Text, ButtonCart } from './components';
+// containers
+import UserProvider from './containers/user';
 // libs
 import { navigationRef } from './lib/root-navigation';
 // styles
@@ -93,6 +101,48 @@ function HomeStackScreen() {
   );
 }
 
+const SearchStack = createStackNavigator();
+
+function SearchStackScreen() {
+  return (
+    <SearchStack.Navigator screenOptions={commonStackOptions}>
+      <HomeStack.Screen
+        name="PLP"
+        component={PLPScreen}
+        options={{
+          title: '',
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
+        }}
+      />
+      <HomeStack.Screen
+        name="PLPInStore"
+        component={PLPInStoreScreen}
+        options={{
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
+        }}
+      />
+      <HomeStack.Screen
+        name="PDP"
+        component={PDPScreen}
+        options={{
+          title: '',
+          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
+        }}
+      />
+      <HomeStack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Mi Pedido' }}
+      />
+      <HomeStack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ title: '' }}
+      />
+    </SearchStack.Navigator>
+  );
+}
+
 const ToSaleStack = createStackNavigator();
 
 function ToSaleStackScreen() {
@@ -131,57 +181,150 @@ function MenuStackScreen() {
   );
 }
 
-const Tab = createBottomTabNavigator();
+const MainTab = createBottomTabNavigator();
+
+function MainTabScreen() {
+  return (
+    <MainTab.Navigator
+      screenOptions={({ route }) => {
+        return {
+          tabBarIcon: ({ color, size }) => {
+            let name;
+            switch (route.name) {
+              case 'SearchStack':
+                name = 'search';
+                break;
+              case 'ToSaleStack':
+                name = 'tag';
+                break;
+              case 'MenuStack':
+                name = 'menu';
+                break;
+              default:
+                name = 'home';
+                break;
+            }
+            return <Icon name={name} size={size} color={color} />;
+          },
+          tabBarLabel: () => {
+            let text;
+            switch (route.name) {
+              case 'SearchStack':
+                text = 'Buscar';
+                break;
+              case 'ToSaleStack':
+                text = 'Vender';
+                break;
+              case 'MenuStack':
+                text = 'Más';
+                break;
+              default:
+                text = 'Inicio';
+                break;
+            }
+            return <Text level={8}>{text}</Text>;
+          },
+        };
+      }}
+      tabBarOptions={{
+        activeTintColor: colors.blue,
+        inactiveTintColor: colors.black,
+      }}
+    >
+      <MainTab.Screen name="HomeStack" component={HomeStackScreen} />
+      <MainTab.Screen name="SearchStack" component={SearchStackScreen} />
+      <MainTab.Screen name="ToSaleStack" component={ToSaleStackScreen} />
+      <MainTab.Screen name="MenuStack" component={MenuStackScreen} />
+    </MainTab.Navigator>
+  );
+}
+
+const MainStack = createStackNavigator();
 
 /**
  * Boot component control de navigation in boot time
+ *
+ * navigation
+ *
+ * MainStack
+ *  TermsScreen
+ *  OnboardingScreen
+ *  *SignInScreen
+ *  SetAddressScreen
+ *  MainTab
+ *    HomeStack
+ *      ....
+ *    SearchStack
+ *      ...
+ *    ToSaleStack
+ *      ...
+ *    MenuStack
+ *      ...
  */
 export default () => {
+  // state
+  const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
+
+  // render logic
+  if (!user) {
+    return null;
+  }
+
+  let initialRoute = 'MainTab';
+  if (!user?.currentAddress) {
+    initialRoute = 'Onboarding';
+  }
+  // terms accepted
+  // anonimous sin address
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef}>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ color, size }) => {
-              let name;
-              switch (route.name) {
-                case 'ToSale':
-                  name = 'tag';
-                  break;
-                case 'Menu':
-                  name = 'menu';
-                  break;
-                default:
-                  name = 'home';
-                  break;
-              }
-              return <Icon name={name} size={size} color={color} />;
-            },
-            tabBarLabel: () => {
-              let text;
-              switch (route.name) {
-                case 'ToSale':
-                  text = 'Vender';
-                  break;
-                case 'Menu':
-                  text = 'Más';
-                  break;
-                default:
-                  text = 'Inicio';
-                  break;
-              }
-              return <Text level={8}>{text}</Text>;
-            },
-          })}
-          tabBarOptions={{
-            activeTintColor: colors.blue,
-            inactiveTintColor: colors.black,
-          }}
+        <MainStack.Navigator
+          screenOptions={commonStackOptions}
+          initialRouteName={initialRoute}
         >
-          <Tab.Screen name="Home" component={HomeStackScreen} />
-          <Tab.Screen name="ToSale" component={ToSaleStackScreen} />
-          <Tab.Screen name="Menu" component={MenuStackScreen} />
-        </Tab.Navigator>
+          <MainStack.Screen
+            name="Onboarding"
+            component={OnboardingScreen}
+            options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name="Terms"
+            component={TermsScreen}
+            options={{ title: '' }}
+          />
+          <MainStack.Screen
+            name="SignIn"
+            component={SignInScreen}
+            options={{ title: '' }}
+          />
+          <MainStack.Screen
+            name="SetPhone"
+            component={SetPhoneScreen}
+            options={{ title: '' }}
+          />
+          <MainStack.Screen
+            name="VerifyPhone"
+            component={VerifyPhoneScreen}
+            options={{ title: '' }}
+          />
+          <MainStack.Screen
+            name="SetAddress"
+            component={SetAddressScreen}
+            options={{ title: '' }}
+          />
+          <MainStack.Screen
+            name="MainTab"
+            component={MainTabScreen}
+            options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name="SignInFlow"
+            component={SignInFlow}
+            options={{ headerShown: false }}
+          />
+        </MainStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );

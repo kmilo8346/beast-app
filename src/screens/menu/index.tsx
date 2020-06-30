@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ScrollView, View } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 
 // components
 import { Text, Container, Button } from '../../components';
@@ -25,6 +26,13 @@ export default ({ navigation }: MenuProps) => {
     try {
       if (user && user.email) {
         await userContainer.signOut();
+        //
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'Onboarding' }],
+          })
+        );
       } else {
         navigation.navigate('SignIn', {
           redirect: {

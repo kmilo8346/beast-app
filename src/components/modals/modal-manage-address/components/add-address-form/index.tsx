@@ -12,7 +12,6 @@ import Touchable from '../../../../touchable';
 import Icon from '../../../../icon';
 // clients
 import googlePlacesClient from '../../../../../clients/google-places-client';
-import useDebounce from '../../../../../lib/hooks/use-debounce';
 // types
 import {
   PlacesAutocompletePrediction,
@@ -21,6 +20,7 @@ import {
   Place,
 } from '../../../../../types';
 // libs
+import useDebounce from '../../../../../lib/hooks/use-debounce';
 import { v4 as uuidv4 } from '../../../../../lib/uuid';
 // constraints
 import constraints from './constraints';

@@ -87,6 +87,7 @@ export default ({
   return (
     <Button
       title="Entrar con Facebook"
+      type="secondary"
       disabled={!request}
       onPress={pressHandler}
     />

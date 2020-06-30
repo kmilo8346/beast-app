@@ -1,3 +1,9 @@
+export { default as TermsScreen } from './terms';
+export { default as OnboardingScreen } from './onboarding';
+export { default as SignInScreen } from './sign-in';
+export { default as SetPhoneScreen } from './set-phone';
+export { default as VerifyPhoneScreen } from './verify-phone';
+export { default as SetAddressScreen } from './set-address';
 export { default as HomeScreen } from './home';
 export { default as PLPScreen } from './plp';
 export { default as PLPInStoreScreen } from './plp/in-store';
@@ -5,4 +11,4 @@ export { default as PDPScreen } from './pdp';
 export { default as CheckoutScreen } from './checkout';
 export { default as ToSaleScreen } from './to-sale';
 export { default as MenuScreen } from './menu';
-export { default as SignInScreen } from './sign-in';
+export { default as SignInFlow } from './sign-in-flow';

@@ -14,5 +14,6 @@ module.exports = {
     'prefer-destructuring': 0,
     'no-useless-catch': 0,
     'react-hooks/exhaustive-deps': 0,
+    'no-unused-expressions': 0,
   },
 };

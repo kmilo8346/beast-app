@@ -28,7 +28,8 @@ export default StyleSheet.create<Styles>({
     top: 0,
     bottom: 0,
     opacity: 0.7,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: 4,
   },
   prefixComponent: {
     height: 24,

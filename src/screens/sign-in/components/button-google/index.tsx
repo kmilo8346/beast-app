@@ -90,6 +90,7 @@ export default ({
   return (
     <Button
       title="Entrar con Google"
+      type="secondary"
       disabled={!request || !nonce}
       onPress={pressButtonHandler}
     />
