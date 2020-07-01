@@ -11,4 +11,3 @@ export { default as PDPScreen } from './pdp';
 export { default as CheckoutScreen } from './checkout';
 export { default as ToSaleScreen } from './to-sale';
 export { default as MenuScreen } from './menu';
-export { default as SignInFlow } from './sign-in-flow';

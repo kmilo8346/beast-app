@@ -3,6 +3,8 @@ import { View } from 'react-native';
 
 // components
 import { Container, Text, Button } from '../../components';
+// styles
+import globalStyles from '../../styles';
 
 export interface ScreenProps {
   navigation: any;
@@ -10,10 +12,24 @@ export interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
-  const redirect = route.params.redirect;
   // event handlers
   const pressContinueHandler = () => {
-    navigation.navigate(redirect.name, redirect.params);
+    const { redirect } = route.params;
+    if (redirect.name === 'SignIn') {
+      navigation.navigate('SignIn', {
+        redirect: {
+          name: 'MainTab',
+        },
+      });
+      return;
+    }
+    if (redirect.name === 'SetAddress') {
+      navigation.navigate('SetAddress');
+      return;
+    }
+    throw new Error(
+      `Redirect name (${route.params.redirect.name}) not supported`
+    );
   };
   return (
     <Container safeArea withMargin>
@@ -25,7 +41,11 @@ export default ({ navigation, route }: ScreenProps) => {
           </Text>
         </View>
       </View>
-      <Button title="Continuar" onPress={pressContinueHandler} />
+      <Button
+        title="Continuar"
+        onPress={pressContinueHandler}
+        style={globalStyles.withMainActionAir}
+      />
     </Container>
   );
 };

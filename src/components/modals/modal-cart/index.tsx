@@ -8,7 +8,8 @@ import Button from '../../buttons/button';
 import ProductItem from '../../product-item';
 import InputSelectAddress from '../../inputs/input-select-address';
 // containers
-import Cart from '../../../containers/cart';
+import CartProvider from '../../../containers/cart';
+import UserProvider from '../../../containers/user';
 // libs
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import { navigate } from '../../../lib/root-navigation';
@@ -98,10 +99,35 @@ export interface CartModalProps {
 }
 
 export default ({ onRequestClose = () => null }: CartModalProps) => {
-  const cartContainer = Cart.useContainer();
+  const cartContainer = CartProvider.useContainer();
   const cart = cartContainer.getCart();
   const stats = cartContainer.getStats();
+  const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
 
+  // event handlers
+  const pressMakeOrderHandler = () => {
+    onRequestClose();
+    // take decistion to where navigate
+    if (!user?.email) {
+      navigate('SignIn', {
+        redirect: {
+          name: 'Checkout',
+        },
+      });
+      return;
+    }
+    if (!user.phone || !user.phoneVerified) {
+      navigate('SetPhone', {
+        redirect: {
+          name: 'Checkout',
+        },
+      });
+      return;
+    }
+    navigate('Checkout');
+  };
+  // render logic
   const Header = renderHeader();
   const Footer = renderFooter(stats.ammount);
   return (
@@ -128,10 +154,7 @@ export default ({ onRequestClose = () => null }: CartModalProps) => {
         <Button
           title="Hacer Pedido"
           style={[globalStyle.withMargin, globalStyle.withMainActionAir]}
-          onPress={() => {
-            onRequestClose();
-            navigate('Checkout');
-          }}
+          onPress={pressMakeOrderHandler}
         />
       </View>
     </Modal>

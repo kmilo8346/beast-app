@@ -2,6 +2,7 @@ import React, { useReducer, useEffect, useRef } from 'react';
 import { View, TextInput } from 'react-native';
 import validate from 'validate.js';
 import axios, { CancelTokenSource } from 'axios';
+import { CommonActions } from '@react-navigation/native';
 
 // components
 import {
@@ -164,10 +165,9 @@ const reducer = (state: State, action: Action): State => {
 
 export interface ScreenProps {
   navigation: any;
-  route: any;
 }
 
-export default ({ navigation, route }: ScreenProps) => {
+export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     innerView: 'SEARCH_TIPS',
@@ -186,7 +186,6 @@ export default ({ navigation, route }: ScreenProps) => {
   const userContainer = UserProvider.useContainer();
   const debouncedAddress = useDebounce(state.form.address, 200);
   const apartmentInput = useRef<TextInput>(null);
-  const { redirect } = route.params;
 
   // event hanlders
   const changeHandler = (attribute: string, value: string) => {
@@ -241,7 +240,7 @@ export default ({ navigation, route }: ScreenProps) => {
       }
     }
   };
-  const pressContinueHandler = async () => {
+  const pressContinueHandler = () => {
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form, constraints);
@@ -249,11 +248,16 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    await userContainer.addAddress({
+    userContainer.addAddress({
       ...state.form.place,
       apartment: state.form.apartment,
     } as Place);
-    navigation.navigate(redirect.name, redirect.params);
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'MainTab' }],
+      })
+    );
   };
   useEffect(() => {
     sessiontoken = uuidv4();

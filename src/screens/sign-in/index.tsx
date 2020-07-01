@@ -1,5 +1,6 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 import validate from 'validate.js';
 
 // components
@@ -10,8 +11,9 @@ import { ButtonGoogle, ButtonFacebook } from './components';
 import firebase from '../../lib/firebase';
 // constraints
 import constraints from './constraints';
-// containes
+// containers
 import UserProvider from '../../containers/user';
+// styles
 import colors from '../../styles/colors';
 
 // instances outside component
@@ -119,6 +121,7 @@ export interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
+  // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'SIGN_IN_FORM',
     form: {
@@ -127,8 +130,8 @@ export default ({ navigation, route }: ScreenProps) => {
     },
     linkFormInfo: null,
   });
-  const { redirect } = route.params;
   const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
 
   // event handlers
   const signInWithProviderOkHandler = async (
@@ -144,9 +147,6 @@ export default ({ navigation, route }: ScreenProps) => {
         // linking current auth user with credential to link
         await auth.currentUser?.linkWithCredential(credentialToLink);
       }
-      // calling redirect
-      console.log('redirect name in sigin', redirect.name);
-      navigation.replace(redirect.name, redirect.params);
     } catch (error) {
       if (
         (error as firebase.auth.AuthError).code ===
@@ -189,6 +189,32 @@ export default ({ navigation, route }: ScreenProps) => {
     // TODO: implement signInWithEmail
     console.log('signInWithEmail');
   };
+  useEffect(() => {
+    // signin was ok
+    if (user?.email) {
+      // not phone
+      if (!user.phone || !user.phoneVerified) {
+        navigation.replace('SetPhone', route.params);
+        return;
+      }
+      // not current address
+      if (!user.currentAddress) {
+        navigation.navigate('SetAddress');
+        return;
+      }
+      // redirect to MainTab
+      if (route.params.redirect.name === 'MainTab') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'MainTab' }],
+          })
+        );
+        return;
+      }
+      navigation.replace(route.params.redirect.name);
+    }
+  }, [user?.id]);
 
   // render logic
   let content = null;

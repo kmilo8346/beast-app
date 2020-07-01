@@ -59,9 +59,6 @@ export default createContainer(
           } catch (error) {
             // TODO: manage error
           }
-        } else {
-          // use this to fix fails
-          container.set('id', authUser.uid);
         }
       });
       return () => {
@@ -142,27 +139,26 @@ export default createContainer(
       const prevAuthUser = auth.currentUser;
       console.info(`${PREFIX} Prev user was saved as backup`, prevUserData);
       try {
-        // await db.collection(COLLECTION).doc(prevUserData.id).delete();
-        // console.info(
-        //   `${PREFIX} Prev anonymous user doc ${prevUserData.id} was deleted in firestore`
-        // );
-
         // signin
         const result = await auth.signInWithCredential(credential);
         console.log(
           `${PREFIX} Sigin in firebase auth was ok`,
           result?.user?.uid
         );
+        // TODO: what happen if init fail?
         // init
         await init(result, prevUserData);
         console.log(`${PREFIX} User initialization was ok`);
 
-        // clean anonymous data in firebase authentication
+        // clean anonymous data
         try {
           if (prevAuthUser) {
-            await prevAuthUser.delete();
-            console.log(
-              `${PREFIX} Prev anonymous user was deleted in firebase auth`
+            await Promise.all([
+              db.collection(COLLECTION).doc(prevAuthUser.uid).delete(),
+              await prevAuthUser.delete(),
+            ]);
+            console.info(
+              `${PREFIX} Prev anonymous user${prevAuthUser.uid} was deleted in auth and firestore`
             );
           }
         } catch (error) {
@@ -241,6 +237,9 @@ export default createContainer(
             phone: authUser.phoneNumber,
             phoneVerified: false,
             photoURL: authUser.photoURL,
+            metaData: {
+              codes: [],
+            },
           };
         }
 

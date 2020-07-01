@@ -36,7 +36,7 @@ export default ({ navigation }: MenuProps) => {
       } else {
         navigation.navigate('SignIn', {
           redirect: {
-            name: 'Menu',
+            name: 'MainTab',
           },
         });
       }

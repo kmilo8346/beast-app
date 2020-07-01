@@ -3,6 +3,8 @@ import { View } from 'react-native';
 
 // components
 import { Container, Text, Button } from '../../components';
+// containers
+import UserProvider from '../../containers/user';
 // styles
 import globalStyles from '../../styles';
 
@@ -19,18 +21,14 @@ export default ({ navigation }: ScreenProps) => {
       },
     });
   }, []);
-  const pressStartToShopHandler = useCallback(() => {
+  const pressStartToShopHandler = useCallback(async () => {
     navigation.navigate('Terms', {
       redirect: {
-        name: 'SignInFlow',
-        params: {
-          redirect: {
-            name: 'MainTab',
-          },
-        },
+        name: 'SignIn',
       },
     });
   }, []);
+
   // render logic
   return (
     <Container safeArea withMargin>

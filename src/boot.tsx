@@ -23,10 +23,9 @@ import {
   CheckoutScreen,
   ToSaleScreen,
   MenuScreen,
-  SignInFlow,
 } from './screens';
 // components
-import { Icon, Text, ButtonCart } from './components';
+import { Icon, Text, ButtonCart, Loading } from './components';
 // containers
 import UserProvider from './containers/user';
 // libs
@@ -88,14 +87,24 @@ function HomeStackScreen() {
         }}
       />
       <HomeStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ title: 'Mi Pedido' }}
-      />
-      <HomeStack.Screen
         name="SignIn"
         component={SignInScreen}
         options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="SetPhone"
+        component={SetPhoneScreen}
+        options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="VerifyPhone"
+        component={VerifyPhoneScreen}
+        options={{ title: '' }}
+      />
+      <HomeStack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Mi Pedido' }}
       />
     </HomeStack.Navigator>
   );
@@ -130,14 +139,24 @@ function SearchStackScreen() {
         }}
       />
       <HomeStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ title: 'Mi Pedido' }}
-      />
-      <HomeStack.Screen
         name="SignIn"
         component={SignInScreen}
         options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="SetPhone"
+        component={SetPhoneScreen}
+        options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="VerifyPhone"
+        component={VerifyPhoneScreen}
+        options={{ title: '' }}
+      />
+      <HomeStack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Mi Pedido' }}
       />
     </SearchStack.Navigator>
   );
@@ -158,6 +177,16 @@ function ToSaleStackScreen() {
         component={SignInScreen}
         options={{ title: '' }}
       />
+      <MainStack.Screen
+        name="SetPhone"
+        component={SetPhoneScreen}
+        options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="VerifyPhone"
+        component={VerifyPhoneScreen}
+        options={{ title: '' }}
+      />
     </ToSaleStack.Navigator>
   );
 }
@@ -175,6 +204,16 @@ function MenuStackScreen() {
       <HomeStack.Screen
         name="SignIn"
         component={SignInScreen}
+        options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="SetPhone"
+        component={SetPhoneScreen}
+        options={{ title: '' }}
+      />
+      <MainStack.Screen
+        name="VerifyPhone"
+        component={VerifyPhoneScreen}
         options={{ title: '' }}
       />
     </MenuStack.Navigator>
@@ -268,15 +307,21 @@ export default () => {
 
   // render logic
   if (!user) {
-    return null;
+    return <Loading />;
   }
 
+  // Valid in MainTab
+  // user anonymous with current address
+  // user logged with phone verified and current address
   let initialRoute = 'MainTab';
-  if (!user?.currentAddress) {
+  if (!user.email && !user.currentAddress) {
     initialRoute = 'Onboarding';
+  } else if (user.email && (!user.phone || !user.phoneVerified)) {
+    initialRoute = 'SetPhone';
+  } else if (user.email && !user.currentAddress) {
+    initialRoute = 'SetAddress';
   }
-  // terms accepted
-  // anonimous sin address
+
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef}>
@@ -298,16 +343,31 @@ export default () => {
             name="SignIn"
             component={SignInScreen}
             options={{ title: '' }}
+            initialParams={{
+              redirect: {
+                name: 'MainTab',
+              },
+            }}
           />
           <MainStack.Screen
             name="SetPhone"
             component={SetPhoneScreen}
             options={{ title: '' }}
+            initialParams={{
+              redirect: {
+                name: 'MainTab',
+              },
+            }}
           />
           <MainStack.Screen
             name="VerifyPhone"
             component={VerifyPhoneScreen}
             options={{ title: '' }}
+            initialParams={{
+              redirect: {
+                name: 'MainTab',
+              },
+            }}
           />
           <MainStack.Screen
             name="SetAddress"
@@ -317,11 +377,6 @@ export default () => {
           <MainStack.Screen
             name="MainTab"
             component={MainTabScreen}
-            options={{ headerShown: false }}
-          />
-          <MainStack.Screen
-            name="SignInFlow"
-            component={SignInFlow}
             options={{ headerShown: false }}
           />
         </MainStack.Navigator>

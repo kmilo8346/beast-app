@@ -8,8 +8,6 @@ import { Container, Text, Input, Button } from '../../components';
 import UserProvider from '../../containers/user';
 // constraints
 import constraints from './constraints';
-// styles
-import globalStyles from '../../styles';
 
 type ChangePhoneAction = { type: 'change_phone'; phone: string };
 type ValidatePhoneAction = {
@@ -68,7 +66,10 @@ export interface ScreenProps {
   route: any;
 }
 
+// validate phone, parse, format phone
+
 export default ({ navigation, route }: ScreenProps) => {
+  // state
   const [state, dispatch] = useReducer(reducer, {
     form: {
       phone: '',
@@ -76,26 +77,32 @@ export default ({ navigation, route }: ScreenProps) => {
     },
   });
   const userContainer = UserProvider.useContainer();
-  const { redirect } = route.params;
 
   // event handlers
   const changePhoneHandler = (phone: string) => {
     dispatch({ type: 'change_phone', phone });
     dispatch({ type: 'validate_phone', phone });
   };
-  const submitHandler = async () => {
-    dispatch({ type: 'set_form_submitted' });
-    // validate
-    const errors = validate(state.form, constraints);
-    if (errors) {
-      dispatch({ type: 'set_form_errors', errors });
-      return;
+  const submitHandler = () => {
+    try {
+      dispatch({ type: 'set_form_submitted' });
+      // validate
+      const errors = validate(state.form, constraints);
+      if (errors) {
+        dispatch({ type: 'set_form_errors', errors });
+        return;
+      }
+      userContainer.updateUser({
+        phone: `+569${state.form.phone}`,
+        phoneVerified: false,
+      });
+      navigation.navigate('VerifyPhone', route.params);
+    } catch (error) {
+      // TODO: show toast
     }
-    await userContainer.updateUser({ phone: state.form.phone });
-    // TODO: send phone for verification
-    navigation.navigate(redirect.name, redirect.params);
   };
 
+  // render logic
   return (
     <Container safeArea withMargin>
       <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
@@ -122,7 +129,7 @@ export default ({ navigation, route }: ScreenProps) => {
         onSubmitEditing={submitHandler}
       />
       <View style={{ flex: 1 }} />
-      <Button title="Continuar" style={globalStyles.withMainActionAir} />
+      <Button title="Continuar" style={{ marginBottom: 70 }} />
     </Container>
   );
 };

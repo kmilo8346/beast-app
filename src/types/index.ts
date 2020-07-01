@@ -114,6 +114,11 @@ export interface User {
   addresses: Place[];
   currentCard: Card | null | undefined;
   cards: Card[];
+
+  metaData: { [key: string]: any };
+
+  // trick for dot notation used in firestore
+  [key: string]: any;
 }
 
 export interface CreateParams<T> {
