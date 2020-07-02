@@ -61,33 +61,31 @@ export default forwardRef<Ref, InputProps>(
       containerStyle,
     ];
     const finalStyle: StyleProp<TextStyle> = [styles.input];
-    let prefixComponent = null;
-    let suffixComponent = null;
+    let prefixContainer = null;
+    let suffixContainer = null;
     if (prefix) {
+      let prefixComponent = null;
       if (typeof prefix === 'string') {
-        prefixComponent = (
-          <View style={[styles.prefix, prefixStyle]}>
-            <Icon name={prefix} />
-          </View>
-        );
+        prefixComponent = <Icon name={prefix} />;
       } else {
-        prefixComponent = (
-          <View style={[styles.prefix, prefixStyle]}>
-            <View style={[styles.prefixComponent, prefixComponentStyle]}>
-              {prefix}
-            </View>
-          </View>
-        );
+        prefixComponent = prefix;
       }
+      prefixContainer = (
+        <View style={[styles.prefix, prefixStyle]}>{prefixComponent}</View>
+      );
       finalStyle.push({ paddingLeft: 45 });
     }
     if (suffix) {
-      suffixComponent = (
-        <View style={styles.suffix}>
-          <Icon name={suffix} />
-        </View>
+      let suffixComponent = null;
+      if (typeof suffix === 'string') {
+        suffixComponent = <Icon name={suffix} />;
+      } else {
+        suffixComponent = suffix;
+      }
+      suffixContainer = (
+        <View style={[styles.suffix, prefixStyle]}>{suffixComponent}</View>
       );
-      finalStyle.push({ paddingRight: 35 });
+      finalStyle.push({ paddingRight: 45 });
     }
     finalStyle.push(inputProps.style);
     return (
@@ -98,7 +96,7 @@ export default forwardRef<Ref, InputProps>(
           </Text>
         )}
         <View style={styles.inputWrapper}>
-          {prefixComponent}
+          {prefixContainer}
           <TextInput
             {...inputProps}
             ref={ref}
@@ -108,7 +106,7 @@ export default forwardRef<Ref, InputProps>(
             style={finalStyle}
             clearButtonMode="while-editing"
           />
-          {suffixComponent}
+          {suffixContainer}
         </View>
 
         <Text level={8} color={colors.red} style={styles.error}>

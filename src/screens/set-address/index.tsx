@@ -32,6 +32,7 @@ import { v4 as uuidv4 } from '../../lib/uuid';
 import constraints from './constraints';
 // styles
 import colors from '../../styles/colors';
+import globalStyles from '../../styles';
 
 // instances outside component
 let autocompleteRequestSource: CancelTokenSource;
@@ -383,7 +384,11 @@ export default ({ navigation }: ScreenProps) => {
         />
         {content}
       </View>
-      <Button title="Continuar" onPress={pressContinueHandler} />
+      <Button
+        title="Continuar"
+        onPress={pressContinueHandler}
+        style={globalStyles.withMainActionAir}
+      />
     </Container>
   );
 };

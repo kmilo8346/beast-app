@@ -129,7 +129,11 @@ export default ({ navigation, route }: ScreenProps) => {
         onSubmitEditing={submitHandler}
       />
       <View style={{ flex: 1 }} />
-      <Button title="Continuar" style={{ marginBottom: 70 }} />
+      <Button
+        title="Continuar"
+        style={{ marginBottom: 70 }}
+        onPress={submitHandler}
+      />
     </Container>
   );
 };

@@ -28,8 +28,9 @@ export default StyleSheet.create<Styles>({
     top: 0,
     bottom: 0,
     opacity: 0.7,
-    justifyContent: 'flex-end',
-    marginBottom: 4,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   prefixComponent: {
     height: 24,
@@ -52,7 +53,9 @@ export default StyleSheet.create<Styles>({
     top: 0,
     bottom: 0,
     opacity: 0.7,
+    width: 40,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   error: {
     marginTop: 3,
