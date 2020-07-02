@@ -84,22 +84,18 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'validate_phone', phone });
   };
   const submitHandler = () => {
-    try {
-      dispatch({ type: 'set_form_submitted' });
-      // validate
-      const errors = validate(state.form, constraints);
-      if (errors) {
-        dispatch({ type: 'set_form_errors', errors });
-        return;
-      }
-      userContainer.updateUser({
-        phone: `+569${state.form.phone}`,
-        phoneVerified: false,
-      });
-      navigation.navigate('VerifyPhone', route.params);
-    } catch (error) {
-      // TODO: show toast
+    dispatch({ type: 'set_form_submitted' });
+    // validate
+    const errors = validate(state.form, constraints);
+    if (errors) {
+      dispatch({ type: 'set_form_errors', errors });
+      return;
     }
+    userContainer.updateUser({
+      phone: `+569${state.form.phone}`,
+      phoneVerified: false,
+    });
+    navigation.navigate('VerifyPhone', route.params);
   };
 
   // render logic

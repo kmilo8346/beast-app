@@ -1,9 +1,10 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useRef } from 'react';
+import { View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 
 // components
-import { Container, Text, Button } from '../../components';
+import { Container, Text, Button, Toast, IToast } from '../../components';
 // clients
 import phoneClient from '../../clients/phone-client';
 // libs
@@ -12,6 +13,7 @@ import firebase from '../../lib/firebase';
 import UserProvider from '../../containers/user';
 // styles
 import colors from '../../styles/colors';
+import globalStyles from '../../styles';
 
 type ChangeCodeAction = {
   type: 'change_code';
@@ -53,6 +55,7 @@ export default ({ navigation, route }: ScreenProps) => {
   });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const submitHandler = async (code: string) => {
@@ -72,7 +75,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const changeCodeHandler = (code: string) => {
     dispatch({ type: 'change_code', code });
   };
-  const sendCode = async () => {
+  const sendCode = async (initial = false) => {
     try {
       // reset error message
       dispatch({ type: 'set_has_verfication_error', hasError: false });
@@ -82,15 +85,24 @@ export default ({ navigation, route }: ScreenProps) => {
       await userContainer.updateUser({
         'metaData.codes': firebase.firestore.FieldValue.arrayUnion(code),
       });
-      // TODO: show toast
+      if (!initial) {
+        toastRef.current?.show({
+          type: 'SUCCESS',
+          message: 'Codigo reenviado correctamente',
+          expiration: 3,
+        });
+      }
     } catch (error) {
-      // TODO: show toast
-      console.log('Error resending code');
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: 'Error al enviar código',
+        expiration: 3,
+      });
     }
   };
   useEffect(() => {
     if (user?.phone) {
-      sendCode();
+      sendCode(true);
     }
   }, [user?.phone]);
   useEffect(() => {
@@ -127,51 +139,69 @@ export default ({ navigation, route }: ScreenProps) => {
   }
   return (
     <Container safeArea withMargin>
-      <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
-        Ingresa el código
-      </Text>
-      <Text style={{ marginBottom: 60 }}>
-        <Text level={5}>
-          Te enviamos un código de verificación a tu número{' '}
-        </Text>
-        <Text level={5} weight="bold">
-          {user?.phone}
-        </Text>
-      </Text>
-      <OTPInputView
-        code={state.code}
-        onCodeChanged={changeCodeHandler}
-        pinCount={4}
-        autoFocusOnLoad
-        style={{
-          height: 60,
-          marginHorizontal: 20,
-          marginBottom: 10,
-        }}
-        codeInputFieldStyle={{
-          width: 60,
-          height: 60,
-          borderWidth: 1,
-          borderColor: colors.blackLight5,
-          borderRadius: 13,
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: colors.black,
-        }}
-        codeInputHighlightStyle={{
-          borderColor: colors.blue,
-        }}
-        onCodeFilled={(code) => {
-          submitHandler(code);
-        }}
-      />
-      {verficationError}
-      <Button
-        type="link"
-        title="Reenviar código"
-        style={{ marginTop: 10 }}
-        onPress={sendCode}
-      />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[{ height: '100%', width: '100%' }]}>
+          <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
+            Ingresa el código
+          </Text>
+          <Text style={{ marginBottom: 60 }}>
+            <Text level={5} style={{ lineHeight: 25 }}>
+              Te enviamos un código de verificación a tu número{' '}
+            </Text>
+            <Text level={5} weight="bold">
+              {user?.phone}
+            </Text>
+          </Text>
+          <OTPInputView
+            code={state.code}
+            onCodeChanged={changeCodeHandler}
+            pinCount={4}
+            autoFocusOnLoad
+            style={{
+              height: 60,
+              marginHorizontal: 20,
+              marginBottom: 10,
+            }}
+            codeInputFieldStyle={{
+              width: 60,
+              height: 60,
+              borderWidth: 1,
+              borderColor: colors.blackLight5,
+              borderRadius: 13,
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: colors.black,
+            }}
+            codeInputHighlightStyle={{
+              borderColor: colors.blue,
+            }}
+            onCodeFilled={(code) => {
+              submitHandler(code);
+            }}
+          />
+          {verficationError}
+          <Button
+            type="link"
+            title="Reenviar código"
+            style={{ marginTop: 10 }}
+            onPress={() => {
+              Keyboard.dismiss();
+              sendCode();
+            }}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              marginBottom: 10,
+            }}
+          >
+            <Toast ref={toastRef} />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </Container>
   );
 };
