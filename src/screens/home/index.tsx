@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -8,6 +8,9 @@ import {
   Button,
   ButtonCart,
   InputSelectAddress,
+  Toast,
+  IToast,
+  Icon,
 } from '../../components';
 
 export interface Props {
@@ -16,6 +19,7 @@ export interface Props {
 
 export default ({ navigation }: Props) => {
   // state
+  const toastRef = useRef<IToast>(null);
 
   return (
     <Container safeArea withMargin fakeHeader>
@@ -35,6 +39,32 @@ export default ({ navigation }: Props) => {
         }}
         style={{ marginTop: 50 }}
       />
+      <Button
+        title="Show toast"
+        onPress={() => {
+          const actionId = new Date().getTime();
+          toastRef.current?.show({
+            message: `Message ${actionId} `,
+            action: <Icon name="x" />,
+            actionCallback: () => {
+              console.log(`Click on action ${actionId}`);
+            },
+            expiration: 10,
+          });
+        }}
+        style={{ marginTop: 10 }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          marginBottom: 10,
+        }}
+      >
+        <Toast ref={toastRef} />
+      </View>
     </Container>
   );
 };
