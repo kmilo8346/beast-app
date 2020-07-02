@@ -5,23 +5,21 @@ import { AsyncStorage } from 'react-native';
 
 const STORAGE_KEY = '@global';
 
-export interface Container {
+export interface Container<T> {
   set: (key: string, value: any) => void;
-  setAll: (state: { [key: string]: any } | null) => void;
+  setAll: (state: T) => void;
   get: (key: string) => any;
-  getAll: () => { [key: string]: any } | null;
+  getAll: () => T;
   has: (key: string) => boolean;
   remove: (key: string) => void;
   clear: () => void;
 }
 
-export default function useContainer(
+export default function useContainer<T>(
   path: string,
-  defaultValue: { [key: string]: any } | null = {}
-): Container {
-  const [state, setState] = useState<{ [key: string]: any } | null>(
-    defaultValue
-  );
+  defaultValue: T
+): Container<T> {
+  const [state, setState] = useState<T>(defaultValue);
 
   const storagePath = `${STORAGE_KEY}/${path}`;
   const isInitialMount = useRef(true);
@@ -47,21 +45,21 @@ export default function useContainer(
   }
 
   function set(key: string, value: any) {
-    setState((prevState) => {
-      const newState = { ...prevState };
-      newState[key] = value;
-      return newState;
-    });
+    if (state) {
+      setState((prevState) => ({ ...prevState, [key]: value }));
+    }
   }
 
-  function setAll(state: { [key: string]: any } | null) {
+  function setAll(state: T) {
     setState(state);
   }
 
   function remove(key: string) {
-    const newState = { ...state };
-    delete newState[key];
-    setState(newState);
+    if (state) {
+      const newState: { [key: string]: any } = { ...state };
+      delete newState[key];
+      setState(newState as T);
+    }
   }
 
   function clear() {
@@ -72,7 +70,7 @@ export default function useContainer(
     if (!state) {
       return null;
     }
-    return state[key];
+    return (state as { [key: string]: any })[key];
   }
 
   function getAll() {

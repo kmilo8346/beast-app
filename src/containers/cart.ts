@@ -5,19 +5,31 @@ import { Product, Store } from '../types';
 
 const STORAGE_KEY = 'cart';
 
+interface Stats {
+  ammount: number;
+  total: number;
+  byStores: {
+    [key: string]: {
+      id: string;
+      name: string;
+      ammount: number;
+      total: number;
+    };
+  };
+}
 export type Cart = { store: Store; data: Product[] }[];
 
 export interface CartContainer {
   isEmpty: () => boolean;
   getCart: () => Cart;
   getItemQty: (product: Product) => number;
-  getStats: () => { ammount: number; total: number };
+  getStats: () => Stats;
   setItem: (item: Product) => void;
 }
 
 export default createContainer(
   (): CartContainer => {
-    const container = useContainer(STORAGE_KEY);
+    const container = useContainer<{ [key: string]: any }>(STORAGE_KEY, {});
 
     const isEmpty = (): boolean => {
       return !Object.keys(container.getAll()).length;
@@ -48,16 +60,31 @@ export default createContainer(
       return 0;
     };
 
-    const getStats = (): { ammount: number; total: number } => {
+    const getStats = (): Stats => {
       const db = container.getAll();
-      const stats = {
+      const stats: Stats = {
         ammount: 0,
         total: 0,
+        byStores: {},
       };
       Object.keys(db).forEach((key) => {
         const item = db[key];
-        stats.total += item.qty;
-        stats.ammount += item.qty * item.price;
+        const total = item.qty;
+        const ammount = item.qty * item.price;
+
+        stats.total += total;
+        stats.ammount += ammount;
+
+        const [storeId] = key.split('|');
+        console.log(storeId);
+        stats.byStores[storeId] = stats.byStores[storeId] || {
+          id: storeId,
+          name: item.store.name,
+          ammount: 0,
+          total: 0,
+        };
+        stats.byStores[storeId].total += total;
+        stats.byStores[storeId].ammount += ammount;
       });
       return stats;
     };

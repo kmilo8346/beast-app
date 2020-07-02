@@ -45,7 +45,7 @@ export interface UserContainer {
 
 export default createContainer(
   (): UserContainer => {
-    const container = useContainer(STORAGE_KEY, null);
+    const container = useContainer<User | null>(STORAGE_KEY, null);
     const user = getUser();
     const id = user ? user.id : null;
 
@@ -75,7 +75,7 @@ export default createContainer(
           .doc(id)
           .onSnapshot((doc) => {
             const data = doc.data() || null;
-            container.setAll(data);
+            container.setAll(data as User);
           });
       }
 
