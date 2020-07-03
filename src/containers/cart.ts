@@ -25,6 +25,7 @@ export interface CartContainer {
   getItemQty: (product: Product) => number;
   getStats: () => Stats;
   setItem: (item: Product) => void;
+  clear: () => void;
 }
 
 export default createContainer(
@@ -76,7 +77,6 @@ export default createContainer(
         stats.ammount += ammount;
 
         const [storeId] = key.split('|');
-        console.log(storeId);
         stats.byStores[storeId] = stats.byStores[storeId] || {
           id: storeId,
           name: item.store.name,
@@ -97,12 +97,17 @@ export default createContainer(
       }
     };
 
+    const clear = (): void => {
+      container.clear();
+    };
+
     return {
       isEmpty,
       getCart,
       getItemQty,
       getStats,
       setItem,
+      clear,
     };
   }
 );

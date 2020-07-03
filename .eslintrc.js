@@ -15,5 +15,6 @@ module.exports = {
     'no-useless-catch': 0,
     'react-hooks/exhaustive-deps': 0,
     'no-unused-expressions': 0,
+    '@typescript-eslint/no-var-requires': 0,
   },
 };

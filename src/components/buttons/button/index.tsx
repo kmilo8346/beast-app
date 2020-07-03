@@ -1,15 +1,18 @@
 import React, { ReactNode } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { View, ViewStyle, ActivityIndicator } from 'react-native';
 
+// components
 import Touchable, { TouchableProps } from '../../touchable';
 import Text from '../../text';
 import Icon from '../../icon';
-import styles from './styles';
+// styles
 import colors from '../../../styles/colors';
+import styles from './styles';
 
 export interface ButtonProps extends Partial<TouchableProps> {
   title: string | ReactNode;
   icon?: string;
+  loading?: boolean;
   disabled?: boolean;
   type?: 'primary' | 'secondary' | 'link';
   children?: ReactNode;
@@ -17,7 +20,8 @@ export interface ButtonProps extends Partial<TouchableProps> {
 
 export default ({
   title,
-  icon = undefined,
+  icon,
+  loading,
   type = 'primary',
   ...otherProps
 }: ButtonProps) => {
@@ -45,9 +49,6 @@ export default ({
       titleStyle.push(styles.title_primary);
       break;
   }
-  if (otherProps.disabled) {
-    containerStyle.push({ backgroundColor: 'gray' });
-  }
   containerStyle.push(otherProps.style as ViewStyle);
   let titleComponent: ReactNode = (
     <Text level={5} weight="bold" style={titleStyle}>
@@ -59,9 +60,12 @@ export default ({
   }
   return (
     <Touchable {...otherProps} style={containerStyle}>
-      {titleComponent}
       <View style={styles.iconContainer}>
         {icon && <Icon name={icon} color={colors.white} style={styles.icon} />}
+      </View>
+      {titleComponent}
+      <View style={styles.loadingContainer}>
+        {loading && <ActivityIndicator color={colors.white} />}
       </View>
     </Touchable>
   );

@@ -29,14 +29,16 @@ export interface UserContainer {
   updateUser: (data: Partial<User>) => Promise<void>;
 
   // addresses
-  getCurrentAddress: () => string | null;
+  getCurrentAddressId: () => string | null;
+  getCurrentAddress: () => Place | undefined;
   getAddresses: () => Place[];
   setCurrentAddress: (addressId: string) => Promise<void>;
   addAddress: (newAddress: Place) => Promise<void>;
   deleteAddress: (id: string) => Promise<void>;
 
   // cards
-  getCurrentCard: () => string | null | undefined;
+  getCurrentCardId: () => string | null | undefined;
+  getCurrentCard: () => Card | undefined;
   getCards: () => Card[];
   setCurrentCard: (cardId: string | null) => Promise<void>;
   addCard: (card: Card) => Promise<void>;
@@ -73,10 +75,24 @@ export default createContainer(
         subscribe = db
           .collection(COLLECTION)
           .doc(id)
-          .onSnapshot((doc) => {
-            const data = doc.data() || null;
-            container.setAll(data as User);
-          });
+          .onSnapshot(
+            (doc) => {
+              const data = doc.data() || null;
+              if (data) {
+                console.log('snapshot con data');
+              } else {
+                console.log('snapshot sin data, skipping update');
+                return;
+              }
+              container.setAll(data as User);
+            },
+            (error) => {
+              console.log(
+                `${PREFIX} error listening realtime updates from firestore`,
+                error
+              );
+            }
+          );
       }
 
       return () => {
@@ -94,6 +110,7 @@ export default createContainer(
       updateUser,
 
       // addresses
+      getCurrentAddressId,
       getCurrentAddress,
       getAddresses,
       setCurrentAddress,
@@ -101,6 +118,7 @@ export default createContainer(
       deleteAddress,
 
       // cards
+      getCurrentCardId,
       getCurrentCard,
       getCards,
       setCurrentCard,
@@ -290,8 +308,13 @@ export default createContainer(
     }
 
     // addresses
-    function getCurrentAddress(): string | null {
+    function getCurrentAddressId(): string | null {
       return container.get('currentAddress') || null;
+    }
+
+    function getCurrentAddress(): Place | undefined {
+      const currentAddressId = getCurrentAddressId();
+      return getAddresses().find((address) => address.id === currentAddressId);
     }
 
     function getAddresses(): Place[] {
@@ -313,7 +336,7 @@ export default createContainer(
       }
 
       let found = false;
-      let currentAddress = getCurrentAddress();
+      let currentAddress = getCurrentAddressId();
       const addresses = getAddresses().map((address) => {
         if (address.id === newAddress.id) {
           found = true;
@@ -338,7 +361,7 @@ export default createContainer(
       }
       let addresses = getAddresses();
       addresses = addresses.filter((address) => address.id !== id);
-      let currentAddress = getCurrentAddress();
+      let currentAddress = getCurrentAddressId();
       if (currentAddress === id && addresses.length) {
         currentAddress = addresses[0].id;
       }
@@ -349,8 +372,13 @@ export default createContainer(
     }
 
     // cards
-    function getCurrentCard(): string | null | undefined {
+    function getCurrentCardId(): string | null | undefined {
       return container.get('currentCard');
+    }
+
+    function getCurrentCard(): Card | undefined {
+      const currentCardId = getCurrentCardId();
+      return getCards().find((card) => card.id === currentCardId);
     }
 
     function getCards(): Card[] {
@@ -372,7 +400,7 @@ export default createContainer(
       }
 
       let found = false;
-      let currentCard = getCurrentCard();
+      let currentCard = getCurrentCardId();
       const cards = getCards().map((card) => {
         if (card.id === newCard.id) {
           found = true;
@@ -397,7 +425,7 @@ export default createContainer(
       }
       let cards = getCards();
       cards = cards.filter((card) => card.id !== id);
-      let currentCard = getCurrentCard();
+      let currentCard = getCurrentCardId();
       if (currentCard === id && cards.length) {
         currentCard = cards[0].id;
       }

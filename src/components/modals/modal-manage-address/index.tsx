@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -18,7 +18,7 @@ export default (props: ModalProps) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
   const addresses = userContainer.getAddresses();
-  const currentAddress = userContainer.getCurrentAddress();
+  const currentAddress = userContainer.getCurrentAddressId();
 
   // event handlers
   const addHandler = (place: Place) => {

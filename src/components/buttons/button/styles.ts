@@ -12,6 +12,7 @@ interface Styles {
   title_secondary: TextStyle;
   title_link: TextStyle;
   iconContainer: ViewStyle;
+  loadingContainer: ViewStyle;
   icon: ViewStyle;
 }
 
@@ -55,6 +56,14 @@ export default StyleSheet.create<Styles>({
     top: 0,
     bottom: 0,
     left: 18,
+    width: 24,
+    justifyContent: 'center',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 18,
     width: 24,
     justifyContent: 'center',
   },

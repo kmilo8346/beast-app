@@ -11,7 +11,7 @@ export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentCardId = userContainer.getCurrentCard();
+  const currentCardId = userContainer.getCurrentCardId();
   const cards = userContainer.getCards();
   const currentCard = cards.find((card) => card.id === currentCardId);
 

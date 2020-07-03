@@ -13,7 +13,7 @@ export { default as Input } from './inputs/input';
 export { default as InputNumber } from './inputs/input-number';
 export { default as InputSelectAddress } from './inputs/input-select-address';
 export { default as InputSelectCard } from './inputs/input-select-card';
-export { default as Modal } from './modals/modal';
+export { default as Modal, ModalProps } from './modals/modal';
 export { default as ModalManageAddress } from './modals/modal-manage-address';
 export { default as ModalManagePayment } from './modals/modal-manage-cards';
 export { default as ActionSheet } from './modals/action-sheet';

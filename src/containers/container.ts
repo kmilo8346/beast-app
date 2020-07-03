@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AsyncStorage } from 'react-native';
 
 const STORAGE_KEY = '@global';
+const PREFIX = '[container]';
 
 export interface Container<T> {
   set: (key: string, value: any) => void;
@@ -45,9 +46,10 @@ export default function useContainer<T>(
   }
 
   function set(key: string, value: any) {
-    if (state) {
-      setState((prevState) => ({ ...prevState, [key]: value }));
+    if (!state) {
+      throw new Error(`${PREFIX} State is not defined`);
     }
+    setState((prevState) => ({ ...prevState, [key]: value }));
   }
 
   function setAll(state: T) {
@@ -55,11 +57,12 @@ export default function useContainer<T>(
   }
 
   function remove(key: string) {
-    if (state) {
-      const newState: { [key: string]: any } = { ...state };
-      delete newState[key];
-      setState(newState as T);
+    if (!state) {
+      throw new Error(`${PREFIX} State is not defined`);
     }
+    const newState: { [key: string]: any } = { ...state };
+    delete newState[key];
+    setState(newState as T);
   }
 
   function clear() {
@@ -68,7 +71,7 @@ export default function useContainer<T>(
 
   function get(key: string) {
     if (!state) {
-      return null;
+      throw new Error(`${PREFIX} State is not defined`);
     }
     return (state as { [key: string]: any })[key];
   }

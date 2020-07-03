@@ -23,7 +23,7 @@ export default (props: ModalProps) => {
     customerId = user.customerId;
   }
   const cards = userContainer.getCards();
-  const currentCard = userContainer.getCurrentCard();
+  const currentCard = userContainer.getCurrentCardId();
   let key = currentCard;
   if (key === null) {
     key = 'TO_AGREE';

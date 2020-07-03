@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from 'react';
-import { View } from 'react-native';
+import { View, ViewStyle, StyleProp } from 'react-native';
 
 // components
 import Text from '../text';
@@ -33,9 +33,11 @@ export type IToast = {
 
 type Ref = IToast;
 
-export interface ToastProps {}
+export interface ToastProps {
+  containerStyle?: StyleProp<ViewStyle>;
+}
 
-export default forwardRef<Ref, ToastProps>((props, ref) => {
+export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
   // state
   const [toasts, setToasts] = useState<InternalToastData[]>([]);
 
@@ -93,7 +95,7 @@ export default forwardRef<Ref, ToastProps>((props, ref) => {
 
   // render logic
   return (
-    <View>
+    <View style={containerStyle}>
       {toasts.map((toastData, index, array) => {
         let toastAction = null;
         if (toastData.action) {

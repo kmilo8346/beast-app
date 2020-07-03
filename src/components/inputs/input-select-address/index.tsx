@@ -11,7 +11,7 @@ export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentAddressId = userContainer.getCurrentAddress();
+  const currentAddressId = userContainer.getCurrentAddressId();
   const adresses = userContainer.getAddresses();
   const currentAddress = adresses.find(
     (address) => address.id === currentAddressId
