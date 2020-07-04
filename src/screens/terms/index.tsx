@@ -36,8 +36,15 @@ export default ({ navigation, route }: ScreenProps) => {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text level={5} style={{ lineHeight: 30 }}>
-            Al continuar, aceptas los Términos de uso y la Política de
-            privacidad de Shop-Shop
+            Al continuar, aceptas los{' '}
+            <Text level={5} weight="bold">
+              Términos de uso
+            </Text>{' '}
+            y la{' '}
+            <Text level={5} weight="bold">
+              Política de Privacidad
+            </Text>{' '}
+            de Shop-Shop
           </Text>
         </View>
       </View>
