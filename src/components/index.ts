@@ -12,6 +12,7 @@ export { default as FriendlyInputNumber } from './inputs/friendly-input-number';
 export { default as Input } from './inputs/input';
 export { default as InputNumber } from './inputs/input-number';
 export { default as InputSelectAddress } from './inputs/input-select-address';
+export { default as InputSelectDeliveryTime } from './inputs/input-select-delivery-time';
 export { default as InputSelectCard } from './inputs/input-select-card';
 export { default as Modal, ModalProps } from './modals/modal';
 export { default as ModalManageAddress } from './modals/modal-manage-address';

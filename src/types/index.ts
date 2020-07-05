@@ -171,3 +171,9 @@ export interface PlacesAutocompletResponse {
 }
 
 export type PlacesDetailsResponse = Place;
+
+export type DeliveryTime = {
+  deliveryFrom: string;
+  deliveryTo: string;
+  timeMeasurement: 'H' | 'M';
+};
