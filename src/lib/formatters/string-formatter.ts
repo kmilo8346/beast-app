@@ -65,6 +65,10 @@ class StringFormatter {
 
     return `${text.slice(0, text.length - 1)}-${text.slice(text.length - 1)}`;
   }
+
+  toNumber(text: string | undefined) {
+    // TODO: implement
+  }
 }
 
 export default new StringFormatter();

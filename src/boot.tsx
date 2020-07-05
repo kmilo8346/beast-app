@@ -185,6 +185,8 @@ function SellerStackScreen() {
     initialRoute = 'SellerOnboarding';
   } else if (!store?.name || !store?.images) {
     initialRoute = 'SetStoreInfo';
+  } else if (!store?.deliveryTime) {
+    initialRoute = 'SetStoreDeliveryInfo';
   }
 
   return (

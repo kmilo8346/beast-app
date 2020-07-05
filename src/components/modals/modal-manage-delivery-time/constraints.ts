@@ -1,11 +1,11 @@
 export default {
-  deliveryFom: {
+  lte: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
   },
-  deliveryTo: {
+  gte: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',

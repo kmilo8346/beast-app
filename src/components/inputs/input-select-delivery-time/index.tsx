@@ -6,16 +6,19 @@ import InputSelect from '../input-select';
 import ModalManageDeliveryTime from '../../modals/modal-manage-delivery-time';
 // containers
 import UserProvider from '../../../containers/user';
+// types
+import { IntegerRange } from '../../../types';
+
+// TODO: mostrar un mensaje mas nice, ex; Entregas entre 1:20 y 3:20 horas
+
+// Entregas entre 1:20 y 3:20 horas
+// Entrega entre 20 minutos y 2:30 horas
 
 export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentAddressId = userContainer.getCurrentAddressId();
-  const adresses = userContainer.getAddresses();
-  const currentAddress = adresses.find(
-    (address) => address.id === currentAddressId
-  );
+  const store = userContainer.getStore();
 
   // event handlers
   const inputPressHandler = useCallback(() => {
@@ -24,23 +27,28 @@ export default () => {
   const requestCloseHandler = useCallback(() => {
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
+  const saveHandler = (deliveryTime: IntegerRange) => {
+    userContainer.updateStore({
+      deliveryTime,
+    });
+    setIsVisible((prevIsVisible) => !prevIsVisible);
+  };
 
   // render logic
-  let text = 'Definir Tiempo de entrega';
-  let deliveryFrom = '10'
-  let deliveryTo = '30'
-  if (currentAddress) {
-    text = `Entregas tus pedidos de ${deliveryFrom} a ${deliveryTo} minutos`;
+  let text = 'Tiempo de entrega';
+  if (store?.deliveryTime) {
+    text = `Entregas entre ${store.deliveryTime.lte} y ${store.deliveryTime.gte} minutos`;
   }
-  // if (currentAddress) {
-  //   text = `Entrega de - ${currentAddress.route.shortName} ${
-  //     currentAddress.streetNumber.shortName
-  //     }${currentAddress.apartment ? ` · ${currentAddress.apartment}` : ''}`;
-  // }
   return (
     <View>
       <InputSelect text={text} onPress={inputPressHandler} />
-      {isVisible && <ModalManageDeliveryTime onRequestClose={requestCloseHandler} />}
+      {isVisible && (
+        <ModalManageDeliveryTime
+          deliveryTime={store?.deliveryTime}
+          onSave={saveHandler}
+          onRequestClose={requestCloseHandler}
+        />
+      )}
     </View>
   );
 };

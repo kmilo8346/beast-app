@@ -339,6 +339,11 @@ export default ({ navigation }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
+    // update store
+    userContainer.updateStore({
+      name: state.form.name,
+      images: [state.form.imageUrl],
+    });
     navigation.navigate('SetStoreDeliveryInfo');
   };
   useEffect(() => {

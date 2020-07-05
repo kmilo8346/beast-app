@@ -5,14 +5,16 @@ export interface IntegerRange {
 
 export interface Store {
   id: string;
-  name: string;
-  phone: string;
-  images: string[];
-  deliveryTime: IntegerRange;
-  deliveryArea: {
-    type: 'Polygon';
-    coordinates: Array<Array<number>>;
-  };
+  name: string | undefined;
+  phone: string | undefined;
+  images: string[] | undefined;
+  deliveryTime: IntegerRange | undefined;
+  deliveryArea:
+    | {
+        type: 'Polygon';
+        coordinates: Array<Array<number>>;
+      }
+    | undefined;
 }
 
 export interface Product {
@@ -112,8 +114,11 @@ export interface User {
 
   currentAddress: Place | null;
   addresses: Place[];
+
   currentCard: Card | null | undefined;
   cards: Card[];
+
+  store: Store | null;
 
   metaData: { [key: string]: any };
 
@@ -171,9 +176,3 @@ export interface PlacesAutocompletResponse {
 }
 
 export type PlacesDetailsResponse = Place;
-
-export type DeliveryTime = {
-  deliveryFrom: string;
-  deliveryTo: string;
-  timeMeasurement: 'H' | 'M';
-};

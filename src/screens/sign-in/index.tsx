@@ -219,6 +219,10 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreInfo');
           return;
         }
+        if (!store?.deliveryTime) {
+          navigation.replace('SetStoreDeliveryInfo');
+          return;
+        }
       }
       navigation.replace(route.params.redirect.name);
     }
