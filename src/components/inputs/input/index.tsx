@@ -24,7 +24,6 @@ export interface InputProps extends TextInputProps {
   parse?: (text: string) => string;
   containerStyle?: StyleProp<ViewStyle>;
   prefixStyle?: StyleProp<ViewStyle>;
-  prefixComponentStyle?: StyleProp<ViewStyle>;
 }
 
 type Ref = TextInput;
@@ -42,7 +41,6 @@ export default forwardRef<Ref, InputProps>(
       onChangeText = () => null,
       containerStyle = {},
       prefixStyle = {},
-      prefixComponentStyle = {},
       ...inputProps
     },
     ref

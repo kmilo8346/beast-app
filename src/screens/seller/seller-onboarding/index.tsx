@@ -10,7 +10,6 @@ import { generatePushID } from '../../../lib/uuid';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-import { navigate } from '../../../lib/root-navigation';
 
 export interface ScreenProps {
   navigation: any;

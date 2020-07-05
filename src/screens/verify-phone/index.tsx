@@ -13,7 +13,6 @@ import firebase from '../../lib/firebase';
 import UserProvider from '../../containers/user';
 // styles
 import colors from '../../styles/colors';
-import globalStyles from '../../styles';
 
 type ChangeCodeAction = {
   type: 'change_code';
