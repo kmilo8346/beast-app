@@ -21,7 +21,12 @@ import {
   PLPInStoreScreen,
   PDPScreen,
   CheckoutScreen,
-  ToSaleScreen,
+  SellerOnboardingScreen,
+  SetStoreInfoScreen,
+  SetStoreDeliveryInfoScreen,
+  MercadoPagoSignInScreen,
+  MercadoPagoSignInRedirectScreen,
+  SellerDashboardScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -162,14 +167,14 @@ function SearchStackScreen() {
   );
 }
 
-const ToSaleStack = createStackNavigator();
+const SellerStack = createStackNavigator();
 
-function ToSaleStackScreen() {
+function SellerStackScreen() {
   return (
-    <ToSaleStack.Navigator screenOptions={commonStackOptions}>
-      <ToSaleStack.Screen
-        name="ToSale"
-        component={ToSaleScreen}
+    <SellerStack.Navigator screenOptions={commonStackOptions}>
+      <SellerStack.Screen
+        name="SellerOnboarding"
+        component={SellerOnboardingScreen}
         options={{ headerShown: false }}
       />
       <HomeStack.Screen
@@ -187,7 +192,28 @@ function ToSaleStackScreen() {
         component={VerifyPhoneScreen}
         options={{ title: '' }}
       />
-    </ToSaleStack.Navigator>
+      <SellerStack.Screen
+        name="SetStoreInfo"
+        component={SetStoreInfoScreen}
+        options={{ title: '' }}
+      />
+      <SellerStack.Screen
+        name="SetStoreDeliveryInfo"
+        component={SetStoreDeliveryInfoScreen}
+      />
+      <SellerStack.Screen
+        name="MercadoPagoSignIn"
+        component={MercadoPagoSignInScreen}
+      />
+      <SellerStack.Screen
+        name="MercadoPagoSignInRedirect"
+        component={MercadoPagoSignInRedirectScreen}
+      />
+      <SellerStack.Screen
+        name="SellerDashboard"
+        component={SellerDashboardScreen}
+      />
+    </SellerStack.Navigator>
   );
 }
 
@@ -233,7 +259,7 @@ function MainTabScreen() {
               case 'SearchStack':
                 name = 'search';
                 break;
-              case 'ToSaleStack':
+              case 'SellerStack':
                 name = 'tag';
                 break;
               case 'MenuStack':
@@ -251,7 +277,7 @@ function MainTabScreen() {
               case 'SearchStack':
                 text = 'Buscar';
                 break;
-              case 'ToSaleStack':
+              case 'SellerStack':
                 text = 'Vender';
                 break;
               case 'MenuStack':
@@ -272,7 +298,7 @@ function MainTabScreen() {
     >
       <MainTab.Screen name="HomeStack" component={HomeStackScreen} />
       <MainTab.Screen name="SearchStack" component={SearchStackScreen} />
-      <MainTab.Screen name="ToSaleStack" component={ToSaleStackScreen} />
+      <MainTab.Screen name="SellerStack" component={SellerStackScreen} />
       <MainTab.Screen name="MenuStack" component={MenuStackScreen} />
     </MainTab.Navigator>
   );

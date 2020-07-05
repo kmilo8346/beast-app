@@ -32,7 +32,8 @@
     "react-native-web": "~0.11.7",
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
-    "validate.js": "^0.13.1"
+    "validate.js": "^0.13.1",
+    "expo-image-picker": "~8.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

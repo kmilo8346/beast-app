@@ -24,7 +24,13 @@
     },
     "android": {
       "package": "com.firedevs.beast",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "VIBRATE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "facebookScheme": "fb587498002202284"
   }
