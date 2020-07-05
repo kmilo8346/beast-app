@@ -170,8 +170,28 @@ function SearchStackScreen() {
 const SellerStack = createStackNavigator();
 
 function SellerStackScreen() {
+  const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
+  const store = userContainer.getStore();
+
+  let initialRoute = 'SellerDashboard';
+  if (
+    !store ||
+    !user?.email ||
+    !user?.customerId ||
+    !user?.phone ||
+    !user?.phoneVerified
+  ) {
+    initialRoute = 'SellerOnboarding';
+  } else if (!store?.name || !store?.images) {
+    initialRoute = 'SetStoreInfo';
+  }
+
   return (
-    <SellerStack.Navigator screenOptions={commonStackOptions}>
+    <SellerStack.Navigator
+      screenOptions={commonStackOptions}
+      initialRouteName={initialRoute}
+    >
       <SellerStack.Screen
         name="SellerOnboarding"
         component={SellerOnboardingScreen}
@@ -200,6 +220,7 @@ function SellerStackScreen() {
       <SellerStack.Screen
         name="SetStoreDeliveryInfo"
         component={SetStoreDeliveryInfoScreen}
+        options={{ title: '' }}
       />
       <SellerStack.Screen
         name="MercadoPagoSignIn"

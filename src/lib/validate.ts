@@ -68,7 +68,11 @@ validate.validators.fieldsPresence = (
   _key: any,
   attributes: { [key: string]: any }
 ) => {
-  if (options.fields.every((field: string) => field in attributes)) {
+  if (
+    options.fields.every(
+      (field: string) => field in attributes && !!attributes[field]
+    )
+  ) {
     return null;
   }
   return options.message;

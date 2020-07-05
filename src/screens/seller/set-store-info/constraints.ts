@@ -11,8 +11,8 @@ export default {
       message: '^Es requerido',
     },
     fieldsPresence: {
-      fields: ['imageBase64'],
-      message: '^Imagen incorrecta, agregue otra',
+      fields: ['imageUrl'],
+      message: '^Imagen aún no se ha subido a la nube',
     },
   },
 } as { [key: string]: any };

@@ -5,6 +5,8 @@ import { View } from 'react-native';
 import { Container, Text, Button } from '../../../components';
 // containers
 import UserProvider from '../../../containers/user';
+// libs
+import { generatePushID } from '../../../lib/uuid';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
@@ -18,24 +20,33 @@ export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
+  const store = userContainer.getStore();
 
   // event hanlders
   const pressCreateStoreHandler = () => {
+    // create store if not exist
+    if (!store) {
+      userContainer.updateUser({
+        store: {
+          id: generatePushID(),
+        },
+      });
+    }
+    // navigation
     if (!user?.email || !user?.customerId) {
-      console.log('1', user?.email, user?.customerId);
       navigation.navigate('SignIn', {
-        redirect: 'SellerDashboard',
+        redirect: {
+          name: 'SellerDashboard',
+        },
       });
       return;
     }
     if (!user?.phone || !user?.phoneVerified) {
-      console.log('2');
       navigation.navigate('SetPhone', {
         redirect: 'SellerDashboard',
       });
       return;
     }
-    console.log('3');
     navigation.navigate('SetStoreInfo');
   };
   // render logic

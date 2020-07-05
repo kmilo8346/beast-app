@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
 import { View, ScrollView, Linking, Image, Vibration } from 'react-native';
 import validate from 'validate.js';
 import Constants from 'expo-constants';
@@ -17,11 +17,18 @@ import {
   IToast,
   ButtonIcon,
 } from '../../../components';
+// containers
+import UserProvider from '../../../containers/user';
+// libs
+import firebase from '../../../lib/firebase';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
+
+const PREFIX = '[set store info]';
+let uploadTaskRef: firebase.storage.UploadTask | null = null;
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -46,10 +53,15 @@ type ShowSelectorAction = {
 type HideSelectorAction = {
   type: 'hide_selector';
 };
-type SetImageAction = {
-  type: 'set_image';
-  image: string;
-  imageBase64: string;
+type ShowUploadingAction = {
+  type: 'show_uploading';
+};
+type HideUploadingAction = {
+  type: 'hide_uploading';
+};
+type SetUploadingProgressAction = {
+  type: 'set_uploading_progress';
+  uploadingProgress: number;
 };
 type Action =
   | ChangeValueAction
@@ -58,7 +70,9 @@ type Action =
   | SetFormErrorsAction
   | ShowSelectorAction
   | HideSelectorAction
-  | SetImageAction;
+  | ShowUploadingAction
+  | HideUploadingAction
+  | SetUploadingProgressAction;
 type State = {
   form: {
     // fields
@@ -66,12 +80,14 @@ type State = {
     image: string;
 
     // hidden fields
-    imageBase64: string;
+    imageUrl: string;
     // other form states
     submitted: boolean;
     errors?: { [key: string]: string[] };
   };
   selector: boolean;
+  uploading: boolean;
+  uploadingProgress: number;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -98,15 +114,12 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, selector: true };
     case 'hide_selector':
       return { ...state, selector: false };
-    case 'set_image':
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          image: action.image,
-          imageBase64: action.imageBase64,
-        },
-      };
+    case 'show_uploading':
+      return { ...state, uploading: true };
+    case 'hide_uploading':
+      return { ...state, uploading: false, uploadingProgress: 0 };
+    case 'set_uploading_progress':
+      return { ...state, uploadingProgress: action.uploadingProgress };
     default:
       return state;
   }
@@ -124,15 +137,29 @@ export default ({ navigation }: ScreenProps) => {
       name: '',
       image: '',
       // hidden fields
-      imageBase64: '',
+      imageUrl: '',
       // other form states
       submitted: false,
     },
     selector: false,
+    uploading: false,
+    uploadingProgress: 0,
   });
   const toastRef = useRef<IToast>(null);
+  const userContainer = UserProvider.useContainer();
+  const store = userContainer.getStore();
 
   // events handlers
+  const changeHandler = (attribute: string, value: string) => {
+    dispatch({ type: 'change_value', attribute, value });
+    dispatch({ type: 'validate_value', attribute, value });
+  };
+  const showUnexpectedError = (message?: string) => {
+    toastRef.current?.show({
+      message: message || 'Ocurrió un error inesperado',
+      expiration: 5,
+    });
+  };
   const permisionNotGrantedHandler = () => {
     toastRef.current?.show({
       message: 'Se necesita asignar permisos',
@@ -148,6 +175,68 @@ export default ({ navigation }: ScreenProps) => {
       type: 'WARNING',
       expiration: 5,
     });
+  };
+  const imagePickedHandler = async (result: ImagePicker.ImagePickerResult) => {
+    try {
+      // preconditions
+      if (result.cancelled) {
+        throw new Error(`${PREFIX} Cant manage image picked if user cancelled`);
+      }
+      if (!store) {
+        throw new Error(`${PREFIX} Store must be initialized`);
+      }
+      // set image uri to show to the user
+      changeHandler('image', result.uri);
+
+      // use this notation to override images and avoid clean tasks
+      const fileName = '1.jpg';
+      const metadata = {
+        contentType: 'image/jpeg',
+      };
+      const response = await fetch(result.uri);
+      const blob = await response.blob();
+
+      const storageRef = firebase.storage().ref();
+      uploadTaskRef = storageRef
+        .child(`stores/${store?.id}/images/${fileName}`)
+        .put(blob, metadata);
+
+      dispatch({ type: 'show_uploading' });
+      // Listen for state changes, errors, and completion of the upload.
+      uploadTaskRef.on(
+        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        (snapshot) => {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const uploadingProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          dispatch({ type: 'set_uploading_progress', uploadingProgress });
+        },
+        (error: any) => {
+          dispatch({ type: 'hide_uploading' });
+
+          // A full list of error codes is available at
+          // https://firebase.google.com/docs/storage/web/handle-errors
+          // eslint-disable-next-line no-underscore-dangle
+          const code = error.code || error.code_;
+          if (code !== 'storage/canceled') {
+            console.log(`${PREFIX} Error uploading image`, error);
+            showUnexpectedError();
+          }
+        },
+        async () => {
+          dispatch({ type: 'hide_uploading' });
+          try {
+            // Upload completed successfully, now we can get the download URL
+            const imageUrl = await uploadTaskRef?.snapshot.ref.getDownloadURL();
+            changeHandler('imageUrl', imageUrl);
+          } catch (error) {
+            showUnexpectedError();
+          }
+        }
+      );
+    } catch (error) {
+      showUnexpectedError();
+    }
   };
   const pickImageFromImageLibrary = async () => {
     try {
@@ -171,17 +260,9 @@ export default ({ navigation }: ScreenProps) => {
         return;
       }
 
-      // set image uri and image base 64
-      dispatch({
-        type: 'set_image',
-        image: result.uri,
-        imageBase64: result.base64 as string,
-      });
+      imagePickedHandler(result);
     } catch (error) {
-      toastRef.current?.show({
-        message: 'Ocurrió un error inesperado',
-        expiration: 5,
-      });
+      showUnexpectedError();
     }
   };
   const takePhotoUsingCamera = async () => {
@@ -209,22 +290,10 @@ export default ({ navigation }: ScreenProps) => {
         return;
       }
 
-      // set image uri and image base 64
-      dispatch({
-        type: 'set_image',
-        image: result.uri,
-        imageBase64: result.base64 as string,
-      });
+      imagePickedHandler(result);
     } catch (error) {
-      toastRef.current?.show({
-        message: 'Ocurrió un error inesperado',
-        expiration: 5,
-      });
+      showUnexpectedError();
     }
-  };
-  const changeHandler = (attribute: string, value: string) => {
-    dispatch({ type: 'change_value', attribute, value });
-    dispatch({ type: 'validate_value', attribute, value });
   };
   const selectorRequestCloseHandler = () => {
     dispatch({ type: 'hide_selector' });
@@ -249,7 +318,17 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'show_selector' });
   };
   const pressClearImageHandler = () => {
-    dispatch({ type: 'set_image', image: '', imageBase64: '' });
+    dispatch({ type: 'change_value', attribute: 'image', value: '' });
+    dispatch({ type: 'change_value', attribute: 'imageUrl', value: '' });
+
+    if (uploadTaskRef) {
+      try {
+        uploadTaskRef.cancel();
+      } catch (error) {
+        // TODO: manage error
+        console.log(`${PREFIX} Error canceling task`);
+      }
+    }
   };
   const pressContinueHandler = () => {
     dispatch({ type: 'set_form_submitted' });
@@ -260,8 +339,18 @@ export default ({ navigation }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
-    console.log('submit image, navigate to set store delivery info');
+    navigation.navigate('SetStoreDeliveryInfo');
   };
+  useEffect(() => {
+    if (uploadTaskRef) {
+      try {
+        uploadTaskRef.cancel();
+      } catch (error) {
+        // TODO: manage error
+        console.log(`${PREFIX} Error canceling task`);
+      }
+    }
+  }, []);
 
   // render logic
   let image = (
@@ -284,13 +373,13 @@ export default ({ navigation }: ScreenProps) => {
           </Text>
         </View>
       </Touchable>
-      {!!state.form.errors && (
+      {!!state.form.errors?.image && (
         <Text
           level={8}
           color={colors.red}
           style={{ marginTop: 10, textAlign: 'center' }}
         >
-          {state.form.errors?.image}
+          {state.form.errors?.image[0]}
         </Text>
       )}
     </View>
@@ -321,6 +410,21 @@ export default ({ navigation }: ScreenProps) => {
             borderRadius: 10,
           }}
         />
+        {state.uploading && (
+          <Text
+            level={8}
+            style={{ marginTop: 10, textAlign: 'center' }}
+          >{`Subiendo imagen ${Math.round(state.uploadingProgress)}%`}</Text>
+        )}
+        {!!state.form.errors?.image && (
+          <Text
+            level={8}
+            color={colors.red}
+            style={{ marginTop: 10, textAlign: 'center' }}
+          >
+            {state.form.errors?.image[0]}
+          </Text>
+        )}
       </View>
     );
   }
