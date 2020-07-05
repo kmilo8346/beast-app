@@ -9,7 +9,7 @@ import firebase from '../lib/firebase';
 // clients
 import customerClient from '../clients/customer-client';
 // types
-import { Place, User, Card } from '../types';
+import { Place, User, Card, Store } from '../types';
 
 const STORAGE_KEY = 'user';
 const COLLECTION = 'users';
@@ -43,6 +43,10 @@ export interface UserContainer {
   setCurrentCard: (cardId: string | null) => Promise<void>;
   addCard: (card: Card) => Promise<void>;
   deleteCard: (id: string) => Promise<void>;
+
+  // store
+  getStore: () => Store | null;
+  updateStore(data: Partial<Store>): Promise<void>;
 }
 
 export default createContainer(
@@ -79,12 +83,8 @@ export default createContainer(
             (doc) => {
               const data = doc.data() || null;
               if (data) {
-                console.log('snapshot con data');
-              } else {
-                console.log('snapshot sin data, skipping update');
-                return;
+                container.setAll(data as User);
               }
-              container.setAll(data as User);
             },
             (error) => {
               console.log(
@@ -124,6 +124,10 @@ export default createContainer(
       setCurrentCard,
       addCard,
       deleteCard,
+
+      // store
+      getStore,
+      updateStore,
     };
 
     // user
@@ -433,6 +437,24 @@ export default createContainer(
         currentCard,
         cards,
       });
+    }
+
+    function getStore(): Store | null {
+      return container.get('store') || null;
+    }
+
+    async function updateStore(data: Partial<Store>): Promise<void> {
+      if (!user) {
+        throw new Error('User is not defined');
+      }
+      if (!user.store) {
+        throw new Error('Store is not defined');
+      }
+      const storeUpdate: { [key: string]: any } = {};
+      Object.keys(data).forEach((key) => {
+        storeUpdate[`store.${key}`] = (data as { [key: string]: any })[key];
+      });
+      return db.collection(COLLECTION).doc(user.id).update(storeUpdate);
     }
   }
 );

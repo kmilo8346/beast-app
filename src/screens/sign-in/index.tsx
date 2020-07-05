@@ -132,6 +132,7 @@ export default ({ navigation, route }: ScreenProps) => {
   });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
+  const store = userContainer.getStore();
 
   // event handlers
   const signInWithProviderOkHandler = async (
@@ -211,6 +212,13 @@ export default ({ navigation, route }: ScreenProps) => {
           })
         );
         return;
+      }
+      // redirect to SellerDashboard
+      if (route.params.redirect.name === 'SellerDashboard') {
+        if (!store?.name || !store.images) {
+          navigation.replace('SetStoreInfo');
+          return;
+        }
       }
       navigation.replace(route.params.redirect.name);
     }

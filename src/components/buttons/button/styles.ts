@@ -40,6 +40,7 @@ export default StyleSheet.create<Styles>({
   container_link: {
     backgroundColor: colors.white,
     color: colors.blue,
+    height: 'auto',
   },
   container_disabled: {},
   title_primary: {
