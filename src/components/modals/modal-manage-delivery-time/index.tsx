@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -6,14 +6,29 @@ import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import Input from '../../inputs/input';
 import Text from '../../text';
+import DateTimePicker from '../../date-time-picker';
 // types
 import { IntegerRange } from '../../../types';
 // libs
 import validate from '../../../lib/validate';
+import stringFormatter from '../../../lib/formatters/string-formatter';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyle from '../../../styles';
+
+// extending validate validators
+validate.validators.notLessThanOrEqualToMin = (
+  _value: any,
+  _options: any,
+  _key: any,
+  attributes: { [key: string]: any }
+) => {
+  if (parseInt(attributes.gte, 10) > parseInt(attributes.lte, 10)) {
+    return null;
+  }
+  return '^El valor debe ser mayor que el mínimo';
+};
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -79,9 +94,6 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-// TODO: validate min < max
-// TODO: format to avoid text
-
 export interface ModalManageDeliveryTimeProps extends ModalProps {
   deliveryTime?: IntegerRange;
   onSave: (deliveryTime: IntegerRange) => void;
@@ -93,7 +105,7 @@ export default ({
   ...otherProps
 }: ModalManageDeliveryTimeProps) => {
   // state
-
+  const [showPicker, setShowPicker] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
@@ -127,6 +139,10 @@ export default ({
     });
   };
 
+  const onDateTimeSelected = (date: Date) => {
+    console.log('Date selected: ', date);
+  };
+
   // render logic
   return (
     <Modal {...otherProps} title="Tiempo de entrega">
@@ -139,6 +155,7 @@ export default ({
           placeholder="Tiempo mínimo"
           keyboardType="number-pad"
           value={state.form.lte}
+          format={stringFormatter.toNumber}
           errors={state.form.errors?.lte}
           onChangeText={(text) => {
             changeHandler('lte', text);
@@ -148,10 +165,19 @@ export default ({
           placeholder="Tiempo máximo"
           keyboardType="number-pad"
           value={state.form.gte}
+          format={stringFormatter.toNumber}
           errors={state.form.errors?.gte}
           onChangeText={(text) => {
             changeHandler('gte', text);
           }}
+        />
+        {showPicker && (
+          <DateTimePicker mode="countdown" onSelect={onDateTimeSelected} />
+        )}
+        <Button
+          title="Show Picker"
+          onPress={() => setShowPicker((prevIsVisible) => !prevIsVisible)}
+          style={globalStyle.withMainActionAir}
         />
         <Button
           title="Guardar"

@@ -33,7 +33,8 @@
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
     "validate.js": "^0.13.1",
-    "expo-image-picker": "~8.1.0"
+    "expo-image-picker": "~8.1.0",
+    "@react-native-community/datetimepicker": "2.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

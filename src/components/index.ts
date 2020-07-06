@@ -14,6 +14,7 @@ export { default as InputNumber } from './inputs/input-number';
 export { default as InputSelectAddress } from './inputs/input-select-address';
 export { default as InputSelectDeliveryTime } from './inputs/input-select-delivery-time';
 export { default as InputSelectCard } from './inputs/input-select-card';
+export { default as DateTimePicker } from './date-time-picker';
 export { default as Modal, ModalProps } from './modals/modal';
 export { default as ModalManageAddress } from './modals/modal-manage-address';
 export { default as ModalManagePayment } from './modals/modal-manage-cards';

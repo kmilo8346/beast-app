@@ -67,7 +67,7 @@ class StringFormatter {
   }
 
   toNumber(text: string | undefined) {
-    // TODO: implement
+    return text?.replace(/[^0-9]/g, '');
   }
 }
 
