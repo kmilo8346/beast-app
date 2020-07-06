@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import React, { useReducer } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -6,7 +6,6 @@ import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import Input from '../../inputs/input';
 import Text from '../../text';
-import DateTimePicker from '../../date-time-picker';
 // types
 import { IntegerRange } from '../../../types';
 // libs
@@ -18,7 +17,7 @@ import constraints from './constraints';
 import globalStyle from '../../../styles';
 
 // extending validate validators
-validate.validators.notLessThanOrEqualToMin = (
+validate.validators.greaterThanMin = (
   _value: any,
   _options: any,
   _key: any,
@@ -105,7 +104,6 @@ export default ({
   ...otherProps
 }: ModalManageDeliveryTimeProps) => {
   // state
-  const [showPicker, setShowPicker] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
@@ -139,10 +137,6 @@ export default ({
     });
   };
 
-  const onDateTimeSelected = (date: Date) => {
-    console.log('Date selected: ', date);
-  };
-
   // render logic
   return (
     <Modal {...otherProps} title="Tiempo de entrega">
@@ -171,14 +165,7 @@ export default ({
             changeHandler('gte', text);
           }}
         />
-        {showPicker && (
-          <DateTimePicker mode="countdown" onSelect={onDateTimeSelected} />
-        )}
-        <Button
-          title="Show Picker"
-          onPress={() => setShowPicker((prevIsVisible) => !prevIsVisible)}
-          style={globalStyle.withMainActionAir}
-        />
+
         <Button
           title="Guardar"
           onPress={saveHandler}

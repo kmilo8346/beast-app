@@ -10,6 +10,6 @@ export default {
       allowEmpty: false,
       message: '^Es requerido',
     },
-    notLessThanOrEqualToMin: true,
+    greaterThanMin: true,
   },
 } as { [key: string]: any };
