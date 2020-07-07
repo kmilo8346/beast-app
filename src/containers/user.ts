@@ -253,14 +253,13 @@ export default createContainer(
             id: authUser.uid,
             email: authUser.email,
             customerId,
-            identificationNumber: null,
             firstName,
             lastName,
             phone: authUser.phoneNumber,
             phoneVerified: false,
             photoURL: authUser.photoURL,
             metaData: {
-              codes: [],
+              codes: [], // TODO: remove this
             },
           };
         }

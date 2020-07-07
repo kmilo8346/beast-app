@@ -21,11 +21,13 @@ import {
 import UserProvider from '../../../containers/user';
 // libs
 import firebase from '../../../lib/firebase';
+import { generatePushID } from '../../../lib/uuid';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
+import { User, Place } from '../../../types';
 
 const PREFIX = '[set store info]';
 let uploadTaskRef: firebase.storage.UploadTask | null = null;
@@ -147,6 +149,7 @@ export default ({ navigation }: ScreenProps) => {
   });
   const toastRef = useRef<IToast>(null);
   const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
   const store = userContainer.getStore();
 
   // events handlers
@@ -154,9 +157,10 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value', attribute, value });
   };
-  const showUnexpectedError = (message?: string) => {
+  const showUnexpectedError = (error: Error) => {
+    console.log(error);
     toastRef.current?.show({
-      message: message || 'Ocurrió un error inesperado',
+      message: 'Ocurrió un error inesperado',
       expiration: 5,
     });
   };
@@ -220,7 +224,7 @@ export default ({ navigation }: ScreenProps) => {
           const code = error.code || error.code_;
           if (code !== 'storage/canceled') {
             console.log(`${PREFIX} Error uploading image`, error);
-            showUnexpectedError();
+            showUnexpectedError(error);
           }
         },
         async () => {
@@ -230,12 +234,12 @@ export default ({ navigation }: ScreenProps) => {
             const imageUrl = await uploadTaskRef?.snapshot.ref.getDownloadURL();
             changeHandler('imageUrl', imageUrl);
           } catch (error) {
-            showUnexpectedError();
+            showUnexpectedError(error);
           }
         }
       );
     } catch (error) {
-      showUnexpectedError();
+      showUnexpectedError(error);
     }
   };
   const pickImageFromImageLibrary = async () => {
@@ -262,7 +266,7 @@ export default ({ navigation }: ScreenProps) => {
 
       imagePickedHandler(result);
     } catch (error) {
-      showUnexpectedError();
+      showUnexpectedError(error);
     }
   };
   const takePhotoUsingCamera = async () => {
@@ -292,7 +296,7 @@ export default ({ navigation }: ScreenProps) => {
 
       imagePickedHandler(result);
     } catch (error) {
-      showUnexpectedError();
+      showUnexpectedError(error);
     }
   };
   const selectorRequestCloseHandler = () => {
@@ -346,15 +350,33 @@ export default ({ navigation }: ScreenProps) => {
     });
     navigation.navigate('SetStoreDeliveryInfo');
   };
+
   useEffect(() => {
-    if (uploadTaskRef) {
-      try {
-        uploadTaskRef.cancel();
-      } catch (error) {
-        // TODO: manage error
-        console.log(`${PREFIX} Error canceling task`);
-      }
+    // if not store initilized, initialized one with default values
+    if (!store) {
+      userContainer.updateUser({
+        store: {
+          id: generatePushID(),
+          phone: user?.phone,
+          deliveryArea: {
+            center: userContainer.getCurrentAddress() as Place,
+            radius: '50m',
+          },
+        },
+      });
     }
+  }, []);
+  useEffect(() => {
+    return () => {
+      if (uploadTaskRef) {
+        try {
+          uploadTaskRef.cancel();
+        } catch (error) {
+          // TODO: manage error
+          console.log(`${PREFIX} Error canceling task`);
+        }
+      }
+    };
   }, []);
 
   // render logic

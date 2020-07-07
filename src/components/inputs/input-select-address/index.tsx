@@ -34,7 +34,7 @@ export default () => {
   }
   return (
     <View>
-      <InputSelect text={text} onPress={inputPressHandler} />
+      <InputSelect value={text} onPress={inputPressHandler} />
       {isVisible && <ModalManageAddress onRequestClose={requestCloseHandler} />}
     </View>
   );

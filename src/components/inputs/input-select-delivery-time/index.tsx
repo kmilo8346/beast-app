@@ -41,7 +41,7 @@ export default () => {
   }
   return (
     <View>
-      <InputSelect text={text} onPress={inputPressHandler} />
+      <InputSelect value={text} onPress={inputPressHandler} />
       {isVisible && (
         <ModalManageDeliveryTime
           deliveryTime={store?.deliveryTime}

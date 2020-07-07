@@ -23,6 +23,7 @@ export interface InputSelectOptions {
   value: string;
   errors?: string[];
   options: Option[];
+  modalTitle: string;
   onChange?: (key: string) => void;
 }
 
@@ -32,6 +33,7 @@ export default ({
   value,
   options,
   errors,
+  modalTitle,
   onChange = () => null,
 }: InputSelectOptions) => {
   // state
@@ -62,7 +64,7 @@ export default ({
       {isVisible && (
         <Modal
           type="auto"
-          title="Selecciona tipo de documento"
+          title={modalTitle}
           onRequestClose={requestCloseHandler}
         >
           <View style={globalStyle.withMargin}>

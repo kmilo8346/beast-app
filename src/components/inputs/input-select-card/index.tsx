@@ -32,7 +32,7 @@ export default () => {
   }
   return (
     <View>
-      <InputSelect text={text} onPress={pressHandler} />
+      <InputSelect value={text} onPress={pressHandler} />
       {isVisible && <ModalManagePayment onRequestClose={requestCloseHandler} />}
     </View>
   );

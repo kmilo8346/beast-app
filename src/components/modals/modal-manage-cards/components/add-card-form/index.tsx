@@ -410,6 +410,7 @@ export default ({ customerId, onAdd }: AddCardFormProps) => {
             <InputSelectOptions
               label="Tipo Documento"
               value={state.form.dockTypeId}
+              modalTitle="Selecciona tipo de documento"
               onChange={(key) => {
                 changeHandler('dockTypeId', key);
               }}

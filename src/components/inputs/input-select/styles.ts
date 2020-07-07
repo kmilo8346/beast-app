@@ -5,25 +5,33 @@ import colors from '../../../styles/colors';
 
 interface Styles {
   container: ViewStyle;
-  text: TextStyle;
-  icon: ViewStyle;
+  icon: TextStyle;
+  textContainer: ViewStyle;
+  label: TextStyle;
+  error: TextStyle;
 }
 
 export default StyleSheet.create<Styles>({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     backgroundColor: colors.blackLight6,
-    borderRadius: 7,
-  },
-  text: {
-    marginLeft: 15,
-    marginRight: 3,
-    flex: 1,
+    borderRadius: 10,
   },
   icon: {
-    marginRight: 15,
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  label: {
+    marginBottom: 5,
+    color: colors.blackLight2,
+  },
+  error: {
+    marginTop: 3,
+    marginLeft: 10,
   },
 });

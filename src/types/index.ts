@@ -3,18 +3,18 @@ export interface IntegerRange {
   gte: number;
 }
 
+export interface Circle {
+  center: Place;
+  radius: string;
+}
+
 export interface Store {
   id: string;
   name: string | undefined;
   phone: string | undefined;
   images: string[] | undefined;
   deliveryTime: IntegerRange | undefined;
-  deliveryArea:
-    | {
-        type: 'Polygon';
-        coordinates: Array<Array<number>>;
-      }
-    | undefined;
+  deliveryArea: Circle | undefined;
 }
 
 export interface Product {
@@ -102,23 +102,23 @@ export interface Card {
 
 export interface User {
   id: string;
-  email: string | null;
-  customerId: string | null;
+  email: string | undefined;
+  customerId: string | undefined;
   identificationType: 'RUT';
-  identificationNumber: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  phone: string | null;
+  identificationNumber: string | undefined;
+  firstName: string | undefined;
+  lastName: string | undefined;
+  phone: string | undefined;
   phoneVerified: boolean;
-  photoURL: string | null;
+  photoURL: string | undefined;
 
-  currentAddress: Place | null;
+  currentAddress: string | undefined;
   addresses: Place[];
 
-  currentCard: Card | null | undefined;
+  currentCard: string | null | undefined;
   cards: Card[];
 
-  store: Store | null;
+  store: Store | undefined;
 
   metaData: { [key: string]: any };
 

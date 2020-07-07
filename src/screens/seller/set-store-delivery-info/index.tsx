@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -6,12 +6,81 @@ import {
   Container,
   Text,
   Button,
-  InputSelectDeliveryTime,
+  InputSetDeliveryArea,
   Toast,
   IToast,
 } from '../../../components';
+// libs
+import validate from '../../../lib/validate';
+// containers
+import UserProvider from '../../../containers/user';
+// constraints
+import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
+import { Circle } from '../../../types';
+
+// instances outside component
+const PREFIX = '[set store delivery info screen]';
+
+type ChangeValueAction = {
+  type: 'change_value';
+  attribute: string;
+  value: any;
+};
+type ValidateValueAction = {
+  type: 'validate_value';
+  attribute: string;
+  value: any;
+};
+type SetSubmittedAction = {
+  type: 'set_submitted';
+};
+type SetFormErrorsAction = {
+  type: 'set_form_errors';
+  errors: { [key: string]: string[] };
+};
+type Action =
+  | ChangeValueAction
+  | ValidateValueAction
+  | SetSubmittedAction
+  | SetFormErrorsAction;
+type State = {
+  form: {
+    // fields;
+    deliveryArea?: Circle;
+    // hidden field
+
+    // other states
+    submitted: boolean;
+    errors?: { [key: string]: string[] };
+  };
+};
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'change_value':
+      return {
+        ...state,
+        form: { ...state.form, [action.attribute]: action.value },
+      };
+    case 'validate_value':
+      if (!state.form.submitted) return state;
+
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          errors: validate(state.form, constraints),
+        },
+      };
+    case 'set_submitted':
+      return { ...state, form: { ...state.form, submitted: true } };
+    case 'set_form_errors':
+      return { ...state, form: { ...state.form, errors: action.errors } };
+    default:
+      return state;
+  }
+};
 
 export interface ScreenProps {
   navigation: any;
@@ -19,16 +88,59 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
+  const userContainer = UserProvider.useContainer();
+  const store = userContainer.getStore();
+  const [state, dispatch] = useReducer(reducer, {
+    form: {
+      // fields
+      deliveryArea: store?.deliveryArea,
+      // hidden fields
+
+      // other form states
+      submitted: false,
+    },
+  });
   const toastRef = useRef<IToast>(null);
+  // precondition
+  if (!store || !store.name || !store.images) {
+    throw new Error(
+      `${PREFIX} Store must be initialized and must have name and images`
+    );
+  }
+
   // event handlers
-  const pressContinueHandler = () => {};
+  const changeHandler = (attribute: string, value: any) => {
+    dispatch({ type: 'change_value', attribute, value });
+    dispatch({ type: 'validate_value', attribute, value });
+  };
+  const pressContinueHandler = () => {
+    // set submitted
+    dispatch({ type: 'set_submitted' });
+    // validate
+    const errors = validate(state.form, constraints);
+    if (errors) {
+      dispatch({ type: 'set_form_errors', errors });
+      return;
+    }
+
+    console.log('Save store delivery info');
+  };
   // render logic
   return (
     <Container withPadding>
       <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
         Información de despacho
       </Text>
-      <InputSelectDeliveryTime />
+      <View style={{ marginTop: 20 }}>
+        <InputSetDeliveryArea
+          value={state.form.deliveryArea}
+          errors={state.form.errors?.deliveryArea}
+          onChange={(deliveryArea) => {
+            changeHandler('deliveryArea', deliveryArea);
+          }}
+        />
+      </View>
+
       <View
         style={[
           { position: 'absolute', left: 0, right: 0, bottom: 0 },
