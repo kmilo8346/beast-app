@@ -146,23 +146,29 @@ export default ({
           de entregar una venta.
         </Text>
         <Input
-          placeholder="Tiempo mínimo"
+          label="Tiempo mínimo"
+          placeholder="10"
           keyboardType="number-pad"
           value={state.form.lte}
           format={stringFormatter.toNumber}
           errors={state.form.errors?.lte}
           onChangeText={(text) => {
-            changeHandler('lte', text);
+            if (text.length < 4) {
+              changeHandler('lte', text);
+            }
           }}
         />
         <Input
-          placeholder="Tiempo máximo"
+          label="Tiempo máximo"
+          placeholder="40"
           keyboardType="number-pad"
           value={state.form.gte}
           format={stringFormatter.toNumber}
           errors={state.form.errors?.gte}
           onChangeText={(text) => {
-            changeHandler('gte', text);
+            if (text.length < 4) {
+              changeHandler('gte', text);
+            }
           }}
         />
 
