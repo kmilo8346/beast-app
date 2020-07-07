@@ -13,7 +13,6 @@ export { default as Input } from './inputs/input';
 export { default as InputNumber } from './inputs/input-number';
 export { default as InputSelectAddress } from './inputs/input-select-address';
 export { default as InputSetDeliveryTime } from './inputs/input-set-delivery-time';
-export { default as InputSetOpeningHours } from './inputs/input-set-opening-hours';
 export { default as InputSelectCard } from './inputs/input-select-card';
 export { default as InputSetDeliveryArea } from './inputs/input-set-delivery-area';
 export { default as Modal, ModalProps } from './modals/modal';

@@ -219,7 +219,8 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreInfo');
           return;
         }
-        if (!store?.deliveryTime) {
+        if (!store.deliveryArea || !store.deliveryTime) {
+          // TODO: add opening hours
           navigation.replace('SetStoreDeliveryInfo');
           return;
         }

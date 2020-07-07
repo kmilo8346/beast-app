@@ -56,7 +56,7 @@ export default StyleSheet.create<Styles>({
   },
   title: {
     marginHorizontal: 21,
-    marginBottom: 34,
+    marginBottom: 25,
   },
   header: {
     height: 60,

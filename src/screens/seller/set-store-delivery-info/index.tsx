@@ -7,6 +7,7 @@ import {
   Text,
   Button,
   InputSetDeliveryArea,
+  InputSetDeliveryTime,
   Toast,
   IToast,
 } from '../../../components';
@@ -18,7 +19,7 @@ import UserProvider from '../../../containers/user';
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
-import { Circle } from '../../../types';
+import { Circle, IntegerRange } from '../../../types';
 
 // instances outside component
 const PREFIX = '[set store delivery info screen]';
@@ -49,6 +50,7 @@ type State = {
   form: {
     // fields;
     deliveryArea?: Circle;
+    deliveryTime?: IntegerRange;
     // hidden field
 
     // other states
@@ -94,6 +96,7 @@ export default ({ navigation }: ScreenProps) => {
     form: {
       // fields
       deliveryArea: store?.deliveryArea,
+      deliveryTime: store?.deliveryTime,
       // hidden fields
 
       // other form states
@@ -112,6 +115,9 @@ export default ({ navigation }: ScreenProps) => {
   const changeHandler = (attribute: string, value: any) => {
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value', attribute, value });
+    userContainer.updateStore({
+      [attribute]: value,
+    });
   };
   const pressContinueHandler = () => {
     // set submitted
@@ -137,6 +143,13 @@ export default ({ navigation }: ScreenProps) => {
           errors={state.form.errors?.deliveryArea}
           onChange={(deliveryArea) => {
             changeHandler('deliveryArea', deliveryArea);
+          }}
+        />
+        <InputSetDeliveryTime
+          value={state.form.deliveryTime}
+          errors={state.form.errors?.deliveryTime}
+          onChange={(deliveryTime) => {
+            changeHandler('deliveryTime', deliveryTime);
           }}
         />
       </View>

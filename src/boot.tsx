@@ -183,9 +183,10 @@ function SellerStackScreen() {
     !user?.phoneVerified
   ) {
     initialRoute = 'SellerOnboarding';
-  } else if (!store?.name || !store?.images) {
+  } else if (!store.name || !store.images) {
     initialRoute = 'SetStoreInfo';
-  } else if (!store?.deliveryTime) {
+  } else if (!store.deliveryArea || !store.deliveryTime) {
+    // TODO: add opening hours
     initialRoute = 'SetStoreDeliveryInfo';
   }
 

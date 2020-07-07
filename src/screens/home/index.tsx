@@ -8,7 +8,6 @@ import {
   Button,
   ButtonCart,
   InputSelectAddress,
-  InputSelectDeliveryTime,
   Toast,
   IToast,
   Icon,
@@ -32,8 +31,6 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
-      <View style={{ height: 40 }} />
-      <InputSelectDeliveryTime />
       <View style={{ height: 40 }} />
       <Button
         title="Go to PLP"

@@ -36,6 +36,21 @@ export default memo(
           {label}
         </Text>
       );
+      if (!value) {
+        labelComponent = (
+          <Text level={5} numberOfLines={1} ellipsizeMode="tail">
+            {label}
+          </Text>
+        );
+      }
+    }
+    let valueComponent = null;
+    if (value) {
+      valueComponent = (
+        <Text level={5} numberOfLines={1} ellipsizeMode="tail">
+          {value}
+        </Text>
+      );
     }
     const error = Array.isArray(errors) && errors.length ? errors[0] : null;
     return (
@@ -45,9 +60,7 @@ export default memo(
             {iconComponent}
             <View style={styles.textContainer}>
               {labelComponent}
-              <Text level={5} numberOfLines={1} ellipsizeMode="tail">
-                {value}
-              </Text>
+              {valueComponent}
             </View>
             <Icon name="chevron-down" />
           </View>

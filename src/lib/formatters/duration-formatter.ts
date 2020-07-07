@@ -11,8 +11,8 @@ class DurationFormatter {
     if (duration < 60) {
       message = `${duration} minutos`;
     }
-    // value equal or grater than 60 -> hour/s
-    if (duration > 59) {
+    // value equal or greater than 60 -> hour/s
+    if (duration >= 60) {
       const hours = Math.floor(duration / 60);
       const minutes = duration % 60;
       // hours and minutes

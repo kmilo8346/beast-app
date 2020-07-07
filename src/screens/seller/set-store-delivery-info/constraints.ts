@@ -5,4 +5,10 @@ export default {
       message: '^Es requerido',
     },
   },
+  deliveryTime: {
+    presence: {
+      allowEmpty: false,
+      message: '^Es requerido',
+    },
+  },
 } as { [key: string]: any };

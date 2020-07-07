@@ -7,15 +7,23 @@ import ModalManageDeliveryTime from '../../modals/modal-set-delivery-time';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { IntegerRange } from '../../../types';
+import { IntegerRange, I } from '../../../types';
 // formatters
 import DurationFormatter from '../../../lib/formatters/duration-formatter';
 
-export default () => {
+export interface InputSetDeliveryTimeProps {
+  value?: IntegerRange;
+  errors?: string[];
+  onChange?: (deliveryTime: IntegerRange) => void;
+}
+
+export default ({
+  value,
+  errors,
+  onChange = () => null,
+}: InputSetDeliveryTimeProps) => {
   // state
   const [isVisible, setIsVisible] = useState(false);
-  const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
 
   // event handlers
   const inputPressHandler = useCallback(() => {
@@ -25,32 +33,30 @@ export default () => {
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
   const saveHandler = (deliveryTime: IntegerRange) => {
-    userContainer.updateStore({
-      deliveryTime,
-    });
+    onChange(deliveryTime);
     setIsVisible((prevIsVisible) => !prevIsVisible);
-    console.log(
-      DurationFormatter.humanizeDurationRange(
-        deliveryTime.lte,
-        deliveryTime.gte
-      )
-    );
   };
 
   // render logic
-  let text = 'Tiempo de entrega';
-  if (store?.deliveryTime) {
-    text = DurationFormatter.humanizeDurationRange(
-      store.deliveryTime.lte,
-      store.deliveryTime.gte
+  let deliveryTimeText = '';
+  if (value) {
+    deliveryTimeText = DurationFormatter.humanizeDurationRange(
+      value.lte,
+      value.gte
     );
   }
   return (
     <View>
-      <InputSelect value={text} onPress={inputPressHandler} />
+      <InputSelect
+        label="Tiempo de entrega"
+        value={deliveryTimeText}
+        icon="clock"
+        errors={errors}
+        onPress={inputPressHandler}
+      />
       {isVisible && (
         <ModalManageDeliveryTime
-          deliveryTime={store?.deliveryTime}
+          deliveryTime={value}
           onSave={saveHandler}
           onRequestClose={requestCloseHandler}
         />

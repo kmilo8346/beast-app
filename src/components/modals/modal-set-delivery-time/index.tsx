@@ -141,13 +141,16 @@ export default ({
   return (
     <Modal {...otherProps} title="Tiempo de entrega">
       <View style={[globalStyle.withMargin]}>
-        <Text level={5} style={{ marginBottom: 20 }}>
-          Agrega el tiempo mínimo y maximo que puedes llegar a tardar al momento
-          de entregar una venta.
+        <Text level={5} style={{ marginBottom: 20, lineHeight: 23 }}>
+          Agrega el rango de tiempo en{' '}
+          <Text level={5} weight="bold">
+            minutos
+          </Text>{' '}
+          que puedes tardar al hacer una entrega.
         </Text>
         <Input
           label="Tiempo mínimo"
-          placeholder="10"
+          placeholder="ej: 10"
           keyboardType="number-pad"
           value={state.form.lte}
           format={stringFormatter.toNumber}
@@ -160,7 +163,7 @@ export default ({
         />
         <Input
           label="Tiempo máximo"
-          placeholder="40"
+          placeholder="ej: 40"
           keyboardType="number-pad"
           value={state.form.gte}
           format={stringFormatter.toNumber}
