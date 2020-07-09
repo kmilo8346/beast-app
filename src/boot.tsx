@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
@@ -24,8 +25,8 @@ import {
   SellerOnboardingScreen,
   SetStoreInfoScreen,
   SetStoreDeliveryInfoScreen,
+  MercadoPagoInfoBeforeSignInScreen,
   MercadoPagoSignInScreen,
-  MercadoPagoSignInRedirectScreen,
   SellerDashboardScreen,
   MenuScreen,
 } from './screens';
@@ -178,7 +179,7 @@ function SellerStackScreen() {
   if (
     !store ||
     !user?.email ||
-    !user?.customerId ||
+    !user?.mercadoPago?.customerId ||
     !user?.phone ||
     !user?.phoneVerified
   ) {
@@ -188,6 +189,8 @@ function SellerStackScreen() {
   } else if (!store.deliveryArea || !store.deliveryTime) {
     // TODO: add opening hours
     initialRoute = 'SetStoreDeliveryInfo';
+  } else if (!user.mercadoPago.userId) {
+    initialRoute = 'MercadoPagoInfoBeforeSignIn';
   }
 
   return (
@@ -226,12 +229,14 @@ function SellerStackScreen() {
         options={{ title: '' }}
       />
       <SellerStack.Screen
-        name="MercadoPagoSignIn"
-        component={MercadoPagoSignInScreen}
+        name="MercadoPagoInfoBeforeSignIn"
+        component={MercadoPagoInfoBeforeSignInScreen}
+        options={{ title: '' }}
       />
       <SellerStack.Screen
-        name="MercadoPagoSignInRedirect"
-        component={MercadoPagoSignInRedirectScreen}
+        name="MercadoPagoSignIn"
+        component={MercadoPagoSignInScreen}
+        options={{ title: '' }}
       />
       <SellerStack.Screen
         name="SellerDashboard"
@@ -357,7 +362,11 @@ export default () => {
 
   // render logic
   if (!user) {
-    return <Loading />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Loading />
+      </View>
+    );
   }
 
   // Valid in MainTab

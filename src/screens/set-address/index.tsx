@@ -15,7 +15,7 @@ import {
   Text,
 } from '../../components';
 // clients
-import googlePlacesClient from '../../clients/google-places-client';
+import placesClient from '../../clients/google/places-client';
 // containers
 import UserProvider from '../../containers/user';
 // types
@@ -200,7 +200,7 @@ export default ({ navigation }: ScreenProps) => {
         autocompleteRequestSource.cancel();
       }
       autocompleteRequestSource = axios.CancelToken.source();
-      const response = await googlePlacesClient.autocomplete(
+      const response = await placesClient.autocomplete(
         {
           input,
           sessiontoken,
@@ -227,7 +227,7 @@ export default ({ navigation }: ScreenProps) => {
       sessiontoken = uuidv4();
 
       dispatch({ type: 'show_loading_details' });
-      const response = await googlePlacesClient.details(
+      const response = await placesClient.details(
         {
           placeId,
           sessiontoken: currentSessiontoken,

@@ -13,20 +13,24 @@ import { Card } from '../../../types';
 // styles
 import globalStyle from '../../../styles';
 
+// instances outside component
+const prefix = '[modal manage cards]';
+
 export default (props: ModalProps) => {
   // state
   const [isFormVisible, setIsFormVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
-  let customerId = null;
-  if (user && user.customerId) {
-    customerId = user.customerId;
-  }
+  const customerId = user?.mercadoPago?.customerId;
   const cards = userContainer.getCards();
   const currentCard = userContainer.getCurrentCardId();
   let key = currentCard;
   if (key === null) {
     key = 'TO_AGREE';
+  }
+  // precondition
+  if (!customerId) {
+    throw new Error(`${prefix} Mercado Pago customer id is not defined`);
   }
 
   // event handlers

@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef, useEffect, usePrevious } from 'react';
 import { View, ScrollView, Linking, Image, Vibration } from 'react-native';
 import validate from 'validate.js';
 import Constants from 'expo-constants';
@@ -22,12 +22,13 @@ import UserProvider from '../../../containers/user';
 // libs
 import firebase from '../../../lib/firebase';
 import { generatePushID } from '../../../lib/uuid';
+// types
+import { Place } from '../../../types';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-import { User, Place } from '../../../types';
 
 const PREFIX = '[set store info]';
 let uploadTaskRef: firebase.storage.UploadTask | null = null;
@@ -65,6 +66,9 @@ type SetUploadingProgressAction = {
   type: 'set_uploading_progress';
   uploadingProgress: number;
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
@@ -74,7 +78,8 @@ type Action =
   | HideSelectorAction
   | ShowUploadingAction
   | HideUploadingAction
-  | SetUploadingProgressAction;
+  | SetUploadingProgressAction
+  | SetSubmitOpIdAction;
 type State = {
   form: {
     // fields
@@ -85,6 +90,8 @@ type State = {
     imageUrl: string;
     // other form states
     submitted: boolean;
+    // identify the submit
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
   selector: boolean;
@@ -109,7 +116,13 @@ const reducer = (state: State, action: Action): State => {
         },
       };
     case 'set_form_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          submitted: true,
+        },
+      };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
     case 'show_selector':
@@ -122,6 +135,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, uploading: false, uploadingProgress: 0 };
     case 'set_uploading_progress':
       return { ...state, uploadingProgress: action.uploadingProgress };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        form: { ...state.form, submitOpId: new Date().getTime() },
+      };
     default:
       return state;
   }
@@ -348,21 +366,21 @@ export default ({ navigation }: ScreenProps) => {
       name: state.form.name,
       images: [state.form.imageUrl],
     });
-    navigation.navigate('SetStoreDeliveryInfo');
+    // mark end of submit
+    dispatch({ type: 'set_submit_op_id' });
   };
 
   useEffect(() => {
     // if not store initilized, initialized one with default values
     if (!store) {
-      userContainer.updateUser({
-        store: {
-          id: generatePushID(),
-          phone: user?.phone,
-          deliveryArea: {
-            center: userContainer.getCurrentAddress() as Place,
-            radius: '50m',
-          },
+      userContainer.updateStore({
+        id: generatePushID(),
+        phone: user?.phone,
+        deliveryArea: {
+          center: userContainer.getCurrentAddress() as Place,
+          radius: '50m',
         },
+        // TODO: add opening hours
       });
     }
   }, []);
@@ -378,6 +396,11 @@ export default ({ navigation }: ScreenProps) => {
       }
     };
   }, []);
+  useEffect(() => {
+    if (state.form.submitOpId && store && store.name && store.images) {
+      navigation.navigate('SetStoreDeliveryInfo');
+    }
+  }, [state.form.submitOpId, store, store?.name, store?.images]);
 
   // render logic
   let image = (

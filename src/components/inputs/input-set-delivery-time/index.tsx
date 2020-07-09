@@ -4,10 +4,8 @@ import { View } from 'react-native';
 // components
 import InputSelect from '../input-select';
 import ModalManageDeliveryTime from '../../modals/modal-set-delivery-time';
-// containers
-import UserProvider from '../../../containers/user';
 // types
-import { IntegerRange, I } from '../../../types';
+import { IntegerRange } from '../../../types';
 // formatters
 import DurationFormatter from '../../../lib/formatters/duration-formatter';
 

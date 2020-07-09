@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -41,11 +41,15 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
   | SetSubmittedAction
-  | SetFormErrorsAction;
+  | SetFormErrorsAction
+  | SetSubmitOpIdAction;
 type State = {
   form: {
     // fields;
@@ -55,6 +59,8 @@ type State = {
 
     // other states
     submitted: boolean;
+    // identify the submit
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -79,6 +85,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        form: { ...state.form, submitOpId: new Date().getTime() },
+      };
     default:
       return state;
   }
@@ -128,9 +139,21 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-
-    console.log('Save store delivery info');
+    // update store
+    userContainer.updateStore({
+      deliveryArea: state.form.deliveryArea,
+      deliveryTime: state.form.deliveryTime,
+      // TODO: add opening hours
+    });
+    // mark end of submit
+    dispatch({ type: 'set_submit_op_id' });
   };
+  useEffect(() => {
+    // TODO: add opening hours
+    if (state.form.submitOpId && store.deliveryArea && store.deliveryTime) {
+      navigation.navigate('MercadoPagoInfoBeforeSignIn');
+    }
+  }, [state.form.submitOpId, store.deliveryTime, store.deliveryTime]);
   // render logic
   return (
     <Container withPadding>

@@ -17,11 +17,12 @@ export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
+  const store = userContainer.getStore();
 
   // event hanlders
   const pressCreateStoreHandler = () => {
     // navigation
-    if (!user?.email || !user?.customerId) {
+    if (!user?.email || !user?.mercadoPago?.customerId) {
       navigation.navigate('SignIn', {
         redirect: {
           name: 'SellerDashboard',
@@ -35,7 +36,20 @@ export default ({ navigation }: ScreenProps) => {
       });
       return;
     }
-    navigation.navigate('SetStoreInfo');
+    if (!store?.name || !store.images) {
+      navigation.replace('SetStoreInfo');
+      return;
+    }
+    if (!store?.deliveryArea || !store.deliveryTime) {
+      // TODO: add opening hours
+      navigation.replace('SetStoreDeliveryInfo');
+      return;
+    }
+    if (!user.mercadoPago?.userId) {
+      navigation.replace('MercadoPagoInfoBeforeSignIn');
+      return;
+    }
+    navigation.navigate('SellerDashboard');
   };
   // render logic
   return (

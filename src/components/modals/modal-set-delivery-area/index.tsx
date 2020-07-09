@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, GestureResponderEvent } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
@@ -20,7 +20,7 @@ import {
   PlacesAutocompletePrediction,
 } from '../../../types';
 // clients
-import googlePlacesClient from '../../../clients/google-places-client';
+import placesClient from '../../../clients/google/places-client';
 // libs
 import validate from '../../../lib/validate';
 import { v4 as uuidv4 } from '../../../lib/uuid';
@@ -269,7 +269,8 @@ export default ({
   const pressCloseAutocompleteHandler = () => {
     dispatch({ type: 'show_form' });
   };
-  const saveHandler = () => {
+  const saveHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
     // set submitted
     dispatch({ type: 'set_submitted' });
     // validate
@@ -287,7 +288,7 @@ export default ({
         autocompleteRequestSource.cancel();
       }
       autocompleteRequestSource = axios.CancelToken.source();
-      const response = await googlePlacesClient.autocomplete(
+      const response = await placesClient.autocomplete(
         {
           input,
           sessiontoken,
@@ -314,7 +315,7 @@ export default ({
       sessiontoken = uuidv4();
 
       dispatch({ type: 'show_loading_details' });
-      const response = await googlePlacesClient.details(
+      const response = await placesClient.details(
         {
           placeId,
           sessiontoken: currentSessiontoken,
