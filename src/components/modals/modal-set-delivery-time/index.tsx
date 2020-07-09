@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { View } from 'react-native';
+import { View, GestureResponderEvent } from 'react-native';
 
 // components
 import Modal, { ModalProps } from '../modal';
@@ -121,7 +121,8 @@ export default ({
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value', attribute, value });
   };
-  const saveHandler = () => {
+  const saveHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
     // set submitted
     dispatch({ type: 'set_submitted' });
     // validate

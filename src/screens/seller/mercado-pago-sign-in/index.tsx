@@ -139,6 +139,7 @@ export default ({ navigation }: ScreenProps) => {
       content = (
         <WebView
           source={{ uri: state.safeUrl }}
+          originWhitelist={['*']}
           onMessage={messageIncomingHandler}
           style={{ flex: 1 }}
         />

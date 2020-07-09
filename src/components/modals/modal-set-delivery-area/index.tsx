@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, GestureResponderEvent } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
@@ -269,7 +269,8 @@ export default ({
   const pressCloseAutocompleteHandler = () => {
     dispatch({ type: 'show_form' });
   };
-  const saveHandler = () => {
+  const saveHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
     // set submitted
     dispatch({ type: 'set_submitted' });
     // validate
