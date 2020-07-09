@@ -175,4 +175,11 @@ export interface PlacesAutocompletResponse {
   predictions: PlacesAutocompletePrediction[];
 }
 
+export interface OpenHours {
+  day: string;
+  open: string;
+  close: string;
+  isOpen: boolean;
+}
+
 export type PlacesDetailsResponse = Place;

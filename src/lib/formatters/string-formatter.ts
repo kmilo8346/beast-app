@@ -69,6 +69,19 @@ class StringFormatter {
   toNumber(text: string | undefined) {
     return text?.replace(/[^0-9]/g, '');
   }
+
+  toHours(text: string | undefined) {
+    if (!text) return text;
+    const hours = text.split(':')[0];
+    const minutes = text.split(':')[1];
+
+    const formattedHour =
+      parseInt(hours, 10) > 10 ? hours : `0${parseInt(hours, 10)}`;
+    const formattedMinute =
+      parseInt(minutes, 10) > 10 ? minutes : `0${parseInt(minutes, 10)}`;
+
+    return `${formattedHour}:${formattedMinute}`;
+  }
 }
 
 export default new StringFormatter();
