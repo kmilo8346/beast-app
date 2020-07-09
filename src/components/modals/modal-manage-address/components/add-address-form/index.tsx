@@ -11,7 +11,7 @@ import Loading from '../../../../loading';
 import Touchable from '../../../../touchable';
 import Icon from '../../../../icon';
 // clients
-import googlePlacesClient from '../../../../../clients/google-places-client';
+import placesClient from '../../../../../clients/google/places-client';
 // types
 import {
   PlacesAutocompletePrediction,
@@ -188,7 +188,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
       }
       autocompleteRequestSource = axios.CancelToken.source();
       // dispatch({ type: 'set_loading' });
-      const response = await googlePlacesClient.autocomplete(
+      const response = await placesClient.autocomplete(
         {
           input,
           sessiontoken,
@@ -215,7 +215,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
       sessiontoken = uuidv4();
 
       dispatch({ type: 'set_loading' });
-      const response = await googlePlacesClient.details(
+      const response = await placesClient.details(
         {
           placeId,
           sessiontoken: currentSessiontoken,

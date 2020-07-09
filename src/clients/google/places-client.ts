@@ -1,9 +1,9 @@
 import { CancelToken } from 'axios';
-import RestClient from './rest-client';
+import RestClient from '../rest-client';
 
-import { PlacesAutocompletResponse, PlacesDetailsResponse } from '../types';
+import { PlacesAutocompletResponse, PlacesDetailsResponse } from '../../types';
 
-class GooglePlacesClient extends RestClient<any> {
+class PlacesClient extends RestClient<any> {
   /**
    * Places autocomplete request
    * @param params
@@ -51,4 +51,4 @@ class GooglePlacesClient extends RestClient<any> {
   }
 }
 
-export default new GooglePlacesClient('google/places');
+export default new PlacesClient('google/places');

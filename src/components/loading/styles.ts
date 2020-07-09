@@ -1,15 +1,17 @@
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 interface Styles {
   container: ViewStyle;
   indicator: ViewStyle;
+  message: TextStyle;
 }
 
 export default StyleSheet.create<Styles>({
   container: {
-    flex: 1,
+    flexDirection: 'row',
   },
-  indicator: {
-    marginTop: '20%',
+  indicator: {},
+  message: {
+    marginLeft: 5,
   },
 });

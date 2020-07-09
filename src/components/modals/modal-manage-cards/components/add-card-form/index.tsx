@@ -10,9 +10,9 @@ import InputSelectOptions from '../../../../inputs/input-select-options';
 import Loading from '../../../../loading';
 import Text from '../../../../text';
 // clients
-import paymentMethodClient from '../../../../../clients/payment-method-client';
-import cardTokenClient from '../../../../../clients/card-token-client';
-import cardClient from '../../../../../clients/card-client';
+import paymentMethodClient from '../../../../../clients/mercado-pago/payment-method-client';
+import cardTokenClient from '../../../../../clients/mercado-pago/card-token-client';
+import cardClient from '../../../../../clients/mercado-pago/card-client';
 // types
 import { Card, SearchResponse } from '../../../../../types';
 // libs

@@ -7,7 +7,7 @@ import useContainer from './container';
 // libs
 import firebase from '../lib/firebase';
 // clients
-import customerClient from '../clients/customer-client';
+import customerClient from '../clients/mercado-pago/customer-client';
 // types
 import { Place, User, Card, Store } from '../types';
 
@@ -64,6 +64,7 @@ export default createContainer(
             await signInAnonymously();
           } catch (error) {
             // TODO: manage error
+            console.log(error);
           }
         }
       });
@@ -252,7 +253,6 @@ export default createContainer(
           user = {
             id: authUser.uid,
             email: authUser.email,
-            customerId,
             firstName,
             lastName,
             phone: authUser.phoneNumber,
@@ -260,6 +260,9 @@ export default createContainer(
             photoURL: authUser.photoURL,
             metaData: {
               codes: [], // TODO: remove this
+            },
+            mercadoPago: {
+              customerId,
             },
           };
         }
@@ -445,9 +448,6 @@ export default createContainer(
     async function updateStore(data: Partial<Store>): Promise<void> {
       if (!user) {
         throw new Error('User is not defined');
-      }
-      if (!user.store) {
-        throw new Error('Store is not defined');
       }
       const storeUpdate: { [key: string]: any } = {};
       Object.keys(data).forEach((key) => {

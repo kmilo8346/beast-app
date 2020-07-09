@@ -103,7 +103,6 @@ export interface Card {
 export interface User {
   id: string;
   email: string | undefined;
-  customerId: string | undefined;
   identificationType: 'RUT';
   identificationNumber: string | undefined;
   firstName: string | undefined;
@@ -111,6 +110,20 @@ export interface User {
   phone: string | undefined;
   phoneVerified: boolean;
   photoURL: string | undefined;
+
+  mercadoPago:
+    | {
+        customerId: string;
+        userId: string;
+        accessToken: string;
+        expiresIn: string;
+        refreshToken: string;
+        tokenType: string;
+        publicKey: string;
+        liveMode: boolean;
+        scope: string;
+      }
+    | undefined;
 
   currentAddress: string | undefined;
   addresses: Place[];

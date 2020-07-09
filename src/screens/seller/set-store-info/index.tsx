@@ -22,12 +22,13 @@ import UserProvider from '../../../containers/user';
 // libs
 import firebase from '../../../lib/firebase';
 import { generatePushID } from '../../../lib/uuid';
+// types
+import { Place } from '../../../types';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-import { User, Place } from '../../../types';
 
 const PREFIX = '[set store info]';
 let uploadTaskRef: firebase.storage.UploadTask | null = null;
@@ -348,21 +349,19 @@ export default ({ navigation }: ScreenProps) => {
       name: state.form.name,
       images: [state.form.imageUrl],
     });
-    navigation.navigate('SetStoreDeliveryInfo');
   };
 
   useEffect(() => {
     // if not store initilized, initialized one with default values
     if (!store) {
-      userContainer.updateUser({
-        store: {
-          id: generatePushID(),
-          phone: user?.phone,
-          deliveryArea: {
-            center: userContainer.getCurrentAddress() as Place,
-            radius: '50m',
-          },
+      userContainer.updateStore({
+        id: generatePushID(),
+        phone: user?.phone,
+        deliveryArea: {
+          center: userContainer.getCurrentAddress() as Place,
+          radius: '50m',
         },
+        // TODO: add opening hours
       });
     }
   }, []);
@@ -378,6 +377,11 @@ export default ({ navigation }: ScreenProps) => {
       }
     };
   }, []);
+  useEffect(() => {
+    if (store && store.name && store.images) {
+      navigation.navigate('SetStoreDeliveryInfo');
+    }
+  }, [store]);
 
   // render logic
   let image = (

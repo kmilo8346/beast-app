@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
 import { View } from 'react-native';
 
 // components
@@ -129,8 +129,18 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
 
-    console.log('Save store delivery info');
+    userContainer.updateStore({
+      deliveryArea: state.form.deliveryArea,
+      deliveryTime: state.form.deliveryTime,
+      // TODO: add opening hours
+    });
   };
+  useEffect(() => {
+    // TODO: add opening hours
+    if (store.deliveryArea && store.deliveryTime) {
+      navigation.navigate('MercadoPagoInfoBeforeSignIn');
+    }
+  }, [store]);
   // render logic
   return (
     <Container withPadding>

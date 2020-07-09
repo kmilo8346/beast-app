@@ -134,7 +134,19 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreDeliveryInfo');
           return;
         }
+        if (!user.mercadoPago?.userId) {
+          navigation.replace('MercadoPagoInfoBeforeSignIn');
+          return;
+        }
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'SellerDashboard' }],
+          })
+        );
+        return;
       }
+
       navigation.pop();
       navigation.replace(route.params.redirect.name);
     }
