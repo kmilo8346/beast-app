@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef, useEffect, usePrevious } from 'react';
 import { View, ScrollView, Linking, Image, Vibration } from 'react-native';
 import validate from 'validate.js';
 import Constants from 'expo-constants';
@@ -66,6 +66,9 @@ type SetUploadingProgressAction = {
   type: 'set_uploading_progress';
   uploadingProgress: number;
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
@@ -75,7 +78,8 @@ type Action =
   | HideSelectorAction
   | ShowUploadingAction
   | HideUploadingAction
-  | SetUploadingProgressAction;
+  | SetUploadingProgressAction
+  | SetSubmitOpIdAction;
 type State = {
   form: {
     // fields
@@ -86,6 +90,8 @@ type State = {
     imageUrl: string;
     // other form states
     submitted: boolean;
+    // identify the submit
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
   selector: boolean;
@@ -110,7 +116,13 @@ const reducer = (state: State, action: Action): State => {
         },
       };
     case 'set_form_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          submitted: true,
+        },
+      };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
     case 'show_selector':
@@ -123,6 +135,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, uploading: false, uploadingProgress: 0 };
     case 'set_uploading_progress':
       return { ...state, uploadingProgress: action.uploadingProgress };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        form: { ...state.form, submitOpId: new Date().getTime() },
+      };
     default:
       return state;
   }
@@ -349,6 +366,8 @@ export default ({ navigation }: ScreenProps) => {
       name: state.form.name,
       images: [state.form.imageUrl],
     });
+    // mark end of submit
+    dispatch({ type: 'set_submit_op_id' });
   };
 
   useEffect(() => {
@@ -378,10 +397,10 @@ export default ({ navigation }: ScreenProps) => {
     };
   }, []);
   useEffect(() => {
-    if (store && store.name && store.images) {
+    if (state.form.submitOpId && store && store.name && store.images) {
       navigation.navigate('SetStoreDeliveryInfo');
     }
-  }, [store]);
+  }, [state.form.submitOpId, store, store?.name, store?.images]);
 
   // render logic
   let image = (

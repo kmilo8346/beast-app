@@ -128,7 +128,7 @@ export default ({ navigation }: ScreenProps) => {
     if (user.mercadoPago?.userId) {
       dispatch({ type: 'show_ready' });
     }
-  }, [user]);
+  });
   // render logic
   let content = null;
   switch (state.view) {
