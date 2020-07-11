@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View } from 'react-native';
+import { View, TouchableWithoutFeedback } from 'react-native';
 
 // components
 import Modal from '../../modals/modal';
@@ -42,9 +42,9 @@ export default ({
   const text = currentOption ? currentOption.title : undefined;
 
   // event handlers
-  const inputTouchHandler = useCallback(() => {
+  const inputTouchHandler = () => {
     setIsVisible(true);
-  }, []);
+  };
   const requestCloseHandler = useCallback(() => {
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
@@ -52,15 +52,17 @@ export default ({
   // render logic
   return (
     <View>
-      <Input
-        label={label}
-        placeholder={placeholder}
-        value={text}
-        suffix="chevron-down"
-        editable={false}
-        onTouchStart={inputTouchHandler}
-        errors={errors}
-      />
+      <Touchable onPress={inputTouchHandler}>
+        <Input
+          label={label}
+          placeholder={placeholder}
+          value={text}
+          suffix="chevron-down"
+          editable={false}
+          pointerEvents="none"
+          errors={errors}
+        />
+      </Touchable>
       {isVisible && (
         <Modal
           type="auto"
