@@ -1,75 +1,238 @@
-import React, { useReducer, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import React, { useReducer } from 'react';
+import {
+  View,
+  ScrollView,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+  Switch,
+  Vibration,
+  Platform,
+  Dimensions,
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // components
 import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import Text from '../../text';
-import InputTime from '../../inputs/input-time';
-import Switch from '../../switch';
+import Touchable from '../../touchable';
 // types
-import { OpenHours } from '../../../types';
+import { OpeningHours } from '../../../types';
 // libs
 import validate from '../../../lib/validate';
+import useDebounce from '../../../lib/hooks/use-debounce';
+// constraints
+import constraints from './constraints';
 // styles
-import styles from './styles';
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
 
-type ChangeValueAction = {
-  type: 'change_value';
-  attribute: string;
-  value: string;
+// instances outside component
+const prefix = '[modal set opening hours]';
+const defaultOpen = 900;
+const defaultClose = 1730;
+const defaultOpeningHours: OpeningHours = [
+  {
+    day: '1',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '2',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '3',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '4',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '5',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '6',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+  {
+    day: '7',
+    open: defaultOpen,
+    close: defaultClose,
+  },
+];
+const toIntegerTime = (date: Date): number => {
+  const czDate = new Date(date);
+  const minutes = (czDate.getMinutes() < 10 ? '0' : '') + czDate.getMinutes();
+  return parseInt(`${czDate.getHours()}${minutes}`, 10);
 };
-type ValidateValueAction = {
-  type: 'validate_value';
-  attribute: string;
-  value: string;
+const fromIntegerTime = (time: number): Date => {
+  let sTime = `${time}`;
+  if (sTime.length < 1 || sTime.length > 4) {
+    throw new Error(`${prefix} Invalid integer time`);
+  }
+  sTime = sTime.padStart(4, '0');
+
+  const date = new Date();
+  date.setHours(parseInt(sTime.substring(0, 2), 10));
+  date.setMinutes(parseInt(sTime.substring(2, 4), 10));
+  return date;
 };
-type SetError = {
-  type: 'set_error';
+const formatIntegerTime = (time: number): string => {
+  let sTime = `${time}`;
+  if (sTime.length < 1 || sTime.length > 4) {
+    throw new Error(`${prefix} Invalid integer time`);
+  }
+  sTime = sTime.padStart(4, '0');
+  return `${sTime.substring(0, 2)}:${sTime.substring(2, 4)} hrs.`;
 };
-type SetSubmittedAction = {
-  type: 'set_submitted';
+const formatDay = (day: string): string => {
+  switch (day) {
+    case '1':
+      return 'Lunes';
+    case '2':
+      return 'Martes';
+    case '3':
+      return 'Miercoles';
+    case '4':
+      return 'Jueves';
+    case '5':
+      return 'Viernes';
+    case '6':
+      return 'Sábado';
+    case '7':
+      return 'Domingo';
+    default:
+      throw new Error(`${prefix} Invalid day ${day}`);
+  }
+};
+const businessWork = (hours: { open: number; close: number }) => {
+  return !(hours.open === 0 && hours.close === 0);
+};
+type Moment = 'open' | 'close';
+type PickerInfo = { day: string; moment: Moment } | null;
+type SetPickerInfoAction = {
+  type: 'set_picker_info';
+  pickerInfo: PickerInfo;
+};
+type ChangeTimeAction = {
+  type: 'change_time';
+  day: string;
+  moment: Moment;
+  time: Date;
+};
+type HidePickerAction = {
+  type: 'hide_picker';
+};
+type ValidateAction = {
+  type: 'validate';
+};
+type ToogleAction = {
+  type: 'toogle_switch';
+  checked: boolean;
+  day: string;
 };
 type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
 type Action =
-  | ChangeValueAction
-  | ValidateValueAction
-  | SetError
-  | SetSubmittedAction
+  | SetPickerInfoAction
+  | ChangeTimeAction
+  | HidePickerAction
+  | ValidateAction
+  | ToogleAction
   | SetFormErrorsAction;
 type State = {
   form: {
     // fields
-    openingHours: OpenHours[];
+    openingHours: OpeningHours;
     // other states
-    submitted: boolean;
-    errors: { [key: string]: string[] };
+    errors?: { [key: string]: string[] };
   };
+  pickerInfo: PickerInfo;
 };
 
 const reducer = (state: State, action: Action): State => {
+  let info;
   switch (action.type) {
-    case 'change_value':
+    case 'set_picker_info':
+      info = action.pickerInfo;
+      // hide if touch again
+      if (
+        state.pickerInfo &&
+        action.pickerInfo &&
+        state.pickerInfo.day === action.pickerInfo.day &&
+        state.pickerInfo.moment === action.pickerInfo.moment
+      ) {
+        info = null;
+      }
       return {
         ...state,
-        form: { ...state.form, [action.attribute]: action.value },
+        pickerInfo: info,
       };
-    case 'validate_value':
-      if (!state.form.submitted) return state;
-
+    case 'change_time':
       return {
         ...state,
         form: {
           ...state.form,
-          errors: {}, // validator here
+          openingHours: state.form.openingHours.map((dayHours) => {
+            if (dayHours.day === action.day) {
+              const newDayHours = { ...dayHours };
+              if (action.moment === 'open') {
+                newDayHours.open = toIntegerTime(action.time);
+              } else {
+                newDayHours.close = toIntegerTime(action.time);
+              }
+              return newDayHours;
+            }
+            return dayHours;
+          }),
+        },
+        pickerInfo: Platform.OS === 'android' ? null : state.pickerInfo,
+      };
+    case 'hide_picker':
+      return {
+        ...state,
+        pickerInfo: null,
+      };
+    case 'validate':
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          errors: validate(state.form, constraints),
         },
       };
-    case 'set_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
+    case 'toogle_switch':
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          openingHours: state.form.openingHours.map((dayHours) => {
+            if (dayHours.day === action.day) {
+              const newDayHours = { ...dayHours };
+              // set default values
+              if (action.checked) {
+                newDayHours.open = defaultOpen;
+                newDayHours.close = defaultClose;
+              } else {
+                newDayHours.open = 0;
+                newDayHours.close = 0;
+              }
+              return newDayHours;
+            }
+            return dayHours;
+          }),
+        },
+      };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
     default:
@@ -78,139 +241,238 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export interface ModalManageOpeningHoursProps extends ModalProps {
-  openingHours?: OpenHours[];
-  onSave: (openingHours?: OpenHours[]) => void;
+  openingHours?: OpeningHours;
+  onSave?: (openingHours: OpeningHours) => void;
 }
 
+/**
+ * @site https://github.com/react-native-community/react-native-modal/issues/109#issuecomment-425106461
+ */
 export default ({
   openingHours,
   onSave = () => null,
   ...otherProps
 }: ModalManageOpeningHoursProps) => {
   // state
-
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
-      // TODO: mejorar esto
-      openingHours: [
-        {
-          day: 'lunes',
-          open: openingHours ? openingHours[0].open : '0900',
-          close: openingHours ? openingHours[0].close : '1900',
-          isOpen: true,
-        },
-        {
-          day: 'martes',
-          open: openingHours ? openingHours[1].open : '0900',
-          close: openingHours ? openingHours[1].close : '1900',
-          isOpen: true,
-        },
-        {
-          day: 'miércoles',
-          open: openingHours ? openingHours[2].open : '0900',
-          close: openingHours ? openingHours[2].close : '1900',
-          isOpen: true,
-        },
-        {
-          day: 'jueves',
-          open: openingHours ? openingHours[3].open : '0900',
-          close: openingHours ? openingHours[3].close : '1900',
-          isOpen: true,
-        },
-        {
-          day: 'viernes',
-          open: openingHours ? openingHours[4].open : '0900',
-          close: openingHours ? openingHours[4].close : '1900',
-          isOpen: true,
-        },
-        {
-          day: 'sábado',
-          open: openingHours ? openingHours[5].open : '0000',
-          close: openingHours ? openingHours[5].close : '0000',
-          isOpen: true,
-        },
-        {
-          day: 'domingo',
-          open: openingHours ? openingHours[6].open : '0000',
-          close: openingHours ? openingHours[6].close : '0000',
-          isOpen: true,
-        },
-      ],
-      // other form states
-      submitted: false,
-      errors: {},
+      openingHours: openingHours || defaultOpeningHours,
     },
+    pickerInfo: null,
   });
 
   // event handlers
-  const changeHandler = (attribute: string, value: string) => {
-    dispatch({ type: 'change_value', attribute, value });
-    dispatch({ type: 'validate_value', attribute, value });
+  const changeTimeHandler = (day: string, moment: Moment, date: Date) => {
+    dispatch({ type: 'change_time', day, moment, time: date });
+    dispatch({ type: 'validate' });
+  };
+  const changeSwitch = (checked: boolean, day: string) => {
+    dispatch({
+      type: 'toogle_switch',
+      checked,
+      day,
+    });
+    dispatch({ type: 'validate' });
   };
   const saveHandler = () => {
-    // set submitted
-    dispatch({ type: 'set_submitted' });
     // validate
     const errors = validate(state.form, constraints);
     if (errors) {
       dispatch({ type: 'set_form_errors', errors });
+      Vibration.vibrate(400);
       return;
     }
-    // save data
+    // // save data
     onSave(state.form.openingHours);
   };
 
   // render logic
+  const error = state.form.errors ? state.form.errors.openingHours[0] : '';
+
   return (
     <Modal {...otherProps} title="Horario de atención">
-      <View style={[globalStyles.withMargin, globalStyles.withScreenAir]}>
-        <Text level={5} style={{ marginBottom: 20 }}>
-          Activa los días de atención capitalista hijo de puta!!
-        </Text>
-        <ScrollView style={globalStyles.withPadding}>
-          {state.form.openingHours.map(
-            ({ day, open, close, isOpen }, index) => {
-              const [showInputs, setShowInputs] = useState(isOpen);
-              return (
-                <View key={index}>
-                  <View style={styles.switchContainer} key={index}>
-                    <Text level={5} weight="bold">
-                      {day}
-                    </Text>
-                    <Switch
-                      checked={showInputs}
-                      onChange={() =>
-                        setShowInputs((prevShowInputs) => !prevShowInputs)
-                      }
-                    />
-                  </View>
-                  {showInputs && (
-                    <View style={{ flexDirection: 'row' }}>
-                      <InputTime
-                        placeHolder="09:00"
-                        minTime="00:00"
-                        value={open}
-                        onChange={(value) => changeHandler('open', value)}
+      <ScrollView
+        style={[
+          globalStyles.withPadding,
+          { height: Dimensions.get('window').height * 0.65 },
+        ]}
+      >
+        <TouchableOpacity>
+          <TouchableWithoutFeedback>
+            <View>
+              {state.form.openingHours.map((dayHours, index) => {
+                let picker = null;
+                let openActive = false;
+                let closeActive = false;
+                let inputs = null;
+                const isBusinessWork = businessWork(dayHours);
+                if (state.pickerInfo && state.pickerInfo.day === dayHours.day) {
+                  let date: Date | null = null;
+                  if (state.pickerInfo.moment === 'open') {
+                    openActive = true;
+                    date = fromIntegerTime(dayHours.open);
+                  } else {
+                    closeActive = true;
+                    date = fromIntegerTime(dayHours.close);
+                  }
+                  if (isBusinessWork) {
+                    picker = (
+                      <DateTimePicker
+                        value={date}
+                        mode="time"
+                        display="clock"
+                        is24Hour={false}
+                        onChange={(event, selectedDate) => {
+                          if (
+                            Platform.OS === 'android' &&
+                            event.type === 'dismissed'
+                          ) {
+                            dispatch({ type: 'hide_picker' });
+                            return;
+                          }
+
+                          if (selectedDate && state.pickerInfo) {
+                            changeTimeHandler(
+                              state.pickerInfo.day,
+                              state.pickerInfo.moment,
+                              selectedDate
+                            );
+                          }
+                        }}
                       />
-                      <InputTime
-                        placeHolder="09:00"
-                        minTime="00:00"
-                        value={open}
-                        onChange={(value) => changeHandler('close', value)}
+                    );
+                  }
+                }
+                if (isBusinessWork) {
+                  inputs = (
+                    <View style={{ flexDirection: 'row' }}>
+                      <Touchable
+                        style={{ flex: 1 }}
+                        onPress={() => {
+                          dispatch({
+                            type: 'set_picker_info',
+                            pickerInfo: {
+                              day: dayHours.day,
+                              moment: 'open',
+                            },
+                          });
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: 30,
+                            borderBottomWidth: 1,
+                            borderBottomColor: openActive
+                              ? colors.blue
+                              : colors.blackLight6,
+                          }}
+                        >
+                          <Text
+                            level={5}
+                            style={{
+                              color: openActive ? colors.blue : colors.black,
+                            }}
+                          >
+                            {formatIntegerTime(dayHours.open)}
+                          </Text>
+                        </View>
+                      </Touchable>
+                      <View style={{ width: 20 }} />
+                      <Touchable
+                        style={{ flex: 1 }}
+                        onPress={() => {
+                          dispatch({
+                            type: 'set_picker_info',
+                            pickerInfo: {
+                              day: dayHours.day,
+                              moment: 'close',
+                            },
+                          });
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: 30,
+                            borderBottomWidth: 1,
+                            borderBottomColor: closeActive
+                              ? colors.blue
+                              : colors.blackLight6,
+                          }}
+                        >
+                          <Text
+                            level={5}
+                            style={{
+                              color: closeActive ? colors.blue : colors.black,
+                            }}
+                          >
+                            {formatIntegerTime(dayHours.close)}
+                          </Text>
+                        </View>
+                      </Touchable>
+                    </View>
+                  );
+                }
+                return (
+                  <View key={`${index}`} style={{ marginBottom: 20 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Text level={5} weight="bold">
+                        {formatDay(dayHours.day)}
+                      </Text>
+                      <Switch
+                        value={businessWork(dayHours)}
+                        thumbColor={colors.white}
+                        trackColor={{
+                          false: colors.blackLight5,
+                          true: colors.blue,
+                        }}
+                        onValueChange={(checked) => {
+                          changeSwitch(checked, dayHours.day);
+                        }}
                       />
                     </View>
-                  )}
-                </View>
-              );
-            }
-          )}
-          <Button
-            title="Guardar"
-            onPress={saveHandler}
-            style={globalStyles.withMainActionAir}
-          />
-        </ScrollView>
+                    {inputs}
+                    {picker}
+                  </View>
+                );
+              })}
+              <View style={globalStyles.withScreenAir} />
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <View
+        style={[
+          {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.white,
+          },
+          globalStyles.withMargin,
+        ]}
+      >
+        {!!error && (
+          <Text
+            level={7}
+            color={colors.red}
+            style={{ marginTop: 10, textAlign: 'center' }}
+          >
+            {error}
+          </Text>
+        )}
+        <Button
+          title="Guardar"
+          onPress={saveHandler}
+          style={[globalStyles.withMainActionAir, { marginTop: 10 }]}
+        />
       </View>
     </Modal>
   );

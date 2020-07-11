@@ -59,7 +59,7 @@ export default ({
 
     default:
       content = (
-        <ScreenView wrapperStyle={styles.containerBackdrop}>
+        <View style={styles.containerBackdrop}>
           <TouchableWithoutFeedback
             onPress={onRequestClose}
             style={styles.backdrop}
@@ -90,7 +90,7 @@ export default ({
               </TouchableWithoutFeedback>
             </View>
           </TouchableWithoutFeedback>
-        </ScreenView>
+        </View>
       );
       break;
   }

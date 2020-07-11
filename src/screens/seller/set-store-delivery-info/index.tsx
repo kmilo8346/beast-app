@@ -8,6 +8,7 @@ import {
   Button,
   InputSetDeliveryArea,
   InputSetDeliveryTime,
+  InputSetOpeningHours,
   Toast,
   IToast,
 } from '../../../components';
@@ -19,7 +20,7 @@ import UserProvider from '../../../containers/user';
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
-import { Circle, IntegerRange } from '../../../types';
+import { Circle, IntegerRange, OpeningHours } from '../../../types';
 
 // instances outside component
 const PREFIX = '[set store delivery info screen]';
@@ -55,6 +56,7 @@ type State = {
     // fields;
     deliveryArea?: Circle;
     deliveryTime?: IntegerRange;
+    openingHours?: OpeningHours;
     // hidden field
 
     // other states
@@ -108,6 +110,7 @@ export default ({ navigation }: ScreenProps) => {
       // fields
       deliveryArea: store?.deliveryArea,
       deliveryTime: store?.deliveryTime,
+      openingHours: store?.openingHours,
       // hidden fields
 
       // other form states
@@ -126,9 +129,6 @@ export default ({ navigation }: ScreenProps) => {
   const changeHandler = (attribute: string, value: any) => {
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value', attribute, value });
-    userContainer.updateStore({
-      [attribute]: value,
-    });
   };
   const pressContinueHandler = () => {
     // set submitted
@@ -143,17 +143,26 @@ export default ({ navigation }: ScreenProps) => {
     userContainer.updateStore({
       deliveryArea: state.form.deliveryArea,
       deliveryTime: state.form.deliveryTime,
-      // TODO: add opening hours
+      openingHours: state.form.openingHours,
     });
     // mark end of submit
     dispatch({ type: 'set_submit_op_id' });
   };
   useEffect(() => {
-    // TODO: add opening hours
-    if (state.form.submitOpId && store.deliveryArea && store.deliveryTime) {
+    if (
+      state.form.submitOpId &&
+      store.deliveryArea &&
+      store.deliveryTime &&
+      store.openingHours
+    ) {
       navigation.navigate('MercadoPagoInfoBeforeSignIn');
     }
-  }, [state.form.submitOpId, store.deliveryTime, store.deliveryTime]);
+  }, [
+    state.form.submitOpId,
+    store.deliveryArea,
+    store.deliveryTime,
+    store.openingHours,
+  ]);
   // render logic
   return (
     <Container withPadding>
@@ -173,6 +182,13 @@ export default ({ navigation }: ScreenProps) => {
           errors={state.form.errors?.deliveryTime}
           onChange={(deliveryTime) => {
             changeHandler('deliveryTime', deliveryTime);
+          }}
+        />
+        <InputSetOpeningHours
+          value={state.form.openingHours}
+          errors={state.form.errors?.openingHours}
+          onChange={(openingHours) => {
+            changeHandler('openingHours', openingHours);
           }}
         />
       </View>

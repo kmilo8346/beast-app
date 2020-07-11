@@ -186,8 +186,11 @@ function SellerStackScreen() {
     initialRoute = 'SellerOnboarding';
   } else if (!store.name || !store.images) {
     initialRoute = 'SetStoreInfo';
-  } else if (!store.deliveryArea || !store.deliveryTime) {
-    // TODO: add opening hours
+  } else if (
+    !store.deliveryArea ||
+    !store.deliveryTime ||
+    !store.openingHours
+  ) {
     initialRoute = 'SetStoreDeliveryInfo';
   } else if (!user.mercadoPago.userId) {
     initialRoute = 'MercadoPagoInfoBeforeSignIn';

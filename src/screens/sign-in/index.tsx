@@ -192,7 +192,7 @@ export default ({ navigation, route }: ScreenProps) => {
   };
   useEffect(() => {
     // signin was ok
-    if (user?.email) {
+    if (user?.email && user.mercadoPago?.customerId) {
       // not phone
       if (!user.phone || !user.phoneVerified) {
         navigation.replace('SetPhone', route.params);
@@ -219,8 +219,7 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreInfo');
           return;
         }
-        if (!store.deliveryArea || !store.deliveryTime) {
-          // TODO: add opening hours
+        if (!store.deliveryArea || !store.deliveryTime || !store.openingHours) {
           navigation.replace('SetStoreDeliveryInfo');
           return;
         }

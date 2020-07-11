@@ -5,12 +5,12 @@ import { View } from 'react-native';
 import InputSelect from '../input-select';
 import ModalSetOpeningHours from '../../modals/modal-set-openning-hours';
 // types
-import { OpenHours } from '../../../types';
+import { OpeningHours } from '../../../types';
 
 export interface InputSetOpeningHoursProps {
-  value?: OpenHours[];
+  value?: OpeningHours;
   errors?: string[];
-  onChange?: (openingHours: OpenHours[]) => void;
+  onChange?: (openingHours: OpeningHours) => void;
 }
 
 export default ({
@@ -28,17 +28,15 @@ export default ({
   const requestCloseHandler = useCallback(() => {
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
-  const saveHandler = (openingHours: OpenHours[]) => {
-    // save data to userContainer
-    console.log('Sending data from modal...', openingHours);
-    // onChange(openingHours);
+  const saveHandler = (openingHours: OpeningHours) => {
+    onChange(openingHours);
     setIsVisible((prevIsVisible) => !prevIsVisible);
   };
 
   // render logic
   let openingHoursText = '';
   if (value) {
-    openingHoursText = `Toda la semana de 8:00 a 19:00`;
+    openingHoursText = `Horario de atención configurado`;
   }
   return (
     <View>
@@ -51,7 +49,7 @@ export default ({
       />
       {isVisible && (
         <ModalSetOpeningHours
-          deliveryTime={value}
+          openingHours={undefined}
           onSave={saveHandler}
           onRequestClose={requestCloseHandler}
         />

@@ -11,4 +11,10 @@ export default {
       message: '^Es requerido',
     },
   },
+  openingHours: {
+    presence: {
+      allowEmpty: false,
+      message: '^Es requerido',
+    },
+  },
 } as { [key: string]: any };

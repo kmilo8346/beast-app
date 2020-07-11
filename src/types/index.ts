@@ -8,6 +8,13 @@ export interface Circle {
   radius: string;
 }
 
+export type OpeningHours = {
+  day: '1' | '2' | '3' | '4' | '5' | '6' | '7';
+  open: number;
+  close: number;
+}[];
+
+// TODO: add opening hours and version
 export interface Store {
   id: string;
   name: string | undefined;
@@ -15,6 +22,7 @@ export interface Store {
   images: string[] | undefined;
   deliveryTime: IntegerRange | undefined;
   deliveryArea: Circle | undefined;
+  openingHours: OpeningHours | undefined;
 }
 
 export interface Product {
@@ -186,13 +194,6 @@ export interface PlacesAutocompletePrediction {
 
 export interface PlacesAutocompletResponse {
   predictions: PlacesAutocompletePrediction[];
-}
-
-export interface OpenHours {
-  day: string;
-  open: string;
-  close: string;
-  isOpen: boolean;
 }
 
 export type PlacesDetailsResponse = Place;

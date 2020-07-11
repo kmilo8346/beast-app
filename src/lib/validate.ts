@@ -1,4 +1,5 @@
 import validate from 'validate.js';
+import { OpeningHours } from '../types';
 
 // extending validate validators
 validate.validators.cardExpirationDate = (
@@ -75,6 +76,32 @@ validate.validators.fieldsPresence = (
   ) {
     return null;
   }
+  return options.message;
+};
+
+validate.validators.openingHours = (
+  value: OpeningHours,
+  options: {
+    message: string;
+  }
+) => {
+  if (value) {
+    let ok = true;
+
+    value.forEach((dayHours) => {
+      if (dayHours.open === 0 && dayHours.close === 0) {
+        return;
+      }
+      if (dayHours.open >= dayHours.close) {
+        ok = false;
+      }
+    });
+
+    if (ok) {
+      return null;
+    }
+  }
+
   return options.message;
 };
 
