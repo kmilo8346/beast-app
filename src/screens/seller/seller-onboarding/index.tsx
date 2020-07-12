@@ -22,7 +22,7 @@ export default ({ navigation }: ScreenProps) => {
   // event hanlders
   const pressCreateStoreHandler = () => {
     // navigation
-    if (!user?.email || !user?.mercadoPago?.customerId) {
+    if (!user?.email || !user?.customerId) {
       navigation.navigate('SignIn', {
         redirect: {
           name: 'SellerDashboard',
@@ -46,7 +46,7 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     if (!user.mercadoPago?.userId) {
-      navigation.replace('MercadoPagoInfoBeforeSignIn');
+      navigation.replace('MercadoPagoSignIn');
       return;
     }
     navigation.navigate('SellerDashboard');

@@ -25,7 +25,6 @@ import {
   SellerOnboardingScreen,
   SetStoreInfoScreen,
   SetStoreDeliveryInfoScreen,
-  MercadoPagoInfoBeforeSignInScreen,
   MercadoPagoSignInScreen,
   SellerDashboardScreen,
   MenuScreen,
@@ -179,7 +178,7 @@ function SellerStackScreen() {
   if (
     !store ||
     !user?.email ||
-    !user?.mercadoPago?.customerId ||
+    !user?.customerId ||
     !user?.phone ||
     !user?.phoneVerified
   ) {
@@ -192,8 +191,8 @@ function SellerStackScreen() {
     !store.openingHours
   ) {
     initialRoute = 'SetStoreDeliveryInfo';
-  } else if (!user.mercadoPago.userId) {
-    initialRoute = 'MercadoPagoInfoBeforeSignIn';
+  } else if (!store.sellerCredentials?.userId) {
+    initialRoute = 'MercadoPagoSignIn';
   }
 
   return (
@@ -229,11 +228,6 @@ function SellerStackScreen() {
       <SellerStack.Screen
         name="SetStoreDeliveryInfo"
         component={SetStoreDeliveryInfoScreen}
-        options={{ title: '' }}
-      />
-      <SellerStack.Screen
-        name="MercadoPagoInfoBeforeSignIn"
-        component={MercadoPagoInfoBeforeSignInScreen}
         options={{ title: '' }}
       />
       <SellerStack.Screen

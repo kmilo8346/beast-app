@@ -133,8 +133,8 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreDeliveryInfo');
           return;
         }
-        if (!user.mercadoPago?.userId) {
-          navigation.replace('MercadoPagoInfoBeforeSignIn');
+        if (!store.sellerCredentials?.userId) {
+          navigation.replace('MercadoPagoSignIn');
           return;
         }
         navigation.dispatch(

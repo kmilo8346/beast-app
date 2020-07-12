@@ -14,15 +14,27 @@ export type OpeningHours = {
   close: number;
 }[];
 
-// TODO: add opening hours and version
+export interface SellerCredentials {
+  accessToken: string;
+  expiresIn: number;
+  liveMode: boolean;
+  publicKey: string;
+  refreshToken: string;
+  scope: string;
+  tokenType: string;
+  userId: number;
+}
+
 export interface Store {
   id: string;
+  version: number;
   name: string | undefined;
   phone: string | undefined;
   images: string[] | undefined;
   deliveryTime: IntegerRange | undefined;
   deliveryArea: Circle | undefined;
   openingHours: OpeningHours | undefined;
+  sellerCredentials: SellerCredentials | undefined;
 }
 
 export interface Product {
@@ -76,7 +88,6 @@ export interface Place {
 export interface Card {
   id: string;
   customerId: string;
-  mercadopagoCustomerId: string;
   expirationMonth: number;
   expirationYear: number;
   firstSixDigits: string;
@@ -115,30 +126,19 @@ export interface User {
   identificationNumber: string | undefined;
   firstName: string | undefined;
   lastName: string | undefined;
+  photoURL: string | undefined;
+  // mercado pago customer id
+  customerId: string | undefined;
+  // phone
   phone: string | undefined;
   phoneVerified: boolean;
-  photoURL: string | undefined;
-
-  mercadoPago:
-    | {
-        customerId: string;
-        userId: string;
-        accessToken: string;
-        expiresIn: string;
-        refreshToken: string;
-        tokenType: string;
-        publicKey: string;
-        liveMode: boolean;
-        scope: string;
-      }
-    | undefined;
-
+  // addresses
   currentAddress: string | undefined;
   addresses: Place[];
-
+  // cards
   currentCard: string | null | undefined;
   cards: Card[];
-
+  // store
   store: Store | undefined;
 
   metaData: { [key: string]: any };

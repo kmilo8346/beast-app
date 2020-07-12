@@ -1,24 +1,30 @@
 import React, { useEffect, useReducer } from 'react';
-import { View } from 'react-native';
-import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { Image, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { CommonActions } from '@react-navigation/native';
+import Constants from 'expo-constants';
 
 // components
 import {
   Container,
+  Text,
+  Icon,
+  Button,
   ErrorView,
   Loading,
-  Text,
-  Button,
 } from '../../../components';
 // clients
-import mercadoPagoAuthSaveUrlClient from '../../../clients/mercado-pago/auth-safe-url-client';
+import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 // container
 import UserProvider from '../../../containers/user';
 // styles
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
 
-// instances
+const mercadoPagoImage = require('../../../../assets/mercado_pago.png');
+
+// instances outside component
 const prefix = '[mercado pago sign in]';
 
 type ShowLoadingAction = {
@@ -27,21 +33,12 @@ type ShowLoadingAction = {
 type ShowErrorAction = {
   type: 'show_error';
 };
-type ShowMercadoPagoSignInAction = {
-  type: 'show_mercado_pago_sign_in';
-  safeUrl: string;
-};
 type ShowReadyAction = {
   type: 'show_ready';
 };
-type Action =
-  | ShowLoadingAction
-  | ShowErrorAction
-  | ShowMercadoPagoSignInAction
-  | ShowReadyAction;
+type Action = ShowLoadingAction | ShowErrorAction | ShowReadyAction;
 type State = {
-  view: 'LOADING' | 'ERROR' | 'MERCADO_PAGO_SIGN_IN' | 'READY';
-  safeUrl: string;
+  view: 'MERCADO_PAGO_BENEFITS' | 'LOADING' | 'ERROR' | 'READY';
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -49,12 +46,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, view: 'LOADING' };
     case 'show_error':
       return { ...state, view: 'ERROR' };
-    case 'show_mercado_pago_sign_in':
-      return {
-        ...state,
-        view: 'MERCADO_PAGO_SIGN_IN',
-        safeUrl: action.safeUrl,
-      };
     case 'show_ready':
       return { ...state, view: 'READY' };
     default:
@@ -66,52 +57,71 @@ export interface ScreenProps {
   navigation: any;
 }
 
+/**
+ * @site https://github.com/expo/examples/blob/master/with-webbrowser-redirect
+ */
 export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    view: 'LOADING',
-    safeUrl: '',
+    view: 'MERCADO_PAGO_BENEFITS',
   });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
-  // precondition
+  const store = userContainer.getStore();
+  // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  if (!store) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
 
   // event handlers
-  const fetchSaveUrl = async () => {
+  const createCredentials = async (code: string) => {
     try {
-      if (user.mercadoPago?.userId) {
-        return;
-      }
       dispatch({ type: 'show_loading' });
-      const { safeUrl } = await mercadoPagoAuthSaveUrlClient.create({
-        body: {
-          userId: user?.id,
-        },
+      const credentials = await oauthTokenClient.create({ body: { code } });
+      userContainer.updateStore({
+        sellerCredentials: credentials,
       });
-      dispatch({ type: 'show_mercado_pago_sign_in', safeUrl });
     } catch (error) {
-      // TODO: log error
       console.log(error);
+      // TODO: log error
       dispatch({ type: 'show_error' });
     }
   };
-  const messageIncomingHandler = (event: WebViewMessageEvent) => {
-    const messageFromWebView = JSON.parse(event.nativeEvent.data);
-    if (messageFromWebView.status === 'ERROR') {
+  const openMercadoPagoSignIn = async () => {
+    const redirect = Linking.makeUrl();
+    if (!redirect) {
+      throw new Error(`${prefix} Redirect must be defined`);
+    }
+    try {
+      const result = await WebBrowser.openAuthSessionAsync(
+        `${Constants.manifest.extra.MERCADO_PAGO_AUTH_URL}?client_id=${Constants.manifest.extra.MERCADO_PAGO_AUTH_CLIENT_ID}&response_type=code&platform_id=mp&state=${redirect}&redirect_uri=${Constants.manifest.extra.MERCADO_PAGO_AUTH_REDIRECT_URI}`,
+        redirect
+      );
+      if (result.type === 'success') {
+        const redirectData = Linking.parse(result.url);
+        if (
+          redirectData.queryParams?.status !== 'ok' ||
+          !redirectData.queryParams?.code
+        ) {
+          dispatch({ type: 'show_error' });
+          return;
+        }
+        createCredentials(redirectData.queryParams.code);
+      }
+    } catch (error) {
+      console.log(error);
       // TODO: log error
-      console.log(`${prefix} Error from webview ${messageFromWebView.message}`);
       dispatch({ type: 'show_error' });
     }
+  };
+  const pressMercadoPagoSignInHandler = async () => {
+    openMercadoPagoSignIn();
   };
   const retryHandler = () => {
-    if (!state.safeUrl) {
-      fetchSaveUrl();
-    } else {
-      dispatch({ type: 'show_mercado_pago_sign_in', safeUrl: state.safeUrl });
-    }
+    openMercadoPagoSignIn();
   };
   const pressLetsStart = () => {
     navigation.dispatch(
@@ -122,28 +132,25 @@ export default ({ navigation }: ScreenProps) => {
     );
   };
   useEffect(() => {
-    fetchSaveUrl();
-  }, []);
-  useEffect(() => {
-    if (user.mercadoPago?.userId) {
+    if (store.sellerCredentials?.userId) {
       dispatch({ type: 'show_ready' });
     }
-  });
+  }, [store.sellerCredentials?.userId]);
+
   // render logic
   let content = null;
   switch (state.view) {
+    case 'LOADING':
+      content = (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Loading message="Creando credenciales..." />
+        </View>
+      );
+      break;
     case 'ERROR':
       content = <ErrorView onRetry={retryHandler} />;
-      break;
-    case 'MERCADO_PAGO_SIGN_IN':
-      content = (
-        <WebView
-          source={{ uri: state.safeUrl }}
-          originWhitelist={['*']}
-          onMessage={messageIncomingHandler}
-          style={{ flex: 1 }}
-        />
-      );
       break;
     case 'READY':
       content = (
@@ -171,13 +178,58 @@ export default ({ navigation }: ScreenProps) => {
       break;
     default:
       content = (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Loading />
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Image
+            source={mercadoPagoImage}
+            style={{
+              width: 170,
+              height: 120,
+              marginTop: '18%',
+              marginBottom: 20,
+            }}
+          />
+          <Text level={2} weight="bold" style={{ marginBottom: 15 }}>
+            ¡Bien! casi listo…
+          </Text>
+          <Text level={5} style={{ lineHeight: 23 }}>
+            Solo nos falta un último paso, ingresa o crea una cuenta de{' '}
+            <Text level={5} weight="bold">
+              Mercado Pago
+            </Text>
+            .
+          </Text>
+
+          <View
+            style={[
+              { position: 'absolute', bottom: 0, left: 0, right: 0 },
+              globalStyles.withMargin,
+            ]}
+          >
+            <View style={{ flexDirection: 'row', marginBottom: 25 }}>
+              <Icon
+                name="info"
+                color={colors.red}
+                size={20}
+                style={{ marginRight: 10 }}
+              />
+              <Text level={7} style={{ lineHeight: 17, flex: 1 }}>
+                Con{' '}
+                <Text level={7} weight="bold">
+                  Mercado Pago
+                </Text>{' '}
+                podrás gestionar tus ventas con tarjetas bancarias, retirar
+                ganancias, realizar devoluciones y transferencias.
+              </Text>
+            </View>
+            <Button
+              title="Ingresar a Mercado Pago"
+              onPress={pressMercadoPagoSignInHandler}
+              style={globalStyles.withMainActionAir}
+            />
+          </View>
         </View>
       );
       break;
   }
-  return <Container>{content}</Container>;
+  return <Container withMargin>{content}</Container>;
 };

@@ -155,7 +155,7 @@ export default ({ navigation }: ScreenProps) => {
       store.deliveryTime &&
       store.openingHours
     ) {
-      navigation.navigate('MercadoPagoInfoBeforeSignIn');
+      navigation.navigate('MercadoPagoSignIn');
     }
   }, [
     state.form.submitOpId,

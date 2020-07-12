@@ -192,7 +192,7 @@ export default ({ navigation, route }: ScreenProps) => {
   };
   useEffect(() => {
     // signin was ok
-    if (user?.email && user.mercadoPago?.customerId) {
+    if (user?.email && user.customerId) {
       // not phone
       if (!user.phone || !user.phoneVerified) {
         navigation.replace('SetPhone', route.params);
@@ -223,8 +223,8 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace('SetStoreDeliveryInfo');
           return;
         }
-        if (!user.mercadoPago?.userId) {
-          navigation.replace('MercadoPagoInfoBeforeSignIn');
+        if (!store.sellerCredentials?.userId) {
+          navigation.replace('MercadoPagoSignIn');
           return;
         }
         navigation.dispatch(

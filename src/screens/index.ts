@@ -12,7 +12,6 @@ export { default as CheckoutScreen } from './checkout';
 export { default as SellerOnboardingScreen } from './seller/seller-onboarding';
 export { default as SetStoreInfoScreen } from './seller/set-store-info';
 export { default as SetStoreDeliveryInfoScreen } from './seller/set-store-delivery-info';
-export { default as MercadoPagoInfoBeforeSignInScreen } from './seller/mercado-pago-info-before-sign-in';
 export { default as MercadoPagoSignInScreen } from './seller/mercado-pago-sign-in';
 export { default as SellerDashboardScreen } from './seller/seller-dashboard';
 export { default as MenuScreen } from './menu';

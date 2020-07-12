@@ -255,14 +255,12 @@ export default createContainer(
             email: authUser.email,
             firstName,
             lastName,
+            photoURL: authUser.photoURL,
             phone: authUser.phoneNumber,
             phoneVerified: false,
-            photoURL: authUser.photoURL,
+            customerId,
             metaData: {
               codes: [], // TODO: remove this
-            },
-            mercadoPago: {
-              customerId,
             },
           };
         }
