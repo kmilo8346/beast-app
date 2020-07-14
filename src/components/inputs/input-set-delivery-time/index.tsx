@@ -39,8 +39,8 @@ export default ({
   let deliveryTimeText = '';
   if (value) {
     deliveryTimeText = DurationFormatter.humanizeDurationRange(
-      value.lte,
-      value.gte
+      value.gte,
+      value.lte
     );
   }
   return (

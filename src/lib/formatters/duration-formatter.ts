@@ -32,17 +32,18 @@ class DurationFormatter {
    * @param max
    * @return string
    */
-  humanizeDurationRange = (lte: number, gte: number): string => {
-    const rowLte = this.humanizeDuration(lte);
+  humanizeDurationRange = (gte: number, lte: number): string => {
     const rowGte = this.humanizeDuration(gte);
-    const lteValue = rowLte.split(' ')[0];
+    const rowLte = this.humanizeDuration(lte);
     const gteValue = rowGte.split(' ')[0];
-    const lteType = rowLte.split(' ')[1];
+    const lteValue = rowLte.split(' ')[0];
     const gteType = rowGte.split(' ')[1];
+    const lteType = rowLte.split(' ')[1];
+
     if (lteType.charAt(0) === gteType.charAt(0)) {
-      return `Entregas entre ${lteValue} y ${gteValue} ${gteType}`;
+      return `Entregas entre ${gteValue} y ${lteValue} ${gteType}`;
     }
-    return `Entregas entre ${rowLte} y ${rowGte}`;
+    return `Entregas entre ${rowGte} y ${rowLte}`;
   };
 }
 

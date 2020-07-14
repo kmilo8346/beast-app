@@ -14,6 +14,8 @@ import {
 } from '../../../components';
 // local components
 import { InputSearch } from '../components';
+// containers
+import UserProvider from '../../../containers/user';
 // types
 import { Product, SearchResponse } from '../../../types';
 // clients
@@ -120,13 +122,21 @@ export interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
+  const userContainer = UserProvider.useContainer();
+  const currentAddress = userContainer.getCurrentAddress();
+  if (!currentAddress) {
+    throw new Error('Current address must be defined');
+  }
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',
     query: '',
     isFetchingMore: false,
     filters: {
       store: route.params.store,
-      position: [-70.63196182250977, -33.44933346731538],
+      position: [
+        currentAddress.geometry.location.lng,
+        currentAddress.geometry.location.lat,
+      ],
     },
     productsTrack: {
       from: 0,

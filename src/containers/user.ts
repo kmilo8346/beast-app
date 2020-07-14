@@ -447,10 +447,13 @@ export default createContainer(
       if (!user) {
         throw new Error('User is not defined');
       }
+
       const storeUpdate: { [key: string]: any } = {};
       Object.keys(data).forEach((key) => {
         storeUpdate[`store.${key}`] = (data as { [key: string]: any })[key];
       });
+      storeUpdate['store.version'] = firebase.firestore.FieldValue.increment(1);
+
       return db.collection(COLLECTION).doc(user.id).update(storeUpdate);
     }
   }

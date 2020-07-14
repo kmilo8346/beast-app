@@ -2,8 +2,10 @@
 import React, { useReducer, useEffect, ReactNode } from 'react';
 import { View } from 'react-native';
 
+// clients
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
+// components
 import {
   Container,
   Text,
@@ -14,8 +16,13 @@ import {
   SectionList,
   ProductItem,
 } from '../../components';
+// local components
 import { StoreCard, InputSearch } from './components';
+// containers
+import UserProvider from '../../containers/user';
+// types
 import { Product, Store, SearchResponse } from '../../types';
+// styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
 
@@ -192,13 +199,21 @@ export interface PLPScreenProps {
 }
 
 export default ({ navigation }: PLPScreenProps) => {
+  const userContainer = UserProvider.useContainer();
+  const currentAddress = userContainer.getCurrentAddress();
+  if (!currentAddress) {
+    throw new Error('Current address must be defined');
+  }
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',
     query: '',
     isFetchingMoreStores: false,
     isFetchingMoreProducts: false,
     filters: {
-      position: [-70.63196182250977, -33.44933346731538],
+      position: [
+        currentAddress.geometry.location.lng,
+        currentAddress.geometry.location.lat,
+      ],
     },
     storesTrack: {
       from: 0,

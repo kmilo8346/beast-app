@@ -376,11 +376,6 @@ export default ({ navigation }: ScreenProps) => {
       userContainer.updateStore({
         id: generatePushID(),
         phone: user?.phone,
-        deliveryArea: {
-          center: userContainer.getCurrentAddress() as Place,
-          radius: '50m',
-        },
-        // TODO: add opening hours
       });
     }
   }, []);

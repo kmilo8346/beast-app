@@ -17,16 +17,16 @@ import constraints from './constraints';
 import globalStyle from '../../../styles';
 
 // extending validate validators
-validate.validators.greaterThanMin = (
+validate.validators.lessThanMax = (
   _value: any,
   _options: any,
   _key: any,
   attributes: { [key: string]: any }
 ) => {
-  if (parseInt(attributes.gte, 10) > parseInt(attributes.lte, 10)) {
+  if (parseInt(attributes.gte, 10) < parseInt(attributes.lte, 10)) {
     return null;
   }
-  return '^El valor debe ser mayor que el mínimo';
+  return '^Mínimo debe ser menor que el máximo';
 };
 
 type ChangeValueAction = {
@@ -153,12 +153,12 @@ export default ({
           label="Tiempo mínimo"
           placeholder="ej: 10"
           keyboardType="number-pad"
-          value={state.form.lte}
+          value={state.form.gte}
           format={stringFormatter.toNumber}
-          errors={state.form.errors?.lte}
+          errors={state.form.errors?.gte}
           onChangeText={(text) => {
             if (text.length < 4) {
-              changeHandler('lte', text);
+              changeHandler('gte', text);
             }
           }}
         />
@@ -166,12 +166,12 @@ export default ({
           label="Tiempo máximo"
           placeholder="ej: 40"
           keyboardType="number-pad"
-          value={state.form.gte}
+          value={state.form.lte}
           format={stringFormatter.toNumber}
-          errors={state.form.errors?.gte}
+          errors={state.form.errors?.lte}
           onChangeText={(text) => {
             if (text.length < 4) {
-              changeHandler('gte', text);
+              changeHandler('lte', text);
             }
           }}
         />
