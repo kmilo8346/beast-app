@@ -149,7 +149,7 @@ export interface User {
 
 export interface CreateParams<T> {
   pathVars?: { [key: string]: any };
-  body: T;
+  body: Omit<T, 'id'>;
   source?: string[];
 }
 
