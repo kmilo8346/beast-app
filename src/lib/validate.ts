@@ -105,4 +105,17 @@ validate.validators.openingHours = (
   return options.message;
 };
 
+validate.validators.arrayWithValues = (
+  value: any[],
+  options: {
+    message: string;
+  }
+) => {
+  if (value && Array.isArray(value) && value.every((v) => !!v)) {
+    return null;
+  }
+
+  return options.message;
+};
+
 export default validate;

@@ -154,7 +154,6 @@ export default ({
           placeholder="ej: 10"
           keyboardType="number-pad"
           value={state.form.gte}
-          format={stringFormatter.toNumber}
           errors={state.form.errors?.gte}
           onChangeText={(text) => {
             if (text.length < 4) {

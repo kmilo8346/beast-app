@@ -27,6 +27,7 @@ import {
   SetStoreDeliveryInfoScreen,
   MercadoPagoSignInScreen,
   SellerDashboardScreen,
+  CreateOrUpdateProductScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -205,17 +206,17 @@ function SellerStackScreen() {
         component={SellerOnboardingScreen}
         options={{ headerShown: false }}
       />
-      <HomeStack.Screen
+      <SellerStack.Screen
         name="SignIn"
         component={SignInScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <SellerStack.Screen
         name="SetPhone"
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <SellerStack.Screen
         name="VerifyPhone"
         component={VerifyPhoneScreen}
         options={{ title: '' }}
@@ -238,6 +239,12 @@ function SellerStackScreen() {
       <SellerStack.Screen
         name="SellerDashboard"
         component={SellerDashboardScreen}
+        options={{ headerShown: false }}
+      />
+      <SellerStack.Screen
+        name="CreateOrUpdateProduct"
+        component={CreateOrUpdateProductScreen}
+        options={{ headerTransparent: true, headerTitle: '' }}
       />
     </SellerStack.Navigator>
   );
@@ -321,6 +328,7 @@ function MainTabScreen() {
         activeTintColor: colors.blue,
         inactiveTintColor: colors.black,
       }}
+      initialRouteName="HomeStack"
     >
       <MainTab.Screen name="HomeStack" component={HomeStackScreen} />
       <MainTab.Screen name="SearchStack" component={SearchStackScreen} />

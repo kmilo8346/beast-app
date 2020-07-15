@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { View } from 'react-native';
+import { View, Vibration } from 'react-native';
 import validate from 'validate.js';
 
 // components
@@ -88,6 +88,7 @@ export default ({ navigation, route }: ScreenProps) => {
     // validate
     const errors = validate(state.form, constraints);
     if (errors) {
+      Vibration.vibrate(400);
       dispatch({ type: 'set_form_errors', errors });
       return;
     }

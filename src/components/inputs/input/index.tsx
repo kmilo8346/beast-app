@@ -18,6 +18,7 @@ import styles from './styles';
 export interface InputProps extends TextInputProps {
   label?: string;
   errors?: string[];
+  lengthCounter?: boolean;
   prefix?: string | JSX.Element;
   suffix?: string;
   format?: (text: string | undefined) => string | undefined;
@@ -34,6 +35,7 @@ export default forwardRef<Ref, InputProps>(
       label = '',
       value,
       errors = [],
+      lengthCounter = false,
       prefix = '',
       suffix = '',
       format = (text: string | undefined) => text,
@@ -61,6 +63,7 @@ export default forwardRef<Ref, InputProps>(
     const finalStyle: StyleProp<TextStyle> = [styles.input];
     let prefixContainer = null;
     let suffixContainer = null;
+    let lentghCounterComponent = null;
     if (prefix) {
       let prefixComponent = null;
       if (typeof prefix === 'string') {
@@ -85,6 +88,31 @@ export default forwardRef<Ref, InputProps>(
       );
       finalStyle.push({ paddingRight: 45 });
     }
+    if (lengthCounter) {
+      if (!inputProps.maxLength) {
+        console.warn('Length counter without max length dont have any sense');
+      }
+      let right = 0;
+      if (!inputProps.multiline && value) {
+        right = 25;
+      }
+      lentghCounterComponent = (
+        <View
+          style={{
+            position: 'absolute',
+            right,
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text level={6} color={colors.blackLight3}>
+            {`${(value || '').length}/${inputProps.maxLength}`}
+          </Text>
+        </View>
+      );
+    }
     finalStyle.push(inputProps.style);
     return (
       <View style={finalContainerStyle}>
@@ -104,6 +132,7 @@ export default forwardRef<Ref, InputProps>(
             style={finalStyle}
             clearButtonMode="while-editing"
           />
+          {lentghCounterComponent}
           {suffixContainer}
         </View>
 

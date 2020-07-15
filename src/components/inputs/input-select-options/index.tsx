@@ -20,7 +20,7 @@ interface Option {
 export interface InputSelectOptions {
   label?: string;
   placeholder?: string;
-  value: string;
+  value?: string;
   errors?: string[];
   options: Option[];
   modalTitle: string;

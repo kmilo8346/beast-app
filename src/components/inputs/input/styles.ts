@@ -43,7 +43,7 @@ export default StyleSheet.create<Styles>({
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 4,
-    paddingRight: 36,
+    paddingRight: 50,
     fontSize: 14,
     color: colors.black,
   },

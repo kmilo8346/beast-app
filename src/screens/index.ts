@@ -14,4 +14,5 @@ export { default as SetStoreInfoScreen } from './seller/set-store-info';
 export { default as SetStoreDeliveryInfoScreen } from './seller/set-store-delivery-info';
 export { default as MercadoPagoSignInScreen } from './seller/mercado-pago-sign-in';
 export { default as SellerDashboardScreen } from './seller/seller-dashboard';
+export { default as CreateOrUpdateProductScreen } from './seller/create-or-update-product';
 export { default as MenuScreen } from './menu';
