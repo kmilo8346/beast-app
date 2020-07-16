@@ -38,12 +38,24 @@ const publishedImage = require('../../../../assets/icons/check.png');
 const prefix = '[create or update service component]';
 const categories = [
   {
-    key: 'DESPENSA',
-    title: 'Despensa',
+    key: 'REPARACIONES DEL HOGAR',
+    title: 'Reparaciones del hogar',
   },
   {
-    key: 'COMIDA',
-    title: 'Comida',
+    key: 'BELLEZA Y SALUD',
+    title: 'Belleza y salud',
+  },
+  {
+    key: 'MENSAJERÍA',
+    title: 'Mensajeria',
+  },
+  {
+    key: 'MASCOTAS',
+    title: 'Mascotas',
+  },
+  {
+    key: 'OTROS',
+    title: 'Otros',
   },
 ];
 validate.validators.servicePrice = (

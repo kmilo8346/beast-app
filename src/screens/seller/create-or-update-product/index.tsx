@@ -41,8 +41,68 @@ const categories = [
     title: 'Despensa',
   },
   {
-    key: 'COMIDA',
-    title: 'Comida',
+    key: 'COMIDAS PREPARADAS',
+    title: 'Comidas preparadas',
+  },
+  {
+    key: 'COMIDA ITALIANA Y PASTAS',
+    title: 'Comida italiana y pastas',
+  },
+  {
+    key: 'COMIDA VENEZOLANA',
+    title: 'Comida Venezolana',
+  },
+  {
+    key: 'FRUTAS Y VERDURAS',
+    title: 'Frutas y verduras',
+  },
+  {
+    key: 'LÁCTEOS Y HUEVOS',
+    title: 'Lácteos y huevos',
+  },
+  {
+    key: 'PANADERÍA Y PASTELERÍA',
+    title: 'Panadería y pastelería',
+  },
+  {
+    key: 'CARNES, AVES Y MARISCOS',
+    title: 'Carnes, aves y mariscos',
+  },
+  {
+    key: 'HOGAR',
+    title: 'Hogar',
+  },
+  {
+    key: 'BEBÉS',
+    title: 'Bebés',
+  },
+  {
+    key: 'CUIDADO PERSONAL Y SALUD',
+    title: 'Cuidado personal y salud',
+  },
+  {
+    key: 'MASCOTAS',
+    title: 'Mascotas',
+  },
+  {
+    key: 'FIESTAS Y CELEBRACIONES',
+    title: 'Fiestas y celebraciones',
+  },
+  {
+    key: 'VEGETARIANO Y VEGANO',
+    title: 'Vegetariano y vegano',
+  },
+  {
+    key: 'DEPORTE',
+    title: 'Deporte',
+  },
+  {
+    key: 'CERVEZAS, VINOS Y LICORES',
+    title: 'Cervezas, vinos Y licores',
+  },
+  {
+    key: 'OTROS',
+    title: 'Otros',
   },
 ];
 
