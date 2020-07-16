@@ -14,6 +14,7 @@ import {
   Toast,
   IToast,
   InputImages,
+  Checkbox,
 } from '../../../components';
 // clients
 import productClient from '../../../clients/product-client';
@@ -24,17 +25,17 @@ import stringParser from '../../../lib/parsers/string-parser';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { Product } from '../../../types';
+import { Service } from '../../../types';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 
-const productImage = require('../../../../assets/icons/tag.png');
+const serviceImage = require('../../../../assets/icons/hand_shake.png');
 const publishedImage = require('../../../../assets/icons/check.png');
 
 // instances outside component
-const prefix = '[create or update product component]';
+const prefix = '[create or update service component]';
 const categories = [
   {
     key: 'DESPENSA',
@@ -45,6 +46,18 @@ const categories = [
     title: 'Comida',
   },
 ];
+validate.validators.servicePrice = (
+  value: any,
+  options: {
+    message: string;
+  }
+) => {
+  if (value === null || (Number.isInteger(value) && value > 0)) {
+    return null;
+  }
+
+  return options.message;
+};
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -76,7 +89,7 @@ type State = {
   view: 'FORM' | 'PUBLISHED';
   form: {
     // fields
-    product?: Product;
+    service?: Service;
     // other form states
     submitted: boolean;
     errors?: { [key: string]: string[] };
@@ -89,8 +102,8 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         form: {
           ...state.form,
-          product: {
-            ...state.form.product,
+          service: {
+            ...state.form.service,
             [action.attribute]: action.value,
           } as Product,
         },
@@ -102,7 +115,7 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         form: {
           ...state.form,
-          errors: validate(state.form.product, constraints),
+          errors: validate(state.form.service, constraints),
         },
       };
     case 'set_form_submitted':
@@ -123,11 +136,11 @@ export interface CreateOrUpdateProps {
 
 export default ({ navigation, route }: CreateOrUpdateProps) => {
   // state
-  const product = route.params?.product;
+  const service = route.params?.service;
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
     form: {
-      product,
+      service,
       // other form states
       submitted: false,
     },
@@ -138,9 +151,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const toastRef = useRef<IToast>(null);
 
   // preconditions
-  if (product && product.type !== 'product') {
+  if (service && service.type !== 'service') {
     throw new Error(
-      `${prefix} Product type must be 'product', invalid type: ${product.type}`
+      `${prefix} Service type must be 'service', invalid type: ${service.type}`
     );
   }
   if (!store) {
@@ -148,14 +161,14 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   }
 
   // event handlers
-  const createOrUpdateProduct = async (product: Product) => {
+  const createOrUpdateService = async (service: Service) => {
     try {
       loadingOverlayRef.current?.show();
       await productClient.create({
         pathVars: {
           storeId: store.id,
         },
-        body: product,
+        body: service,
       });
       dispatch({ type: 'show_published' });
     } catch (error) {
@@ -177,20 +190,20 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const publishHadler = () => {
     dispatch({ type: 'set_form_submitted' });
     // validate
-    const errors = validate(state.form.product, constraints);
+    const errors = validate(state.form.service, constraints);
     if (errors) {
       Vibration.vibrate(400);
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
 
-    createOrUpdateProduct({
-      ...state.form.product,
+    createOrUpdateService({
+      ...state.form.service,
       // set type
-      type: 'product',
+      type: 'service',
       // set updated store
       store,
-    } as Product);
+    } as Service);
   };
 
   // render logic
@@ -206,7 +219,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           style={{ height: 90, width: 90, marginBottom: 20 }}
         />
         <Text level={1} weight="bold" style={{ textAlign: 'center' }}>
-          ¡Producto publicado con exito!
+          Servicio publicado con exito!
         </Text>
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
           <Button
@@ -221,9 +234,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     );
   }
 
-  let title = 'Nuevo producto';
-  if (state.form.product?.id) {
-    title = 'Editar producto';
+  let title = 'Nuevo servicio';
+  if (state.form.service?.id) {
+    title = 'Editar servicio';
   }
   return (
     <Container safeArea fakeHeader>
@@ -235,15 +248,18 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             marginBottom: 30,
           }}
         >
-          <Image source={productImage} style={{ width: 51, height: 51 }} />
+          <Image
+            source={serviceImage}
+            style={{ width: 51, height: 51, marginRight: 10 }}
+          />
           <Text level={2} weight="bold">
             {title}
           </Text>
         </View>
         <Input
           label="Nombre"
-          placeholder="Porotos con riendas"
-          value={state.form.product?.name}
+          placeholder="Cortes de cabello a domicilio"
+          value={state.form.service?.name}
           errors={state.form.errors?.name}
           lengthCounter
           maxLength={30}
@@ -253,8 +269,8 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         />
         <Input
           label="Descripción"
-          placeholder="Porotos con rienda caseros"
-          value={state.form.product?.description}
+          placeholder="Todo tipo de cortes a domicilio"
+          value={state.form.service?.description}
           errors={state.form.errors?.description}
           lengthCounter
           maxLength={100}
@@ -267,28 +283,17 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         <InputImages
           label="Imágenes"
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
-          path={`stores/${store.id}/products/images/\${}`}
+          path={`stores/${store.id}/services/images/\${}`}
           errors={state.form.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);
           }}
         />
         <View style={{ flexDirection: 'row' }}>
-          <Input
-            label="Marca"
-            placeholder="Don Pepe"
-            value={state.form.product?.brand}
-            errors={state.form.errors?.brand}
-            onChangeText={(text) => {
-              changeHandler('brand', text);
-            }}
-            containerStyle={{ width: '60%' }}
-          />
-          <View style={{ width: 15 }} />
           <InputNumeric
             label="Precio"
             placeholder="$1000"
-            value={state.form.product?.price}
+            value={state.form.service?.price || undefined}
             errors={state.form.errors?.price}
             formatNumber={numberFormatter.toCurrency}
             parseNumber={stringParser.fromCurrency}
@@ -297,11 +302,20 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             }}
             containerStyle={{ flex: 1 }}
           />
+          <View style={{ width: 15 }} />
+          <Checkbox
+            label="Precio a convenir"
+            checked={state.form.service?.price === null}
+            onChange={(checked) => {
+              changeHandler('price', checked ? null : undefined);
+            }}
+            style={{ alignSelf: 'flex-end', marginBottom: 30 }}
+          />
         </View>
         <InputSelectOptions
           label="Categoría"
           placeholder="Seleccione categoría"
-          value={state.form.product?.category}
+          value={state.form.service?.category}
           errors={state.form.errors?.category}
           modalTitle="Selecciona categoría"
           onChange={(key: string) => {
@@ -319,7 +333,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
-          title="Publicar producto"
+          title="Publicar servicio"
           onPress={publishHadler}
           style={globalStyles.withMainActionAir}
         />

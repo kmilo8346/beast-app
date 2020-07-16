@@ -1,12 +1,14 @@
 export default {
-  address: {
+  center: {
+    presence: {
+      allowEmpty: false,
+      message: '^Seleccione una dirección con calle y número',
+    },
+  },
+  radius: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
-    },
-    fieldsPresence: {
-      fields: ['center'],
-      message: '^Selecciona una dirección',
     },
   },
 } as { [key: string]: any };

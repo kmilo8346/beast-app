@@ -17,7 +17,7 @@ import { InputSearch } from '../components';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { Product, SearchResponse } from '../../../types';
+import { Product, Service, SearchResponse } from '../../../types';
 // clients
 import productClient from '../../../clients/product-client';
 // styles
@@ -39,7 +39,7 @@ type SetIsFetchingMoreAction = {
 };
 type SetFetchResponseAction = {
   type: 'set_fetch_response';
-  response: SearchResponse<Partial<Product>>;
+  response: SearchResponse<Partial<Product | Service>>;
 };
 type SetErrorAction = {
   type: 'set_error';
@@ -124,6 +124,8 @@ export interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   const userContainer = UserProvider.useContainer();
   const currentAddress = userContainer.getCurrentAddress();
+  // in store
+  const store = route.params.store;
   if (!currentAddress) {
     throw new Error('Current address must be defined');
   }
@@ -132,7 +134,7 @@ export default ({ navigation, route }: ScreenProps) => {
     query: '',
     isFetchingMore: false,
     filters: {
-      store: route.params.store,
+      store: store.id,
       position: [
         currentAddress.geometry.location.lng,
         currentAddress.geometry.location.lat,
@@ -149,10 +151,12 @@ export default ({ navigation, route }: ScreenProps) => {
   const fetchProducts = async () => {
     try {
       const response = await productClient.search({
+        pathVars: {
+          storeId: store.id,
+        },
         query: state.query,
         filters: {
           position: state.filters.position,
-          store: state.filters.store,
         },
         from: state.productsTrack.from,
         size: 10,
@@ -182,7 +186,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.query]);
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({ title: state.filters.store });
+    navigation.setOptions({ title: store.name });
   }, [state.filters.store]);
 
   let content: ReactNode;

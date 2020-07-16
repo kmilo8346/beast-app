@@ -21,21 +21,21 @@ import { StoreCard, InputSearch } from './components';
 // containers
 import UserProvider from '../../containers/user';
 // types
-import { Product, Store, SearchResponse } from '../../types';
+import { Product, Service, Store, SearchResponse } from '../../types';
 // styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
 
-const mapProductsToSections = (products: Product[]): Section[] => {
+const mapProductsToSections = (products: (Product | Service)[]): Section[] => {
   const sections: Section[] = [];
   let lastTag: string | null = null;
   products.forEach((product) => {
     if (lastTag !== product.store.name) {
       sections.push({
-        tag: product.store.name,
+        tag: product.store.name as string,
         data: [],
       });
-      lastTag = product.store.name;
+      lastTag = product.store.name as string;
     }
     const currenSection = sections[sections.length - 1];
 
@@ -46,7 +46,7 @@ const mapProductsToSections = (products: Product[]): Section[] => {
 
 interface Section {
   tag: string;
-  data: Product[];
+  data: (Product | Service)[];
 }
 type ViewState =
   | 'LOADING'
@@ -82,7 +82,7 @@ type SetFetchStoresErrorAction = {
 };
 type SetFetchProductsResponseAction = {
   type: 'set_fetch_products_response';
-  response: SearchResponse<Product>;
+  response: SearchResponse<Product | Service>;
 };
 type SetFetchProductsErrorAction = {
   type: 'set_fetch_products_error';
@@ -266,6 +266,9 @@ export default ({ navigation }: PLPScreenProps) => {
   const fetchProducts = async () => {
     try {
       const response = await productClient.search({
+        pathVars: {
+          storeId: '-',
+        },
         query: state.query,
         filters: {
           position: state.filters.position,
@@ -343,7 +346,7 @@ export default ({ navigation }: PLPScreenProps) => {
                 name={item.name}
                 image={item.images[0]}
                 onPress={() => {
-                  navigation.navigate('PLPInStore', { store: item.name });
+                  navigation.navigate('PLPInStore', { store: item });
                 }}
               />
             );

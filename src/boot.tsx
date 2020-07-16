@@ -28,6 +28,7 @@ import {
   MercadoPagoSignInScreen,
   SellerDashboardScreen,
   CreateOrUpdateProductScreen,
+  CreateOrUpdateServiceScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -244,6 +245,11 @@ function SellerStackScreen() {
       <SellerStack.Screen
         name="CreateOrUpdateProduct"
         component={CreateOrUpdateProductScreen}
+        options={{ headerTransparent: true, headerTitle: '' }}
+      />
+      <SellerStack.Screen
+        name="CreateOrUpdateService"
+        component={CreateOrUpdateServiceScreen}
         options={{ headerTransparent: true, headerTitle: '' }}
       />
     </SellerStack.Navigator>

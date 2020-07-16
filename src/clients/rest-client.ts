@@ -101,8 +101,8 @@ export default class RESTClient<T> {
     params: UpdateParams<T>,
     cancelToken?: CancelToken
   ): Promise<void> {
-    const { pathVars, ...data } = params;
-    await this.axios.put<T>(interpolate(this.prefix, pathVars), data, {
+    const { pathVars, body } = params;
+    await this.axios.put<T>(interpolate(this.prefix, pathVars), body, {
       cancelToken,
     });
   }

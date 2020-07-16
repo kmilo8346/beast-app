@@ -3,29 +3,27 @@ import { View, Image, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 // components
-import {
-  Touchable,
-  Icon,
-  Text,
-  ButtonIcon,
-  ActionSheet,
-} from '../../../../../components';
+import Touchable from '../../touchable';
+import Icon from '../../icon';
+import Text from '../../text';
+import ButtonIcon from '../../buttons/button-icon';
+import ActionSheet from '../../modals/action-sheet';
 // libs
-import firebase from '../../../../../lib/firebase';
-import { generatePushID } from '../../../../../lib/uuid';
+import firebase from '../../../lib/firebase';
+import { generatePushID } from '../../../lib/uuid';
 // styles
-import colors from '../../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 // instances outside component
 const prefix = '[input images component]';
-interface Image {
+interface InputImage {
   id: string;
   uri: string;
   url: string;
   uploading: boolean;
   progress: number;
 }
-const fromValue = (value?: string[]): Image[] => {
+const fromValue = (value?: string[]): InputImage[] => {
   if (!value) {
     return [];
   }
@@ -68,7 +66,7 @@ export default ({
   onError = () => null,
 }: InputImagesProps) => {
   // state
-  const [images, setImages] = useState<Image[]>(fromValue(value));
+  const [images, setImages] = useState<InputImage[]>(fromValue(value));
   const [selector, setSelector] = useState(false);
 
   // event handlers
@@ -87,7 +85,7 @@ export default ({
 
     return newImage;
   };
-  const updateImage = (id: string, update: Partial<Image>) => {
+  const updateImage = (id: string, update: Partial<InputImage>) => {
     setImages((prevImages) => {
       return prevImages.map((image) => {
         if (image.id === id) {

@@ -1,5 +1,6 @@
 import React, { useReducer, useRef, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, Vibration } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 // components
 import {
@@ -20,7 +21,7 @@ import UserProvider from '../../../containers/user';
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
-import { Circle, IntegerRange, OpeningHours } from '../../../types';
+import { IntegerRange, OpeningHours, DeliveryArea } from '../../../types';
 
 // instances outside component
 const PREFIX = '[set store delivery info screen]';
@@ -54,7 +55,7 @@ type Action =
 type State = {
   form: {
     // fields;
-    deliveryArea?: Circle;
+    deliveryArea?: DeliveryArea;
     deliveryTime?: IntegerRange;
     openingHours?: OpeningHours;
     // hidden field
@@ -118,6 +119,8 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
   const toastRef = useRef<IToast>(null);
+  const isFocused = useIsFocused();
+
   // precondition
   if (!store || !store.name || !store.images) {
     throw new Error(
@@ -137,6 +140,7 @@ export default ({ navigation }: ScreenProps) => {
     const errors = validate(state.form, constraints);
     if (errors) {
       dispatch({ type: 'set_form_errors', errors });
+      Vibration.vibrate(400);
       return;
     }
     // update store
@@ -150,6 +154,7 @@ export default ({ navigation }: ScreenProps) => {
   };
   useEffect(() => {
     if (
+      isFocused &&
       state.form.submitOpId &&
       store.deliveryArea &&
       store.deliveryTime &&
@@ -158,6 +163,7 @@ export default ({ navigation }: ScreenProps) => {
       navigation.navigate('MercadoPagoSignIn');
     }
   }, [
+    isFocused,
     state.form.submitOpId,
     store.deliveryArea,
     store.deliveryTime,

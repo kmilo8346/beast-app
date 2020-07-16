@@ -1,6 +1,6 @@
 import RestClient from './rest-client';
-import { Product } from '../types';
+import { Product, Service } from '../types';
 
-class ProductClient extends RestClient<Product> {}
+class ProductClient extends RestClient<Product | Service> {}
 
-export default new ProductClient('products');
+export default new ProductClient('/stores/:storeId/products');

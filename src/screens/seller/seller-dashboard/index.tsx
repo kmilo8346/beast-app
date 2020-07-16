@@ -82,7 +82,9 @@ export default ({ navigation }: ScreenProps) => {
             case 'product':
               navigation.navigate('CreateOrUpdateProduct');
               break;
-
+            case 'service':
+              navigation.navigate('CreateOrUpdateService');
+              break;
             default:
               throw new Error(`${prefix} Invalid on select type`);
           }

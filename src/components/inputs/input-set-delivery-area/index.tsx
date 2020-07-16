@@ -5,12 +5,12 @@ import { View } from 'react-native';
 import InputSelect from '../input-select';
 import ModalSetDeliveryArea from '../../modals/modal-set-delivery-area';
 // types
-import { Circle } from '../../../types';
+import { DeliveryArea } from '../../../types';
 
 export interface InputSetDeliveryAreaProps {
-  value?: Circle;
+  value?: DeliveryArea;
   errors?: string[];
-  onChange?: (deliveryArea: Circle) => void;
+  onChange?: (deliveryArea: DeliveryArea) => void;
 }
 
 export default ({
@@ -28,7 +28,7 @@ export default ({
   const requestCloseHandler = useCallback(() => {
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
-  const saveHandler = (deliveryArea: Circle) => {
+  const saveHandler = (deliveryArea: DeliveryArea) => {
     onChange(deliveryArea);
     setIsVisible((prevIsVisible) => !prevIsVisible);
   };

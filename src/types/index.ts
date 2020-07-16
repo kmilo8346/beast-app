@@ -4,52 +4,9 @@ export interface IntegerRange {
 }
 
 export interface Circle {
-  center: Place;
+  type: 'circle';
   radius: string;
-}
-
-export type OpeningHours = {
-  day: '1' | '2' | '3' | '4' | '5' | '6' | '7';
-  open: number;
-  close: number;
-}[];
-
-export interface SellerCredentials {
-  accessToken: string;
-  expiresIn: number;
-  liveMode: boolean;
-  publicKey: string;
-  refreshToken: string;
-  scope: string;
-  tokenType: string;
-  userId: number;
-}
-
-export interface Store {
-  id: string;
-  version: number;
-  name: string | undefined;
-  phone: string | undefined;
-  images: string[] | undefined;
-  deliveryTime: IntegerRange | undefined;
-  deliveryArea: Circle | undefined;
-  openingHours: OpeningHours | undefined;
-  sellerCredentials: SellerCredentials | undefined;
-}
-
-export interface Product {
-  id: string;
-  type: 'product' | 'service';
-  name: string;
-  description?: string;
-  images: string[];
-  price: number | null;
-  brand?: string;
-  format?: string;
-  tags: string[];
-  categories: string[];
-  store: Store;
-  qty: number;
+  coordinates: number[];
 }
 
 export interface AddressProp {
@@ -72,17 +29,67 @@ export interface Place {
       lat: number;
       lng: number;
     };
-    viewport: {
-      northeast: {
-        lat: number;
-        lng: number;
-      };
-      southwest: {
-        lat: number;
-        lng: number;
-      };
-    };
   };
+}
+
+export type OpeningHours = {
+  day: '1' | '2' | '3' | '4' | '5' | '6' | '7';
+  open: number;
+  close: number;
+}[];
+
+export interface SellerCredentials {
+  accessToken: string;
+  expiresIn: number;
+  liveMode: boolean;
+  publicKey: string;
+  refreshToken: string;
+  scope: string;
+  tokenType: string;
+  userId: number;
+}
+
+export interface DeliveryArea {
+  center: Place;
+  radius: string;
+  geometry: Circle;
+}
+
+export interface Store {
+  id: string;
+  version: number;
+  name: string | undefined;
+  phone: string | undefined;
+  images: string[] | undefined;
+  deliveryTime: IntegerRange | undefined;
+  deliveryArea: DeliveryArea | undefined;
+  openingHours: OpeningHours | undefined;
+  sellerCredentials: SellerCredentials | undefined;
+}
+
+export interface Product {
+  id: string;
+  type: 'product';
+  name: string;
+  description: string;
+  images: string[];
+  price: number;
+  brand?: string;
+  category: string;
+  tags?: string[];
+  store: Store;
+}
+
+export interface Service {
+  id: string;
+  type: 'service';
+  name: string;
+  description: string;
+  images: string[];
+  price: number | null;
+  category: string;
+  tags?: string[];
+  store: Store;
 }
 
 export interface Card {
@@ -156,7 +163,6 @@ export interface CreateParams<T> {
 export interface UpdateParams<T> {
   pathVars?: { [key: string]: any };
   body: Partial<T>;
-  source?: string[];
 }
 
 export interface GetParams {

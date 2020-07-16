@@ -19,6 +19,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // const db = firebase.firestore();
+
 // db.settings({
 //   host: 'localhost:8080',
 //   ssl: false,
