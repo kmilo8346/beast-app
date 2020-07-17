@@ -14,6 +14,7 @@ import {
   Toast,
   IToast,
   InputImages,
+  Switch,
 } from '../../../components';
 // clients
 import productClient from '../../../clients/product-client';
@@ -187,7 +188,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
     form: {
-      product,
+      product: { enabled: true, ...product },
       // other form states
       submitted: false,
     },
@@ -369,6 +370,29 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           }}
           options={categories}
         />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text level={6} style={{ marginBottom: 10 }}>
+              Habilitar
+            </Text>
+            <Text level={7}>
+              {state.form.product?.enabled
+                ? 'Presione para desabilitar el producto'
+                : 'Presione para habilitar el producto'}
+            </Text>
+          </View>
+          <Switch
+            value={state.form.product?.enabled}
+            onValueChange={(value) => {
+              changeHandler('enabled', value);
+            }}
+          />
+        </View>
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View

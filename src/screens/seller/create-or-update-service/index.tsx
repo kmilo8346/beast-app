@@ -15,6 +15,7 @@ import {
   IToast,
   InputImages,
   Checkbox,
+  Switch,
 } from '../../../components';
 // clients
 import productClient from '../../../clients/product-client';
@@ -117,7 +118,7 @@ const reducer = (state: State, action: Action): State => {
           service: {
             ...state.form.service,
             [action.attribute]: action.value,
-          } as Product,
+          } as Service,
         },
       };
     case 'validate_value':
@@ -152,7 +153,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
     form: {
-      service,
+      service: { enabled: true, ...service },
       // other form states
       submitted: false,
     },
@@ -335,6 +336,29 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           }}
           options={categories}
         />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text level={6} style={{ marginBottom: 10 }}>
+              Habilitar
+            </Text>
+            <Text level={7}>
+              {state.form.service?.enabled
+                ? 'Presione para desabilitar el servicio'
+                : 'Presione para habilitar el servicio'}
+            </Text>
+          </View>
+          <Switch
+            value={state.form.service?.enabled}
+            onValueChange={(value) => {
+              changeHandler('enabled', value);
+            }}
+          />
+        </View>
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View

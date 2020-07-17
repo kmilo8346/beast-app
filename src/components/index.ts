@@ -33,3 +33,4 @@ export { default as ProductItem } from './product-item';
 export { default as Badge } from './badge';
 export { default as Toast, IToast } from './toast';
 export { default as Checkbox } from './checkbox';
+export { default as Switch } from './switch';

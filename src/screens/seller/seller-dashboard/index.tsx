@@ -12,25 +12,14 @@ import {
 } from './components';
 // styles
 import globalStyles from '../../../styles';
-
+const myProductsImage = require('../../../../assets/icons/tag.png');
+const myServicesImage = require('../../../../assets/icons/hand_shake.png');
+const mySalesImage = require('../../../../assets/icons/sale.png');
 const addProductOrServiceImage = require('../../../../assets/icons/plus.png');
 const salesInProgressImage = require('../../../../assets/icons/clock.png');
 
 // instances outside component
-const links = [
-  {
-    image: require('../../../../assets/icons/tag.png'),
-    title: 'Mis productos',
-  },
-  {
-    image: require('../../../../assets/icons/hand_shake.png'),
-    title: 'Mis servicios',
-  },
-  {
-    image: require('../../../../assets/icons/sale.png'),
-    title: 'Ventas',
-  },
-];
+
 const prefix = '[seller dashboard screen]';
 type ShowSelectProductTypeModalAction = {
   type: 'show_select_product_type_modal';
@@ -95,13 +84,15 @@ export default ({ navigation }: ScreenProps) => {
   return (
     <Container safeArea>
       <ScrollView style={[globalStyles.withPadding]}>
-        {links.map((link, index) => (
-          <DashboardLink
-            key={`${index}`}
-            image={link.image}
-            title={link.title}
-          />
-        ))}
+        <DashboardLink
+          image={myProductsImage}
+          title="Mis productos"
+          onPress={() => {
+            navigation.navigate('MyProducts');
+          }}
+        />
+        <DashboardLink image={myServicesImage} title="Mis productos" />
+        <DashboardLink image={mySalesImage} title="Mis ventas" />
       </ScrollView>
       <View
         style={[

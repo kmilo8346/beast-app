@@ -8,11 +8,12 @@ import colors from '../../../../../styles/colors';
 export interface LinkProps {
   image: ImageSourcePropType;
   title: string;
+  onPress?: () => void;
 }
 
-export default ({ image, title }: LinkProps) => {
+export default ({ image, title, onPress = () => null }: LinkProps) => {
   return (
-    <Touchable>
+    <Touchable onPress={onPress}>
       <View
         style={{
           flexDirection: 'row',

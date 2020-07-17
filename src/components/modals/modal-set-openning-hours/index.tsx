@@ -4,7 +4,6 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  Switch,
   Vibration,
   Platform,
   Dimensions,
@@ -16,11 +15,11 @@ import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import Text from '../../text';
 import Touchable from '../../touchable';
+import Switch from '../../switch';
 // types
 import { OpeningHours } from '../../../types';
 // libs
 import validate from '../../../lib/validate';
-import useDebounce from '../../../lib/hooks/use-debounce';
 // constraints
 import constraints from './constraints';
 // styles
@@ -426,11 +425,6 @@ export default ({
                       </Text>
                       <Switch
                         value={businessWork(dayHours)}
-                        thumbColor={colors.white}
-                        trackColor={{
-                          false: colors.blackLight5,
-                          true: colors.blue,
-                        }}
                         onValueChange={(checked) => {
                           changeSwitch(checked, dayHours.day);
                         }}

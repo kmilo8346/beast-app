@@ -29,6 +29,7 @@ import {
   SellerDashboardScreen,
   CreateOrUpdateProductScreen,
   CreateOrUpdateServiceScreen,
+  MyProductsScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -251,6 +252,11 @@ function SellerStackScreen() {
         name="CreateOrUpdateService"
         component={CreateOrUpdateServiceScreen}
         options={{ headerTransparent: true, headerTitle: '' }}
+      />
+      <SellerStack.Screen
+        name="MyProducts"
+        component={MyProductsScreen}
+        options={{ headerTransparent: true, headerTitle: 'Mis productos' }}
       />
     </SellerStack.Navigator>
   );
