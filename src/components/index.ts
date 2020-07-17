@@ -34,3 +34,4 @@ export { default as Badge } from './badge';
 export { default as Toast, IToast } from './toast';
 export { default as Checkbox } from './checkbox';
 export { default as Switch } from './switch';
+export { default as KeyboardAvoidingView } from './keyboard-avoiding-view';

@@ -3,7 +3,6 @@ import { ScrollView, View, Image, Vibration } from 'react-native';
 
 // components
 import {
-  Container,
   Text,
   Input,
   InputNumeric,
@@ -30,6 +29,7 @@ import { Product } from '../../../types';
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
 
 const productImage = require('../../../../assets/icons/tag.png');
 const publishedImage = require('../../../../assets/icons/check.png');
@@ -221,10 +221,15 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   // render logic
   if (state.view === 'PUBLISHED') {
     return (
-      <Container
-        safeArea
-        withMargin
-        style={{ justifyContent: 'center', alignItems: 'center' }}
+      <View
+        style={[
+          {
+            flex: 1,
+            backgroundColor: colors.white,
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+        ]}
       >
         <Image
           source={publishedImage}
@@ -233,7 +238,12 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         <Text level={1} weight="bold" style={{ textAlign: 'center' }}>
           ¡Producto publicado con exito!
         </Text>
-        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        <View
+          style={[
+            { position: 'absolute', left: 0, right: 0, bottom: 0 },
+            globalStyles.withMargin,
+          ]}
+        >
           <Button
             title="Continuar"
             style={globalStyles.withMainActionAir}
@@ -242,7 +252,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             }}
           />
         </View>
-      </Container>
+      </View>
     );
   }
 
@@ -251,8 +261,8 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     title = 'Editar producto';
   }
   return (
-    <Container safeArea fakeHeader>
-      <ScrollView style={[globalStyles.withPadding]}>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
+      <ScrollView style={[globalStyles.withPadding, { flex: 1 }]}>
         <View
           style={{
             flexDirection: 'row',
@@ -284,7 +294,6 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           lengthCounter
           maxLength={100}
           multiline
-          numberOfLines={10}
           onChangeText={(text) => {
             changeHandler('description', text);
           }}
@@ -359,12 +368,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         </View>
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
-      <View
-        style={[
-          { position: 'relative', left: 0, right: 0, bottom: 0 },
-          globalStyles.withMargin,
-        ]}
-      >
+      <View style={[globalStyles.withMargin]}>
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Publicar producto"
@@ -373,6 +377,6 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         />
       </View>
       <LoadingOverlay ref={loadingOverlayRef} />
-    </Container>
+    </View>
   );
 };

@@ -19,7 +19,7 @@ export default StyleSheet.create<Styles>({
     marginBottom: 15,
   },
   withScreenAir: {
-    marginBottom: 90,
+    marginBottom: 110,
   },
   withCartSpace: {
     marginBottom: 90,
