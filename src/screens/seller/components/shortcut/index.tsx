@@ -1,13 +1,20 @@
 import React from 'react';
-import { View, Image, ImageSourcePropType } from 'react-native';
+import {
+  View,
+  Image,
+  ImageSourcePropType,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 
 // components
-import { Text, Touchable, Icon } from '../../../../../components';
-import colors from '../../../../../styles/colors';
+import { Text, Touchable, Icon } from '../../../../components';
+import colors from '../../../../styles/colors';
 
 export interface ShortcutProps {
   image: ImageSourcePropType;
   title: string;
+  style?: StyleProp<ViewStyle>;
   hasChevron?: boolean;
   onPress?: () => void;
 }
@@ -15,21 +22,24 @@ export interface ShortcutProps {
 export default ({
   image,
   title,
+  style,
   hasChevron = false,
   onPress = () => null,
 }: ShortcutProps) => {
   return (
     <Touchable onPress={onPress}>
       <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: colors.blueLight2,
-          borderRadius: 13,
-          paddingVertical: 7,
-          paddingHorizontal: 15,
-          marginBottom: 12,
-        }}
+        style={[
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.blueLight2,
+            borderRadius: 13,
+            paddingVertical: 7,
+            paddingHorizontal: 15,
+          },
+          style,
+        ]}
       >
         <Image source={image} style={{ width: 40, height: 40 }} />
         <Text

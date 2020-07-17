@@ -176,12 +176,23 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const createOrUpdateProduct = async (product: Product) => {
     try {
       loadingOverlayRef.current?.show();
-      await productClient.create({
-        pathVars: {
-          storeId: store.id,
-        },
-        body: product,
-      });
+      if (product.id) {
+        await productClient.update({
+          pathVars: {
+            storeId: store.id,
+            id: product.id,
+          },
+          body: product,
+        });
+      } else {
+        await productClient.create({
+          pathVars: {
+            storeId: store.id,
+          },
+          body: product,
+        });
+      }
+
       dispatch({ type: 'show_published' });
     } catch (error) {
       // TODO: log error
@@ -302,6 +313,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           label="Imágenes"
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
           path={`stores/${store.id}/products/images/\${}`}
+          value={state.form.product?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);
@@ -316,7 +328,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             onChangeText={(text) => {
               changeHandler('brand', text);
             }}
-            containerStyle={{ width: '60%' }}
+            containerStyle={{ flex: 1 }}
           />
           <View style={{ width: 15 }} />
           <InputNumeric

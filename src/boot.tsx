@@ -264,7 +264,7 @@ function SellerStackScreen() {
         <SellerStack.Screen
           name="MyProducts"
           component={MyProductsScreen}
-          options={{ headerTransparent: true, headerTitle: 'Mis productos' }}
+          options={{ headerTitle: 'Mis productos' }}
         />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>

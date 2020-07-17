@@ -24,12 +24,15 @@ export default ({ data, onPress = () => null }: ProductItemProps) => {
   // render logic
   const image = data.images[0];
   return (
-    <Touchable style={{ flexDirection: 'row' }} onPress={pressHandler}>
+    <Touchable
+      style={{ flexDirection: 'row', marginBottom: 15 }}
+      onPress={pressHandler}
+    >
       <Image
         source={{ uri: image }}
         style={{ width: 55, height: 55, borderRadius: 10 }}
       />
-      <View style={{ flex: 1, marginHorizontal: 10 }}>
+      <View style={{ flex: 1, marginHorizontal: 10, justifyContent: 'center' }}>
         <Text level={5} weight="bold">
           {data.name}
         </Text>

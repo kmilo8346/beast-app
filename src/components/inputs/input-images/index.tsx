@@ -338,7 +338,7 @@ export default ({
                 }}
               />
               <Image
-                source={{ uri: image.url || image.uri }}
+                source={{ uri: image.uri || image.url }}
                 style={{
                   width: 107,
                   height: 107,

@@ -306,6 +306,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           label="Imágenes"
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
           path={`stores/${store.id}/services/images/\${}`}
+          value={state.form.service?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);

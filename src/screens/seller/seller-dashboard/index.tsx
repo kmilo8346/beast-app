@@ -4,14 +4,13 @@ import { ScrollView, View } from 'react-native';
 
 // components
 import { Container } from '../../../components';
+// seller components
+import { Shortcut as DashboardShorcut } from '../components';
 // local components
-import {
-  Link as DashboardLink,
-  Shortcut as DashboardShorcut,
-  ModalSelectProductType,
-} from './components';
+import { Link as DashboardLink, ModalSelectProductType } from './components';
 // styles
 import globalStyles from '../../../styles';
+
 const myProductsImage = require('../../../../assets/icons/tag.png');
 const myServicesImage = require('../../../../assets/icons/hand_shake.png');
 const mySalesImage = require('../../../../assets/icons/sale.png');
@@ -91,7 +90,7 @@ export default ({ navigation }: ScreenProps) => {
             navigation.navigate('MyProducts');
           }}
         />
-        <DashboardLink image={myServicesImage} title="Mis productos" />
+        <DashboardLink image={myServicesImage} title="Mis servicios" />
         <DashboardLink image={mySalesImage} title="Mis ventas" />
       </ScrollView>
       <View
@@ -106,10 +105,12 @@ export default ({ navigation }: ScreenProps) => {
           onPress={() => {
             dispatch({ type: 'show_select_product_type_modal' });
           }}
+          style={{ marginBottom: 12 }}
         />
         <DashboardShorcut
           image={salesInProgressImage}
           title="Ventas en curso"
+          style={{ marginBottom: 12 }}
         />
       </View>
       {selectProductTypeModal}
