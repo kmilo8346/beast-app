@@ -10,7 +10,7 @@ import {
   Container,
   Text,
   ErrorView,
-  NotData,
+  NotSearchResult,
   Loading,
   FlatList,
   SectionList,
@@ -365,7 +365,7 @@ export default ({ navigation }: PLPScreenProps) => {
       break;
     case 'NOT_STORES':
       content = (
-        <NotData
+        <NotSearchResult
           title="No hay tiendas registradas"
           subtitle="Empieza a vender totalmente gratis"
           action="Vender"
@@ -439,7 +439,7 @@ export default ({ navigation }: PLPScreenProps) => {
       );
       break;
     case 'NOT_PRODUCTS':
-      content = <NotData />;
+      content = <NotSearchResult />;
       break;
     case 'FETCH_PRODUCTS_ERROR':
       content = (

@@ -13,6 +13,7 @@ import {
   UpdateParams,
   GetParams,
   GetAllParams,
+  DeleteParams,
 } from '../types';
 
 axios.defaults.baseURL = Constants.manifest.extra.BEAST_API_URL;
@@ -144,5 +145,12 @@ export default class RESTClient<T> {
       { cancelToken }
     );
     return response.data;
+  }
+
+  async delete(params: DeleteParams, cancelToken?: CancelToken): Promise<void> {
+    const { pathVars } = params;
+    await this.axios.delete<T>(interpolate(`${this.prefix}/:id`, pathVars), {
+      cancelToken,
+    });
   }
 }

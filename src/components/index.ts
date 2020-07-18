@@ -24,7 +24,7 @@ export { default as ModalManageAddress } from './modals/modal-manage-address';
 export { default as ModalManagePayment } from './modals/modal-manage-cards';
 export { default as ActionSheet } from './modals/action-sheet';
 export { default as ErrorView } from './error-view';
-export { default as NotData } from './not-data';
+export { default as NotSearchResult } from './not-search-result';
 export { default as Loading } from './loading';
 export { default as LoadingOverlay, ILoadingOverlay } from './loading-overlay';
 export { default as FlatList } from './flat-list';

@@ -50,7 +50,7 @@ export default StyleSheet.create<Styles>({
     color: colors.blue,
   },
   title_link: {
-    textDecorationLine: 'underline',
+    color: colors.blue,
   },
   iconContainer: {
     position: 'absolute',

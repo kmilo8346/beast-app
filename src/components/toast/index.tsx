@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from 'react';
-import { View, ViewStyle, StyleProp } from 'react-native';
+import { View, ViewStyle, StyleProp, Vibration } from 'react-native';
 
 // components
 import Text from '../text';
@@ -66,6 +66,10 @@ export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
 
     // add to list
     setToasts((prevToasts) => [...prevToasts, toastData]);
+
+    if (data.type === 'ERROR') {
+      Vibration.vibrate(400);
+    }
   };
   const pressActionHandler = (toastData: InternalToastData) => {
     if (toastData.timeoutId) {

@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import {
   Container,
   ErrorView,
-  NotData,
+  NotSearchResult,
   Loading,
   FlatList,
   Text,
@@ -202,7 +202,7 @@ export default ({ navigation, route }: ScreenProps) => {
       );
       break;
     case 'NOT_PRODUCTS':
-      content = <NotData />;
+      content = <NotSearchResult />;
       break;
     case 'PRODUCTS':
       if (state.isFetchingMore) {

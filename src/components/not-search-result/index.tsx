@@ -7,7 +7,7 @@ import Button from '../buttons/button';
 
 const notDataImage = require('../../../assets/not_data.png');
 
-export interface NotDataProps {
+export interface NotQueryResultProps {
   image?: ImageSourcePropType;
   title?: string;
   subtitle?: string;
@@ -21,7 +21,7 @@ export default ({
   subtitle = 'Intenta una búsqueda diferente',
   action = '',
   onCallAction = () => null,
-}: NotDataProps) => {
+}: NotQueryResultProps) => {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ marginTop: '20%', alignItems: 'center' }}>

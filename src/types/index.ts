@@ -191,6 +191,12 @@ export interface SearchParams {
   source?: string[];
 }
 
+export interface DeleteParams {
+  pathVars: {
+    [key: string]: any;
+  };
+}
+
 export interface SearchResponse<T> {
   from: number;
   size: number;
