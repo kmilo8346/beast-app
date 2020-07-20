@@ -87,10 +87,16 @@ export default ({ navigation }: ScreenProps) => {
           image={myProductsImage}
           title="Mis productos"
           onPress={() => {
-            navigation.navigate('MyProducts');
+            navigation.navigate('MyProducts', { type: 'product' });
           }}
         />
-        <DashboardLink image={myServicesImage} title="Mis servicios" />
+        <DashboardLink
+          image={myServicesImage}
+          title="Mis servicios"
+          onPress={() => {
+            navigation.navigate('MyProducts', { type: 'service' });
+          }}
+        />
         <DashboardLink image={mySalesImage} title="Mis ventas" />
       </ScrollView>
       <View

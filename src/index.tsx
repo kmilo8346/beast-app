@@ -1,4 +1,5 @@
 import React from 'react';
+import { YellowBox } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
 import Boot from './boot';
@@ -7,6 +8,12 @@ import { ErrorView } from './components';
 // containers
 import UserContainer from './containers/user';
 import CartContainer from './containers/cart';
+
+// CreateOrUpdateProduct and CreateOrUpdateService using function in params
+// @site https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
+YellowBox.ignoreWarnings([
+  'Non-serializable values were found in the navigation state',
+]);
 
 class App extends React.Component<{}, { hasError: boolean }> {
   constructor(props: any) {

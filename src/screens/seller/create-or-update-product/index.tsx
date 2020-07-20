@@ -21,6 +21,7 @@ import productClient from '../../../clients/product-client';
 import validate from '../../../lib/validate';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import stringParser from '../../../lib/parsers/string-parser';
+import { noop } from '../../../lib/utils';
 // containers
 import UserProvider from '../../../containers/user';
 // types
@@ -149,6 +150,8 @@ export interface CreateOrUpdateProps {
 export default ({ navigation, route }: CreateOrUpdateProps) => {
   // state
   const product = route.params?.product;
+  const onChangeProduct = route.params?.onChangeProduct || noop;
+
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
     form: {
@@ -184,13 +187,15 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           },
           body: product,
         });
+        onChangeProduct('updated', product);
       } else {
-        await productClient.create({
+        const productCreated = await productClient.create({
           pathVars: {
             storeId: store.id,
           },
           body: product,
         });
+        onChangeProduct('created', productCreated);
       }
 
       dispatch({ type: 'show_published' });

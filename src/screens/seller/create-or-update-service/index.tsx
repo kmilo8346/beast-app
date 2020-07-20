@@ -22,6 +22,7 @@ import productClient from '../../../clients/product-client';
 import validate from '../../../lib/validate';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import stringParser from '../../../lib/parsers/string-parser';
+import { noop } from '../../../lib/utils';
 // containers
 import UserProvider from '../../../containers/user';
 // types
@@ -150,6 +151,7 @@ export interface CreateOrUpdateProps {
 export default ({ navigation, route }: CreateOrUpdateProps) => {
   // state
   const service = route.params?.service;
+  const onChangeProduct = route.params?.onChangeProduct || noop;
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
     form: {
@@ -177,12 +179,25 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const createOrUpdateService = async (service: Service) => {
     try {
       loadingOverlayRef.current?.show();
-      await productClient.create({
-        pathVars: {
-          storeId: store.id,
-        },
-        body: service,
-      });
+      if (service.id) {
+        await productClient.update({
+          pathVars: {
+            storeId: store.id,
+            id: service.id,
+          },
+          body: service,
+        });
+        onChangeProduct('updated', service);
+      } else {
+        const productCreated = await productClient.create({
+          pathVars: {
+            storeId: store.id,
+          },
+          body: service,
+        });
+        onChangeProduct('created', productCreated);
+      }
+
       dispatch({ type: 'show_published' });
     } catch (error) {
       // TODO: log error

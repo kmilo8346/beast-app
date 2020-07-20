@@ -261,11 +261,7 @@ function SellerStackScreen() {
           component={CreateOrUpdateServiceScreen}
           options={{ headerTitle: '' }}
         />
-        <SellerStack.Screen
-          name="MyProducts"
-          component={MyProductsScreen}
-          options={{ headerTitle: 'Mis productos' }}
-        />
+        <SellerStack.Screen name="MyProducts" component={MyProductsScreen} />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>
   );
