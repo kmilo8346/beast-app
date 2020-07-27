@@ -1,7 +1,7 @@
 import { createContainer } from 'unstated-next';
 
 import useContainer from './container';
-import { Product, Store } from '../types';
+import { ShoppingCart, Product } from '../types';
 
 const STORAGE_KEY = 'cart';
 
@@ -17,11 +17,10 @@ interface Stats {
     };
   };
 }
-export type Cart = { store: Store; data: Product[] }[];
 
 export interface CartContainer {
   isEmpty: () => boolean;
-  getCart: () => Cart;
+  getCart: () => ShoppingCart;
   getItemQty: (product: Product) => number;
   getStats: () => Stats;
   setItem: (item: Product) => void;
@@ -36,7 +35,7 @@ export default createContainer(
       return !Object.keys(container.getAll()).length;
     };
 
-    const getCart = (): Cart => {
+    const getCart = (): ShoppingCart => {
       const db = container.getAll();
       const storesDb: { [key: string]: Product[] } = {};
       Object.keys(db).forEach((key) => {

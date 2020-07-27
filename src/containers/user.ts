@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { createContainer } from 'unstated-next';
 import { useEffect } from 'react';
 
@@ -38,7 +37,7 @@ export interface UserContainer {
 
   // cards
   getCurrentCardId: () => string | null | undefined;
-  getCurrentCard: () => Card | undefined;
+  getCurrentCard: () => Card | null | undefined;
   getCards: () => Card[];
   setCurrentCard: (cardId: string | null) => Promise<void>;
   addCard: (card: Card) => Promise<void>;
@@ -255,7 +254,7 @@ export default createContainer(
             email: authUser.email,
             firstName,
             lastName,
-            photoURL: authUser.photoURL,
+            photoUrl: authUser.photoURL,
             phone: authUser.phoneNumber,
             phoneVerified: false,
             customerId,
@@ -380,8 +379,11 @@ export default createContainer(
       return container.get('currentCard');
     }
 
-    function getCurrentCard(): Card | undefined {
+    function getCurrentCard(): Card | null | undefined {
       const currentCardId = getCurrentCardId();
+      if (currentCardId === null) {
+        return null;
+      }
       return getCards().find((card) => card.id === currentCardId);
     }
 

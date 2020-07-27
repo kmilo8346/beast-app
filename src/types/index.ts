@@ -135,7 +135,7 @@ export interface User {
   identificationNumber: string | undefined;
   firstName: string | undefined;
   lastName: string | undefined;
-  photoURL: string | undefined;
+  photoUrl: string | undefined;
   // mercado pago customer id
   customerId: string | undefined;
   // phone
@@ -156,10 +156,94 @@ export interface User {
   [key: string]: any;
 }
 
+export interface Customer {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName?: string;
+  photoUrl?: string;
+  mercadoPagoCustomerId: string;
+  phone: string;
+}
+
+export interface Item extends Omit<Product, 'store'> {
+  qty: number;
+}
+
+export type ShoppingCart = { store: Store; data: Item[] }[];
+
+export type PaymentMethod = 'CREDIT_CARD' | 'TO_AGREE';
+
+export interface PaymentInfo {
+  card: Card;
+  securityCode: string;
+  installments: number;
+}
+
+export interface CreateShop {
+  customer: Customer;
+  transaction: {
+    country: string;
+    currency: string;
+    language: string;
+    deliveryAddress: Place;
+    shoppingCart: ShoppingCart;
+    paymentMethod: PaymentMethod;
+    paymentInfo?: PaymentInfo;
+  };
+}
+
+export interface Shop extends CreateShop {
+  id: string;
+  index: string;
+  idempotency: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Stats {
+  total: number;
+  ammount: number;
+}
+
+export type OrderStatus =
+  | 'payment_pending'
+  | 'payment_in_process'
+  | 'payment_rejected'
+  | 'confirmation_pending'
+  | 'in_delivery'
+  | 'delivered';
+
+export interface CreateOrder {
+  status: OrderStatus;
+  shopId: string;
+  customer: Customer;
+  transaction: {
+    country: string;
+    currency: string;
+    language: string;
+    deliveryAddress: Place;
+    paymentMethod: PaymentMethod;
+    paymentInfo?: PaymentInfo;
+    shoppingCart: Item[];
+    store: Store;
+    stats: Stats;
+  };
+}
+
+export interface Order extends CreateOrder {
+  id: string;
+  index: string;
+  idempotency: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface CreateParams<T> {
   pathVars?: { [key: string]: any };
   body: Omit<T, 'id'>;
   source?: string[];
+  idempotency?: string;
 }
 
 export interface UpdateParams<T> {
@@ -171,13 +255,6 @@ export interface GetParams {
   pathVars: {
     [key: string]: any;
   };
-  source?: string[];
-}
-
-export interface GetAllParams {
-  pathVars?: { [key: string]: any };
-  from: number;
-  size: number;
   source?: string[];
 }
 
@@ -201,7 +278,7 @@ export interface SearchResponse<T> {
   from: number;
   size: number;
   total: number;
-  hits: T[];
+  hits: Partial<T>[];
 }
 
 export interface PlacesAutocompletePrediction {

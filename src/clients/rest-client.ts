@@ -12,7 +12,6 @@ import {
   CreateParams,
   UpdateParams,
   GetParams,
-  GetAllParams,
   DeleteParams,
 } from '../types';
 
@@ -37,7 +36,7 @@ const interpolate = (
 /**
  * REST Client to standarize api comunications
  */
-export default class RESTClient<T> {
+export default class RESTClient<T, V> {
   public axios: AxiosInstance;
 
   public prefix: string;
@@ -88,7 +87,10 @@ export default class RESTClient<T> {
     );
   }
 
-  async create(params: CreateParams<T>, cancelToken?: CancelToken): Promise<T> {
+  async create(
+    params: CreateParams<V>,
+    cancelToken?: CancelToken
+  ): Promise<Partial<T>> {
     const { pathVars, ...data } = params;
     const response = await this.axios.post<T>(
       interpolate(this.prefix, pathVars),
@@ -108,7 +110,7 @@ export default class RESTClient<T> {
     });
   }
 
-  async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
+  async get(params: GetParams, cancelToken?: CancelToken): Promise<Partial<T>> {
     const { pathVars, source } = params;
     const response = await this.axios.get<T>(
       interpolate(`${this.prefix}/:id`, pathVars),
@@ -116,18 +118,6 @@ export default class RESTClient<T> {
         params: {
           source,
         },
-        cancelToken,
-      }
-    );
-    return response.data;
-  }
-
-  async getAll(params: GetAllParams, cancelToken?: CancelToken): Promise<T[]> {
-    const { pathVars, ...data } = params;
-    const response = await this.axios.get<T[]>(
-      interpolate(this.prefix, pathVars),
-      {
-        params: data,
         cancelToken,
       }
     );

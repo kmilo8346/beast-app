@@ -6,6 +6,7 @@ import {
   ResponseType,
   useAuthRequest,
   AuthSessionResult,
+  Prompt,
 } from 'expo-auth-session';
 import Constants from 'expo-constants';
 
@@ -50,6 +51,7 @@ export default ({
         // Optionally you can use this to rerequest declined permissions
         auth_type: 'rerequest',
       },
+      prompt: Prompt.SelectAccount,
     },
     discovery
   );

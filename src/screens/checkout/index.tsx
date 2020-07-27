@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, ScrollView } from 'react-native';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
-import { CommonActions } from '@react-navigation/native';
 
 // components
 import {
@@ -16,17 +15,23 @@ import {
 } from '../../components';
 // local components
 import { ModalSecurityCode } from './components';
+// clients
+import shopClient from '../../clients/shop-client';
 // containers
 import UserProvider from '../../containers/user';
 import CartProvider from '../../containers/cart';
 // libs
 import numberFormatter from '../../lib/formatters/number-formatter';
+import firebase from '../../lib/firebase';
+import { generatePushID } from '../../lib/uuid';
 // types
-import { Card } from '../../types';
+import { Card, PaymentMethod } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
 
+// instances outside component
+const prefix = '[checkout screen]';
 const createUrl = (url: string, params: { [key: string]: any }) => {
   let createdUrl = url;
   Object.keys(params).forEach((key, index) => {
@@ -40,9 +45,7 @@ const createUrl = (url: string, params: { [key: string]: any }) => {
   });
   return createdUrl;
 };
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const db = firebase.firestore();
 
 interface CheckoutProps {
   navigation: any;
@@ -54,14 +57,64 @@ export default ({ navigation }: CheckoutProps) => {
     false
   );
   const [loading, setLoading] = useState(false);
+  const [idempotency, setIdempotency] = useState<string | null>(null);
+
   const userContainer = UserProvider.useContainer();
+  const user = userContainer.getUser();
   const currentAddress = userContainer.getCurrentAddress();
   const currentCard = userContainer.getCurrentCard();
   const cartContainer = CartProvider.useContainer();
+  const shoppingCart = cartContainer.getCart();
   const stats = cartContainer.getStats();
   const toastRef = useRef<IToast>(null);
 
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  if (!currentAddress) {
+    throw new Error(`${prefix} Current address must be defined`);
+  }
+
   // event handlers
+  const createShop = async (securityCode?: string) => {
+    let paymentMethod: PaymentMethod = 'TO_AGREE';
+    let paymentInfo;
+    if (securityCode) {
+      paymentMethod = 'CREDIT_CARD';
+      paymentInfo = {
+        card: currentCard as Card,
+        securityCode,
+        installments: 1,
+      };
+    }
+
+    const response = await shopClient.create({
+      body: {
+        customer: {
+          id: user.id,
+          email: user.email as string,
+          firstName: user.firstName as string,
+          lastName: user.lastName,
+          photoUrl: user.photoUrl as string,
+          mercadoPagoCustomerId: user.customerId as string,
+          phone: user.phone as string,
+        },
+        transaction: {
+          country: 'CL',
+          currency: 'CLP',
+          language: 'ES',
+          deliveryAddress: currentAddress,
+          shoppingCart,
+          paymentMethod,
+          paymentInfo,
+        },
+      },
+      idempotency,
+      source: ['id'],
+    });
+    console.log(response.id);
+  };
   const pressImageMapHandler = () => {
     Linking.openURL(
       createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/search/`, {
@@ -78,14 +131,15 @@ export default ({ navigation }: CheckoutProps) => {
     setModalConfirmationVisible(false);
     try {
       setLoading(true);
-      await sleep(5000);
-      cartContainer.clear();
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [{ name: 'MainTab' }],
-        })
-      );
+      createShop(securityCode);
+
+      // cartContainer.clear();
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 1,
+      //     routes: [{ name: 'MainTab' }],
+      //   })
+      // );
     } catch (error) {
       toastRef.current?.show({
         message: 'Ocurrió un error procesando el pago',
@@ -99,6 +153,9 @@ export default ({ navigation }: CheckoutProps) => {
   const requestCloseHandler = () => {
     setModalConfirmationVisible(false);
   };
+  useEffect(() => {
+    setIdempotency(generatePushID());
+  }, []);
 
   // render logic
   return (

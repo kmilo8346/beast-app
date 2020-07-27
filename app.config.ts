@@ -2,7 +2,14 @@ import dotenv from 'dotenv-safe';
 import { ExpoConfig, ConfigContext } from '@expo/config';
 import os from 'os';
 
-const envContent = dotenv.config().parsed;
+const options: dotenv.DotenvSafeOptions = {};
+// uncomment to test other environments,
+// comment when finish `(o.o)´
+
+// options.path = '.env.development';
+// options.path = '.env.staging';
+// options.path = '.env.production';
+const envContent = dotenv.config(options).parsed;
 
 const getIp = () => {
   const interfaces = os.networkInterfaces();

@@ -8,6 +8,7 @@ import {
   ResponseType,
   AuthSessionResult,
   generateHexStringAsync,
+  Prompt,
 } from 'expo-auth-session';
 import Constants from 'expo-constants';
 
@@ -57,6 +58,7 @@ export default ({
         nonce: nonce as string,
       },
       usePKCE: false,
+      prompt: Prompt.SelectAccount,
     },
     discovery
   );

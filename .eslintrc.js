@@ -16,5 +16,6 @@ module.exports = {
     'react-hooks/exhaustive-deps': 0,
     'no-unused-expressions': 0,
     '@typescript-eslint/no-var-requires': 0,
+    '@typescript-eslint/no-use-before-define': 0,
   },
 };

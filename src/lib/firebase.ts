@@ -18,11 +18,12 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-// const db = firebase.firestore();
-
-// db.settings({
-//   host: 'localhost:8080',
-//   ssl: false,
-// });
+if (Constants.manifest.extra.ENVIRONMENT === 'local') {
+  const db = firebase.firestore();
+  db.settings({
+    host: 'localhost:8080',
+    ssl: false,
+  });
+}
 
 export default firebase;

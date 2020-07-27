@@ -12,6 +12,8 @@ import {
   IToast,
   Icon,
 } from '../../components';
+// containers
+import OrderProvider from '.././../containers/order';
 
 export interface Props {
   navigation: any;
@@ -20,6 +22,9 @@ export interface Props {
 export default ({ navigation }: Props) => {
   // state
   const toastRef = useRef<IToast>(null);
+  const orderContainer = OrderProvider.useContainer();
+  const withPaymentPending = orderContainer.withPaymentPending();
+  const withDeliveryPending = orderContainer.withDeliveryPending();
 
   return (
     <Container safeArea withMargin fakeHeader>
@@ -31,6 +36,10 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
+      <View style={{ height: 40 }} />
+      <Text level={7} weight="bold" style={{ marginBottom: 0 }}>
+        {`with payment pending ${withPaymentPending.length} , with delivery pending ${withDeliveryPending.length}`}
+      </Text>
       <View style={{ height: 40 }} />
       <Button
         title="Go to PLP"
