@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, ScrollView } from 'react-native';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
+import { CommonActions } from '@react-navigation/native';
 
 // components
 import {
@@ -12,6 +13,8 @@ import {
   Touchable,
   Toast,
   IToast,
+  LoadingOverlay,
+  ILoadingOverlay,
 } from '../../components';
 // local components
 import { ModalSecurityCode } from './components';
@@ -25,7 +28,7 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import firebase from '../../lib/firebase';
 import { generatePushID } from '../../lib/uuid';
 // types
-import { Card, PaymentMethod } from '../../types';
+import { Card, PaymentMethod, Order } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -56,8 +59,10 @@ export default ({ navigation }: CheckoutProps) => {
   const [modalConfirmationVisible, setModalConfirmationVisible] = useState(
     false
   );
-  const [loading, setLoading] = useState(false);
+
+  const [loading, setLoading] = useState<boolean>(false);
   const [idempotency, setIdempotency] = useState<string | null>(null);
+  const [shopId, setShopId] = useState<string | null>(null);
 
   const userContainer = UserProvider.useContainer();
   const user = userContainer.getUser();
@@ -66,7 +71,9 @@ export default ({ navigation }: CheckoutProps) => {
   const cartContainer = CartProvider.useContainer();
   const shoppingCart = cartContainer.getCart();
   const stats = cartContainer.getStats();
+
   const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // preconditions
   if (!user) {
@@ -113,7 +120,24 @@ export default ({ navigation }: CheckoutProps) => {
       idempotency,
       source: ['id'],
     });
-    console.log(response.id);
+    return response.id as string;
+  };
+  const confirmHandler = async (securityCode?: string) => {
+    setModalConfirmationVisible(false);
+    try {
+      setLoading(true);
+      loadingOverlayRef.current?.show();
+      const shopId = await createShop(securityCode);
+      setShopId(shopId);
+    } catch (error) {
+      setLoading(false);
+      loadingOverlayRef.current?.hide();
+      toastRef.current?.show({
+        message: 'Ocurrió un error procesando el pago',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    }
   };
   const pressImageMapHandler = () => {
     Linking.openURL(
@@ -127,29 +151,6 @@ export default ({ navigation }: CheckoutProps) => {
   const pressPayHandler = () => {
     setModalConfirmationVisible(true);
   };
-  const confirmHandler = async (securityCode?: string) => {
-    setModalConfirmationVisible(false);
-    try {
-      setLoading(true);
-      createShop(securityCode);
-
-      // cartContainer.clear();
-      // navigation.dispatch(
-      //   CommonActions.reset({
-      //     index: 1,
-      //     routes: [{ name: 'MainTab' }],
-      //   })
-      // );
-    } catch (error) {
-      toastRef.current?.show({
-        message: 'Ocurrió un error procesando el pago',
-        type: 'ERROR',
-        expiration: 3,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
   const requestCloseHandler = () => {
     setModalConfirmationVisible(false);
   };
@@ -159,7 +160,7 @@ export default ({ navigation }: CheckoutProps) => {
 
   // render logic
   return (
-    <Container>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
         <View style={{ flexDirection: 'row', marginTop: 10, marginBottom: 20 }}>
           <Touchable onPress={pressImageMapHandler}>
@@ -251,7 +252,6 @@ export default ({ navigation }: CheckoutProps) => {
         <Button
           title="Pagar"
           disabled={loading}
-          loading={loading}
           onPress={pressPayHandler}
           style={globalStyles.withMainActionAir}
         />
@@ -263,6 +263,7 @@ export default ({ navigation }: CheckoutProps) => {
           onRequestClose={requestCloseHandler}
         />
       )}
-    </Container>
+      <LoadingOverlay ref={loadingOverlayRef} />
+    </View>
   );
 };

@@ -14,6 +14,7 @@ import {
 } from '../../components';
 // containers
 import OrderProvider from '.././../containers/order';
+import colors from '../../styles/colors';
 
 export interface Props {
   navigation: any;
@@ -23,8 +24,40 @@ export default ({ navigation }: Props) => {
   // state
   const toastRef = useRef<IToast>(null);
   const orderContainer = OrderProvider.useContainer();
-  const withPaymentPending = orderContainer.withPaymentPending();
-  const withDeliveryPending = orderContainer.withDeliveryPending();
+  const orders = orderContainer.list(
+    (order) =>
+      ['confirmation_pending', 'in_delivery'].indexOf(order.status) !== -1
+  );
+  let ordersInProgress = null;
+  if (orders.length) {
+    ordersInProgress = (
+      <Button
+        title={
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Icon name="truck" color={colors.white} />
+            <Text
+              level={5}
+              weight="bold"
+              color={colors.white}
+              style={{ marginLeft: 10 }}
+            >
+              Compras en curso
+            </Text>
+            <View style={{ flex: 1 }} />
+            <Text level={5} weight="bold" color={colors.white}>
+              {orders.length}
+            </Text>
+          </View>
+        }
+      />
+    );
+  }
 
   return (
     <Container safeArea withMargin fakeHeader>
@@ -36,10 +69,7 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
-      <View style={{ height: 40 }} />
-      <Text level={7} weight="bold" style={{ marginBottom: 0 }}>
-        {`with payment pending ${withPaymentPending.length} , with delivery pending ${withDeliveryPending.length}`}
-      </Text>
+
       <View style={{ height: 40 }} />
       <Button
         title="Go to PLP"
@@ -73,6 +103,7 @@ export default ({ navigation }: Props) => {
         }}
       >
         <Toast ref={toastRef} />
+        {ordersInProgress}
       </View>
     </Container>
   );

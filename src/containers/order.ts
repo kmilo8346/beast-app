@@ -14,8 +14,7 @@ const PREFIX = '[order container]';
 const db = firebase.firestore();
 
 export interface OrderContainer {
-  withPaymentPending: () => Order[];
-  withDeliveryPending: () => Order[];
+  list: (filter: (order: Order) => boolean) => Order[];
 }
 
 export default createContainer(
@@ -26,42 +25,28 @@ export default createContainer(
 
     // real time updates
     useEffect(() => {
-      let unsubscribe1: () => void = () => null;
-      let unsubscribe2: () => void = () => null;
+      let unsubscribe: () => void = () => null;
       if (user?.id) {
-        // listening for orders with payment pending
-        unsubscribe1 = db
+        // listening for orders not delivered
+        unsubscribe = db
           .collection(COLLECTION)
           .where('customer.id', '==', user.id)
-          .where('status', 'in', ['payment_pending', 'payment_in_process'])
+          .where('status', 'in', [
+            'payment_pending',
+            'payment_in_process',
+            'payment_rejected',
+            'confirmation_pending',
+            'in_delivery',
+          ])
+          .orderBy('updatedAt')
+          .limit(30)
           .onSnapshot(
             (querySnapshot) => {
-              const withPaymentPending: any[] = [];
+              const orders: any[] = [];
               querySnapshot.forEach((doc) => {
-                withPaymentPending.push(doc.data());
+                orders.push(doc.data());
               });
-              container.set('withPaymentPending', withPaymentPending);
-            },
-            (error) => {
-              console.log(
-                `${PREFIX} error listening realtime updates from firestore`,
-                error
-              );
-            }
-          );
-
-        // listening for orders pending
-        unsubscribe2 = db
-          .collection(COLLECTION)
-          .where('customer.id', '==', user.id)
-          .where('status', 'in', ['confirmation_pending', 'in_delivery'])
-          .onSnapshot(
-            (querySnapshot) => {
-              const withDeliveryPending: any[] = [];
-              querySnapshot.forEach((doc) => {
-                withDeliveryPending.push(doc.data());
-              });
-              container.set('withDeliveryPending', withDeliveryPending);
+              container.set('orders', orders);
             },
             (error) => {
               console.log(
@@ -73,22 +58,17 @@ export default createContainer(
       }
 
       return () => {
-        unsubscribe1();
-        unsubscribe2();
+        unsubscribe();
       };
     }, [user?.id]);
 
     return {
-      withPaymentPending,
-      withDeliveryPending,
+      list,
     };
 
-    function withPaymentPending() {
-      return container.get('withPaymentPending');
-    }
-
-    function withDeliveryPending() {
-      return container.get('withDeliveryPending');
+    function list(filter = (order: Order) => !!order) {
+      const orders = container.get('orders') || [];
+      return orders.filter(filter);
     }
   }
 );

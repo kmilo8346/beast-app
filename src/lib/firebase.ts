@@ -1,3 +1,4 @@
+import 'expo-firestore-offline-persistence';
 import * as firebase from 'firebase';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -25,5 +26,8 @@ if (Constants.manifest.extra.ENVIRONMENT === 'local') {
     ssl: false,
   });
 }
+
+// enabling online persistence
+firebase.firestore().enablePersistence();
 
 export default firebase;
