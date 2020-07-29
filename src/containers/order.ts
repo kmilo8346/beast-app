@@ -10,11 +10,11 @@ import { Order } from '../types';
 
 const STORAGE_KEY = 'order';
 const COLLECTION = 'orders';
-const PREFIX = '[order container]';
 const db = firebase.firestore();
 
 export interface OrderContainer {
-  list: (filter: (order: Order) => boolean) => Order[];
+  purchases: (filter?: (order: Order) => boolean) => Order[];
+  sales: (filter?: (order: Order) => boolean) => Order[];
 }
 
 export default createContainer(
@@ -23,11 +23,12 @@ export default createContainer(
     const userContainer = UserProvider.useContainer();
     const user = userContainer.getUser();
 
-    // real time updates
+    // real time updates for purchases
     useEffect(() => {
       let unsubscribe: () => void = () => null;
+
       if (user?.id) {
-        // listening for orders not delivered
+        // listening for purchases not delivered
         unsubscribe = db
           .collection(COLLECTION)
           .where('customer.id', '==', user.id)
@@ -39,22 +40,14 @@ export default createContainer(
             'in_delivery',
           ])
           .orderBy('updatedAt')
-          .limit(30)
-          .onSnapshot(
-            (querySnapshot) => {
-              const orders: any[] = [];
-              querySnapshot.forEach((doc) => {
-                orders.push(doc.data());
-              });
-              container.set('orders', orders);
-            },
-            (error) => {
-              console.log(
-                `${PREFIX} error listening realtime updates from firestore`,
-                error
-              );
-            }
-          );
+          .limit(10)
+          .onSnapshot((querySnapshot) => {
+            const purchases: any[] = [];
+            querySnapshot.forEach((doc) => {
+              purchases.push(doc.data());
+            });
+            container.set('purchases', purchases);
+          });
       }
 
       return () => {
@@ -62,13 +55,43 @@ export default createContainer(
       };
     }, [user?.id]);
 
+    // real time updates for sales
+    useEffect(() => {
+      let unsubscribe: () => void = () => null;
+
+      if (user?.store?.id) {
+        // listening for sales not delivered
+        unsubscribe = db
+          .collection(COLLECTION)
+          .where('transaction.store.id', '==', user.store.id)
+          .where('status', 'in', ['confirmation_pending', 'in_delivery'])
+          .orderBy('updatedAt')
+          .limit(10)
+          .onSnapshot((querySnapshot) => {
+            const sales: any[] = [];
+            querySnapshot.forEach((doc) => {
+              sales.push(doc.data());
+            });
+            container.set('sales', sales);
+          });
+      }
+
+      return () => {
+        unsubscribe();
+      };
+    }, [user?.store?.id]);
+
     return {
-      list,
+      purchases,
+      sales,
     };
 
-    function list(filter = (order: Order) => !!order) {
-      const orders = container.get('orders') || [];
-      return orders.filter(filter);
+    function purchases(filter = (order: Order) => !!order) {
+      return (container.get('purchases') || []).filter(filter);
+    }
+
+    function sales(filter = (order: Order) => !!order) {
+      return (container.get('sales') || []).filter(filter);
     }
   }
 );

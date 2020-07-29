@@ -97,7 +97,13 @@ export default ({ navigation }: ScreenProps) => {
             navigation.navigate('MyProducts', { type: 'service' });
           }}
         />
-        <DashboardLink image={mySalesImage} title="Mis ventas" />
+        <DashboardLink
+          image={mySalesImage}
+          title="Mis ventas"
+          onPress={() => {
+            navigation.navigate('MySales', { view: 'HISTORIC' });
+          }}
+        />
       </ScrollView>
       <View
         style={[
@@ -117,6 +123,9 @@ export default ({ navigation }: ScreenProps) => {
           image={salesInProgressImage}
           title="Ventas en curso"
           style={{ marginBottom: 12 }}
+          onPress={() => {
+            navigation.navigate('MySales', { view: 'IN_PROGRESS' });
+          }}
         />
       </View>
       {selectProductTypeModal}

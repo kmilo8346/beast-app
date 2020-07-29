@@ -74,7 +74,7 @@ export default ({ navigation }: CheckoutProps) => {
 
   let orders: Order[] | null = null;
   if (shopId) {
-    orders = orderContainer.list((order) => {
+    orders = orderContainer.purchases((order) => {
       return (
         order.shopId === shopId &&
         [
