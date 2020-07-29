@@ -3,25 +3,25 @@ import { View, TextInput } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import Input from '../../../../inputs/input';
-import ButtonIcon from '../../../../buttons/button-icon';
-import Icon from '../../../../icon';
-import Text from '../../../../text';
-import Touchable from '../../../../touchable';
-import Loading from '../../../../loading';
+import Input from '../input';
+import ButtonIcon from '../../buttons/button-icon';
+import Icon from '../../icon';
+import Text from '../../text';
+import Touchable from '../../touchable';
+import Loading from '../../loading';
 // clients
-import placesClient from '../../../../../clients/google/places-client';
+import placesClient from '../../../clients/google/places-client';
 // types
 import {
   Place,
   PlacesAutocompletResponse,
   PlacesDetailsResponse,
   PlacesAutocompletePrediction,
-} from '../../../../../types';
+} from '../../../types';
 // libs
-import { v4 as uuidv4 } from '../../../../../lib/uuid';
-import useDebounce from '../../../../../lib/hooks/use-debounce';
-import colors from '../../../../../styles/colors';
+import { v4 as uuidv4 } from '../../../lib/uuid';
+import useDebounce from '../../../lib/hooks/use-debounce';
+import colors from '../../../styles/colors';
 
 // instances outside component
 const toAddress = (place?: Place): string => {
@@ -310,6 +310,9 @@ export default ({
           onPress={pressCloseAutocompleteHandler}
           style={{ position: 'absolute', top: -5, right: -5 }}
         />
+        <Text level={6} style={{ marginLeft: 4, top: 30 }}>
+          {label}
+        </Text>
         <TextInput
           value={state.address}
           placeholder="Jose Pedro Alessandri 927"

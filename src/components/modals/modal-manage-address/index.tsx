@@ -35,19 +35,21 @@ export default (props: ModalProps) => {
     setIsFormVisible(true);
   };
 
-  let title = 'Agrega una dirección';
+  let title = 'Agregar dirección';
   let content = <AddAddressForm onAdd={addHandler} />;
 
   if (!isFormVisible && addresses.length && currentAddress) {
     title = 'Selecciona una dirección';
-
-    const options = addresses.map((address: Place) => ({
-      key: address.id,
-      title: `${address.route.shortName}`,
-      subtitle: `${address.streetNumber.shortName}${
-        address.apartment ? `, ${address.apartment}` : ''
-      }, ${address.locality.shortName}`,
-    }));
+    const options = addresses.map(
+      (address: Place, index: number, array: Place[]) => ({
+        key: address.id,
+        title: `${address.route.shortName}`,
+        subtitle: `${address.streetNumber.shortName}${
+          address.apartment ? `, ${address.apartment}` : ''
+          }, ${address.locality.shortName}`,
+        readonly: array.length === 1,
+      })
+    );
     content = (
       <View>
         <SelectFriendly

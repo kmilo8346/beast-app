@@ -5,8 +5,7 @@ import { View, GestureResponderEvent, Vibration } from 'react-native';
 import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import InputSelectOptions from '../../inputs/input-select-options';
-// local components
-import { InputPlaceAutocomplete } from './components';
+import InputPlaceAutocomplete from '../../inputs/input-place-autocomplete';
 // types
 import { Place, DeliveryArea, Circle } from '../../../types';
 // libs

@@ -5,8 +5,8 @@ export default {
       message: '^Es requerido',
     },
     fieldsPresence: {
-      fields: ['place'],
-      message: '^Seleccion una dirección',
+      fields: ['address'],
+      message: '^Seleccion una dirección válida',
     },
   },
 } as { [key: string]: any };

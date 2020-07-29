@@ -1,15 +1,16 @@
 /* eslint-disable global-require */
 import React, { useReducer } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, ImageBackground } from 'react-native';
 
 // components
-import { Container } from '../../../components';
+import { Container, Touchable, Text } from '../../../components';
 // seller components
 import { Shortcut as DashboardShorcut } from '../components';
 // local components
 import { Link as DashboardLink, ModalSelectProductType } from './components';
 // styles
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
 
 const myProductsImage = require('../../../../assets/icons/tag.png');
 const myServicesImage = require('../../../../assets/icons/hand_shake.png');
@@ -33,6 +34,8 @@ type Action =
 
 type State = {
   selectProductTypeModalIsVisible: boolean;
+  sellerName: string;
+  selledproductsQty: number;
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -54,6 +57,8 @@ export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     selectProductTypeModalIsVisible: false,
+    sellerName: 'Camilo',
+    selledproductsQty: 7,
   });
 
   // render logic
@@ -83,6 +88,37 @@ export default ({ navigation }: ScreenProps) => {
   return (
     <Container safeArea>
       <ScrollView style={[globalStyles.withPadding]}>
+        <Touchable onPress={() => null}>
+          <ImageBackground
+            source={require('../../../../assets/bg-acumulado.png')}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              height: 100,
+              marginBottom: 20,
+              borderRadius: 13,
+              paddingLeft: 20,
+            }}
+          >
+            <View style={{ flex: 5 }}>
+              <Text level={1} weight="bold" color={colors.white}>
+                {`Hola ${state.sellerName}`}
+              </Text>
+              <Text level={5} color={colors.white}>
+                Productos vendidos en total
+              </Text>
+            </View>
+            <Text
+              style={{ flex: 1 }}
+              level={1}
+              weight="bold"
+              color={colors.white}
+            >
+              {state.selledproductsQty}
+            </Text>
+          </ImageBackground>
+        </Touchable>
         <DashboardLink
           image={myProductsImage}
           title="Mis productos"

@@ -11,6 +11,7 @@ export { default as ButtonContact } from './buttons/button-contact';
 export { default as FriendlyInputNumber } from './inputs/friendly-input-number';
 export { default as Input } from './inputs/input';
 export { default as InputNumeric } from './inputs/input-numeric';
+export { default as InputPlaceAutocomplete } from './inputs/input-place-autocomplete';
 export { default as InputNumber } from './inputs/input-number';
 export { default as InputImages } from './inputs/input-images';
 export { default as InputSelectAddress } from './inputs/input-select-address';
