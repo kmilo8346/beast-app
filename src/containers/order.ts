@@ -40,7 +40,7 @@ export default createContainer(
             'in_delivery',
           ])
           .orderBy('updatedAt')
-          .limit(10)
+          .limit(30)
           .onSnapshot((querySnapshot) => {
             const purchases: any[] = [];
             querySnapshot.forEach((doc) => {
@@ -66,7 +66,7 @@ export default createContainer(
           .where('transaction.store.id', '==', user.store.id)
           .where('status', 'in', ['confirmation_pending', 'in_delivery'])
           .orderBy('updatedAt')
-          .limit(10)
+          .limit(30)
           .onSnapshot((querySnapshot) => {
             const sales: any[] = [];
             querySnapshot.forEach((doc) => {
