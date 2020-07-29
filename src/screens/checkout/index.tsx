@@ -23,9 +23,9 @@ import shopClient from '../../clients/shop-client';
 // containers
 import UserProvider from '../../containers/user';
 import CartProvider from '../../containers/cart';
+import OrderProvider from '../../containers/order';
 // libs
 import numberFormatter from '../../lib/formatters/number-formatter';
-import firebase from '../../lib/firebase';
 import { generatePushID } from '../../lib/uuid';
 // types
 import { Card, PaymentMethod, Order } from '../../types';
@@ -48,7 +48,6 @@ const createUrl = (url: string, params: { [key: string]: any }) => {
   });
   return createdUrl;
 };
-const db = firebase.firestore();
 
 interface CheckoutProps {
   navigation: any;
@@ -71,6 +70,22 @@ export default ({ navigation }: CheckoutProps) => {
   const cartContainer = CartProvider.useContainer();
   const shoppingCart = cartContainer.getCart();
   const stats = cartContainer.getStats();
+  const orderContainer = OrderProvider.useContainer();
+
+  let orders: Order[] | null = null;
+  if (shopId) {
+    orders = orderContainer.purchases((order) => {
+      return (
+        order.shopId === shopId &&
+        [
+          'payment_pending',
+          'payment_in_process',
+          'payment_rejected',
+          'confirmation_pending',
+        ].indexOf(order.status) !== -1
+      );
+    });
+  }
 
   const toastRef = useRef<IToast>(null);
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
@@ -157,6 +172,37 @@ export default ({ navigation }: CheckoutProps) => {
   useEffect(() => {
     setIdempotency(generatePushID());
   }, []);
+  useEffect(() => {
+    if (orders) {
+      // orders length must be the shopping cart lenght
+      if (orders.length < shoppingCart.length) {
+        return;
+      }
+
+      for (let i = 0; i < orders.length; i++) {
+        const order = orders[i];
+        // processing not finished yet
+        if (
+          order.status === 'payment_pending' ||
+          order.status === 'payment_in_process'
+        ) {
+          return;
+        }
+      }
+      // clear current cart
+      cartContainer.clear();
+      // hide loading
+      setLoading(false);
+      loadingOverlayRef.current?.hide();
+      // reset to home
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'MainTab' }],
+        })
+      );
+    }
+  }, [orders]);
 
   // render logic
   return (

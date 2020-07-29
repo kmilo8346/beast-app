@@ -30,6 +30,7 @@ import {
   CreateOrUpdateProductScreen,
   CreateOrUpdateServiceScreen,
   MyProductsScreen,
+  MySalesScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -262,6 +263,11 @@ function SellerStackScreen() {
           options={{ headerTitle: '' }}
         />
         <SellerStack.Screen name="MyProducts" component={MyProductsScreen} />
+        <SellerStack.Screen
+          name="MySales"
+          component={MySalesScreen}
+          options={{ headerTitle: 'Ventas' }}
+        />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>
   );

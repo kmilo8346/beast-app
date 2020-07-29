@@ -13,7 +13,7 @@ import {
   Icon,
 } from '../../components';
 // containers
-import OrderProvider from '.././../containers/order';
+import OrderProvider from '../../containers/order';
 import colors from '../../styles/colors';
 
 export interface Props {
@@ -24,12 +24,9 @@ export default ({ navigation }: Props) => {
   // state
   const toastRef = useRef<IToast>(null);
   const orderContainer = OrderProvider.useContainer();
-  const orders = orderContainer.list(
-    (order) =>
-      ['confirmation_pending', 'in_delivery'].indexOf(order.status) !== -1
-  );
+  const purchases = orderContainer.purchases();
   let ordersInProgress = null;
-  if (orders.length) {
+  if (purchases.length) {
     ordersInProgress = (
       <Button
         title={
@@ -51,7 +48,7 @@ export default ({ navigation }: Props) => {
             </Text>
             <View style={{ flex: 1 }} />
             <Text level={5} weight="bold" color={colors.white}>
-              {orders.length}
+              {purchases.length}
             </Text>
           </View>
         }

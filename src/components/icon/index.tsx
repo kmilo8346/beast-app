@@ -1,7 +1,7 @@
 import React from 'react';
 import { Feather, FontAwesome } from '@expo/vector-icons';
 
-const awesome = ['whatsapp'];
+const awesome = ['whatsapp', 'bicycle'];
 
 export default ({ name, ...otherProps }: any) => {
   if (awesome.indexOf(name) !== -1) {
