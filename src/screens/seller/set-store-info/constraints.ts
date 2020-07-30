@@ -5,14 +5,13 @@ export default {
       message: '^Es requerido',
     },
   },
-  image: {
+  images: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
-    fieldsPresence: {
-      fields: ['imageUrl'],
-      message: '^Imagen aún no se ha subido a la nube',
+    arrayWithValues: {
+      message: '^Imágenes se están subiendo',
     },
   },
 } as { [key: string]: any };
