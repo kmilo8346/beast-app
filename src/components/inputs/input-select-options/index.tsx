@@ -49,6 +49,11 @@ export default ({
     setIsVisible((prevIsVisible) => !prevIsVisible);
   }, []);
 
+  const onSelectValuehandler = (value: string) => {
+    onChange(value);
+    requestCloseHandler();
+  };
+
   // render logic
   return (
     <View>
@@ -83,7 +88,7 @@ export default ({
                 <Touchable
                   key={option.key}
                   onPress={() => {
-                    onChange(option.key);
+                    onSelectValuehandler(option.key);
                   }}
                   style={{ flexDirection: 'row' }}
                 >

@@ -49,7 +49,7 @@ export default ({
       />
       {isVisible && (
         <ModalSetOpeningHours
-          openingHours={undefined}
+          openingHours={value}
           onSave={saveHandler}
           onRequestClose={requestCloseHandler}
         />
