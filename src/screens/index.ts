@@ -18,4 +18,5 @@ export { default as CreateOrUpdateProductScreen } from './seller/create-or-updat
 export { default as CreateOrUpdateServiceScreen } from './seller/create-or-update-service';
 export { default as MyProductsScreen } from './seller/my-products';
 export { default as MySalesScreen } from './seller/my-sales';
+export { default as SaleDetailsScreen } from './seller/sale-details';
 export { default as MenuScreen } from './menu';

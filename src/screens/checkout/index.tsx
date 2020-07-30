@@ -6,7 +6,6 @@ import { CommonActions } from '@react-navigation/native';
 
 // components
 import {
-  Container,
   Text,
   InputSelectCard,
   Button,
@@ -27,6 +26,7 @@ import OrderProvider from '../../containers/order';
 // libs
 import numberFormatter from '../../lib/formatters/number-formatter';
 import { generatePushID } from '../../lib/uuid';
+import { createUrl } from '../../lib/utils';
 // types
 import { Card, PaymentMethod, Order } from '../../types';
 // styles
@@ -35,19 +35,6 @@ import globalStyles from '../../styles';
 
 // instances outside component
 const prefix = '[checkout screen]';
-const createUrl = (url: string, params: { [key: string]: any }) => {
-  let createdUrl = url;
-  Object.keys(params).forEach((key, index) => {
-    let separator = '&';
-    if (index === 0) {
-      separator = '?';
-    }
-    createdUrl = `${createdUrl}${separator}${key}=${encodeURIComponent(
-      params[key]
-    )}`;
-  });
-  return createdUrl;
-};
 
 interface CheckoutProps {
   navigation: any;

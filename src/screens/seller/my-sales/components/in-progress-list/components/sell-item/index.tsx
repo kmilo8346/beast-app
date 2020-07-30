@@ -18,7 +18,7 @@ import colors from '../../../../../../../styles/colors';
 
 export interface SellItemProps {
   sell: Order;
-  onPress?: () => void;
+  onPress?: (order: Order) => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -26,7 +26,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    onPress();
+    onPress(sell);
   };
 
   // render logic
@@ -88,7 +88,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
       <Text level={5} weight="bold" style={{ marginHorizontal: 10 }}>
         {numberFormatter.toCurrency(sell.transaction.stats.ammount)}
       </Text>
-      <Icon name="chevron-right" />
+      <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
     </Touchable>
   );
 };

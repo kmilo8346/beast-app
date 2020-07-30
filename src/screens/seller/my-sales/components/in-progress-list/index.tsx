@@ -86,9 +86,14 @@ const reducer = (state: State, action: Action): State => {
 export interface InProgressListProps {
   orders?: SearchResponse<Order>;
   onChange?: (orders: SearchResponse<Order>) => void;
+  onPressItem?: (order: Order) => void;
 }
 
-export default ({ orders, onChange = utils.noop }: InProgressListProps) => {
+export default ({
+  orders,
+  onChange = utils.noop,
+  onPressItem = utils.noop,
+}: InProgressListProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     error: null,
@@ -285,7 +290,13 @@ export default ({ orders, onChange = utils.noop }: InProgressListProps) => {
       renderSectionFooter={renderSectionFooter}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => {
-        return <SellItem sell={item} style={{ marginBottom: 5 }} />;
+        return (
+          <SellItem
+            sell={item}
+            onPress={onPressItem}
+            style={{ marginBottom: 5 }}
+          />
+        );
       }}
       ListFooterComponent={<View style={globalStyles.withScreenAir} />}
       onRefresh={refresh}

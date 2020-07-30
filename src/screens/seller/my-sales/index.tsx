@@ -64,6 +64,11 @@ export default ({ navigation, route }: MySalesProps) => {
   const pressTabHandler = (view: MySalesView) => {
     dispatch({ type: 'change_view', view });
   };
+  const pressInProgressItemHandler = (order: Order) => {
+    navigation.navigate('SaleDetails', {
+      sale: order,
+    });
+  };
 
   // render logic
   let content = (
@@ -83,6 +88,7 @@ export default ({ navigation, route }: MySalesProps) => {
             inProgressOrders,
           });
         }}
+        onPressItem={pressInProgressItemHandler}
       />
     );
   }

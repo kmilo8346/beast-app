@@ -231,10 +231,25 @@ export interface CreateOrder {
   };
 }
 
+export interface ProductConfirmation {
+  id: string;
+  qtyDesired: number;
+  qtyPosible: number;
+  status: 'full_stock' | 'partial_stock' | 'out_of_stock';
+}
+
+export interface Confirmation {
+  items: number;
+  products: ProductConfirmation[];
+  changes: boolean;
+  status: 'pending' | 'finished';
+}
+
 export interface Order extends CreateOrder {
   id: string;
   index: string;
   idempotency: string;
+  confirmation?: Confirmation;
   createdAt: Date;
   updatedAt: Date;
 }
