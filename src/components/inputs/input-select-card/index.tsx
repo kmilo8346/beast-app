@@ -7,7 +7,11 @@ import ModalManagePayment from '../../modals/modal-manage-cards';
 // containers
 import UserProvider from '../../../containers/user';
 
-export default () => {
+export interface InputSelectCardProps {
+  errors?: string[];
+}
+
+export default ({ errors }: InputSelectCardProps) => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
@@ -24,15 +28,20 @@ export default () => {
   }, []);
 
   // render logic
-  let text = 'Selecciona un medio de pago';
+  let text = '';
   if (currentCardId === null) {
-    text = 'El pago será convenir con el vendedor';
+    text = 'A convenir con el vendedor';
   } else if (currentCard) {
     text = `Tarjeta de Crédito terminada en ${currentCard.lastFourDigits}`;
   }
   return (
     <View>
-      <InputSelect value={text} onPress={pressHandler} />
+      <InputSelect
+        label="Selecciona un medio de pago"
+        value={text}
+        onPress={pressHandler}
+        errors={errors}
+      />
       {isVisible && <ModalManagePayment onRequestClose={requestCloseHandler} />}
     </View>
   );
