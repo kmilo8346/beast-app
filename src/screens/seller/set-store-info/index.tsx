@@ -180,7 +180,7 @@ export default ({ navigation }: ScreenProps) => {
           size={1}
           label="Imágen"
           tip="Agrega la imagen de tu tienda para que tus clientes te identifiquen."
-          path={`stores/${store?.id}/products/images/\${}`}
+          path={`stores/${store?.id}/images/\${}`}
           value={store?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
