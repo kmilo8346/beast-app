@@ -45,6 +45,10 @@ export default ({ navigation }: MenuProps) => {
     }
   };
 
+  const pressMenuItemHandler = (screen: string) => {
+    navigation.navigate(screen);
+  };
+
   // render logic
   let toogleSessionMessage = 'Iniciar Session';
   if (user && user.email) {
@@ -61,17 +65,17 @@ export default ({ navigation }: MenuProps) => {
         <Item
           name="Cuenta"
           description="Correo, email, medios de pagos, dirección"
-          onPress={() => null}
+          onPress={() => pressMenuItemHandler('UpdateAccount')}
         />
         <Item
           name="Compras"
           description="Historial de compras"
-          onPress={() => null}
+          onPress={() => pressMenuItemHandler('Purchases')}
         />
         <Item
           name="Ayuda"
           description="Preguntas frecuentes, tutoriales"
-          onPress={() => null}
+          onPress={() => pressMenuItemHandler('Help')}
         />
       </ScrollView>
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
