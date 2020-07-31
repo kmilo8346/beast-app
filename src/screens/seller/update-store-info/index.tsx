@@ -1,12 +1,9 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useReducer } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
 import {
-  Text,
   Input,
-  Toast,
-  IToast,
   InputImages,
   Button,
   InputSetDeliveryArea,
