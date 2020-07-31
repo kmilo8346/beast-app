@@ -1,15 +1,27 @@
-import React, { ReactNode } from 'react';
-import { View, ScrollView, Image } from 'react-native';
+import React, { ReactNode, useReducer, useRef } from 'react';
+import { View, ScrollView, Image, GestureResponderEvent } from 'react-native';
 import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
+import axios, { CancelTokenSource } from 'axios';
 
 // components
-import { Text, Button, Touchable, ButtonIcon } from '../../../components';
+import {
+  Text,
+  Button,
+  Touchable,
+  ButtonIcon,
+  LoadingOverlay,
+  IToast,
+  ILoadingOverlay,
+  Toast,
+} from '../../../components';
 // local components
 import { Steps, Step, StepStatus } from './components';
 // libs
 import * as utils from '../../../lib/utils';
 import numberFormatter from '../../../lib/formatters/number-formatter';
+// clients
+// import orderClient from '../../../clients/order-client';
 // containers
 import UserProvider from '../../../containers/user';
 // types
@@ -22,6 +34,7 @@ const markerImage = require('../../../../assets/icons/marker.png');
 
 // instaces outside component
 const prefix = '[sale details screen]';
+let fetchRequestSource: CancelTokenSource;
 const steps: Step[] = [
   {
     key: 'confirmation_pending',
@@ -36,6 +49,30 @@ const steps: Step[] = [
     label: 'Entregado',
   },
 ];
+type SaleDetailsView = 'DETAILS' | 'CONFIRMED' | 'DELIVERED';
+type SetCollapsedAction = {
+  type: 'set_collapsed';
+  collapsed: boolean;
+};
+type ChangeViewAction = {
+  type: 'change_view';
+  view: SaleDetailsView;
+};
+type Action = SetCollapsedAction | ChangeViewAction;
+type State = {
+  view: SaleDetailsView;
+  collapsed: boolean;
+};
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'set_collapsed':
+      return { ...state, collapsed: action.collapsed };
+    case 'change_view':
+      return { ...state, view: action.view };
+    default:
+      return state;
+  }
+};
 
 export interface SaleDetailsProps {
   navigation: any;
@@ -44,13 +81,15 @@ export interface SaleDetailsProps {
 
 export default ({ navigation, route }: SaleDetailsProps) => {
   // state
+  const [state, dispatch] = useReducer(reducer, {
+    view: 'DETAILS',
+    collapsed: false,
+  });
   const sale: Order = route.params.sale;
   const userContainer = UserProvider.useContainer();
   const store = userContainer.getStore();
-  // TODO: add reducer
-  const state: any = {
-    collapsed: true,
-  };
+  const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // precondition
   if (!sale) {
@@ -72,6 +111,54 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         query_place_id: sale.transaction.deliveryAddress.id,
       })
     );
+  };
+  const pressGoToStockVerificationHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('StockVerificaton', {
+      sale,
+    });
+  };
+  const confirm = async () => {
+    try {
+      loadingOverlayRef.current?.show();
+      if (fetchRequestSource) {
+        fetchRequestSource.cancel();
+      }
+      fetchRequestSource = axios.CancelToken.source();
+      await utils.sleep(3000);
+      dispatch({ type: 'change_view', view: 'CONFIRMED' });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        toastRef.current?.show({
+          message: 'Ocurrió un error inesperado, reintente',
+          type: 'ERROR',
+          expiration: 3,
+        });
+      }
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
+  };
+  const setDelivered = async () => {
+    try {
+      loadingOverlayRef.current?.show();
+      if (fetchRequestSource) {
+        fetchRequestSource.cancel();
+      }
+      fetchRequestSource = axios.CancelToken.source();
+      await utils.sleep(3000);
+      dispatch({ type: 'change_view', view: 'DELIVERED' });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        toastRef.current?.show({
+          message: 'Ocurrió un error inesperado, reintente',
+          type: 'ERROR',
+          expiration: 3,
+        });
+      }
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
   };
 
   // render logic
@@ -175,206 +262,227 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (sale.transaction.shoppingCart.length <= 3) {
     collapseButton = null;
   }
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.white }}>
-      <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-        <Steps
-          current={sale.status}
-          status={status}
-          steps={steps}
-          style={{ marginTop: 10 }}
-        />
 
-        <View style={{ flexDirection: 'row', marginTop: 20 }}>
-          <Touchable onPress={pressImageMapHandler}>
-            <Image
-              source={{
-                uri: mapImageUrl,
-              }}
-              style={{ width: 140, height: 105, borderRadius: 13 }}
+  let content: ReactNode | null = null;
+  switch (state.view) {
+    case 'CONFIRMED':
+      content = <View style={{ flex: 1 }} />;
+      break;
+    case 'DELIVERED':
+      content = <View style={{ flex: 1 }} />;
+      break;
+    default:
+      content = (
+        <View style={{ flex: 1 }}>
+          <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
+            <Steps
+              current={sale.status}
+              status={status}
+              steps={steps}
+              style={{ marginTop: 10 }}
             />
-          </Touchable>
-          <View style={{ flex: 1, marginLeft: 15 }}>
-            <Text
-              level={6}
-              color={colors.blackLight4}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ marginTop: 3, marginBottom: 7 }}
-            >
-              Dirección de entrega
-            </Text>
-            <Text
-              level={6}
-              weight="bold"
-              numberOfLines={2}
-              ellipsizeMode="tail"
-              style={{ marginBottom: 7, lineHeight: 20 }}
-            >
-              {deliveryAddress}
-            </Text>
-            <Text
-              level={6}
-              color={colors.blackLight4}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {distanceText}
-            </Text>
-          </View>
-        </View>
 
-        <View style={{ flexDirection: 'row', marginTop: 25 }}>
-          <View style={{ flex: 1 }}>
-            <Text
-              level={6}
-              color={colors.blackLight4}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ marginBottom: 10 }}
-            >
-              Nombre cliente
-            </Text>
-            <Text
-              level={6}
-              weight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {fullName}
-            </Text>
-          </View>
-          <View style={{ width: 15 }} />
-          <View style={{ flex: 1 }}>
-            <Text
-              level={6}
-              color={colors.blackLight4}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ marginBottom: 10 }}
-            >
-              Método de pago
-            </Text>
-            <Text
-              level={6}
-              weight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {paymentMethod}
-            </Text>
-          </View>
-        </View>
-
-        {showRoute}
-
-        <View style={{ marginTop: 20 }}>
-          <View style={{ flexDirection: 'row' }}>
-            <Text
-              level={4}
-              weight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ flex: 1 }}
-            >
-              Resumen de productos
-            </Text>
-            <View style={{ width: 2 }} />
-            {editConfirmationButton}
-          </View>
-
-          <View
-            style={{
-              height: 1,
-              backgroundColor: colors.blackLight6,
-              marginTop: 15,
-              marginBottom: 15,
-            }}
-          />
-
-          {products.map((product) => {
-            // TODO: change
-            const qty = product.qty || 1;
-            return (
-              <View
-                key={product.id}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 5,
-                }}
-              >
-                <View
-                  style={{
-                    borderWidth: 2,
-                    borderColor: colors.blackLight4,
-                    borderRadius: 4,
-                    paddingVertical: 3,
-                    paddingHorizontal: 5,
-                    minWidth: 25,
-                    minHeight: 25,
-                    alignItems: 'center',
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
+              <Touchable onPress={pressImageMapHandler}>
+                <Image
+                  source={{
+                    uri: mapImageUrl,
                   }}
-                >
-                  <Text level={6}>{qty}</Text>
-                </View>
+                  style={{ width: 140, height: 105, borderRadius: 13 }}
+                />
+              </Touchable>
+              <View style={{ flex: 1, marginLeft: 15 }}>
                 <Text
                   level={6}
+                  color={colors.blackLight4}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginTop: 3, marginBottom: 7 }}
+                >
+                  Dirección de entrega
+                </Text>
+                <Text
+                  level={6}
+                  weight="bold"
                   numberOfLines={2}
                   ellipsizeMode="tail"
-                  style={{ flex: 1, marginLeft: 10 }}
+                  style={{ marginBottom: 7, lineHeight: 20 }}
                 >
-                  {product.name}
+                  {deliveryAddress}
                 </Text>
-                <Text level={6} style={{ marginLeft: 10 }}>
-                  {numberFormatter.toCurrency(qty * product.price)}
+                <Text
+                  level={6}
+                  color={colors.blackLight4}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {distanceText}
                 </Text>
               </View>
-            );
-          })}
-          <View style={{ alignItems: 'center' }}>{collapseButton}</View>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: colors.blackLight6,
-              marginTop: 5,
-              marginBottom: 20,
-            }}
-          />
+            </View>
 
+            <View style={{ flexDirection: 'row', marginTop: 25 }}>
+              <View style={{ flex: 1 }}>
+                <Text
+                  level={6}
+                  color={colors.blackLight4}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 10 }}
+                >
+                  Nombre cliente
+                </Text>
+                <Text
+                  level={6}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {fullName}
+                </Text>
+              </View>
+              <View style={{ width: 15 }} />
+              <View style={{ flex: 1 }}>
+                <Text
+                  level={6}
+                  color={colors.blackLight4}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 10 }}
+                >
+                  Método de pago
+                </Text>
+                <Text
+                  level={6}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {paymentMethod}
+                </Text>
+              </View>
+            </View>
+
+            {showRoute}
+
+            <View style={{ marginTop: 20 }}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text
+                  level={4}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ flex: 1 }}
+                >
+                  Resumen de productos
+                </Text>
+                <View style={{ width: 2 }} />
+                {editConfirmationButton}
+              </View>
+
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: colors.blackLight6,
+                  marginTop: 15,
+                  marginBottom: 15,
+                }}
+              />
+
+              {products.map((product) => {
+                return (
+                  <View
+                    key={product.id}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 5,
+                    }}
+                  >
+                    <View
+                      style={{
+                        borderWidth: 2,
+                        borderColor: colors.blackLight4,
+                        borderRadius: 4,
+                        paddingVertical: 3,
+                        paddingHorizontal: 5,
+                        minWidth: 25,
+                        minHeight: 25,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text level={6}>{product.qty}</Text>
+                    </View>
+                    <Text
+                      level={6}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                      style={{ flex: 1, marginLeft: 10 }}
+                    >
+                      {product.name}
+                    </Text>
+                    <Text level={6} style={{ marginLeft: 10 }}>
+                      {numberFormatter.toCurrency(product.qty * product.price)}
+                    </Text>
+                  </View>
+                );
+              })}
+              <View style={{ alignItems: 'center' }}>{collapseButton}</View>
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: colors.blackLight6,
+                  marginTop: 5,
+                  marginBottom: 20,
+                }}
+              />
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Text level={5} weight="bold">
+                  Total
+                </Text>
+                <Text level={3} weight="bold">
+                  {numberFormatter.toCurrency(sale.transaction.stats.ammount)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={globalStyles.withScreenAir} />
+          </ScrollView>
           <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+            style={[
+              { position: 'absolute', left: 0, right: 0, bottom: 0 },
+              globalStyles.withMargin,
+            ]}
           >
-            <Text level={5} weight="bold">
-              Total
+            <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
+            <Text
+              level={7}
+              color={colors.blackLight5}
+              style={{ marginBottom: 10, textAlign: 'center' }}
+            >
+              Para continuar con la venta, verifiquemos que cuentas con todos
+              los productos.
             </Text>
-            <Text level={3} weight="bold">
-              {numberFormatter.toCurrency(sale.transaction.stats.ammount)}
-            </Text>
+            <Button
+              title="Ir a verificación de stock"
+              style={globalStyles.withMainActionAir}
+              onPress={pressGoToStockVerificationHandler}
+            />
           </View>
         </View>
+      );
+  }
 
-        <View style={globalStyles.withScreenAir} />
-      </ScrollView>
-      <View
-        style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
-          globalStyles.withMargin,
-        ]}
-      >
-        <Text
-          level={7}
-          color={colors.blackLight5}
-          style={{ marginBottom: 10, textAlign: 'center' }}
-        >
-          Para continuar con la venta, verifiquemos que cuentas con todos los
-          productos.
-        </Text>
-        <Button
-          title="Ir a verificación de stock"
-          style={globalStyles.withMainActionAir}
-        />
-      </View>
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
+      {content}
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

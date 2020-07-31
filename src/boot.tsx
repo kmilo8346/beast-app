@@ -32,6 +32,7 @@ import {
   MyProductsScreen,
   MySalesScreen,
   SaleDetailsScreen,
+  StockVerificationScreen,
   MenuScreen,
 } from './screens';
 // components
@@ -273,6 +274,11 @@ function SellerStackScreen() {
           name="SaleDetails"
           component={SaleDetailsScreen}
           options={{ headerTitle: 'Detalle de venta' }}
+        />
+        <SellerStack.Screen
+          name="StockVerificaton"
+          component={StockVerificationScreen}
+          options={{ headerTitle: 'Verificación de stock' }}
         />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>

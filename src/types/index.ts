@@ -231,11 +231,16 @@ export interface CreateOrder {
   };
 }
 
+export type ProductConfirmationStatus =
+  | 'full_stock'
+  | 'partial_stock'
+  | 'out_of_stock';
+
 export interface ProductConfirmation {
   id: string;
   qtyDesired: number;
   qtyPosible: number;
-  status: 'full_stock' | 'partial_stock' | 'out_of_stock';
+  status: ProductConfirmationStatus;
 }
 
 export interface Confirmation {

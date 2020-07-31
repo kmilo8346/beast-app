@@ -119,7 +119,7 @@ export default ({ navigation }: CheckoutProps) => {
           paymentInfo,
         },
       },
-      idempotency,
+      idempotency: idempotency as string,
       source: ['id'],
     });
     return response.id as string;
