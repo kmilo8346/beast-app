@@ -1,13 +1,21 @@
 /* eslint-disable global-require */
 import React, { useReducer } from 'react';
-import { ScrollView, View, ImageBackground } from 'react-native';
+import { ScrollView, View, Image, ImageBackground } from 'react-native';
 
 // components
-import { Container, Touchable, Text } from '../../../components';
+import {
+  Container,
+  Touchable,
+  Text,
+  Icon,
+  ButtonIcon,
+} from '../../../components';
 // seller components
 import { Shortcut as DashboardShorcut } from '../components';
 // local components
 import { Link as DashboardLink, ModalSelectProductType } from './components';
+// containers
+import UserProvider from '../../../containers/user';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
@@ -19,8 +27,8 @@ const addProductOrServiceImage = require('../../../../assets/icons/plus.png');
 const salesInProgressImage = require('../../../../assets/icons/clock.png');
 
 // instances outside component
-
 const prefix = '[seller dashboard screen]';
+
 type ShowSelectProductTypeModalAction = {
   type: 'show_select_product_type_modal';
 };
@@ -34,8 +42,6 @@ type Action =
 
 type State = {
   selectProductTypeModalIsVisible: boolean;
-  sellerName: string;
-  selledproductsQty: number;
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -55,11 +61,19 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
+  const userContainer = UserProvider.useContainer();
+  const store = userContainer.getStore();
   const [state, dispatch] = useReducer(reducer, {
     selectProductTypeModalIsVisible: false,
-    sellerName: 'Camilo',
-    selledproductsQty: 7,
   });
+
+  // preconditions
+  if (!store) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
+  if (!store.images) {
+    throw new Error(`${prefix} Store images must be defined`);
+  }
 
   // render logic
   let selectProductTypeModal = null;
@@ -85,9 +99,65 @@ export default ({ navigation }: ScreenProps) => {
       />
     );
   }
+  const image = store.images[0];
   return (
     <Container safeArea>
       <ScrollView style={[globalStyles.withPadding]}>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 10,
+          }}
+        >
+          <Touchable
+            style={{
+              flexDirection: 'row',
+              flex: 1,
+            }}
+            onPress={() => {
+              // console.log('mi tienda clicked');
+              navigation.navigate('UpdateStoreInfoScreen');
+            }}
+          >
+            <Image
+              source={{ uri: image }}
+              style={{
+                height: 50,
+                width: 50,
+                borderRadius: 30,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 15,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                }}
+              >
+                <Text
+                  level={2}
+                  style={{ marginBottom: 2, marginRight: 3 }}
+                  weight="bold"
+                >
+                  Mi tienda
+                </Text>
+                <Icon name="chevron-down" />
+              </View>
+              <Text level={5} color={colors.blackLight2}>
+                Editar datos de tienda
+              </Text>
+            </View>
+          </Touchable>
+          <ButtonIcon
+            icon="bell"
+            style={{ alignSelf: 'center' }}
+            onPress={() => null}
+          />
+        </View>
         <Touchable onPress={() => null}>
           <ImageBackground
             source={require('../../../../assets/bg-acumulado.png')}
@@ -103,7 +173,7 @@ export default ({ navigation }: ScreenProps) => {
           >
             <View style={{ flex: 5 }}>
               <Text level={1} weight="bold" color={colors.white}>
-                {`Hola ${state.sellerName}`}
+                Hola Camilo
               </Text>
               <Text level={5} color={colors.white}>
                 Productos vendidos en total
@@ -115,7 +185,7 @@ export default ({ navigation }: ScreenProps) => {
               weight="bold"
               color={colors.white}
             >
-              {state.selledproductsQty}
+              7
             </Text>
           </ImageBackground>
         </Touchable>

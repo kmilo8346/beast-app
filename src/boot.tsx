@@ -24,6 +24,7 @@ import {
   CheckoutScreen,
   SellerOnboardingScreen,
   SetStoreInfoScreen,
+  UpdateStoreInfoScreen,
   SetStoreDeliveryInfoScreen,
   MercadoPagoSignInScreen,
   SellerDashboardScreen,
@@ -218,6 +219,11 @@ function SellerStackScreen() {
           name="SellerOnboarding"
           component={SellerOnboardingScreen}
           options={{ headerShown: false }}
+        />
+        <SellerStack.Screen
+          name="UpdateStoreInfoScreen"
+          component={UpdateStoreInfoScreen}
+          options={{ title: 'Información de tienda' }}
         />
         <SellerStack.Screen
           name="SignIn"
