@@ -271,7 +271,7 @@ export default ({
   let addComponent = null;
   if (label) {
     labelComponent = (
-      <Text level={6} style={{ marginLeft: 4 }}>
+      <Text level={6} style={{ marginLeft: 4, marginBottom: 10 }}>
         {label}
       </Text>
     );
@@ -283,7 +283,6 @@ export default ({
         style={{
           marginLeft: 4,
           lineHeight: 20,
-          marginTop: 10,
           marginBottom: 10,
         }}
       >

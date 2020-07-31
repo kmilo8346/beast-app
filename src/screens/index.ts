@@ -11,6 +11,7 @@ export { default as PDPScreen } from './pdp';
 export { default as CheckoutScreen } from './checkout';
 export { default as SellerOnboardingScreen } from './seller/seller-onboarding';
 export { default as SetStoreInfoScreen } from './seller/set-store-info';
+export { default as UpdateStoreInfoScreen } from './seller/update-store-info';
 export { default as SetStoreDeliveryInfoScreen } from './seller/set-store-delivery-info';
 export { default as MercadoPagoSignInScreen } from './seller/mercado-pago-sign-in';
 export { default as SellerDashboardScreen } from './seller/seller-dashboard';

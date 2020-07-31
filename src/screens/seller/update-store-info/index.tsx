@@ -1,25 +1,32 @@
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
 import {
-  Container,
   Text,
   Input,
-  Button,
   Toast,
   IToast,
   InputImages,
+  Button,
+  InputSetDeliveryArea,
+  InputSetDeliveryTime,
+  InputSetOpeningHours,
 } from '../../../components';
 // containers
 import UserProvider from '../../../containers/user';
 // libs
-import { generatePushID } from '../../../lib/uuid';
 import validate from '../../../lib/validate';
 // constraints
 import constraints from './constraints';
+// types
+import { IntegerRange, OpeningHours, DeliveryArea } from '../../../types';
 // styles
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
+// instances outside component
+
+const prefix = '[update store info screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -41,6 +48,7 @@ type SetFormErrorsAction = {
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
 };
+
 type Action =
   | ChangeValueAction
   | ValidateValueAction
@@ -52,6 +60,9 @@ type State = {
     // fields
     name: string;
     images: string[];
+    deliveryArea?: DeliveryArea;
+    deliveryTime?: IntegerRange;
+    openingHours?: OpeningHours;
     // other form states
     submitted: boolean;
     // identify the submit
@@ -102,19 +113,34 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
+  const userContainer = UserProvider.useContainer();
+  const store = userContainer.getStore();
+
+  // preconditions
+  if (
+    !store ||
+    !store.name ||
+    !store.images ||
+    !store.deliveryArea ||
+    !store.deliveryTime ||
+    !store.openingHours
+  ) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
+
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
-      name: '',
-      images: [],
+      name: store.name,
+      images: store.images,
+      deliveryArea: store.deliveryArea,
+      deliveryTime: store.deliveryTime,
+      openingHours: store.openingHours,
+
       // other form states
       submitted: false,
     },
   });
-  const toastRef = useRef<IToast>(null);
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
 
   // events handlers
   const changeHandler = (attribute: string, value: any) => {
@@ -135,38 +161,28 @@ export default ({ navigation }: ScreenProps) => {
     userContainer.updateStore({
       name: state.form.name,
       images: state.form.images,
+      deliveryArea: state.form.deliveryArea,
+      deliveryTime: state.form.deliveryTime,
+      openingHours: state.form.openingHours,
     });
     // mark end of submit
     dispatch({ type: 'set_submit_op_id' });
+
+    // navigation a SellerDasboard que puede ser un back
+    navigation.navigate('SellerDashboard');
   };
 
-  useEffect(() => {
-    // if not store initilized, initialized one with default values
-    if (!store) {
-      userContainer.updateStore({
-        id: generatePushID(),
-        phone: user?.phone,
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (state.form.submitOpId && store && store.name && store.images) {
-      navigation.navigate('SetStoreDeliveryInfo');
-    }
-  }, [state.form.submitOpId, store, store?.name, store?.images]);
-
   // render logic
-
   return (
-    <Container>
-      <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-        <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
-          Información de tienda
-        </Text>
-        <Text level={5} style={{ marginBottom: 30, lineHeight: 23 }}>
-          Te pediremos algúnos datos necesarios para crear tu tienda
-        </Text>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.white,
+      }}
+    >
+      <ScrollView
+        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
+      >
         <Input
           placeholder="Minimarket Don Juan"
           label="Nombre de tienda"
@@ -179,14 +195,35 @@ export default ({ navigation }: ScreenProps) => {
         <InputImages
           size={1}
           label="Imagen"
-          tip="Agrega la imagen de tu tienda para que tus clientes te identifiquen."
           path={`stores/${store?.id}/images/\${}`}
-          value={store?.images}
+          value={state.form.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);
           }}
         />
+        <InputSetDeliveryArea
+          value={state.form.deliveryArea}
+          errors={state.form.errors?.deliveryArea}
+          onChange={(deliveryArea) => {
+            changeHandler('deliveryArea', deliveryArea);
+          }}
+        />
+        <InputSetDeliveryTime
+          value={state.form.deliveryTime}
+          errors={state.form.errors?.deliveryTime}
+          onChange={(deliveryTime) => {
+            changeHandler('deliveryTime', deliveryTime);
+          }}
+        />
+        <InputSetOpeningHours
+          value={state.form.openingHours}
+          errors={state.form.errors?.openingHours}
+          onChange={(openingHours) => {
+            changeHandler('openingHours', openingHours);
+          }}
+        />
+        <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View
         style={[
@@ -194,13 +231,12 @@ export default ({ navigation }: ScreenProps) => {
           globalStyles.withMargin,
         ]}
       >
-        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"
           onPress={pressContinueHandler}
           style={globalStyles.withMainActionAir}
         />
       </View>
-    </Container>
+    </View>
   );
 };
