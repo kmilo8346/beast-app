@@ -1,29 +1,28 @@
 import React, { useReducer } from 'react';
-import { View, ScrollView, Vibration } from 'react-native';
+import { ScrollView, View, Vibration } from 'react-native';
 
 // components
 import {
+  Container,
+  Button,
   Input,
   InputImages,
-  Button,
-  InputSetDeliveryArea,
-  InputSetDeliveryTime,
-  InputSetOpeningHours,
+  InputSelectAddress,
 } from '../../../components';
 // containers
 import UserProvider from '../../../containers/user';
 // libs
 import validate from '../../../lib/validate';
-// constraints
-import constraints from './constraints';
 // types
-import { IntegerRange, OpeningHours, DeliveryArea } from '../../../types';
+import { Place } from '../../../types';
 // styles
-import globalStyles from '../../../styles';
+import globalStyle from '../../../styles';
+// constrains
+import constraints from './constraints';
 import colors from '../../../styles/colors';
-// instances outside component
 
-const prefix = '[update store info screen]';
+// instances outside component
+const prefix = '[update account info screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -55,11 +54,11 @@ type Action =
 type State = {
   form: {
     // fields
-    name: string;
-    images: string[];
-    deliveryArea?: DeliveryArea;
-    deliveryTime?: IntegerRange;
-    openingHours?: OpeningHours;
+    firstName: string;
+    lastName: string;
+    photoUrl: string[];
+    currentAddress: string;
+    addresses: Place[];
     // other form states
     submitted: boolean;
     // identify the submit
@@ -103,42 +102,41 @@ const reducer = (state: State, action: Action): State => {
       return state;
   }
 };
-
-export interface ScreenProps {
+export interface UpdateAccountProps {
   navigation: any;
 }
 
-export default ({ navigation }: ScreenProps) => {
+export default ({ navigation }: UpdateAccountProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
+  const user = userContainer.getUser();
 
   // preconditions
   if (
-    !store ||
-    !store.name ||
-    !store.images ||
-    !store.deliveryArea ||
-    !store.deliveryTime ||
-    !store.openingHours
+    !user ||
+    !user.id ||
+    !user.firstName ||
+    !user.lastName ||
+    !user.photoUrl ||
+    !user.currentAddress ||
+    !user.addresses
   ) {
-    throw new Error(`${prefix} Store must be defined`);
+    throw new Error(`${prefix} User must be defined`);
   }
 
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
-      name: store.name,
-      images: store.images,
-      deliveryArea: store.deliveryArea,
-      deliveryTime: store.deliveryTime,
-      openingHours: store.openingHours,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photoUrl: [user.photoUrl],
+      currentAddress: user.currentAddress,
+      addresses: user.addresses,
 
       // other form states
       submitted: false,
     },
   });
-
   // events handlers
   const changeHandler = (attribute: string, value: any) => {
     dispatch({ type: 'change_value', attribute, value });
@@ -154,86 +152,80 @@ export default ({ navigation }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
-    // update store
-    userContainer.updateStore({
-      name: state.form.name,
-      images: state.form.images,
-      deliveryArea: state.form.deliveryArea,
-      deliveryTime: state.form.deliveryTime,
-      openingHours: state.form.openingHours,
+    // update user
+    userContainer.updateUser({
+      firstName: state.form.firstName,
+      lastName: state.form.lastName,
+      photoUrl: state.form.photoUrl[0],
+      currentAddress: state.form.currentAddress,
+      addresses: state.form.addresses,
     });
     // mark end of submit
     dispatch({ type: 'set_submit_op_id' });
 
-    // navigation
-    navigation.navigate('SellerDashboard');
+    // navigation to Menu
+    navigation.navigate('Menu');
   };
 
   // render logic
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.white,
-      }}
-    >
+    <Container>
       <ScrollView
-        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
+        style={[{ flex: 1, paddingTop: 15 }, globalStyle.withPadding]}
       >
-        <Input
-          placeholder="Minimarket Don Juan"
-          label="Nombre de tienda"
-          value={state.form.name}
-          errors={state.form.errors?.name}
-          onChangeText={(text) => {
-            changeHandler('name', text);
-          }}
-        />
         <InputImages
           size={1}
-          label="Imagen"
-          path={`stores/${store?.id}/images/\${}`}
-          value={state.form.images}
-          errors={state.form.errors?.images}
-          onChange={(images) => {
-            changeHandler('images', images);
+          label="Foto de perfil"
+          path={`users/${user.id}/images/\${}`}
+          value={state.form.photoUrl}
+          errors={state.form.errors?.photoUrl}
+          onChange={(photoUrl) => {
+            changeHandler('photoUrl', photoUrl);
           }}
         />
-        <InputSetDeliveryArea
-          value={state.form.deliveryArea}
-          errors={state.form.errors?.deliveryArea}
-          onChange={(deliveryArea) => {
-            changeHandler('deliveryArea', deliveryArea);
+        <Input
+          placeholder="Rigoberto"
+          label="Nombre"
+          value={state.form.firstName}
+          errors={state.form.errors?.firstName}
+          onChangeText={(firstName) => {
+            changeHandler('firstName', firstName);
           }}
         />
-        <InputSetDeliveryTime
-          value={state.form.deliveryTime}
-          errors={state.form.errors?.deliveryTime}
-          onChange={(deliveryTime) => {
-            changeHandler('deliveryTime', deliveryTime);
+        <Input
+          placeholder="López"
+          label="Apellido"
+          value={state.form.lastName}
+          errors={state.form.errors?.lastName}
+          onChangeText={(lastName) => {
+            changeHandler('lastName', lastName);
           }}
         />
-        <InputSetOpeningHours
-          value={state.form.openingHours}
-          errors={state.form.errors?.openingHours}
-          onChange={(openingHours) => {
-            changeHandler('openingHours', openingHours);
-          }}
+        <InputSelectAddress />
+        <Input
+          style={{ color: colors.blackLight3 }}
+          editable={false}
+          placeholder="your_email@mail.com"
+          label="Email"
+          value={user.email}
         />
-        <View style={globalStyles.withScreenAir} />
+        <Input
+          style={{ color: colors.blackLight3 }}
+          editable={false}
+          placeholder="+5673460078"
+          label="Teléfono"
+          value={user.phone}
+        />
+        <View style={globalStyle.withScreenAir} />
       </ScrollView>
-      <View
-        style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
-          globalStyles.withMargin,
-        ]}
-      >
+      <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
         <Button
-          title="Continuar"
+          title="Guardar cambios"
+          style={[globalStyle.withMargin, globalStyle.withMainActionAir]}
           onPress={pressContinueHandler}
-          style={globalStyles.withMainActionAir}
         />
       </View>
-    </View>
+    </Container>
   );
 };
