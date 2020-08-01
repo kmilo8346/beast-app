@@ -22,6 +22,7 @@ export default ({
   title,
   icon,
   loading,
+  disabled,
   type = 'primary',
   ...otherProps
 }: ButtonProps) => {
@@ -49,6 +50,9 @@ export default ({
       titleStyle.push(styles.title_primary);
       break;
   }
+  if (disabled) {
+    containerStyle.push(styles.container_disabled);
+  }
   containerStyle.push(otherProps.style as ViewStyle);
   let titleComponent: ReactNode = (
     <Text level={5} weight="bold" style={titleStyle}>
@@ -59,7 +63,7 @@ export default ({
     titleComponent = title;
   }
   return (
-    <Touchable {...otherProps} style={containerStyle}>
+    <Touchable disabled={disabled} {...otherProps} style={containerStyle}>
       <View style={styles.iconContainer}>
         {icon && <Icon name={icon} color={colors.white} style={styles.icon} />}
       </View>

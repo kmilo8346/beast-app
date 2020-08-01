@@ -106,7 +106,6 @@ export default ({
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
-
   // event handlers
   const fetch = async (from = 0, size = defaultSize) => {
     if (fetchRequestSource) {

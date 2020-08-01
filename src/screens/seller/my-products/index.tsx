@@ -223,6 +223,7 @@ export default ({ navigation, route }: MyProductsProps) => {
           storeId: store.id,
           id,
         },
+        index: `products-${store.id}`,
         body: data,
       });
       let entity = 'Producto';

@@ -231,24 +231,18 @@ export interface CreateOrder {
   };
 }
 
-export type ProductConfirmationStatus =
-  | 'full_stock'
-  | 'partial_stock'
-  | 'out_of_stock';
-
-export interface ProductConfirmation {
-  id: string;
-  qtyDesired: number;
-  qtyPosible: number;
-  status: ProductConfirmationStatus;
+export enum ProductConfirmationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  REPLACE = 'replace',
 }
 
-export interface Confirmation {
-  items: number;
-  products: ProductConfirmation[];
-  changes: boolean;
-  status: 'pending' | 'finished';
-}
+export type ProductConfirmation =
+  | { type: ProductConfirmationType.UPDATE; id: string; qtyPosible: number }
+  | { type: ProductConfirmationType.DELETE; id: string };
+
+export type Confirmation = ProductConfirmation[];
 
 export interface Order extends CreateOrder {
   id: string;
@@ -268,7 +262,16 @@ export interface CreateParams<T> {
 
 export interface UpdateParams<T> {
   pathVars?: { [key: string]: any };
+  index: string;
+  idempotency?: string;
   body: Partial<T>;
+}
+
+export interface ActionParams<T> {
+  pathVars?: { [key: string]: any };
+  index: string;
+  idempotency?: string;
+  body?: Partial<T>;
 }
 
 export interface GetParams {

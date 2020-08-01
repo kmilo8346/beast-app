@@ -14,6 +14,7 @@ import {
   IToast,
   ILoadingOverlay,
   Toast,
+  Icon,
 } from '../../../components';
 // local components
 import { Steps, Step, StepStatus } from './components';
@@ -21,7 +22,7 @@ import { Steps, Step, StepStatus } from './components';
 import * as utils from '../../../lib/utils';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 // clients
-// import orderClient from '../../../clients/order-client';
+import orderClient from '../../../clients/order-client';
 // containers
 import UserProvider from '../../../containers/user';
 // types
@@ -31,6 +32,8 @@ import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
 
 const markerImage = require('../../../../assets/icons/marker.png');
+const checkImage = require('../../../../assets/icons/check.png');
+const happyImage = require('../../../../assets/success.png');
 
 // instaces outside component
 const prefix = '[sale details screen]';
@@ -125,10 +128,21 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         fetchRequestSource.cancel();
       }
       fetchRequestSource = axios.CancelToken.source();
-      await utils.sleep(3000);
+      await orderClient.action('confirm', {
+        pathVars: {
+          id: sale.id,
+        },
+        index: sale.index,
+        body: {
+          confirmation: sale.confirmation,
+        },
+      });
       dispatch({ type: 'change_view', view: 'CONFIRMED' });
     } catch (error) {
       if (!axios.isCancel(error)) {
+        // TODO: log error
+        console.log(error);
+
         toastRef.current?.show({
           message: 'Ocurrió un error inesperado, reintente',
           type: 'ERROR',
@@ -139,17 +153,25 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       loadingOverlayRef.current?.hide();
     }
   };
-  const setDelivered = async () => {
+  const deliver = async () => {
     try {
       loadingOverlayRef.current?.show();
       if (fetchRequestSource) {
         fetchRequestSource.cancel();
       }
       fetchRequestSource = axios.CancelToken.source();
-      await utils.sleep(3000);
+      await orderClient.action('deliver', {
+        pathVars: {
+          id: sale.id,
+        },
+        index: sale.index,
+      });
       dispatch({ type: 'change_view', view: 'DELIVERED' });
     } catch (error) {
       if (!axios.isCancel(error)) {
+        // TODO: log error
+        console.log(error);
+
         toastRef.current?.show({
           message: 'Ocurrió un error inesperado, reintente',
           type: 'ERROR',
@@ -159,6 +181,12 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     } finally {
       loadingOverlayRef.current?.hide();
     }
+  };
+  const backToSales = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('MySales', {
+      view: 'IN_PROGRESS',
+    });
   };
 
   // render logic
@@ -167,7 +195,10 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   let status: StepStatus = 'finish';
   if (sale.status === 'confirmation_pending') {
     status = 'process';
-    if (sale.confirmation?.status === 'finished') {
+    if (
+      sale.confirmation &&
+      sale.confirmation.length >= sale.transaction.shoppingCart.length
+    ) {
       status = 'finish';
     }
   } else if (sale.status === 'in_delivery') {
@@ -199,9 +230,43 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     sale.transaction.deliveryAddress.geometry.location.lng,
     'K'
   );
-  const distanceText = `A ${numberFormatter.humanizeDistance(
-    distance
-  )} de distancia`;
+  let distanceText = (
+    <Text
+      level={6}
+      color={colors.blackLight4}
+      numberOfLines={1}
+      ellipsizeMode="tail"
+    >
+      {`A ${numberFormatter.humanizeDistance(distance)} de distancia`}
+    </Text>
+  );
+  if (sale.status === 'in_delivery') {
+    distanceText = (
+      <Touchable style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Icon name="map" />
+        <Text
+          level={7}
+          weight="bold"
+          color={colors.blue}
+          style={{ marginLeft: 5 }}
+        >
+          Ver ruta
+        </Text>
+      </Touchable>
+    );
+  }
+  if (distance === 0) {
+    distanceText = (
+      <Text
+        level={6}
+        color={colors.blackLight4}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        En tu misma dirección
+      </Text>
+    );
+  }
   // full name
   let fullName = sale.customer.firstName;
   if (sale.customer.lastName) {
@@ -212,36 +277,6 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (sale.transaction.paymentMethod === 'CREDIT_CARD') {
     paymentMethod = 'Con tarjeta';
   }
-  // show route to customer
-  let showRoute = null;
-  if (sale.status === 'in_delivery') {
-    showRoute = (
-      <Touchable
-        style={{
-          backgroundColor: colors.blueLight3,
-          borderWidth: 1,
-          borderColor: colors.blueLight1,
-          borderRadius: 13,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 15,
-          paddingVertical: 10,
-          marginTop: 15,
-        }}
-      >
-        <Image source={markerImage} />
-        <Text
-          level={5}
-          weight="bold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginLeft: 15 }}
-        >
-          Ver dirección en mapa
-        </Text>
-      </Touchable>
-    );
-  }
   // edit confirmation
   let editConfirmationButton = null;
   if (sale.status === 'confirmation_pending' && sale.confirmation) {
@@ -250,9 +285,11 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         type="link"
         title="Editar stock"
         style={{ paddingHorizontal: 0 }}
+        onPress={pressGoToStockVerificationHandler}
       />
     );
   }
+  // products and collpase button
   let products = sale.transaction.shoppingCart;
   let collapseButton: ReactNode | null = <ButtonIcon icon="chevron-up" />;
   if (state.collapsed) {
@@ -263,13 +300,115 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     collapseButton = null;
   }
 
+  // main action
+  let mainAction: ReactNode = (
+    <>
+      <Text
+        level={7}
+        color={colors.blackLight5}
+        style={{ marginBottom: 10, textAlign: 'center' }}
+      >
+        Para continuar con la venta, verifiquemos que cuentas con todos los
+        productos.
+      </Text>
+      <Button
+        title="Ir a verificación de stock"
+        style={globalStyles.withMainActionAir}
+        onPress={pressGoToStockVerificationHandler}
+      />
+    </>
+  );
+  if (
+    sale.status === 'confirmation_pending' &&
+    sale.confirmation &&
+    sale.confirmation.length >= sale.transaction.shoppingCart.length
+  ) {
+    mainAction = (
+      <Button
+        title="¡Listo! confirmar"
+        style={globalStyles.withMainActionAir}
+        onPress={confirm}
+      />
+    );
+  } else if (sale.status === 'in_delivery') {
+    mainAction = (
+      <Button
+        title="¡Listo! entregado"
+        style={globalStyles.withMainActionAir}
+        onPress={deliver}
+      />
+    );
+  }
   let content: ReactNode | null = null;
   switch (state.view) {
     case 'CONFIRMED':
-      content = <View style={{ flex: 1 }} />;
+      content = (
+        <View style={[{ flex: 1 }, globalStyles.withMargin]}>
+          <Image
+            source={checkImage}
+            style={{
+              width: 90,
+              height: 90,
+              marginTop: 70,
+              alignSelf: 'center',
+            }}
+          />
+          <Text
+            level={1}
+            weight="bold"
+            style={{ marginTop: 30, textAlign: 'center', alignSelf: 'center' }}
+          >
+            ¡Listo! confirmaste la venta
+          </Text>
+          <Text
+            level={3}
+            style={{ marginTop: 15, textAlign: 'center', alignSelf: 'center' }}
+          >
+            Ahora puedes ir a entregar.
+          </Text>
+          <Steps
+            current="in_delivery"
+            status="process"
+            steps={steps}
+            style={{ marginTop: 35 }}
+          />
+          <View style={{ flex: 1 }} />
+          <Button
+            title="Continuar"
+            onPress={backToSales}
+            style={globalStyles.withMainActionAir}
+          />
+        </View>
+      );
       break;
     case 'DELIVERED':
-      content = <View style={{ flex: 1 }} />;
+      content = (
+        <View style={[{ flex: 1 }, globalStyles.withMargin]}>
+          <Image
+            source={happyImage}
+            style={{
+              width: 250,
+              height: 260,
+              marginTop: 70,
+              alignSelf: 'center',
+            }}
+          />
+          <Text
+            level={1}
+            weight="bold"
+            style={{ marginTop: 30, textAlign: 'center', alignSelf: 'center' }}
+          >
+            ¡Genial! vamos por más.
+          </Text>
+
+          <View style={{ flex: 1 }} />
+          <Button
+            title="Volver a ventas"
+            onPress={backToSales}
+            style={globalStyles.withMainActionAir}
+          />
+        </View>
+      );
       break;
     default:
       content = (
@@ -310,14 +449,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                 >
                   {deliveryAddress}
                 </Text>
-                <Text
-                  level={6}
-                  color={colors.blackLight4}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {distanceText}
-                </Text>
+                {distanceText}
               </View>
             </View>
 
@@ -362,8 +494,6 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                 </Text>
               </View>
             </View>
-
-            {showRoute}
 
             <View style={{ marginTop: 20 }}>
               <View style={{ flexDirection: 'row' }}>
@@ -461,19 +591,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
             ]}
           >
             <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
-            <Text
-              level={7}
-              color={colors.blackLight5}
-              style={{ marginBottom: 10, textAlign: 'center' }}
-            >
-              Para continuar con la venta, verifiquemos que cuentas con todos
-              los productos.
-            </Text>
-            <Button
-              title="Ir a verificación de stock"
-              style={globalStyles.withMainActionAir}
-              onPress={pressGoToStockVerificationHandler}
-            />
+            {mainAction}
           </View>
         </View>
       );
