@@ -10,17 +10,16 @@ import {
 // components
 import { Touchable, Text, Badge } from '../../../components';
 // local components
-import { InProgressList } from './components';
+import { InProgressList, HistoricalList } from './components';
 // types
 import { SearchResponse, Order } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
-import globalStyles from '../../../styles';
 
 // instances outside component
 const prefix = '[my sales component]';
-type MySalesView = 'IN_PROGRESS' | 'HISTORIC';
-const views: MySalesView[] = ['IN_PROGRESS', 'HISTORIC'];
+type MySalesView = 'IN_PROGRESS' | 'HISTORICAL';
+const views: MySalesView[] = ['IN_PROGRESS', 'HISTORICAL'];
 type ChangeViewAction = {
   type: 'change_view';
   view: MySalesView;
@@ -29,10 +28,15 @@ type SetInProgressOrders = {
   type: 'set_in_progress_orders';
   inProgressOrders: SearchResponse<Order>;
 };
-type Action = ChangeViewAction | SetInProgressOrders;
+type SetHistoricalOrders = {
+  type: 'set_historical_orders';
+  historicalOrders: SearchResponse<Order>;
+};
+type Action = ChangeViewAction | SetInProgressOrders | SetHistoricalOrders;
 type State = {
   view: MySalesView;
   inProgressOrders?: SearchResponse<Order>;
+  historicalOrders?: SearchResponse<Order>;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -40,6 +44,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, view: action.view };
     case 'set_in_progress_orders':
       return { ...state, inProgressOrders: action.inProgressOrders };
+    case 'set_historical_orders':
+      return { ...state, historicalOrders: action.historicalOrders };
     default:
       return state;
   }
@@ -72,11 +78,16 @@ export default ({ navigation, route }: MySalesProps) => {
 
   // render logic
   let content = (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text level={5} weight="bold">
-        Not implemented yet
-      </Text>
-    </View>
+    <HistoricalList
+      orders={state.historicalOrders}
+      onChange={(historicalOrders: SearchResponse<Order>) => {
+        dispatch({
+          type: 'set_historical_orders',
+          historicalOrders,
+        });
+      }}
+      onPressItem={pressInProgressItemHandler}
+    />
   );
   if (state.view === 'IN_PROGRESS') {
     content = (
@@ -106,7 +117,7 @@ export default ({ navigation, route }: MySalesProps) => {
             marginLeft: 5,
             backgroundColor: colors.blackLight4,
           };
-          if (key === 'HISTORIC') {
+          if (key === 'HISTORICAL') {
             text = 'Historial';
           }
           if (key === state.view) {

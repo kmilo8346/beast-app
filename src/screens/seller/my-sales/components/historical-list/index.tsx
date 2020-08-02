@@ -1,55 +1,26 @@
 import React, { useReducer, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, FlatList, Image } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import {
-  Loading,
-  ErrorView,
-  SectionList,
-  Icon,
-  Text,
-} from '../../../../../components';
+import { Loading, ErrorView, Text } from '../../../../../components';
 // local components
 import SellItem from '../sell-item';
 // types
 import { Order, SearchResponse } from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
-
 // clients
 import orderClient from '../../../../../clients/order-client';
 // containers
 import UserProvider from '../../../../../containers/user';
 // styles
-import colors from '../../../../../styles/colors';
 import globalStyles from '../../../../../styles';
+// images
+const desertImage = require('../../../../../../assets/desert.png');
 
 // instances outside component
-const createSections = (orders: Order[]) => {
-  const hash: { [key: string]: any } = {
-    confirmation_pending: [],
-    in_delivery: [],
-  };
-  orders.forEach((order) => {
-    if (!hash[order.status]) {
-      console.warn(`${prefix} Not mapped status, status: ${order.status}`);
-      return;
-    }
-    hash[order.status].push(order);
-  });
-  return [
-    {
-      status: 'confirmation_pending',
-      data: hash.confirmation_pending,
-    },
-    {
-      status: 'in_delivery',
-      data: hash.in_delivery,
-    },
-  ];
-};
-const prefix = '[in progress list component]';
+const prefix = '[historical list component]';
 let fetchRequestSource: CancelTokenSource;
 const defaultSize = 10;
 type SetErrorAction = {
@@ -117,7 +88,7 @@ export default ({
       {
         filters: {
           store: store.id,
-          status: ['confirmation_pending', 'in_delivery'],
+          status: ['delivered'],
         },
         from,
         size,
@@ -221,50 +192,6 @@ export default ({
   }, []);
 
   // render logic
-  const renderSectionHeader = ({ section: { status } }: any) => {
-    let icon = 'clock';
-    let text = 'Por confirmar';
-    if (status === 'in_delivery') {
-      icon = 'bicycle';
-      text = 'En camino';
-    }
-    return (
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginVertical: 15,
-        }}
-      >
-        <Icon name={icon} color={colors.blackLight3} size={17} />
-        <Text
-          level={5}
-          weight="bold"
-          style={{ marginLeft: 7, color: colors.blackLight3 }}
-        >
-          {text}
-        </Text>
-      </View>
-    );
-  };
-  const renderSectionFooter = ({ section: { data, status } }: any) => {
-    if (data.length) {
-      return null;
-    }
-    let text = 'No hay ventas para confirmar.';
-    if (status === 'in_delivery') {
-      text = 'No hay ventas para entregar.';
-    }
-    return (
-      <View style={{ flex: 1, alignItems: 'center', paddingTop: 20 }}>
-        <Text level={6} weight="bold" style={{ marginBottom: 10 }}>
-          {text}
-        </Text>
-        <Text level={6}>Te notificaremos cuando llegue una.</Text>
-      </View>
-    );
-  };
-
   if (state.error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -280,32 +207,52 @@ export default ({
       </View>
     );
   }
-
   return (
-    <SectionList
-      sections={createSections(orders.hits as Order[])}
-      refreshing={state.refreshing}
-      stickySectionHeadersEnabled={false}
-      renderSectionHeader={renderSectionHeader}
-      renderSectionFooter={renderSectionFooter}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => {
-        return (
-          <SellItem
-            sell={item}
-            onPress={onPressItem}
-            style={{ marginBottom: 5 }}
-          />
-        );
+    <View
+      style={{
+        flex: 1,
+        paddingTop: 20,
       }}
-      ListFooterComponent={<View style={globalStyles.withScreenAir} />}
-      onRefresh={refresh}
-      onBeastEndReached={() => {
-        if (orders.from < orders.total) {
-          fetchMore();
+    >
+      <FlatList
+        data={orders.hits as Order[]}
+        refreshing={state.refreshing}
+        keyExtractor={(item: Order) => item.id}
+        renderItem={({ item }) => {
+          return (
+            <SellItem
+              sell={item as Order}
+              onPress={onPressItem}
+              style={{ marginBottom: 5 }}
+            />
+          );
+        }}
+        ListFooterComponent={<View style={globalStyles.withScreenAir} />}
+        ListEmptyComponent={
+          <View
+            style={{
+              alignItems: 'center',
+              marginTop: '40%',
+            }}
+          >
+            <Image
+              source={desertImage}
+              style={{ marginBottom: 20 }}
+              resizeMode="contain"
+            />
+            <Text level={1} weight="bold" style={{ marginBottom: 10 }}>
+              Nada por aquí
+            </Text>
+          </View>
         }
-      }}
-      style={[{ flex: 1 }, globalStyles.withPadding]}
-    />
+        onRefresh={refresh}
+        onEndReached={() => {
+          if (orders.from < orders.total) {
+            fetchMore();
+          }
+        }}
+        style={[{ flex: 1 }, globalStyles.withPadding]}
+      />
+    </View>
   );
 };

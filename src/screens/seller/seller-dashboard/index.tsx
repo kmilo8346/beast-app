@@ -207,7 +207,7 @@ export default ({ navigation }: ScreenProps) => {
           image={mySalesImage}
           title="Mis ventas"
           onPress={() => {
-            navigation.navigate('MySales', { view: 'HISTORIC' });
+            navigation.navigate('MySales', { view: 'HISTORICAL' });
           }}
         />
       </ScrollView>

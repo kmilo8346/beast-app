@@ -7,14 +7,14 @@ import {
 } from 'react-native';
 
 // components
-import { Touchable, Text, Icon } from '../../../../../../../components';
+import { Touchable, Text, Icon } from '../../../../../components';
 // libs
-import numberFormatter from '../../../../../../../lib/formatters/number-formatter';
-import dateFormatter from '../../../../../../../lib/formatters/date-formatter';
+import numberFormatter from '../../../../../lib/formatters/number-formatter';
+import dateFormatter from '../../../../../lib/formatters/date-formatter';
 // types
-import { Order } from '../../../../../../../types';
+import { Order } from '../../../../../types';
 // styles
-import colors from '../../../../../../../styles/colors';
+import colors from '../../../../../styles/colors';
 
 export interface SellItemProps {
   sell: Order;
