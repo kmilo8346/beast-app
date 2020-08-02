@@ -223,6 +223,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     event.stopPropagation();
     navigation.navigate('MySales', {
       view: 'IN_PROGRESS',
+      reload: true,
     });
   };
 
@@ -379,6 +380,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         onPress={deliver}
       />
     );
+  } else if (sale.status === 'delivered') {
+    mainAction = null;
   }
   let content: ReactNode | null = null;
   switch (state.view) {

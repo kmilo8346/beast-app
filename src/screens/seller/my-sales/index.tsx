@@ -16,6 +16,7 @@ import { InProgressList, HistoricalList } from './components';
 import { SearchResponse, Order } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
+import { navigate } from '../../../lib/root-navigation';
 
 // instances outside component
 const prefix = '[my sales component]';
@@ -31,7 +32,7 @@ type SetInProgressOrders = {
 };
 type SetHistoricalOrders = {
   type: 'set_historical_orders';
-  historicalOrders: SearchResponse<Order>;
+  historicalOrders?: SearchResponse<Order>;
 };
 type Action = ChangeViewAction | SetInProgressOrders | SetHistoricalOrders;
 type State = {
@@ -62,6 +63,7 @@ export default ({ navigation, route }: MySalesProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: route.params.view || 'IN_PROGRESS',
   });
+  const reload = route.params.reload;
   const isFocused = useIsFocused();
   // precondition
   if (views.indexOf(state.view) === -1) {
@@ -78,10 +80,11 @@ export default ({ navigation, route }: MySalesProps) => {
     });
   };
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused && reload) {
       dispatch({ type: 'set_in_progress_orders', inProgressOrders: undefined });
+      dispatch({ type: 'set_historical_orders', historicalOrders: undefined });
     }
-  }, [isFocused]);
+  }, [isFocused, reload]);
 
   // render logic
   let content = (

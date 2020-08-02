@@ -1,9 +1,9 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, FlatList, Image } from 'react-native';
+import { View, Image } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import { Loading, ErrorView, Text } from '../../../../../components';
+import { Loading, ErrorView, Text, FlatList } from '../../../../../components';
 // local components
 import SellItem from '../sell-item';
 // types
@@ -246,7 +246,7 @@ export default ({
           </View>
         }
         onRefresh={refresh}
-        onEndReached={() => {
+        onBeastEndReached={() => {
           if (orders.from < orders.total) {
             fetchMore();
           }
