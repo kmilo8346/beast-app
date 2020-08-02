@@ -39,7 +39,8 @@
     "react-native-web": "~0.11.7",
     "snakecase-keys": "^3.2.0",
     "unstated-next": "^1.1.0",
-    "validate.js": "^0.13.1"
+    "validate.js": "^0.13.1",
+    "react-native-webview": "8.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

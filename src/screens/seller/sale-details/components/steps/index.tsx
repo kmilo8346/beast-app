@@ -162,7 +162,7 @@ export default ({ current, status, steps, style }: StepsProps) => {
     );
   });
   return (
-    <View>
+    <View style={{ alignSelf: 'stretch' }}>
       <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
         {widgets}
       </View>

@@ -42,7 +42,9 @@ export default StyleSheet.create<Styles>({
     color: colors.blue,
     height: 'auto',
   },
-  container_disabled: {},
+  container_disabled: {
+    opacity: 0.6,
+  },
   title_primary: {
     color: colors.white,
   },

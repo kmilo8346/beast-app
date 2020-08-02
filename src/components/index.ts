@@ -24,6 +24,7 @@ export { default as Modal, ModalProps } from './modals/modal';
 export { default as ModalManageAddress } from './modals/modal-manage-address';
 export { default as ModalManagePayment } from './modals/modal-manage-cards';
 export { default as ActionSheet } from './modals/action-sheet';
+export { default as ActionSheetContact } from './modals/action-sheet-contact';
 export { default as ErrorView } from './error-view';
 export { default as NotSearchResult } from './not-search-result';
 export { default as Loading } from './loading';

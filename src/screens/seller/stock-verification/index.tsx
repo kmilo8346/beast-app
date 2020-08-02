@@ -6,7 +6,12 @@ import { Button, Text, Icon } from '../../../components';
 // local components
 import { Item, ProgressBar } from './components';
 // types
-import { Confirmation, Order, ProductConfirmation } from '../../../types';
+import {
+  Confirmation,
+  Order,
+  ProductConfirmation,
+  ProductConfirmationType,
+} from '../../../types';
 // syles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
@@ -17,53 +22,51 @@ const prefix = '[stock verification screen]';
 type ToogleEditAction = {
   type: 'toogle_edit';
 };
-type ChangeProductConfirmation = {
+type ChangeProductConfirmationAction = {
   type: 'change_product_confirmation';
   productConfirmation: ProductConfirmation;
 };
-type Action = ToogleEditAction | ChangeProductConfirmation;
+type RevertProductConfirmationAction = {
+  type: 'revert_product_confirmation';
+  productConfirmation: ProductConfirmation;
+};
+type Action =
+  | ToogleEditAction
+  | ChangeProductConfirmationAction
+  | RevertProductConfirmationAction;
 type State = {
-  edit: boolean;
+  editting: boolean;
   confirmation: Confirmation;
 };
 const reducer = (state: State, action: Action): State => {
   let found: boolean;
-  let changes: boolean;
-  let products: ProductConfirmation[];
+  let confirmation: Confirmation;
   switch (action.type) {
     case 'toogle_edit':
-      return { ...state, edit: !state.edit };
+      return { ...state, editting: !state.editting };
     case 'change_product_confirmation':
       found = false;
-      changes = false;
-      products = state.confirmation.products.map((product) => {
-        if (product.status !== 'partial_stock') {
-          changes = true;
-        }
-        if (product.id === action.productConfirmation.id) {
+      confirmation = state.confirmation.map((productConfirmation) => {
+        if (productConfirmation.id === action.productConfirmation.id) {
           found = true;
           return action.productConfirmation;
         }
-        return product;
+        return productConfirmation;
       });
       if (!found) {
-        if (action.productConfirmation.status !== 'partial_stock') {
-          changes = true;
-        }
-        products.push(action.productConfirmation);
+        confirmation.push(action.productConfirmation);
       }
-
       return {
         ...state,
-        confirmation: {
-          ...state.confirmation,
-          products,
-          changes,
-          status:
-            state.confirmation.items === products.length
-              ? 'finished'
-              : 'pending',
-        },
+        confirmation,
+      };
+    case 'revert_product_confirmation':
+      return {
+        ...state,
+        confirmation: state.confirmation.filter(
+          (productConfirmation) =>
+            productConfirmation.id !== action.productConfirmation.id
+        ),
       };
     default:
       return state;
@@ -78,13 +81,8 @@ export interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   const sale: Order = route.params.sale;
   const [state, dispatch] = useReducer(reducer, {
-    edit: false,
-    confirmation: sale.confirmation || {
-      items: sale.transaction.shoppingCart.length,
-      products: [],
-      changes: false,
-      status: 'pending',
-    },
+    editting: false,
+    confirmation: sale.confirmation || [],
   });
 
   // preconditions
@@ -95,10 +93,15 @@ export default ({ navigation, route }: ScreenProps) => {
   const pressEditHandler = () => {
     dispatch({ type: 'toogle_edit' });
   };
-  const changeConfirmationHandler = (
+  const changeProductConfirmationHandler = (
     productConfirmation: ProductConfirmation
   ) => {
     dispatch({ type: 'change_product_confirmation', productConfirmation });
+  };
+  const revertProductConfirmationHandler = (
+    productConfirmation: ProductConfirmation
+  ) => {
+    dispatch({ type: 'revert_product_confirmation', productConfirmation });
   };
   const pressContinueHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -111,7 +114,7 @@ export default ({ navigation, route }: ScreenProps) => {
   };
   useLayoutEffect(() => {
     let text = 'Editar';
-    if (state.edit) {
+    if (state.editting) {
       text = 'Listo';
     }
     navigation.setOptions({
@@ -119,23 +122,14 @@ export default ({ navigation, route }: ScreenProps) => {
         <Button title={text} type="link" onPress={pressEditHandler} />
       ),
     });
-  }, [state.edit]);
+  }, [state.editting]);
 
   // render logic
   const hash: { [key: string]: ProductConfirmation } = {};
-  state.confirmation.products.forEach((confirmation) => {
-    hash[confirmation.id] = confirmation;
+  state.confirmation.forEach((productConfirmation) => {
+    hash[productConfirmation.id] = productConfirmation;
   });
-  let continueButton: ReactNode | null = null;
-  if (state.confirmation.products.length === state.confirmation.items) {
-    continueButton = (
-      <Button
-        title="Continuemos"
-        onPress={pressContinueHandler}
-        style={globalStyles.withMainActionAir}
-      />
-    );
-  }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView
@@ -147,9 +141,10 @@ export default ({ navigation, route }: ScreenProps) => {
             <Item
               key={item.id}
               product={item}
-              confirmation={confirmation}
-              editting={state.edit}
-              onChangeConfirmation={changeConfirmationHandler}
+              productConfirmation={confirmation}
+              editting={state.editting}
+              onChangeProductConfirmation={changeProductConfirmationHandler}
+              onRevertProductConfirmation={revertProductConfirmationHandler}
             />
           );
         })}
@@ -163,8 +158,8 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
       >
         <ProgressBar
-          progress={state.confirmation.products.length}
-          goal={state.confirmation.items}
+          progress={state.confirmation.length}
+          goal={sale.transaction.shoppingCart.length}
           style={{ marginBottom: 10 }}
         />
         <View style={globalStyles.withMargin}>
@@ -181,29 +176,17 @@ export default ({ navigation, route }: ScreenProps) => {
             <Text
               level={4}
               weight="bold"
-            >{`${state.confirmation.products.length} de ${state.confirmation.items}`}</Text>
+            >{`${state.confirmation.length} de ${sale.transaction.shoppingCart.length}`}</Text>
           </View>
 
-          {continueButton}
-
-          <View
-            style={{
-              alignSelf: 'center',
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <Icon name="phone" color={colors.blue} />
-            <Text
-              level={6}
-              weight="bold"
-              color={colors.blue}
-              style={{ marginLeft: 5 }}
-            >
-              Llamar a cliente
-            </Text>
-          </View>
+          <Button
+            title="Continuemos"
+            disabled={
+              state.confirmation.length < sale.transaction.shoppingCart.length
+            }
+            style={globalStyles.withMainActionAir}
+            onPress={pressContinueHandler}
+          />
         </View>
       </View>
     </View>

@@ -13,6 +13,7 @@ import {
   UpdateParams,
   GetParams,
   DeleteParams,
+  ActionParams,
 } from '../types';
 
 axios.defaults.baseURL = Constants.manifest.extra.BEAST_API_URL;
@@ -104,10 +105,25 @@ export default class RESTClient<T, V> {
     params: UpdateParams<T>,
     cancelToken?: CancelToken
   ): Promise<void> {
-    const { pathVars, body } = params;
-    await this.axios.put<T>(interpolate(`${this.prefix}/:id`, pathVars), body, {
+    const { pathVars, ...data } = params;
+    await this.axios.put<T>(interpolate(`${this.prefix}/:id`, pathVars), data, {
       cancelToken,
     });
+  }
+
+  async action(
+    path: string,
+    params: ActionParams<T>,
+    cancelToken?: CancelToken
+  ): Promise<void> {
+    const { pathVars, ...data } = params;
+    await this.axios.post<T>(
+      interpolate(`${this.prefix}/:id/${path}`, pathVars),
+      data,
+      {
+        cancelToken,
+      }
+    );
   }
 
   async get(params: GetParams, cancelToken?: CancelToken): Promise<Partial<T>> {

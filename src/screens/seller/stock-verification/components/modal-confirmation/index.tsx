@@ -19,12 +19,14 @@ import {
   ProductConfirmation,
   Item,
   ProductConfirmationStatus,
+  ProductConfirmationType,
 } from '../../../../../types';
 // styles
 import globalStyles from '../../../../../styles';
 import colors from '../../../../../styles/colors';
 
 // instances outside component
+const prefix = '[modal confirmation component]';
 
 export interface ModalConfirmationProps extends ModalProps {
   product: Item;
@@ -41,33 +43,25 @@ export default ({
   // state
   const [state, setState] = useState<ProductConfirmation>(
     confirmation || {
+      type: ProductConfirmationType.UPDATE,
       id: product.id,
-      qtyDesired: product.qty,
       qtyPosible: 0,
-      status: 'out_of_stock',
     }
   );
+  // precondition
+  if (state.type !== ProductConfirmationType.UPDATE) {
+    throw new Error(
+      `${prefix} Invalid product confirmation type, type ${state.type}`
+    );
+  }
 
   // event handlers
   const changeHandler = (qty: number) => {
-    setState((prevState) => {
-      let status: ProductConfirmationStatus = 'out_of_stock';
-      if (qty >= 1) {
-        status = 'partial_stock';
-        if (qty === prevState.qtyDesired) {
-          status = 'full_stock';
-        }
-      }
-      return {
-        ...prevState,
-        qtyPosible: qty,
-        status,
-      };
-    });
+    setState((prevState) => ({ ...prevState, qtyPosible: qty }));
   };
   const pressIHaveAllHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    changeHandler(state.qtyDesired);
+    changeHandler(product.qty);
   };
   const saveHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -79,7 +73,7 @@ export default ({
   let inputStatus: InputNumberStatus = 'error';
   if (state.qtyPosible >= 1) {
     inputStatus = 'warning';
-    if (state.qtyPosible === state.qtyDesired) {
+    if (state.qtyPosible === product.qty) {
       inputStatus = 'success';
     }
   }
@@ -124,7 +118,7 @@ export default ({
           <InputNumber
             value={state.qtyPosible}
             min={0}
-            max={state.qtyDesired}
+            max={product.qty}
             status={inputStatus}
             onChange={changeHandler}
           />

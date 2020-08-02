@@ -185,6 +185,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             storeId: store.id,
             id: product.id,
           },
+          index: `products-${store.id}`,
           body: product,
         });
         onChangeProduct('updated', product);

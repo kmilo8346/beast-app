@@ -12,6 +12,8 @@ import {
   IToast,
   Icon,
 } from '../../components';
+// local components
+import ButtonPay from './button-pay';
 // containers
 import OrderProvider from '../../containers/order';
 import colors from '../../styles/colors';
@@ -66,6 +68,8 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
+      <View style={{ height: 20 }} />
+      <ButtonPay />
 
       <View style={{ height: 40 }} />
       <Button
@@ -75,21 +79,7 @@ export default ({ navigation }: Props) => {
         }}
         style={{ marginTop: 50 }}
       />
-      <Button
-        title="Show toast"
-        onPress={() => {
-          const actionId = new Date().getTime();
-          toastRef.current?.show({
-            message: `Message ${actionId} `,
-            action: <Icon name="x" />,
-            actionCallback: () => {
-              console.log(`Click on action ${actionId}`);
-            },
-            expiration: 10,
-          });
-        }}
-        style={{ marginTop: 10 }}
-      />
+
       <View
         style={{
           position: 'absolute',

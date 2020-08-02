@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import {
   View,
   TextStyle,
@@ -6,6 +6,7 @@ import {
   ViewStyle,
   GestureResponderEvent,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 // components
 import { Touchable, Text, Badge } from '../../../components';
@@ -26,7 +27,7 @@ type ChangeViewAction = {
 };
 type SetInProgressOrders = {
   type: 'set_in_progress_orders';
-  inProgressOrders: SearchResponse<Order>;
+  inProgressOrders?: SearchResponse<Order>;
 };
 type SetHistoricalOrders = {
   type: 'set_historical_orders';
@@ -61,6 +62,7 @@ export default ({ navigation, route }: MySalesProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: route.params.view || 'IN_PROGRESS',
   });
+  const isFocused = useIsFocused();
   // precondition
   if (views.indexOf(state.view) === -1) {
     throw new Error(`${prefix} View not mapped, view: ${state.view}`);
@@ -75,6 +77,11 @@ export default ({ navigation, route }: MySalesProps) => {
       sale: order,
     });
   };
+  useEffect(() => {
+    if (isFocused) {
+      dispatch({ type: 'set_in_progress_orders', inProgressOrders: undefined });
+    }
+  }, [isFocused]);
 
   // render logic
   let content = (

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, ViewStyle, StyleProp, Linking } from 'react-native';
+import { View, ViewStyle, StyleProp } from 'react-native';
 
 import Button from '../button';
 import Text from '../../text';
-import ActionSheet from '../../modals/action-sheet';
+import ActionSheetContact from '../../modals/action-sheet-contact';
 import colors from '../../../styles/colors';
 import globalStyle from '../../../styles';
 
@@ -39,48 +39,10 @@ export default ({
         }}
       />
       {isVisible && (
-        <ActionSheet
-          options={[
-            {
-              key: 'call_phone',
-              text: 'Llamar al vendedor',
-              icon: 'phone-call',
-            },
-            {
-              key: 'sms',
-              text: 'SMS al vendedor',
-              icon: 'message-square',
-            },
-            {
-              key: 'message_whatsapp',
-              text: 'Mensaje al vendedor',
-              icon: 'whatsapp',
-            },
-            { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
-          ]}
+        <ActionSheetContact
+          phone={phone}
           onRequestClose={() => {
             setIsVisible(false);
-          }}
-          onCallAction={async (key) => {
-            try {
-              switch (key) {
-                case 'call_phone':
-                  await Linking.openURL(`tel: ${phone}`);
-                  break;
-                case 'sms':
-                  await Linking.openURL(`sms: ${phone}`);
-                  break;
-                case 'message_whatsapp':
-                  await Linking.openURL(`https://wa.me/${phone}`);
-                  break;
-                default:
-                  break;
-              }
-            } catch (error) {
-              // TODO: register error
-            } finally {
-              setIsVisible(false);
-            }
           }}
         />
       )}
