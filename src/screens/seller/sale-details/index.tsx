@@ -15,9 +15,10 @@ import {
   ILoadingOverlay,
   Toast,
   Icon,
+  ActionSheetContact,
 } from '../../../components';
 // local components
-import { Steps, Step, StepStatus } from './components';
+import { Steps, Step, StepStatus, Item } from './components';
 // libs
 import * as utils from '../../../lib/utils';
 import numberFormatter from '../../../lib/formatters/number-formatter';
@@ -26,14 +27,15 @@ import orderClient from '../../../clients/order-client';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { Order } from '../../../types';
+import { Order, ProductConfirmation } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
 
-const markerImage = require('../../../../assets/icons/marker.png');
 const checkImage = require('../../../../assets/icons/check.png');
 const happyImage = require('../../../../assets/success.png');
+const routeImage = require('../../../../assets/icons/route.png');
+const callImage = require('../../../../assets/icons/call.png');
 
 // instaces outside component
 const prefix = '[sale details screen]';
@@ -57,19 +59,26 @@ type SetCollapsedAction = {
   type: 'set_collapsed';
   collapsed: boolean;
 };
+type SetContactAction = {
+  type: 'set_contact';
+  contact: boolean;
+};
 type ChangeViewAction = {
   type: 'change_view';
   view: SaleDetailsView;
 };
-type Action = SetCollapsedAction | ChangeViewAction;
+type Action = SetCollapsedAction | SetContactAction | ChangeViewAction;
 type State = {
   view: SaleDetailsView;
   collapsed: boolean;
+  contact: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_collapsed':
       return { ...state, collapsed: action.collapsed };
+    case 'set_contact':
+      return { ...state, contact: action.contact };
     case 'change_view':
       return { ...state, view: action.view };
     default:
@@ -86,7 +95,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'DETAILS',
-    collapsed: false,
+    collapsed: true,
+    contact: false,
   });
   const sale: Order = route.params.sale;
   const userContainer = UserProvider.useContainer();
@@ -115,11 +125,38 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       })
     );
   };
+  const pressSeeRouteHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    Linking.openURL(
+      utils.createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/dir/`, {
+        api: 1,
+        origin: `${store.deliveryArea?.center.geometry.location.lat},${store.deliveryArea?.center.geometry.location.lng}`,
+        origin_place_id: store.deliveryArea?.center.id,
+        destination: `${sale.transaction.deliveryAddress.geometry.location.lat},${sale.transaction.deliveryAddress.geometry.location.lng}`,
+        destination_place_id: sale.transaction.deliveryAddress.id,
+      })
+    );
+  };
+  const pressCallClientHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_contact', contact: true });
+  };
+  const contactCloseHandler = () => {
+    dispatch({ type: 'set_contact', contact: false });
+  };
   const pressGoToStockVerificationHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('StockVerificaton', {
       sale,
     });
+  };
+  const pressExpandHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_collapsed', collapsed: false });
+  };
+  const pressCollapseHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_collapsed', collapsed: true });
   };
   const confirm = async () => {
     try {
@@ -230,43 +267,38 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     sale.transaction.deliveryAddress.geometry.location.lng,
     'K'
   );
-  let distanceText = (
-    <Text
-      level={6}
-      color={colors.blackLight4}
-      numberOfLines={1}
-      ellipsizeMode="tail"
-    >
-      {`A ${numberFormatter.humanizeDistance(distance)} de distancia`}
-    </Text>
-  );
-  if (sale.status === 'in_delivery') {
-    distanceText = (
-      <Touchable style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Icon name="map" />
-        <Text
-          level={7}
-          weight="bold"
-          color={colors.blue}
-          style={{ marginLeft: 5 }}
-        >
-          Ver ruta
-        </Text>
-      </Touchable>
-    );
-  }
+  let distanceText = `A ${numberFormatter.humanizeDistance(
+    distance
+  )} de distancia`;
   if (distance === 0) {
-    distanceText = (
-      <Text
-        level={6}
-        color={colors.blackLight4}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
-        En tu misma dirección
-      </Text>
-    );
+    distanceText = 'En tu misma dirección';
   }
+  // see route
+  let seeRoute: ReactNode | null = (
+    <Touchable
+      style={{ flexDirection: 'row', alignItems: 'center' }}
+      onPress={pressSeeRouteHandler}
+    >
+      <Image source={routeImage} style={{ width: 18.75, height: 18.75 }} />
+      <Text
+        level={5}
+        weight="bold"
+        color={colors.blue}
+        style={{ marginLeft: 3 }}
+      >
+        Ver ruta
+      </Text>
+      <Icon
+        name="chevron-right"
+        color={colors.blue}
+        style={{ marginLeft: 3 }}
+      />
+    </Touchable>
+  );
+  if (distance === 0) {
+    seeRoute = null;
+  }
+
   // full name
   let fullName = sale.customer.firstName;
   if (sale.customer.lastName) {
@@ -291,14 +323,23 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   }
   // products and collpase button
   let products = sale.transaction.shoppingCart;
-  let collapseButton: ReactNode | null = <ButtonIcon icon="chevron-up" />;
+  let collapseButton: ReactNode | null = (
+    <ButtonIcon icon="chevron-up" onPress={pressCollapseHandler} />
+  );
   if (state.collapsed) {
     products = products.slice(0, 3);
-    collapseButton = <ButtonIcon icon="chevron-down" />;
+    collapseButton = (
+      <ButtonIcon icon="chevron-down" onPress={pressExpandHandler} />
+    );
   }
   if (sale.transaction.shoppingCart.length <= 3) {
     collapseButton = null;
   }
+  // hash to easy search product confirmations
+  const confirmationHash: { [key: string]: ProductConfirmation } = {};
+  (sale.confirmation || []).forEach((productConfirmation) => {
+    confirmationHash[productConfirmation.id] = productConfirmation;
+  });
 
   // main action
   let mainAction: ReactNode = (
@@ -430,16 +471,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                   style={{ width: 140, height: 105, borderRadius: 13 }}
                 />
               </Touchable>
-              <View style={{ flex: 1, marginLeft: 15 }}>
-                <Text
-                  level={6}
-                  color={colors.blackLight4}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={{ marginTop: 3, marginBottom: 7 }}
-                >
-                  Dirección de entrega
-                </Text>
+
+              <View style={{ flex: 1, marginLeft: 15, paddingTop: 2 }}>
                 <Text
                   level={6}
                   weight="bold"
@@ -449,7 +482,16 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                 >
                   {deliveryAddress}
                 </Text>
-                {distanceText}
+                <Text
+                  level={6}
+                  color={colors.blackLight4}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 7 }}
+                >
+                  {distanceText}
+                </Text>
+                {seeRoute}
               </View>
             </View>
 
@@ -495,7 +537,31 @@ export default ({ navigation, route }: SaleDetailsProps) => {
               </View>
             </View>
 
-            <View style={{ marginTop: 20 }}>
+            <Touchable
+              style={{
+                backgroundColor: colors.blueLight3,
+                borderWidth: 1,
+                borderColor: colors.blueLight5,
+                borderRadius: 8,
+                paddingHorizontal: 20,
+                paddingVertical: 12,
+                flexDirection: 'row',
+                marginTop: 20,
+              }}
+              onPress={pressCallClientHandler}
+            >
+              <Image source={callImage} style={{ width: 27.5, height: 24.1 }} />
+              <Text
+                level={5}
+                weight="bold"
+                color={colors.blue}
+                style={{ marginLeft: 15 }}
+              >
+                Contactar a cliente
+              </Text>
+            </Touchable>
+
+            <View style={{ marginTop: 30 }}>
               <View style={{ flexDirection: 'row' }}>
                 <Text
                   level={4}
@@ -520,44 +586,23 @@ export default ({ navigation, route }: SaleDetailsProps) => {
               />
 
               {products.map((product) => {
+                const productConfirmation = confirmationHash[product.id];
                 return (
-                  <View
+                  <Item
                     key={product.id}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 5,
-                    }}
-                  >
-                    <View
-                      style={{
-                        borderWidth: 2,
-                        borderColor: colors.blackLight4,
-                        borderRadius: 4,
-                        paddingVertical: 3,
-                        paddingHorizontal: 5,
-                        minWidth: 25,
-                        minHeight: 25,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text level={6}>{product.qty}</Text>
-                    </View>
-                    <Text
-                      level={6}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                      style={{ flex: 1, marginLeft: 10 }}
-                    >
-                      {product.name}
-                    </Text>
-                    <Text level={6} style={{ marginLeft: 10 }}>
-                      {numberFormatter.toCurrency(product.qty * product.price)}
-                    </Text>
-                  </View>
+                    product={product}
+                    productConfirmation={productConfirmation}
+                  />
                 );
               })}
-              <View style={{ alignItems: 'center' }}>{collapseButton}</View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                }}
+              >
+                {collapseButton}
+              </View>
               <View
                 style={{
                   height: 1,
@@ -586,7 +631,13 @@ export default ({ navigation, route }: SaleDetailsProps) => {
           </ScrollView>
           <View
             style={[
-              { position: 'absolute', left: 0, right: 0, bottom: 0 },
+              {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: colors.white,
+              },
               globalStyles.withMargin,
             ]}
           >
@@ -601,6 +652,12 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       {content}
       <LoadingOverlay ref={loadingOverlayRef} />
+      {state.contact && (
+        <ActionSheetContact
+          phone={sale.customer.phone}
+          onRequestClose={contactCloseHandler}
+        />
+      )}
     </View>
   );
 };

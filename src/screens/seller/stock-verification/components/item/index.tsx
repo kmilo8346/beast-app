@@ -97,28 +97,38 @@ export default memo(
     let label: ReactNode | null = null;
     if (productConfirmation) {
       let text = 'Eliminado';
+      let containerColor = colors.blackLight5;
+      let textColor = colors.black;
       if (productConfirmation.type === ProductConfirmationType.UPDATE) {
-        text = 'Nada para entregar';
+        text = 'Sin stock';
+        containerColor = colors.redLight3;
+        textColor = colors.redLight2;
         if (productConfirmation.qtyPosible === product.qty) {
-          text = `Se entregará todo`;
-        } else if (productConfirmation.qtyPosible > 1) {
-          text = `Se entregarán ${productConfirmation.qtyPosible}`;
+          text = ``;
+        } else if (productConfirmation.qtyPosible >= 1) {
+          text = `Se entregará ${productConfirmation.qtyPosible} de ${product.qty}`;
+          containerColor = colors.yellowLight2;
+          textColor = colors.yellow;
         }
       }
-      label = (
-        <View
-          style={{
-            paddingHorizontal: 10,
-            paddingVertical: 2,
-            borderRadius: 5,
-            backgroundColor: colors.blackLight5,
-            alignSelf: 'flex-start',
-            marginTop: 7,
-          }}
-        >
-          <Text level={6}>{text}</Text>
-        </View>
-      );
+      if (text) {
+        label = (
+          <View
+            style={{
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 5,
+              backgroundColor: containerColor,
+              alignSelf: 'flex-start',
+              marginTop: 7,
+            }}
+          >
+            <Text level={6} color={textColor}>
+              {text}
+            </Text>
+          </View>
+        );
+      }
     }
     let rightPart: ReactNode | null = (
       <Icon name="chevron-right" style={{ marginLeft: 10 }} />
