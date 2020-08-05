@@ -43,7 +43,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 
 type Action =
@@ -64,7 +64,7 @@ type State = {
     // other states
     submitted: boolean;
     // identify the submit
-    submitOpId?: string;
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -157,23 +157,19 @@ export default ({ navigation }: ScreenProps) => {
       ...(state.form.address as Place),
       apartment: state.form.apartment,
     };
-    const opId = `${new Date().getTime()}`;
+    const version = new Date().getTime();
     userClient.update(
       user.id,
       {
         currentAddress: address.id,
         addresses: [address],
       },
-      opId
+      version
     );
-    dispatch({ type: 'set_submit_op_id', opId });
+    dispatch({ type: 'set_submit_op_id', opId: version });
   };
   useEffect(() => {
-    if (
-      state.form.submitOpId === user.opId &&
-      user.currentAddress &&
-      (user.addresses || []).length
-    ) {
+    if (state.form.submitOpId === user.version) {
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
@@ -181,7 +177,7 @@ export default ({ navigation }: ScreenProps) => {
         })
       );
     }
-  }, [state.form.submitOpId, user.currentAddress, user.addresses]);
+  }, [state.form.submitOpId, user.currentAddress]);
 
   // render logic
   let text = null;

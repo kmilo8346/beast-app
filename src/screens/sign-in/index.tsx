@@ -52,7 +52,7 @@ type ShowLinkFormAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 type Action =
   | ChangeEmailAction
@@ -73,7 +73,7 @@ type State = {
     // other states
     submitted: boolean;
     // identify the submit
-    submitOpId?: string;
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
   linkFormInfo: {
@@ -161,8 +161,8 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'show_loading' });
       const prevUserData = user;
       const prevAuthUser = auth.currentUser;
-      const opId = `${new Date().getTime()}`;
-      await userClient.signIn(credential, prevUserData, opId);
+      const version = new Date().getTime();
+      await userClient.signIn(credential, prevUserData, version);
 
       try {
         // clean logic
@@ -184,7 +184,7 @@ export default ({ navigation, route }: ScreenProps) => {
         // linking current auth user with credential to link
         await auth.currentUser.linkWithCredential(credentialToLink);
       }
-      dispatch({ type: 'set_submit_op_id', opId });
+      dispatch({ type: 'set_submit_op_id', opId: version });
     } catch (error) {
       if (
         (error as firebase.auth.AuthError).code ===
@@ -228,7 +228,7 @@ export default ({ navigation, route }: ScreenProps) => {
     console.log('signInWithEmail');
   };
   useEffect(() => {
-    if (user && user.email && user.opId === state.form.submitOpId) {
+    if (user && user.email && user.version === state.form.submitOpId) {
       // not phone
       if (!user.phone || !user.phoneVerified) {
         navigation.replace('SetPhone', route.params);

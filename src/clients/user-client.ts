@@ -11,7 +11,7 @@ class UserClient {
   async signIn(
     credential: firebase.auth.AuthCredential,
     prevUser: User,
-    opId: string
+    version: number
   ) {
     const result = await auth.signInWithCredential(credential);
     if (!result.user) {
@@ -68,8 +68,8 @@ class UserClient {
         await transaction.update(ref, { currentAddress, addresses });
       }
 
-      // mark with op id to identify transaction
-      await transaction.update(ref, { opId });
+      // mark with version to identify transaction
+      await transaction.update(ref, { version });
     });
   }
 
@@ -101,10 +101,10 @@ class UserClient {
     });
   }
 
-  async update(id: string, data: Partial<User>, opId: string) {
+  async update(id: string, data: Partial<User>, version: number) {
     const update: any = {
       ...data,
-      opId,
+      version,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection('users').doc(id).update(update);

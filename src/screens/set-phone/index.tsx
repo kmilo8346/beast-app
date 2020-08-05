@@ -31,7 +31,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 type Action =
   | ChangePhoneAction
@@ -46,7 +46,7 @@ type State = {
     // other states
     submitted: boolean;
     // identify the submit
-    submitOpId?: string;
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -118,22 +118,22 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    const opId = `${new Date().getTime()}`;
+    const version = new Date().getTime();
     userClient.update(
       user.id,
       {
         phone: `+569${state.form.phone}`,
         phoneVerified: false,
       },
-      opId
+      version
     );
-    dispatch({ type: 'set_submit_op_id', opId });
+    dispatch({ type: 'set_submit_op_id', opId: version });
   };
   useEffect(() => {
-    if (user.opId === state.form.submitOpId) {
+    if (state.form.submitOpId && state.form.submitOpId === user.version) {
       navigation.navigate('VerifyPhone', route.params);
     }
-  }, [state.form.submitOpId, user]);
+  }, [state.form.submitOpId, user.phone, user.phoneVerified]);
 
   // render logic
   return (

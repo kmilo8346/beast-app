@@ -57,8 +57,13 @@ export default ({
           borderStyle: 'solid',
           borderWidth: 1,
           borderRadius: 4,
-          paddingHorizontal: 5,
-          paddingVertical: 3,
+          minWidth: 68,
+          minHeight: 23,
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative',
+          top: 12,
+          right: 15,
         }}
         onPress={addTagHandler}
       >
@@ -85,7 +90,7 @@ export default ({
             clearButtonMode="never"
             suffix={add}
             style={{ marginBottom: -20 }}
-            suffixStyle={{ minHeight: 30, minWidth: 65, marginTop: 8 }}
+            // suffixStyle={{ minHeight: 30, minWidth: 65, marginTop: 8 }}
             onChangeText={changeTagHandler}
           />
         </View>

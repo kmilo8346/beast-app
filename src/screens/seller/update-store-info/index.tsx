@@ -46,7 +46,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 
 type Action =
@@ -66,7 +66,7 @@ type State = {
     // other form states
     submitted: boolean;
     // identify the submit
-    submitOpId?: string;
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -161,7 +161,7 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     // update store
-    const opId = `${new Date().getTime()}`;
+    const version = new Date().getTime();
     userClient.update(
       user.id,
       {
@@ -170,15 +170,16 @@ export default ({ navigation }: ScreenProps) => {
         'store.deliveryArea': state.form.deliveryArea,
         'store.deliveryTime': state.form.deliveryTime,
         'store.openingHours': state.form.openingHours,
+        'store.version': new Date().getTime(),
       },
-      opId
+      version
     );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id', opId });
+    dispatch({ type: 'set_submit_op_id', opId: version });
   };
 
   useEffect(() => {
-    if (state.form.submitOpId === user.opId) {
+    if (state.form.submitOpId === user.version) {
       navigation.navigate('SellerDashboard');
     }
   }, [

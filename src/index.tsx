@@ -104,6 +104,7 @@ class App extends React.Component<{}, State> {
       );
     }
 
+    console.log('Current user', user?.id);
     return (
       <UserContainer.Provider initialState={user}>
         <CartContainer.Provider>

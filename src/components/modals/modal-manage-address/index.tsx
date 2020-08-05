@@ -46,7 +46,7 @@ export default (props: ModalProps) => {
           (i1, i2) => i1.id === i2.id
         ),
       },
-      `${new Date().getTime()}`
+      new Date().getTime()
     );
     setIsFormVisible(false);
   };
@@ -56,7 +56,7 @@ export default (props: ModalProps) => {
       {
         currentAddress: key,
       },
-      `${new Date().getTime()}`
+      new Date().getTime()
     );
   };
   const deleteHandler = (key: string) => {
@@ -67,7 +67,7 @@ export default (props: ModalProps) => {
         currentAddress: array[0].id,
         addresses: array,
       },
-      `${new Date().getTime()}`
+      new Date().getTime()
     );
   };
   const addOptionHandler = () => {

@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { ScrollView, View, Vibration } from 'react-native';
 
 // components
@@ -20,6 +20,7 @@ import globalStyle from '../../../styles';
 // constrains
 import constraints from './constraints';
 import colors from '../../../styles/colors';
+import userClient from '../../../clients/user-client';
 
 // instances outside component
 const prefix = '[update account info screen]';
@@ -43,6 +44,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
+  opId: number;
 };
 
 type Action =
@@ -55,7 +57,7 @@ type State = {
   form: {
     // fields
     firstName: string;
-    lastName: string;
+    lastName?: string;
     photoUrl: string[];
     currentAddress: string;
     addresses: Place[];
@@ -96,7 +98,7 @@ const reducer = (state: State, action: Action): State => {
     case 'set_submit_op_id':
       return {
         ...state,
-        form: { ...state.form, submitOpId: new Date().getTime() },
+        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -116,7 +118,6 @@ export default ({ navigation }: UpdateAccountProps) => {
     !user ||
     !user.id ||
     !user.firstName ||
-    !user.lastName ||
     !user.photoUrl ||
     !user.currentAddress ||
     !user.addresses
@@ -153,22 +154,35 @@ export default ({ navigation }: UpdateAccountProps) => {
       return;
     }
     // update user
-    userContainer.updateUser({
-      firstName: state.form.firstName,
-      lastName: state.form.lastName,
-      photoUrl: state.form.photoUrl[0],
-      currentAddress: state.form.currentAddress,
-      addresses: state.form.addresses,
-    });
+    const version = new Date().getTime();
+    userClient.update(
+      user.id,
+      {
+        firstName: state.form.firstName,
+        lastName: state.form.lastName,
+        photoUrl: state.form.photoUrl[0],
+        currentAddress: state.form.currentAddress,
+        addresses: state.form.addresses,
+      },
+      version
+    );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id' });
-
-    // navigation to Menu
-    navigation.navigate('Menu');
+    dispatch({ type: 'set_submit_op_id', opId: version });
   };
+  useEffect(() => {
+    if (state.form.submitOpId === user.version) {
+      navigation.navigate('Menu');
+    }
+  }, [
+    state.form.submitOpId,
+    user.version,
+    user.firstName,
+    user.lastName,
+    user.photoUrl,
+    user.currentAddress,
+  ]);
 
   // render logic
-
   return (
     <Container>
       <ScrollView

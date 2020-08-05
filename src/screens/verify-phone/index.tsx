@@ -28,7 +28,7 @@ type SetHasVerificationErrorAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 
 type Action =
@@ -39,7 +39,7 @@ type Action =
 type State = {
   code: string;
   hasVerficationError: boolean;
-  submitOpId?: string;
+  submitOpId?: number;
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -82,16 +82,16 @@ export default ({ navigation, route }: ScreenProps) => {
   const submitHandler = async (code: string) => {
     try {
       if ((user.metaData.codes || []).indexOf(code) !== -1) {
-        const opId = `${new Date().getTime()}`;
+        const version = new Date().getTime();
         userClient.update(
           user.id,
           {
             phoneVerified: true,
             'metaData.codes': [],
           },
-          opId
+          version
         );
-        dispatch({ type: 'set_submit_op_id', opId });
+        dispatch({ type: 'set_submit_op_id', opId: version });
         return;
       }
       dispatch({ type: 'set_has_verfication_error', hasError: true });
@@ -113,7 +113,7 @@ export default ({ navigation, route }: ScreenProps) => {
         {
           'metaData.codes': firebase.firestore.FieldValue.arrayUnion(code),
         },
-        `${new Date().getTime()}`
+        new Date().getTime()
       );
       if (!initial) {
         toastRef.current?.show({
@@ -137,7 +137,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [user?.phone]);
   useEffect(() => {
     // phone was verified
-    if (user.opId === state.submitOpId && user.phoneVerified) {
+    if (user.version === state.submitOpId && user.phoneVerified) {
       // not current address
       if (!user.currentAddress) {
         navigation.replace('SetAddress');

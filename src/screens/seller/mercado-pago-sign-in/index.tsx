@@ -82,13 +82,14 @@ export default ({ navigation }: ScreenProps) => {
     try {
       dispatch({ type: 'show_loading' });
       const credentials = await oauthTokenClient.create({ body: { code } });
-      const opId = `${new Date().getTime()}`;
+      const version = new Date().getTime();
       userClient.update(
         user.id,
         {
           'store.sellerCredentials': credentials,
+          'store.version': new Date().getTime(),
         },
-        opId
+        version
       );
     } catch (error) {
       console.log(error);

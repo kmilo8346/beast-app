@@ -46,7 +46,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
-  opId: string;
+  opId: number;
 };
 type Action =
   | ChangeValueAction
@@ -62,7 +62,7 @@ type State = {
     // other form states
     submitted: boolean;
     // identify the submit
-    submitOpId?: string;
+    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -142,17 +142,18 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     // update store
-    const opId = `${new Date().getTime()}`;
+    const version = new Date().getTime();
     userClient.update(
       user.id,
       {
         'store.name': state.form.name,
         'store.images': state.form.images,
+        'store.version': new Date().getTime(),
       },
-      opId
+      version
     );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id', opId });
+    dispatch({ type: 'set_submit_op_id', opId: version });
   };
 
   useEffect(() => {
@@ -163,15 +164,16 @@ export default ({ navigation }: ScreenProps) => {
         {
           'store.id': generatePushID(),
           'store.phone': user.phone,
+          'store.version': new Date().getTime(),
         },
-        `${new Date().getTime()}`
+        new Date().getTime()
       );
     }
   }, []);
 
   useEffect(() => {
     if (
-      state.form.submitOpId === user.opId &&
+      state.form.submitOpId === user.version &&
       store &&
       store.name &&
       store.images

@@ -128,23 +128,16 @@ export interface Card {
 
 export interface User {
   id: string;
+  version: number;
   email: string | undefined;
-  identificationType: 'RUT';
-  identificationNumber: string | undefined;
   firstName: string | undefined;
   lastName: string | undefined;
   photoUrl: string | undefined;
-  // mercado pago customer id
-  customerId: string | undefined;
-  // phone
   phone: string | undefined;
   phoneVerified: boolean;
   // addresses
   currentAddress: string | undefined;
   addresses: Place[];
-  // cards
-  currentCard: string | null | undefined;
-  cards: Card[];
   // store
   store: Store | undefined;
 
