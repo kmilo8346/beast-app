@@ -1,25 +1,40 @@
 import React from 'react';
-import { YellowBox } from 'react-native';
+import { View } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
 import Boot from './boot';
-// component
-import { ErrorView } from './components';
+// components
+import { ErrorView, Loading } from './components';
 // containers
 import UserContainer from './containers/user';
 import CartContainer from './containers/cart';
 import OrderContainer from './containers/order';
+// libs
+import firebase from './lib/firebase';
+import { noop } from './lib/utils';
+// types
+import { User } from './types';
+// clients
+import userClient from './clients/user-client';
 
-// CreateOrUpdateProduct and CreateOrUpdateService using function in params
-// @site https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
-YellowBox.ignoreWarnings([
-  'Non-serializable values were found in the navigation state',
-]);
+const prefix = '[app]';
+const auth = firebase.auth();
 
-class App extends React.Component<{}, { hasError: boolean }> {
+interface State {
+  hasError: boolean;
+  hydrated: boolean;
+  user?: User;
+}
+
+class App extends React.Component<{}, State> {
+  private unsubAuth: () => void = noop;
+
   constructor(props: any) {
     super(props);
-    this.state = { hasError: false };
+    this.state = {
+      hasError: false,
+      hydrated: false,
+    };
   }
 
   static getDerivedStateFromError() {
@@ -27,25 +42,70 @@ class App extends React.Component<{}, { hasError: boolean }> {
     return { hasError: true };
   }
 
+  componentDidMount() {
+    this.unsubAuth = auth.onAuthStateChanged(async (authUser) => {
+      const { hydrated } = this.state;
+      if (!hydrated || !authUser) {
+        this.hydrate();
+      }
+    });
+  }
+
   componentDidCatch(error: any, errorInfo: any) {
     // You can also log the error to an error reporting service
     console.log(`Unexpected error`, error, errorInfo);
   }
 
+  componentWillUnmount() {
+    this.unsubAuth();
+  }
+
+  async hydrate() {
+    this.setState({ hydrated: false });
+    if (!auth.currentUser) {
+      const credentials = await auth.signInAnonymously();
+      if (!credentials.user) {
+        throw new Error(
+          `${prefix} Invalid user after sucefull anonymously sign in`
+        );
+      }
+      await userClient.create(credentials.user);
+    }
+    if (!auth.currentUser) {
+      throw new Error(`${prefix} Current user must be defined`);
+    }
+    const user = await userClient.get(auth.currentUser.uid);
+    if (!user) {
+      await userClient.create(auth.currentUser);
+    }
+    this.setState({ hydrated: true, user });
+  }
+
   render() {
-    const { hasError } = this.state;
+    const { hasError, hydrated, user } = this.state;
+
     if (hasError) {
-      // You can render any custom fallback UI
       return (
         <ErrorView
           onRetry={() => {
-            this.setState({ hasError: false });
+            this.hydrate();
           }}
         />
       );
     }
+
+    if (!hydrated) {
+      return (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Loading message="Conectando con la fuerza" />
+        </View>
+      );
+    }
+
     return (
-      <UserContainer.Provider>
+      <UserContainer.Provider initialState={user}>
         <CartContainer.Provider>
           <OrderContainer.Provider>
             <Boot />

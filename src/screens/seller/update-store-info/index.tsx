@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
@@ -10,6 +10,8 @@ import {
   InputSetDeliveryTime,
   InputSetOpeningHours,
 } from '../../../components';
+// clients
+import userClient from '../../../clients/user-client';
 // containers
 import UserProvider from '../../../containers/user';
 // libs
@@ -44,6 +46,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
+  opId: string;
 };
 
 type Action =
@@ -63,7 +66,7 @@ type State = {
     // other form states
     submitted: boolean;
     // identify the submit
-    submitOpId?: number;
+    submitOpId?: string;
     errors?: { [key: string]: string[] };
   };
 };
@@ -97,7 +100,7 @@ const reducer = (state: State, action: Action): State => {
     case 'set_submit_op_id':
       return {
         ...state,
-        form: { ...state.form, submitOpId: new Date().getTime() },
+        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -111,9 +114,12 @@ export interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-
+  const user = userContainer.get();
   // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
   if (
     !store ||
     !store.name ||
@@ -155,19 +161,34 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     // update store
-    userContainer.updateStore({
-      name: state.form.name,
-      images: state.form.images,
-      deliveryArea: state.form.deliveryArea,
-      deliveryTime: state.form.deliveryTime,
-      openingHours: state.form.openingHours,
-    });
+    const opId = `${new Date().getTime()}`;
+    userClient.update(
+      user.id,
+      {
+        'store.name': state.form.name,
+        'store.images': state.form.images,
+        'store.deliveryArea': state.form.deliveryArea,
+        'store.deliveryTime': state.form.deliveryTime,
+        'store.openingHours': state.form.openingHours,
+      },
+      opId
+    );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id' });
-
-    // navigation
-    navigation.navigate('SellerDashboard');
+    dispatch({ type: 'set_submit_op_id', opId });
   };
+
+  useEffect(() => {
+    if (state.form.submitOpId === user.opId) {
+      navigation.navigate('SellerDashboard');
+    }
+  }, [
+    state.form.submitOpId,
+    store.name,
+    store.images,
+    store.deliveryArea,
+    store.deliveryTime,
+    store.openingHours,
+  ]);
 
   // render logic
   return (

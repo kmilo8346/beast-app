@@ -100,20 +100,24 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   });
   const sale: Order = route.params.sale;
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-  const toastRef = useRef<IToast>(null);
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
-
+  const user = userContainer.get();
   // precondition
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
   if (!sale) {
     throw new Error(`${prefix} Sale must be defined`);
   }
+  const store = user.store;
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
   if (!store.deliveryArea) {
     throw new Error(`${prefix} Store must have a delivery area`);
   }
+
+  const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
   const pressImageMapHandler = () => {

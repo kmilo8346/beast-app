@@ -7,6 +7,8 @@ import validate from 'validate.js';
 import { Container, Text, Input, Button } from '../../components';
 // local components
 import { ButtonGoogle, ButtonFacebook } from './components';
+// clients
+import userClient from '../../clients/user-client';
 // libs
 import firebase from '../../lib/firebase';
 // constraints
@@ -17,6 +19,7 @@ import UserProvider from '../../containers/user';
 import colors from '../../styles/colors';
 
 // instances outside component
+const prefix = '[sign in screen]';
 const auth = firebase.auth();
 
 type ChangeEmailAction = {
@@ -47,6 +50,10 @@ type ShowLinkFormAction = {
     credentialToLink: firebase.auth.OAuthCredential;
   };
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+  opId: string;
+};
 type Action =
   | ChangeEmailAction
   | ValidateEmailAction
@@ -54,7 +61,8 @@ type Action =
   | SetFormErrorsAction
   | ShowLoadingAction
   | ShowErrorAction
-  | ShowLinkFormAction;
+  | ShowLinkFormAction
+  | SetSubmitOpIdAction;
 
 type ViewState = 'LOADING' | 'SIGN_IN_FORM' | 'LINK_FORM';
 type State = {
@@ -64,6 +72,8 @@ type State = {
     email: string;
     // other states
     submitted: boolean;
+    // identify the submit
+    submitOpId?: string;
     errors?: { [key: string]: string[] };
   };
   linkFormInfo: {
@@ -99,7 +109,6 @@ const reducer = (state: State, action: Action): State => {
         view: 'LOADING',
       };
     case 'show_error':
-      console.log('An error happened');
       return {
         ...state,
         view: 'SIGN_IN_FORM',
@@ -109,6 +118,11 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         view: 'LINK_FORM',
         linkFormInfo: action.info,
+      };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -131,8 +145,12 @@ export default ({ navigation, route }: ScreenProps) => {
     linkFormInfo: null,
   });
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
+
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event handlers
   const signInWithProviderOkHandler = async (
@@ -141,13 +159,32 @@ export default ({ navigation, route }: ScreenProps) => {
   ) => {
     try {
       dispatch({ type: 'show_loading' });
+      const prevUserData = user;
+      const prevAuthUser = auth.currentUser;
+      const opId = `${new Date().getTime()}`;
+      await userClient.signIn(credential, prevUserData, opId);
 
-      await userContainer.signInWithCredential(credential);
+      try {
+        // clean logic
+        await Promise.all([
+          userClient.delete(prevUserData.id),
+          prevAuthUser?.delete(),
+        ]);
+      } catch (error) {
+        // dont crash app for that
+      }
+
+      if (!auth.currentUser) {
+        throw new Error(
+          `${prefix} Auth user must be defined after a sucefull signin`
+        );
+      }
 
       if (credentialToLink) {
         // linking current auth user with credential to link
-        await auth.currentUser?.linkWithCredential(credentialToLink);
+        await auth.currentUser.linkWithCredential(credentialToLink);
       }
+      dispatch({ type: 'set_submit_op_id', opId });
     } catch (error) {
       if (
         (error as firebase.auth.AuthError).code ===
@@ -191,8 +228,7 @@ export default ({ navigation, route }: ScreenProps) => {
     console.log('signInWithEmail');
   };
   useEffect(() => {
-    // signin was ok
-    if (user?.email && user.customerId) {
+    if (user && user.email && user.opId === state.form.submitOpId) {
       // not phone
       if (!user.phone || !user.phoneVerified) {
         navigation.replace('SetPhone', route.params);
@@ -215,7 +251,8 @@ export default ({ navigation, route }: ScreenProps) => {
       }
       // redirect to SellerDashboard
       if (route.params.redirect.name === 'SellerDashboard') {
-        if (!store?.name || !store.images) {
+        const store = user.store;
+        if (!store || !store.name || !store.images) {
           navigation.replace('SetStoreInfo');
           return;
         }
@@ -237,7 +274,7 @@ export default ({ navigation, route }: ScreenProps) => {
       }
       navigation.replace(route.params.redirect.name);
     }
-  }, [user?.id]);
+  }, [state.form.submitOpId, user]);
 
   // render logic
   let content = null;

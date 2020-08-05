@@ -1,4 +1,3 @@
-/* eslint-disable global-require */
 import React, { useReducer } from 'react';
 import { ScrollView, View, Image, ImageBackground } from 'react-native';
 
@@ -20,6 +19,7 @@ import UserProvider from '../../../containers/user';
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
 
+const bgAcumuladoImage = require('../../../../assets/bg-acumulado.png');
 const myProductsImage = require('../../../../assets/icons/tag.png');
 const myServicesImage = require('../../../../assets/icons/hand_shake.png');
 const mySalesImage = require('../../../../assets/icons/sale.png');
@@ -62,18 +62,21 @@ export interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-  const [state, dispatch] = useReducer(reducer, {
-    selectProductTypeModalIsVisible: false,
-  });
-
+  const user = userContainer.get();
   // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
   if (!store.images) {
     throw new Error(`${prefix} Store images must be defined`);
   }
+  const [state, dispatch] = useReducer(reducer, {
+    selectProductTypeModalIsVisible: false,
+  });
 
   // render logic
   let selectProductTypeModal = null;
@@ -160,7 +163,7 @@ export default ({ navigation }: ScreenProps) => {
         </View>
         <Touchable onPress={() => null}>
           <ImageBackground
-            source={require('../../../../assets/bg-acumulado.png')}
+            source={bgAcumuladoImage}
             style={{
               flex: 1,
               flexDirection: 'row',

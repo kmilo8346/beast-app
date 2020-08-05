@@ -21,7 +21,7 @@ export default createContainer(
   (): OrderContainer => {
     const container = useContainer<{ [key: string]: any }>(STORAGE_KEY, {});
     const userContainer = UserProvider.useContainer();
-    const user = userContainer.getUser();
+    const user = userContainer.get();
 
     // real time updates for purchases
     useEffect(() => {

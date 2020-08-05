@@ -150,17 +150,20 @@ export default ({ navigation, route }: MyProductsProps) => {
     hits: [],
   });
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-  const debouncedQuery = useDebounce(state.query, 200);
-  const toastRef = useRef<IToast>(null);
-
+  const user = userContainer.get();
   // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
   if (type !== 'product' && type !== 'service') {
     throw new Error(`${prefix} Invalid product type, invalid type: ${type}`);
   }
+  const debouncedQuery = useDebounce(state.query, 200);
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const fetchProducts = async (query = '', from = 0, size = defaultSize) => {

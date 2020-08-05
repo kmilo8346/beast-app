@@ -11,6 +11,8 @@ import {
   IToast,
   InputImages,
 } from '../../../components';
+// clients
+import userClient from '../../../clients/user-client';
 // containers
 import UserProvider from '../../../containers/user';
 // libs
@@ -20,6 +22,10 @@ import validate from '../../../lib/validate';
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
+
+// instances outside component
+const prefix = '[set store info screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -40,6 +46,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
+  opId: string;
 };
 type Action =
   | ChangeValueAction
@@ -55,7 +62,7 @@ type State = {
     // other form states
     submitted: boolean;
     // identify the submit
-    submitOpId?: number;
+    submitOpId?: string;
     errors?: { [key: string]: string[] };
   };
 };
@@ -89,7 +96,7 @@ const reducer = (state: State, action: Action): State => {
     case 'set_submit_op_id':
       return {
         ...state,
-        form: { ...state.form, submitOpId: new Date().getTime() },
+        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -113,8 +120,11 @@ export default ({ navigation }: ScreenProps) => {
   });
   const toastRef = useRef<IToast>(null);
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
 
   // events handlers
   const changeHandler = (attribute: string, value: any) => {
@@ -132,34 +142,47 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     // update store
-    userContainer.updateStore({
-      name: state.form.name,
-      images: state.form.images,
-    });
+    const opId = `${new Date().getTime()}`;
+    userClient.update(
+      user.id,
+      {
+        'store.name': state.form.name,
+        'store.images': state.form.images,
+      },
+      opId
+    );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id' });
+    dispatch({ type: 'set_submit_op_id', opId });
   };
 
   useEffect(() => {
     // if not store initilized, initialized one with default values
     if (!store) {
-      userContainer.updateStore({
-        id: generatePushID(),
-        phone: user?.phone,
-      });
+      userClient.update(
+        user.id,
+        {
+          'store.id': generatePushID(),
+          'store.phone': user.phone,
+        },
+        `${new Date().getTime()}`
+      );
     }
   }, []);
 
   useEffect(() => {
-    if (state.form.submitOpId && store && store.name && store.images) {
+    if (
+      state.form.submitOpId === user.opId &&
+      store &&
+      store.name &&
+      store.images
+    ) {
       navigation.navigate('SetStoreDeliveryInfo');
     }
   }, [state.form.submitOpId, store, store?.name, store?.images]);
 
   // render logic
-
   return (
-    <Container>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
         <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
           Información de tienda
@@ -201,6 +224,6 @@ export default ({ navigation }: ScreenProps) => {
           style={globalStyles.withMainActionAir}
         />
       </View>
-    </Container>
+    </View>
   );
 };

@@ -6,11 +6,16 @@ import { CommonActions } from '@react-navigation/native';
 import { Text, Container, Button } from '../../components';
 // local components
 import { Item } from './components';
+// clients
+import userClient from '../../clients/user-client';
 // containers
 import UserProvider from '../../containers/user';
 // styles
 import globalStyle from '../../styles';
 import styles from './styles';
+
+// instances outside component
+const prefix = '[menu screen]';
 
 export interface MenuProps {
   navigation: any;
@@ -19,20 +24,23 @@ export interface MenuProps {
 export default ({ navigation }: MenuProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event handlers
   const pressToogleSessionHandler = async () => {
     try {
       if (user && user.email) {
-        await userContainer.signOut();
-        //
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [{ name: 'Onboarding' }],
-          })
-        );
+        await userClient.signOut();
+        // navigation.dispatch(
+        //   CommonActions.reset({
+        //     index: 1,
+        //     routes: [{ name: 'Onboarding' }],
+        //   })
+        // );
       } else {
         navigation.navigate('SignIn', {
           redirect: {

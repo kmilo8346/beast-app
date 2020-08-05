@@ -1,13 +1,21 @@
-import React, { useReducer } from 'react';
-import { View, Vibration } from 'react-native';
+import React, { useReducer, useEffect } from 'react';
+import { View, Vibration, ScrollView } from 'react-native';
 import validate from 'validate.js';
 
 // components
 import { Container, Text, Input, Button } from '../../components';
+// clients
+import userClient from '../../clients/user-client';
 // containers
 import UserProvider from '../../containers/user';
 // constraints
 import constraints from './constraints';
+// styles
+import globalStyles from '../../styles';
+import colors from '../../styles/colors';
+
+// instances outside component
+const prefix = '[set phone screen]';
 
 type ChangePhoneAction = { type: 'change_phone'; phone: string };
 type ValidatePhoneAction = {
@@ -21,17 +29,24 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+  opId: string;
+};
 type Action =
   | ChangePhoneAction
   | ValidatePhoneAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction;
+  | SetFormErrorsAction
+  | SetSubmitOpIdAction;
 type State = {
   form: {
     // fields
     phone: string;
     // other states
     submitted: boolean;
+    // identify the submit
+    submitOpId?: string;
     errors?: { [key: string]: string[] };
   };
 };
@@ -56,6 +71,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        form: { ...state.form, submitOpId: action.opId },
+      };
     default:
       return state;
   }
@@ -77,6 +97,12 @@ export default ({ navigation, route }: ScreenProps) => {
     },
   });
   const userContainer = UserProvider.useContainer();
+  const user = userContainer.get();
+
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event handlers
   const changePhoneHandler = (phone: string) => {
@@ -92,45 +118,63 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    userContainer.updateUser({
-      phone: `+569${state.form.phone}`,
-      phoneVerified: false,
-    });
-    navigation.navigate('VerifyPhone', route.params);
+    const opId = `${new Date().getTime()}`;
+    userClient.update(
+      user.id,
+      {
+        phone: `+569${state.form.phone}`,
+        phoneVerified: false,
+      },
+      opId
+    );
+    dispatch({ type: 'set_submit_op_id', opId });
   };
+  useEffect(() => {
+    if (user.opId === state.form.submitOpId) {
+      navigation.navigate('VerifyPhone', route.params);
+    }
+  }, [state.form.submitOpId, user]);
 
   // render logic
   return (
-    <Container safeArea withMargin>
-      <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
-        Teléfono móvil
-      </Text>
-      <Text level={5} style={{ marginBottom: 60 }}>
-        Ingresa tu número de teléfono
-      </Text>
-      <Input
-        placeholder="Número de teléfono"
-        label=""
-        keyboardType="phone-pad"
-        returnKeyType="done"
-        prefix={
-          <Text level={6} weight="bold">
-            +569
-          </Text>
-        }
-        prefixComponentStyle={{ width: 48 }}
-        value={state.form.phone}
-        errors={state.form.errors?.phone}
-        onChangeText={changePhoneHandler}
-        containerStyle={{ marginBottom: 30 }}
-        onSubmitEditing={submitHandler}
-      />
-      <View style={{ flex: 1 }} />
-      <Button
-        title="Continuar"
-        style={{ marginBottom: 70 }}
-        onPress={submitHandler}
-      />
-    </Container>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
+      <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
+        <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
+          Teléfono móvil
+        </Text>
+        <Text level={5} style={{ marginBottom: 60 }}>
+          Ingresa tu número de teléfono
+        </Text>
+        <Input
+          placeholder="Número de teléfono"
+          label=""
+          keyboardType="phone-pad"
+          returnKeyType="done"
+          autoFocus
+          prefix={
+            <Text level={6} weight="bold">
+              +569
+            </Text>
+          }
+          value={state.form.phone}
+          errors={state.form.errors?.phone}
+          onChangeText={changePhoneHandler}
+          containerStyle={{ marginBottom: 30 }}
+          onSubmitEditing={submitHandler}
+        />
+      </ScrollView>
+      <View
+        style={[
+          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          globalStyles.withMargin,
+        ]}
+      >
+        <Button
+          title="Continuar"
+          style={globalStyles.withMainActionAir}
+          onPress={submitHandler}
+        />
+      </View>
+    </View>
   );
 };
