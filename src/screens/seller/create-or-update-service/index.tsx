@@ -6,7 +6,7 @@ import {
   Text,
   Input,
   InputNumeric,
-  InputSelectOptions,
+  InputTags,
   Button,
   LoadingOverlay,
   ILoadingOverlay,
@@ -38,28 +38,7 @@ const publishedImage = require('../../../../assets/icons/check.png');
 
 // instances outside component
 const prefix = '[create or update service component]';
-const categories = [
-  {
-    key: 'REPARACIONES DEL HOGAR',
-    title: 'Reparaciones del hogar',
-  },
-  {
-    key: 'BELLEZA Y SALUD',
-    title: 'Belleza y salud',
-  },
-  {
-    key: 'MENSAJERÍA',
-    title: 'Mensajeria',
-  },
-  {
-    key: 'MASCOTAS',
-    title: 'Mascotas',
-  },
-  {
-    key: 'OTROS',
-    title: 'Otros',
-  },
-];
+
 validate.validators.servicePrice = (
   value: any,
   options: {
@@ -351,16 +330,14 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             style={{ alignSelf: 'flex-end', marginBottom: 30 }}
           />
         </View>
-        <InputSelectOptions
-          label="Categoría"
-          placeholder="Seleccione categoría"
-          value={state.form.service?.category}
-          errors={state.form.errors?.category}
-          modalTitle="Selecciona categoría"
-          onChange={(key: string) => {
-            changeHandler('category', key);
+        <InputTags
+          label="Tags"
+          placeHolder="masage, belleza"
+          size={3}
+          value={state.form.service?.tags}
+          onChange={(key: string[]) => {
+            changeHandler('tags', key);
           }}
-          options={categories}
         />
         <View
           style={{

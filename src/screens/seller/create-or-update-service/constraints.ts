@@ -25,10 +25,4 @@ export default {
       message: '^Defina el precio o marque a convenir',
     },
   },
-  category: {
-    presence: {
-      allowEmpty: false,
-      message: '^Es requerido',
-    },
-  },
 } as { [key: string]: any };

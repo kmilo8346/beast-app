@@ -10,6 +10,7 @@ export { default as ButtonCart } from './buttons/button-cart';
 export { default as ButtonContact } from './buttons/button-contact';
 export { default as FriendlyInputNumber } from './inputs/friendly-input-number';
 export { default as Input } from './inputs/input';
+export { default as InputTags } from './inputs/input-tags';
 export { default as InputNumeric } from './inputs/input-numeric';
 export { default as InputPlaceAutocomplete } from './inputs/input-place-autocomplete';
 export { default as InputNumber } from './inputs/input-number';

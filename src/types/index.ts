@@ -75,7 +75,6 @@ export interface Product {
   images: string[];
   price: number;
   brand?: string;
-  category: string;
   tags?: string[];
   enabled: boolean;
   store: Store;
@@ -88,7 +87,6 @@ export interface Service {
   description: string;
   images: string[];
   price: number | null;
-  category: string;
   tags?: string[];
   enabled: boolean;
   store: Store;

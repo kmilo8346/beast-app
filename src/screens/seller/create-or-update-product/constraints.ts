@@ -30,10 +30,4 @@ export default {
       message: '^Imágenes se están subiendo',
     },
   },
-  category: {
-    presence: {
-      allowEmpty: false,
-      message: '^Es requerido',
-    },
-  },
 } as { [key: string]: any };

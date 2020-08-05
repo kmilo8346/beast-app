@@ -20,11 +20,12 @@ export interface InputProps extends TextInputProps {
   errors?: string[];
   lengthCounter?: boolean;
   prefix?: string | JSX.Element;
-  suffix?: string;
+  suffix?: string | JSX.Element;
   format?: (text: string | undefined) => string | undefined;
   parse?: (text: string) => string;
   containerStyle?: StyleProp<ViewStyle>;
   prefixStyle?: StyleProp<ViewStyle>;
+  suffixStyle?: StyleProp<ViewStyle>;
 }
 
 type Ref = TextInput;
@@ -43,6 +44,8 @@ export default forwardRef<Ref, InputProps>(
       onChangeText = () => null,
       containerStyle = {},
       prefixStyle = {},
+      suffixStyle = {},
+      clearButtonMode = 'while-editing',
       ...inputProps
     },
     ref
@@ -84,7 +87,7 @@ export default forwardRef<Ref, InputProps>(
         suffixComponent = suffix;
       }
       suffixContainer = (
-        <View style={[styles.suffix, prefixStyle]}>{suffixComponent}</View>
+        <View style={[styles.suffix, suffixStyle]}>{suffixComponent}</View>
       );
       finalStyle.push({ paddingRight: 45 });
     }
@@ -130,7 +133,7 @@ export default forwardRef<Ref, InputProps>(
             value={formmattedValue}
             onChangeText={changeTextHandler}
             style={finalStyle}
-            clearButtonMode="while-editing"
+            clearButtonMode={clearButtonMode}
           />
           {lentghCounterComponent}
           {suffixContainer}

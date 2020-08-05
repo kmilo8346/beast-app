@@ -6,7 +6,6 @@ import {
   Text,
   Input,
   InputNumeric,
-  InputSelectOptions,
   Button,
   LoadingOverlay,
   ILoadingOverlay,
@@ -14,6 +13,7 @@ import {
   IToast,
   InputImages,
   Switch,
+  InputTags,
 } from '../../../components';
 // clients
 import productClient from '../../../clients/product-client';
@@ -37,40 +37,6 @@ const publishedImage = require('../../../../assets/icons/check.png');
 
 // instances outside component
 const prefix = '[create or update product component]';
-const categories = [
-  {
-    key: 'DESPENSA Y BOTILLERÍA',
-    title: 'Despensa y botillería',
-  },
-  {
-    key: 'COMIDAS PREPARADAS',
-    title: 'Comidas preparadas',
-  },
-  {
-    key: 'FRUTAS Y VERDURAS',
-    title: 'Frutas y verduras',
-  },
-  {
-    key: 'PANES Y DULCES',
-    title: 'Panes y dulces',
-  },
-  {
-    key: 'CUIDADO PERSONAL Y SALUD',
-    title: 'Cuidado personal y salud',
-  },
-  {
-    key: 'MASCOTAS',
-    title: 'Mascotas',
-  },
-  {
-    key: 'VIDA SALUDABLE',
-    title: 'Vida saludable',
-  },
-  {
-    key: 'OTROS',
-    title: 'Otros',
-  },
-];
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -350,16 +316,14 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             containerStyle={{ flex: 1 }}
           />
         </View>
-        <InputSelectOptions
-          label="Categoría"
-          placeholder="Seleccione categoría"
-          value={state.form.product?.category}
-          errors={state.form.errors?.category}
-          modalTitle="Selecciona categoría"
-          onChange={(key: string) => {
-            changeHandler('category', key);
+        <InputTags
+          label="Tags"
+          placeHolder="desayuno, once"
+          size={3}
+          value={state.form.product?.tags}
+          onChange={(key: string[]) => {
+            changeHandler('tags', key);
           }}
-          options={categories}
         />
         <View
           style={{
