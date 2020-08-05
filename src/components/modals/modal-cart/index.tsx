@@ -19,6 +19,9 @@ import { Store } from '../../../types';
 import globalStyle from '../../../styles';
 import colors from '../../../styles/colors';
 
+// instances outside component
+const prefix = '[modal cart component]';
+
 const renderHeader = (): ReactElement => (
   <View style={{ marginBottom: 15 }}>
     <InputSelectAddress />
@@ -103,7 +106,11 @@ export default ({ onRequestClose = () => null }: CartModalProps) => {
   const cart = cartContainer.getCart();
   const stats = cartContainer.getStats();
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event handlers
   const pressMakeOrderHandler = () => {

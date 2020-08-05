@@ -3,8 +3,6 @@ import { View } from 'react-native';
 
 // components
 import { Container, Text, Button } from '../../components';
-// containers
-import UserProvider from '../../containers/user';
 // styles
 import globalStyles from '../../styles';
 

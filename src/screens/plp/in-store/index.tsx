@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useReducer, useEffect, ReactNode } from 'react';
 import { View } from 'react-native';
 
@@ -17,11 +16,14 @@ import { InputSearch } from '../components';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { Product, Service, SearchResponse } from '../../../types';
+import { Product, Service, SearchResponse, Place } from '../../../types';
 // clients
 import productClient from '../../../clients/product-client';
 // styles
 import globalStyle from '../../../styles';
+
+// instances outside component
+const prefix = '[plp in store screen]';
 
 type ViewState = 'LOADING' | 'ERROR' | 'PRODUCTS' | 'NOT_PRODUCTS';
 
@@ -123,12 +125,26 @@ export interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   const userContainer = UserProvider.useContainer();
-  const currentAddress = userContainer.getCurrentAddress();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  if (!user.currentAddress) {
+    throw new Error(`${prefix} User current address must be defined`);
+  }
+  if (!user.addresses.length) {
+    throw new Error(`${prefix} User addresses dont have data`);
+  }
+  const currentAddress = user.addresses.find(
+    (address: Place) => address.id === user.currentAddress
+  );
+  if (!currentAddress) {
+    throw new Error(`${prefix} User current address not mach in addresses`);
+  }
   // in store
   const store = route.params.store;
-  if (!currentAddress) {
-    throw new Error('Current address must be defined');
-  }
+
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',
     query: '',

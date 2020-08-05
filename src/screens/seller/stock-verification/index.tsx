@@ -1,17 +1,12 @@
-import React, { useReducer, useLayoutEffect, ReactNode } from 'react';
+import React, { useReducer, useLayoutEffect } from 'react';
 import { View, ScrollView, GestureResponderEvent } from 'react-native';
 
 // components
-import { Button, Text, Icon } from '../../../components';
+import { Button, Text } from '../../../components';
 // local components
 import { Item, ProgressBar } from './components';
 // types
-import {
-  Confirmation,
-  Order,
-  ProductConfirmation,
-  ProductConfirmationType,
-} from '../../../types';
+import { Confirmation, Order, ProductConfirmation } from '../../../types';
 // syles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';

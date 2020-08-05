@@ -7,12 +7,16 @@ import OTPInputView from '@twotalltotems/react-native-otp-input';
 import { Container, Text, Button, Toast, IToast } from '../../components';
 // clients
 import phoneClient from '../../clients/phone-client';
+import userClient from '../../clients/user-client';
 // libs
 import firebase from '../../lib/firebase';
 // containers
 import UserProvider from '../../containers/user';
 // styles
 import colors from '../../styles/colors';
+
+// instances outside component
+const prefix = '[verify phone screen]';
 
 type ChangeCodeAction = {
   type: 'change_code';
@@ -22,12 +26,20 @@ type SetHasVerificationErrorAction = {
   type: 'set_has_verfication_error';
   hasError: boolean;
 };
+type SetSubmitOpIdAction = {
+  type: 'set_submit_op_id';
+  opId: string;
+};
 
-type Action = ChangeCodeAction | SetHasVerificationErrorAction;
+type Action =
+  | ChangeCodeAction
+  | SetHasVerificationErrorAction
+  | SetSubmitOpIdAction;
 
 type State = {
   code: string;
   hasVerficationError: boolean;
+  submitOpId?: string;
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -36,6 +48,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, code: action.code };
     case 'set_has_verfication_error':
       return { ...state, hasVerficationError: action.hasError };
+    case 'set_submit_op_id':
+      return {
+        ...state,
+        submitOpId: action.opId,
+      };
     default:
       return state;
   }
@@ -53,18 +70,28 @@ export default ({ navigation, route }: ScreenProps) => {
     hasVerficationError: false,
   });
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
   const toastRef = useRef<IToast>(null);
+
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event handlers
   const submitHandler = async (code: string) => {
     try {
-      if ((user?.metaData.codes || []).indexOf(code) !== -1) {
-        userContainer.updateUser({
-          phoneVerified: true,
-          'metaData.codes': [],
-        });
+      if ((user.metaData.codes || []).indexOf(code) !== -1) {
+        const opId = `${new Date().getTime()}`;
+        userClient.update(
+          user.id,
+          {
+            phoneVerified: true,
+            'metaData.codes': [],
+          },
+          opId
+        );
+        dispatch({ type: 'set_submit_op_id', opId });
         return;
       }
       dispatch({ type: 'set_has_verfication_error', hasError: true });
@@ -77,14 +104,17 @@ export default ({ navigation, route }: ScreenProps) => {
   };
   const sendCode = async (initial = false) => {
     try {
-      // reset error message
       dispatch({ type: 'set_has_verfication_error', hasError: false });
       const { code } = await phoneClient.code({
         phone: user?.phone as string,
       });
-      await userContainer.updateUser({
-        'metaData.codes': firebase.firestore.FieldValue.arrayUnion(code),
-      });
+      await userClient.update(
+        user.id,
+        {
+          'metaData.codes': firebase.firestore.FieldValue.arrayUnion(code),
+        },
+        `${new Date().getTime()}`
+      );
       if (!initial) {
         toastRef.current?.show({
           type: 'SUCCESS',
@@ -107,7 +137,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [user?.phone]);
   useEffect(() => {
     // phone was verified
-    if (user?.phoneVerified) {
+    if (user.opId === state.submitOpId && user.phoneVerified) {
       // not current address
       if (!user.currentAddress) {
         navigation.replace('SetAddress');
@@ -125,7 +155,8 @@ export default ({ navigation, route }: ScreenProps) => {
       }
       // redirect to SellerDashboard
       if (route.params.redirect.name === 'SellerDashboard') {
-        if (!store?.name || !store.images) {
+        const store = user.store;
+        if (!store || !store.name || !store.images) {
           navigation.replace('SetStoreInfo');
           return;
         }
@@ -149,7 +180,7 @@ export default ({ navigation, route }: ScreenProps) => {
       navigation.pop();
       navigation.replace(route.params.redirect.name);
     }
-  }, [user?.phoneVerified]);
+  }, [state.submitOpId, user.phoneVerified]);
 
   // render logic
   let verficationError = null;

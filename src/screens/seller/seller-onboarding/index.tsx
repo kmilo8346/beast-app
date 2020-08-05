@@ -9,6 +9,9 @@ import UserProvider from '../../../containers/user';
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
 
+// instances outside component
+const prefix = '[seller onboarding screen]';
+
 export interface ScreenProps {
   navigation: any;
 }
@@ -16,13 +19,15 @@ export interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
 
   // event hanlders
   const pressCreateStoreHandler = () => {
     // navigation
-    if (!user?.email || !user?.customerId) {
+    if (!user.email) {
       navigation.navigate('SignIn', {
         redirect: {
           name: 'SellerDashboard',
@@ -30,26 +35,13 @@ export default ({ navigation }: ScreenProps) => {
       });
       return;
     }
-    if (!user?.phone || !user?.phoneVerified) {
+    if (!user.phone || !user.phoneVerified) {
       navigation.navigate('SetPhone', {
         redirect: 'SellerDashboard',
       });
       return;
     }
-    if (!store?.name || !store.images) {
-      navigation.replace('SetStoreInfo');
-      return;
-    }
-    if (!store?.deliveryArea || !store.deliveryTime) {
-      // TODO: add opening hours
-      navigation.replace('SetStoreDeliveryInfo');
-      return;
-    }
-    if (!user.mercadoPago?.userId) {
-      navigation.replace('MercadoPagoSignIn');
-      return;
-    }
-    navigation.navigate('SellerDashboard');
+    navigation.replace('SetStoreInfo');
   };
   // render logic
   return (

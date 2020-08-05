@@ -21,11 +21,13 @@ import { StoreCard, InputSearch } from './components';
 // containers
 import UserProvider from '../../containers/user';
 // types
-import { Product, Service, Store, SearchResponse } from '../../types';
+import { Product, Service, Store, SearchResponse, Place } from '../../types';
 // styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
 
+// instances outside component
+const prefix = '[plp screen]';
 const mapProductsToSections = (products: (Product | Service)[]): Section[] => {
   const sections: Section[] = [];
   let lastTag: string | null = null;
@@ -200,9 +202,22 @@ export interface PLPScreenProps {
 
 export default ({ navigation }: PLPScreenProps) => {
   const userContainer = UserProvider.useContainer();
-  const currentAddress = userContainer.getCurrentAddress();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  if (!user.currentAddress) {
+    throw new Error(`${prefix} User current address must be defined`);
+  }
+  if (!user.addresses.length) {
+    throw new Error(`${prefix} User addresses dont have data`);
+  }
+  const currentAddress = user.addresses.find(
+    (address: Place) => address.id === user.currentAddress
+  );
   if (!currentAddress) {
-    throw new Error('Current address must be defined');
+    throw new Error(`${prefix} User current address not mach in addresses`);
   }
   const [state, dispatch] = useReducer(reducer, {
     view: 'LOADING',

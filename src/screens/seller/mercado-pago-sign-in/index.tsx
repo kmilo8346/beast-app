@@ -16,6 +16,7 @@ import {
 } from '../../../components';
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
+import userClient from '../../../clients/user-client';
 // container
 import UserProvider from '../../../containers/user';
 // styles
@@ -25,7 +26,7 @@ import colors from '../../../styles/colors';
 const mercadoPagoImage = require('../../../../assets/mercado_pago.png');
 
 // instances outside component
-const prefix = '[mercado pago sign in]';
+const prefix = '[mercado pago sign in screen]';
 
 type ShowLoadingAction = {
   type: 'show_loading';
@@ -66,12 +67,12 @@ export default ({ navigation }: ScreenProps) => {
     view: 'MERCADO_PAGO_BENEFITS',
   });
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
   // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const store = user.store;
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
@@ -81,9 +82,14 @@ export default ({ navigation }: ScreenProps) => {
     try {
       dispatch({ type: 'show_loading' });
       const credentials = await oauthTokenClient.create({ body: { code } });
-      userContainer.updateStore({
-        sellerCredentials: credentials,
-      });
+      const opId = `${new Date().getTime()}`;
+      userClient.update(
+        user.id,
+        {
+          'store.sellerCredentials': credentials,
+        },
+        opId
+      );
     } catch (error) {
       console.log(error);
       // TODO: log error

@@ -161,19 +161,21 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     },
   });
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
-  const toastRef = useRef<IToast>(null);
-
-  // preconditions
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
+  if (!store) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
   if (product && product.type !== 'product') {
     throw new Error(
       `${prefix} Product type must be 'product', invalid type: ${product.type}`
     );
   }
-  if (!store) {
-    throw new Error(`${prefix} Store must be defined`);
-  }
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const createOrUpdateProduct = async (product: Product) => {

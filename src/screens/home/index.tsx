@@ -15,8 +15,13 @@ import {
 // local components
 import ButtonPay from './button-pay';
 // containers
+import UserProvider from '../../containers/user';
 import OrderProvider from '../../containers/order';
+// styles
 import colors from '../../styles/colors';
+
+// instances outside component
+const prefix = '[home screen]';
 
 export interface Props {
   navigation: any;
@@ -25,8 +30,17 @@ export interface Props {
 export default ({ navigation }: Props) => {
   // state
   const toastRef = useRef<IToast>(null);
+  const userContainer = UserProvider.useContainer();
+  const user = userContainer.get();
   const orderContainer = OrderProvider.useContainer();
   const purchases = orderContainer.purchases();
+
+  // preconditions
+  if (!user || !user.currentAddress) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+
+  // render logic
   let ordersInProgress = null;
   if (purchases.length) {
     ordersInProgress = (
@@ -57,7 +71,6 @@ export default ({ navigation }: Props) => {
       />
     );
   }
-
   return (
     <Container safeArea withMargin fakeHeader>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

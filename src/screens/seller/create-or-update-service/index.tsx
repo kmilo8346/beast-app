@@ -161,19 +161,21 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     },
   });
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
-  const toastRef = useRef<IToast>(null);
-
-  // preconditions
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
+  if (!store) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
   if (service && service.type !== 'service') {
     throw new Error(
       `${prefix} Service type must be 'service', invalid type: ${service.type}`
     );
   }
-  if (!store) {
-    throw new Error(`${prefix} Store must be defined`);
-  }
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const createOrUpdateService = async (service: Service) => {

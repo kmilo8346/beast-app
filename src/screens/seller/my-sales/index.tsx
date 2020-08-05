@@ -16,7 +16,6 @@ import { InProgressList, HistoricalList } from './components';
 import { SearchResponse, Order } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
-import { navigate } from '../../../lib/root-navigation';
 
 // instances outside component
 const prefix = '[my sales component]';

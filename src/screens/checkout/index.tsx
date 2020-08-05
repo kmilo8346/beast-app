@@ -51,9 +51,10 @@ export default ({ navigation }: CheckoutProps) => {
   const [shopId, setShopId] = useState<string | null>(null);
 
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const currentAddress = userContainer.getCurrentAddress();
-  const currentCard = userContainer.getCurrentCard();
+  const user = userContainer.get();
+  const currentAddress = user?.addresses.find(
+    (address) => address.id === user.currentAddress
+  );
   const cartContainer = CartProvider.useContainer();
   const shoppingCart = cartContainer.getCart();
   const stats = cartContainer.getStats();
@@ -92,7 +93,6 @@ export default ({ navigation }: CheckoutProps) => {
     if (securityCode) {
       paymentMethod = 'CREDIT_CARD';
       paymentInfo = {
-        card: currentCard as Card,
         securityCode,
         installments: 1,
       };

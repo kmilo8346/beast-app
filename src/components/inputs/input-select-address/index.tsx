@@ -7,12 +7,23 @@ import ModalManageAddress from '../../modals/modal-manage-address';
 // containers
 import UserProvider from '../../../containers/user';
 
+// instances outside component
+const prefix = '[input select address component]';
+
 export default () => {
   // state
   const [isVisible, setIsVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const currentAddressId = userContainer.getCurrentAddressId();
-  const adresses = userContainer.getAddresses();
+  const user = userContainer.get();
+  // precondition
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  if (!user.currentAddress) {
+    throw new Error(`${prefix} User current address must be defined`);
+  }
+  const currentAddressId = user.currentAddress;
+  const adresses = user.addresses || [];
   const currentAddress = adresses.find(
     (address) => address.id === currentAddressId
   );

@@ -79,3 +79,22 @@ export const distance = (
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const replaceOrAdd = (
+  array: Array<any>,
+  newItem: any,
+  areEqual: (item1: any, item2: any) => boolean
+): Array<any> => {
+  let found = false;
+  const newArray: Array<any> = array.map((item) => {
+    if (areEqual(item, newItem)) {
+      found = true;
+      return newItem;
+    }
+    return item;
+  });
+  if (!found) {
+    newArray.push(newItem);
+  }
+  return newArray;
+};

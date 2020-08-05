@@ -1,6 +1,5 @@
 import React, { useReducer, useRef, useEffect } from 'react';
 import { View, Vibration } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
 
 // components
 import {
@@ -13,6 +12,8 @@ import {
   Toast,
   IToast,
 } from '../../../components';
+// clients
+import userClient from '../../../clients/user-client';
 // libs
 import validate from '../../../lib/validate';
 // containers
@@ -24,7 +25,7 @@ import globalStyles from '../../../styles';
 import { IntegerRange, OpeningHours, DeliveryArea } from '../../../types';
 
 // instances outside component
-const PREFIX = '[set store delivery info screen]';
+const prefix = '[set store delivery info screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
@@ -45,6 +46,7 @@ type SetFormErrorsAction = {
 };
 type SetSubmitOpIdAction = {
   type: 'set_submit_op_id';
+  opId: string;
 };
 type Action =
   | ChangeValueAction
@@ -63,7 +65,7 @@ type State = {
     // other states
     submitted: boolean;
     // identify the submit
-    submitOpId?: number;
+    submitOpId?: string;
     errors?: { [key: string]: string[] };
   };
 };
@@ -91,7 +93,7 @@ const reducer = (state: State, action: Action): State => {
     case 'set_submit_op_id':
       return {
         ...state,
-        form: { ...state.form, submitOpId: new Date().getTime() },
+        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -105,7 +107,17 @@ export interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
+  if (!store || !store.name || !store.images) {
+    throw new Error(
+      `${prefix} Store must be initialized and must have name and images`
+    );
+  }
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
@@ -119,14 +131,6 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
   const toastRef = useRef<IToast>(null);
-  const isFocused = useIsFocused();
-
-  // precondition
-  if (!store || !store.name || !store.images) {
-    throw new Error(
-      `${PREFIX} Store must be initialized and must have name and images`
-    );
-  }
 
   // event handlers
   const changeHandler = (attribute: string, value: any) => {
@@ -144,18 +148,22 @@ export default ({ navigation }: ScreenProps) => {
       return;
     }
     // update store
-    userContainer.updateStore({
-      deliveryArea: state.form.deliveryArea,
-      deliveryTime: state.form.deliveryTime,
-      openingHours: state.form.openingHours,
-    });
+    const opId = `${new Date().getTime()}`;
+    userClient.update(
+      user.id,
+      {
+        'store.deliveryArea': state.form.deliveryArea,
+        'store.deliveryTime': state.form.deliveryTime,
+        'store.openingHours': state.form.openingHours,
+      },
+      opId
+    );
     // mark end of submit
-    dispatch({ type: 'set_submit_op_id' });
+    dispatch({ type: 'set_submit_op_id', opId });
   };
   useEffect(() => {
     if (
-      isFocused &&
-      state.form.submitOpId &&
+      state.form.submitOpId === user.opId &&
       store.deliveryArea &&
       store.deliveryTime &&
       store.openingHours
@@ -163,7 +171,6 @@ export default ({ navigation }: ScreenProps) => {
       navigation.navigate('MercadoPagoSignIn');
     }
   }, [
-    isFocused,
     state.form.submitOpId,
     store.deliveryArea,
     store.deliveryTime,

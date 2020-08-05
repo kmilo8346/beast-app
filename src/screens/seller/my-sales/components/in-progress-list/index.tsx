@@ -101,8 +101,11 @@ export default ({
     refreshing: false,
   });
   const userContainer = UserProvider.useContainer();
-  const store = userContainer.getStore();
-
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }

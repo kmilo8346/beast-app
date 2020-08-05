@@ -109,7 +109,7 @@ export interface UpdateAccountProps {
 export default ({ navigation }: UpdateAccountProps) => {
   // state
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
+  const user = userContainer.get();
 
   // preconditions
   if (

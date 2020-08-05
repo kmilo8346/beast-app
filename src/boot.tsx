@@ -188,17 +188,14 @@ const SellerStack = createStackNavigator();
 // https://github.com/react-navigation/react-navigation/issues/3971
 function SellerStackScreen() {
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
-  const store = userContainer.getStore();
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
 
   let initialRoute = 'SellerDashboard';
-  if (
-    !store ||
-    !user?.email ||
-    !user?.customerId ||
-    !user?.phone ||
-    !user?.phoneVerified
-  ) {
+  if (!store || !user.email || !user.phone || !user.phoneVerified) {
     initialRoute = 'SellerOnboarding';
   } else if (!store.name || !store.images) {
     initialRoute = 'SetStoreInfo';
@@ -399,6 +396,7 @@ function MainTabScreen() {
 
 const MainStack = createStackNavigator();
 
+const prefix = '[boot component]';
 /**
  * Boot component control de navigation in boot time
  *
@@ -422,22 +420,17 @@ const MainStack = createStackNavigator();
 export default () => {
   // state
   const userContainer = UserProvider.useContainer();
-  const user = userContainer.getUser();
+  const user = userContainer.get();
 
-  // render logic
   if (!user) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Loading />
-      </View>
-    );
+    throw new Error(`${prefix} User must be defined`);
   }
 
   // Valid in MainTab
   // user anonymous with current address
   // user logged with phone verified and current address
   let initialRoute = 'MainTab';
-  if (!user.email && !user.currentAddress) {
+  if (!user.email && (!user.currentAddress || !(user.addresses || []).length)) {
     initialRoute = 'Onboarding';
   } else if (user.email && (!user.phone || !user.phoneVerified)) {
     initialRoute = 'SetPhone';

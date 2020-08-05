@@ -6,6 +6,10 @@ import Modal, { ModalProps } from '../modal';
 import SelectFriendly from '../../select-friendly';
 // local components
 import { AddAddressForm } from './components';
+// clients
+import userClient from '../../../clients/user-client';
+// libs
+import * as utils from '../../../lib/utils';
 // containers
 import UserProvider from '../../../containers/user';
 // types
@@ -13,23 +17,58 @@ import { Place } from '../../../types';
 // styles
 import globalStyle from '../../../styles';
 
+// instances outside component
+const prefix = '[modal manage address component]';
+
 export default (props: ModalProps) => {
   // state
   const [isFormVisible, setIsFormVisible] = useState(false);
   const userContainer = UserProvider.useContainer();
-  const addresses = userContainer.getAddresses();
-  const currentAddress = userContainer.getCurrentAddressId();
+  const user = userContainer.get();
+  // preconditions
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  if (!user.currentAddress) {
+    throw new Error(`${prefix} User current address must be defined`);
+  }
+  const addresses = user.addresses;
+  const currentAddress = user.currentAddress;
 
   // event handlers
   const addHandler = (place: Place) => {
-    userContainer.addAddress(place);
+    userClient.update(
+      user.id,
+      {
+        addresses: utils.replaceOrAdd(
+          addresses,
+          place,
+          (i1, i2) => i1.id === i2.id
+        ),
+      },
+      `${new Date().getTime()}`
+    );
     setIsFormVisible(false);
   };
   const selectHandler = (key: string) => {
-    userContainer.setCurrentAddress(key);
+    userClient.update(
+      user.id,
+      {
+        currentAddress: key,
+      },
+      `${new Date().getTime()}`
+    );
   };
   const deleteHandler = (key: string) => {
-    userContainer.deleteAddress(key);
+    const array = addresses.filter((address) => address.id !== key);
+    userClient.update(
+      user.id,
+      {
+        currentAddress: array[0].id,
+        addresses: array,
+      },
+      `${new Date().getTime()}`
+    );
   };
   const addOptionHandler = () => {
     setIsFormVisible(true);
@@ -46,7 +85,7 @@ export default (props: ModalProps) => {
         title: `${address.route.shortName}`,
         subtitle: `${address.streetNumber.shortName}${
           address.apartment ? `, ${address.apartment}` : ''
-          }, ${address.locality.shortName}`,
+        }, ${address.locality.shortName}`,
         readonly: array.length === 1,
       })
     );
