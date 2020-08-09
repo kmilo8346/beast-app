@@ -19,7 +19,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-if (Constants.manifest.extra.ENVIRONMENT === 'local') {
+if (Constants.manifest.extra.BEAST_ENVIRONMENT === 'local') {
   const db = firebase.firestore();
   db.settings({
     host: 'localhost:8080',

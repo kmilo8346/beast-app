@@ -27,7 +27,11 @@ import orderClient from '../../../clients/order-client';
 // containers
 import UserProvider from '../../../containers/user';
 // types
-import { Order, ProductConfirmation } from '../../../types';
+import {
+  Order,
+  ProductConfirmation,
+  OwnerDispatchStatus,
+} from '../../../types';
 // styles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
@@ -42,15 +46,15 @@ const prefix = '[sale details screen]';
 let fetchRequestSource: CancelTokenSource;
 const steps: Step[] = [
   {
-    key: 'confirmation_pending',
+    key: OwnerDispatchStatus.CREATED,
     label: 'Por confirmar',
   },
   {
-    key: 'in_delivery',
+    key: OwnerDispatchStatus.CONFIRMED,
     label: 'En camino',
   },
   {
-    key: 'delivered',
+    key: OwnerDispatchStatus.DELIVERED,
     label: 'Entregado',
   },
 ];
@@ -173,9 +177,10 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         pathVars: {
           id: sale.id,
         },
-        index: sale.index,
         body: {
-          confirmation: sale.confirmation,
+          provider: {
+            confirmation: sale.provider.confirmation,
+          },
         },
       });
       dispatch({ type: 'change_view', view: 'CONFIRMED' });
@@ -205,7 +210,6 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         pathVars: {
           id: sale.id,
         },
-        index: sale.index,
       });
       dispatch({ type: 'change_view', view: 'DELIVERED' });
     } catch (error) {
@@ -232,18 +236,18 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   };
 
   // render logic
-
+  const stats = utils.getStats(sale.transaction.shoppingCart);
   // current step status
   let status: StepStatus = 'finish';
-  if (sale.status === 'confirmation_pending') {
+  if (sale.provider.status === OwnerDispatchStatus.CREATED) {
     status = 'process';
     if (
-      sale.confirmation &&
-      sale.confirmation.length >= sale.transaction.shoppingCart.length
+      sale.provider.confirmation &&
+      sale.provider.confirmation.length >= sale.transaction.shoppingCart.length
     ) {
       status = 'finish';
     }
-  } else if (sale.status === 'in_delivery') {
+  } else if (sale.provider.status === OwnerDispatchStatus.CONFIRMED) {
     status = 'process';
   }
   // delivery adddress map image
@@ -309,14 +313,13 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (sale.customer.lastName) {
     fullName = `${fullName} ${sale.customer.lastName}`;
   }
-  // payment method
-  let paymentMethod = 'A convenir';
-  if (sale.transaction.paymentMethod === 'CREDIT_CARD') {
-    paymentMethod = 'Con tarjeta';
-  }
+
   // edit confirmation
   let editConfirmationButton = null;
-  if (sale.status === 'confirmation_pending' && sale.confirmation) {
+  if (
+    sale.provider.status === OwnerDispatchStatus.CREATED &&
+    sale.provider.confirmation
+  ) {
     editConfirmationButton = (
       <Button
         type="link"
@@ -342,7 +345,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   }
   // hash to easy search product confirmations
   const confirmationHash: { [key: string]: ProductConfirmation } = {};
-  (sale.confirmation || []).forEach((productConfirmation) => {
+  (sale.provider.confirmation || []).forEach((productConfirmation) => {
     confirmationHash[productConfirmation.id] = productConfirmation;
   });
 
@@ -365,9 +368,9 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     </>
   );
   if (
-    sale.status === 'confirmation_pending' &&
-    sale.confirmation &&
-    sale.confirmation.length >= sale.transaction.shoppingCart.length
+    sale.provider.status === OwnerDispatchStatus.CREATED &&
+    sale.provider.confirmation &&
+    sale.provider.confirmation.length >= sale.transaction.shoppingCart.length
   ) {
     mainAction = (
       <Button
@@ -376,7 +379,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         onPress={confirm}
       />
     );
-  } else if (sale.status === 'in_delivery') {
+  } else if (sale.provider.status === OwnerDispatchStatus.CONFIRMED) {
     mainAction = (
       <Button
         title="¡Listo! entregado"
@@ -384,7 +387,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         onPress={deliver}
       />
     );
-  } else if (sale.status === 'delivered') {
+  } else if (sale.provider.status === OwnerDispatchStatus.DELIVERED) {
     mainAction = null;
   }
   let content: ReactNode | null = null;
@@ -415,7 +418,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
             Ahora puedes ir a entregar.
           </Text>
           <Steps
-            current="in_delivery"
+            current={OwnerDispatchStatus.CONFIRMED}
             status="process"
             steps={steps}
             style={{ marginTop: 35 }}
@@ -522,26 +525,6 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                   {fullName}
                 </Text>
               </View>
-              <View style={{ width: 15 }} />
-              <View style={{ flex: 1 }}>
-                <Text
-                  level={6}
-                  color={colors.blackLight4}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={{ marginBottom: 10 }}
-                >
-                  Método de pago
-                </Text>
-                <Text
-                  level={6}
-                  weight="bold"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {paymentMethod}
-                </Text>
-              </View>
             </View>
 
             <Touchable
@@ -629,7 +612,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                   Total
                 </Text>
                 <Text level={3} weight="bold">
-                  {numberFormatter.toCurrency(sale.transaction.stats.ammount)}
+                  {numberFormatter.toCurrency(stats.ammount)}
                 </Text>
               </View>
             </View>

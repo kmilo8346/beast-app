@@ -8,13 +8,18 @@ import {
 
 // components
 import { Touchable, Text, Icon } from '../../../../../components';
+// containers
+import UserProvider from '../../../../../containers/user';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../../lib/formatters/date-formatter';
+import * as utils from '../../../../../lib/utils';
 // types
-import { Order } from '../../../../../types';
+import { Order, OwnerDispatchStatus } from '../../../../../types';
 // styles
 import colors from '../../../../../styles/colors';
+
+const prefix = '[sell item component]';
 
 export interface SellItemProps {
   sell: Order;
@@ -23,6 +28,20 @@ export interface SellItemProps {
 }
 
 export default ({ sell, onPress = () => null, style }: SellItemProps) => {
+  const userContainer = UserProvider.useContainer();
+  const user = userContainer.get();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const store = user.store;
+  if (!store) {
+    throw new Error(`${prefix} Store must be defined`);
+  }
+  if (!store.deliveryArea) {
+    throw new Error(`${prefix} Store must have a delivery area`);
+  }
+  const stats = utils.getStats(sell.transaction.shoppingCart);
+
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -35,13 +54,27 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
     fullName = `${fullName} ${sell.customer.lastName}`;
   }
   let totalLabel = 'producto';
-  if (sell.transaction.stats.total > 1) {
+  if (stats.total > 1) {
     totalLabel = `${totalLabel}s`;
   }
-  let paymentMethod = 'Pago a convenir';
-  if (sell.transaction.paymentMethod === 'CREDIT_CARD') {
-    paymentMethod = 'Pago con tarjeta';
+
+  let distanceText = '';
+  if (sell.provider.status !== OwnerDispatchStatus.DELIVERED) {
+    const distance = utils.distance(
+      store.deliveryArea?.center.geometry.location.lat,
+      store.deliveryArea.center.geometry.location.lng,
+      sell.transaction.deliveryAddress.geometry.location.lat,
+      sell.transaction.deliveryAddress.geometry.location.lng,
+      'K'
+    );
+    distanceText = ` · A ${numberFormatter.humanizeDistance(
+      distance
+    )} de distancia`;
+    if (distance === 0) {
+      distanceText = ' · En tu misma dirección';
+    }
   }
+
   return (
     <Touchable
       onPress={pressHandler}
@@ -74,9 +107,9 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
           style={{ marginBottom: 5 }}
         >
           <Text level={6} weight="bold">
-            {sell.transaction.stats.total}
+            {stats.total}
           </Text>
-          {` ${totalLabel} · ${paymentMethod}`}
+          {` ${totalLabel}${distanceText}`}
         </Text>
         <Text level={7} color={colors.blackLight3}>
           {dateFormatter.format(
@@ -86,7 +119,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
         </Text>
       </View>
       <Text level={5} weight="bold" style={{ marginHorizontal: 10 }}>
-        {numberFormatter.toCurrency(sell.transaction.stats.ammount)}
+        {numberFormatter.toCurrency(stats.ammount)}
       </Text>
       <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
     </Touchable>

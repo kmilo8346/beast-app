@@ -23,6 +23,7 @@ import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
+import { PaymentProvider, DispatchProvider } from '../../../types';
 
 // instances outside component
 const prefix = '[set store info screen]';
@@ -165,6 +166,8 @@ export default ({ navigation }: ScreenProps) => {
           'store.id': generatePushID(),
           'store.phone': user.phone,
           'store.version': new Date().getTime(),
+          'store.paymentProvider': PaymentProvider.MERCADOPAGO,
+          'store.dispatchProvider': DispatchProvider.OWNER,
         },
         new Date().getTime()
       );

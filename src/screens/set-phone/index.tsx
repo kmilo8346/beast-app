@@ -3,7 +3,7 @@ import { View, Vibration, ScrollView } from 'react-native';
 import validate from 'validate.js';
 
 // components
-import { Container, Text, Input, Button } from '../../components';
+import { Text, Input, Button } from '../../components';
 // clients
 import userClient from '../../clients/user-client';
 // containers
@@ -133,7 +133,7 @@ export default ({ navigation, route }: ScreenProps) => {
     if (state.form.submitOpId && state.form.submitOpId === user.version) {
       navigation.navigate('VerifyPhone', route.params);
     }
-  }, [state.form.submitOpId, user.phone, user.phoneVerified]);
+  }, [state.form.submitOpId, user.version, user.phone, user.phoneVerified]);
 
   // render logic
   return (

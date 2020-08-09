@@ -88,10 +88,7 @@ export default class RESTClient<T, V> {
     );
   }
 
-  async create(
-    params: CreateParams<V>,
-    cancelToken?: CancelToken
-  ): Promise<Partial<T>> {
+  async create(params: CreateParams<V>, cancelToken?: CancelToken): Promise<T> {
     const { pathVars, ...data } = params;
     const response = await this.axios.post<T>(
       interpolate(this.prefix, pathVars),
@@ -126,7 +123,7 @@ export default class RESTClient<T, V> {
     );
   }
 
-  async get(params: GetParams, cancelToken?: CancelToken): Promise<Partial<T>> {
+  async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
     const { pathVars, source } = params;
     const response = await this.axios.get<T>(
       interpolate(`${this.prefix}/:id`, pathVars),

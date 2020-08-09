@@ -199,12 +199,7 @@ export default ({ customerId, onAdd }: AddCardFormProps) => {
     submitted: false,
     errors: {},
   };
-  // if (Constants.manifest.extra.ENVIRONMENT !== 'production') {
-  //   initalState.form.cardNumber = '4170068810108020';
-  //   initalState.form.securityCode = '123';
-  //   initalState.form.expirationDate = '1125';
-  //   initalState.form.cardHolderName = 'APRO';
-  // }
+
   const [state, dispatch] = useReducer(reducer, initalState);
   const bins = state.form.cardNumber.substring(0, 6);
 

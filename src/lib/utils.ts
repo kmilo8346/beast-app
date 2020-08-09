@@ -1,3 +1,5 @@
+import { Item } from '../types';
+
 export const noop = () => {
   return null;
 };
@@ -97,4 +99,17 @@ export const replaceOrAdd = (
     newArray.push(newItem);
   }
   return newArray;
+};
+
+export const getStats = (items: Item[]) => {
+  return items.reduce(
+    (stats, product) => ({
+      total: stats.total + 1,
+      ammount: stats.ammount + product.price * 1,
+    }),
+    {
+      total: 0,
+      ammount: 0,
+    }
+  );
 };

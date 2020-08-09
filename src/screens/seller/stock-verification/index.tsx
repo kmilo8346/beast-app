@@ -77,7 +77,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const sale: Order = route.params.sale;
   const [state, dispatch] = useReducer(reducer, {
     editting: false,
-    confirmation: sale.confirmation || [],
+    confirmation: sale.provider.confirmation || [],
   });
 
   // preconditions
@@ -103,7 +103,10 @@ export default ({ navigation, route }: ScreenProps) => {
     navigation.navigate('SaleDetails', {
       sale: {
         ...sale,
-        confirmation: state.confirmation,
+        provider: {
+          ...sale.provider,
+          confirmation: state.confirmation,
+        },
       },
     });
   };

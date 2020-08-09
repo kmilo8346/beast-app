@@ -1,3 +1,71 @@
+type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? RecursivePartial<U>[]
+    : T[P] extends object
+    ? RecursivePartial<T[P]>
+    : T[P];
+};
+
+export interface CreateParams<T> {
+  pathVars?: { [key: string]: any };
+  body: Omit<T, 'id'>;
+  source?: string[];
+  idempotency?: string;
+}
+
+export interface UpdateParams<T> {
+  pathVars?: { [key: string]: any };
+  idempotency?: string;
+  body: RecursivePartial<T>;
+}
+
+export interface ActionParams<T> {
+  pathVars?: { [key: string]: any };
+  idempotency?: string;
+  body?: RecursivePartial<T>;
+}
+
+export interface GetParams {
+  pathVars: {
+    [key: string]: any;
+  };
+  source?: string[];
+}
+
+export interface SearchParams {
+  pathVars?: { [key: string]: any };
+  query?: string;
+  filters?: { [key: string]: any };
+  from?: number;
+  size?: number;
+  sort?: { field: string; order: 'asc' | 'desc' }[];
+  source?: string[];
+}
+
+export interface DeleteParams {
+  pathVars: {
+    [key: string]: any;
+  };
+}
+
+export interface SearchResponse<T> {
+  from: number;
+  size: number;
+  total: number;
+  hits: Partial<T>[];
+}
+
+export interface PlacesAutocompletePrediction {
+  description: string;
+  placeId: string;
+}
+
+export interface PlacesAutocompletResponse {
+  predictions: PlacesAutocompletePrediction[];
+}
+
+export type PlacesDetailsResponse = Place;
+
 export interface IntegerRange {
   lte: number;
   gte: number;
@@ -55,6 +123,14 @@ export interface DeliveryArea {
   geometry: Circle;
 }
 
+export enum PaymentProvider {
+  MERCADOPAGO = 'mercadopago',
+}
+
+export enum DispatchProvider {
+  OWNER = 'owner',
+}
+
 export interface Store {
   id: string;
   version: number;
@@ -65,6 +141,8 @@ export interface Store {
   deliveryArea: DeliveryArea | undefined;
   openingHours: OpeningHours | undefined;
   sellerCredentials: SellerCredentials | undefined;
+  paymentProvider: PaymentProvider;
+  dispatchProvider: DispatchProvider;
 }
 
 export interface Product {
@@ -153,7 +231,6 @@ export interface Customer {
   firstName: string;
   lastName?: string;
   photoUrl?: string;
-  mercadoPagoCustomerId: string;
   phone: string;
 }
 
@@ -161,65 +238,70 @@ export interface Item extends Omit<Product, 'store'> {
   qty: number;
 }
 
-export type ShoppingCart = { store: Store; data: Item[] }[];
-
-export type PaymentMethod = 'CREDIT_CARD' | 'TO_AGREE';
-
-export interface PaymentInfo {
-  card: Card;
-  securityCode: string;
-  installments: number;
+export interface Transaction {
+  country: string;
+  currency: string;
+  language: string;
+  deliveryAddress: Place;
+  shoppingCart: Item[];
+  store: Store;
 }
 
-export interface CreateShop {
+export interface CreatePayment {
   customer: Customer;
-  transaction: {
-    country: string;
-    currency: string;
-    language: string;
-    deliveryAddress: Place;
-    shoppingCart: ShoppingCart;
-    paymentMethod: PaymentMethod;
-    paymentInfo?: PaymentInfo;
-  };
+  transaction: Transaction;
+  redirectUrl: string;
 }
 
-export interface Shop extends CreateShop {
+export interface CreateCheckout {
+  reference: string;
+  customer: Customer;
+  transaction: Transaction;
+  redirectUrl: string;
+}
+
+export enum MercadopagoPaymentStatus {
+  STARTED = 'started',
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  AUTHORIZED = 'authorized',
+  IN_PROCESS = 'in_process',
+  IN_MEDIATION = 'in_mediation',
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded',
+  CHARGED_BACK = 'charged_back',
+}
+
+export type PaymentProviderState = {
+  id: PaymentProvider.MERCADOPAGO;
+  status: MercadopagoPaymentStatus;
+  checkout: { id: string; initPoint: string };
+  data: { [key: string]: any };
+};
+
+export enum PaymentStatus {
+  CREATED = 'created',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
+}
+
+export interface Payment extends CreatePayment {
   id: string;
-  index: string;
-  idempotency: string;
+  reference: string;
+  status: PaymentStatus;
+  provider: PaymentProviderState;
+  idempotency?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Stats {
-  total: number;
-  ammount: number;
-}
-
-export type OrderStatus =
-  | 'payment_pending'
-  | 'payment_in_process'
-  | 'payment_rejected'
-  | 'confirmation_pending'
-  | 'in_delivery'
-  | 'delivered';
-
-export interface CreateOrder {
-  status: OrderStatus;
-  shopId: string;
-  customer: Customer;
-  transaction: {
-    country: string;
-    currency: string;
-    language: string;
-    deliveryAddress: Place;
-    paymentMethod: PaymentMethod;
-    paymentInfo?: PaymentInfo;
-    shoppingCart: Item[];
-    store: Store;
-    stats: Stats;
-  };
+export enum OrderStatus {
+  CREATED = 'created',
+  CONFIRMED = 'confirmed',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled',
 }
 
 export enum ProductConfirmationType {
@@ -235,73 +317,30 @@ export type ProductConfirmation =
 
 export type Confirmation = ProductConfirmation[];
 
+export enum OwnerDispatchStatus {
+  CREATED = 'created',
+  CONFIRMED = 'confirmed',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled',
+}
+
+export interface DispatchProviderState {
+  id: DispatchProvider.OWNER;
+  status: OwnerDispatchStatus;
+  confirmation?: Confirmation;
+}
+
+export interface CreateOrder {
+  reference: string;
+  customer: Customer;
+  transaction: Transaction;
+  idempotency?: string;
+}
+
 export interface Order extends CreateOrder {
   id: string;
-  index: string;
-  idempotency: string;
-  confirmation?: Confirmation;
+  status: OrderStatus;
+  provider: DispatchProviderState;
   createdAt: Date;
   updatedAt: Date;
 }
-
-export interface CreateParams<T> {
-  pathVars?: { [key: string]: any };
-  body: Omit<T, 'id'>;
-  source?: string[];
-  idempotency?: string;
-}
-
-export interface UpdateParams<T> {
-  pathVars?: { [key: string]: any };
-  index: string;
-  idempotency?: string;
-  body: Partial<T>;
-}
-
-export interface ActionParams<T> {
-  pathVars?: { [key: string]: any };
-  index: string;
-  idempotency?: string;
-  body?: Partial<T>;
-}
-
-export interface GetParams {
-  pathVars: {
-    [key: string]: any;
-  };
-  source?: string[];
-}
-
-export interface SearchParams {
-  pathVars?: { [key: string]: any };
-  query?: string;
-  filters?: { [key: string]: any };
-  from?: number;
-  size?: number;
-  sort?: { field: string; order: 'asc' | 'desc' }[];
-  source?: string[];
-}
-
-export interface DeleteParams {
-  pathVars: {
-    [key: string]: any;
-  };
-}
-
-export interface SearchResponse<T> {
-  from: number;
-  size: number;
-  total: number;
-  hits: Partial<T>[];
-}
-
-export interface PlacesAutocompletePrediction {
-  description: string;
-  placeId: string;
-}
-
-export interface PlacesAutocompletResponse {
-  predictions: PlacesAutocompletePrediction[];
-}
-
-export type PlacesDetailsResponse = Place;

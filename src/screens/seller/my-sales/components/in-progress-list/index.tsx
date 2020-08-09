@@ -13,7 +13,11 @@ import {
 // local components
 import SellItem from '../sell-item';
 // types
-import { Order, SearchResponse } from '../../../../../types';
+import {
+  Order,
+  SearchResponse,
+  OwnerDispatchStatus,
+} from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
 
@@ -28,8 +32,8 @@ import globalStyles from '../../../../../styles';
 // instances outside component
 const createSections = (orders: Order[]) => {
   const hash: { [key: string]: any } = {
-    confirmation_pending: [],
-    in_delivery: [],
+    created: [],
+    confirmed: [],
   };
   orders.forEach((order) => {
     if (!hash[order.status]) {
@@ -40,12 +44,12 @@ const createSections = (orders: Order[]) => {
   });
   return [
     {
-      status: 'confirmation_pending',
-      data: hash.confirmation_pending,
+      status: OwnerDispatchStatus.CREATED,
+      data: hash.created,
     },
     {
-      status: 'in_delivery',
-      data: hash.in_delivery,
+      status: OwnerDispatchStatus.CONFIRMED,
+      data: hash.confirmed,
     },
   ];
 };
@@ -119,7 +123,7 @@ export default ({
       {
         filters: {
           store: store.id,
-          status: ['confirmation_pending', 'in_delivery'],
+          status: [OwnerDispatchStatus.CREATED, OwnerDispatchStatus.CONFIRMED],
         },
         from,
         size,
@@ -226,7 +230,7 @@ export default ({
   const renderSectionHeader = ({ section: { status } }: any) => {
     let icon = 'clock';
     let text = 'Por confirmar';
-    if (status === 'in_delivery') {
+    if (status === OwnerDispatchStatus.CONFIRMED) {
       icon = 'bicycle';
       text = 'En camino';
     }
@@ -254,7 +258,7 @@ export default ({
       return null;
     }
     let text = 'No hay ventas para confirmar.';
-    if (status === 'in_delivery') {
+    if (status === OwnerDispatchStatus.CONFIRMED) {
       text = 'No hay ventas para entregar.';
     }
     return (

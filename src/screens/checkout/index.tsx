@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useReducer } from 'react';
 import { View, Image, ScrollView } from 'react-native';
 import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { CommonActions } from '@react-navigation/native';
 
 // components
 import {
   Text,
-  InputSelectCard,
   Button,
   Touchable,
   Toast,
@@ -15,20 +14,17 @@ import {
   LoadingOverlay,
   ILoadingOverlay,
 } from '../../components';
-// local components
-import { ModalSecurityCode } from './components';
 // clients
-import shopClient from '../../clients/shop-client';
+import paymentClient from '../../clients/payment-client';
 // containers
 import UserProvider from '../../containers/user';
 import CartProvider from '../../containers/cart';
-import OrderProvider from '../../containers/order';
 // libs
 import numberFormatter from '../../lib/formatters/number-formatter';
 import { generatePushID } from '../../lib/uuid';
 import { createUrl } from '../../lib/utils';
 // types
-import { Card, PaymentMethod, Order } from '../../types';
+import { MercadopagoPaymentStatus } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -36,111 +32,68 @@ import globalStyles from '../../styles';
 // instances outside component
 const prefix = '[checkout screen]';
 
+export enum CheckoutView {
+  FORM = 'form',
+  PENDING = 'pending',
+  IN_PROCESS = 'in_process',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+type SetIdempotencyAction = {
+  type: 'set_idempotency';
+  idempotency: string;
+};
+type ChangeViewAction = {
+  type: 'change_view';
+  view: CheckoutView;
+};
+
+type Action = SetIdempotencyAction | ChangeViewAction;
+type State = {
+  view: CheckoutView;
+  idempotency?: string;
+};
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'set_idempotency':
+      return { ...state, idempotency: action.idempotency };
+    case 'change_view':
+      return { ...state, view: action.view };
+    default:
+      return state;
+  }
+};
+
 interface CheckoutProps {
   navigation: any;
 }
 
 export default ({ navigation }: CheckoutProps) => {
   // state
-  const [modalConfirmationVisible, setModalConfirmationVisible] = useState(
-    false
-  );
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [idempotency, setIdempotency] = useState<string | null>(null);
-  const [shopId, setShopId] = useState<string | null>(null);
-
+  const [state, dispatch] = useReducer(reducer, {
+    view: CheckoutView.FORM,
+  });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.get();
-  const currentAddress = user?.addresses.find(
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
+  const currentAddress = user.addresses.find(
     (address) => address.id === user.currentAddress
   );
-  const cartContainer = CartProvider.useContainer();
-  const shoppingCart = cartContainer.getCart();
-  const stats = cartContainer.getStats();
-  const orderContainer = OrderProvider.useContainer();
-
-  let orders: Order[] | null = null;
-  if (shopId) {
-    orders = orderContainer.purchases((order) => {
-      return (
-        order.shopId === shopId &&
-        [
-          'payment_pending',
-          'payment_in_process',
-          'payment_rejected',
-          'confirmation_pending',
-        ].indexOf(order.status) !== -1
-      );
-    });
+  if (!currentAddress) {
+    throw new Error(`${prefix} Current address must be defined`);
   }
+  const cartContainer = CartProvider.useContainer();
+  const cart = cartContainer.getCart();
+  const shoppingCart = cart[0].data;
+  const store = cart[0].store;
+  const stats = cartContainer.getStats();
 
   const toastRef = useRef<IToast>(null);
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
-  // preconditions
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
-  if (!currentAddress) {
-    throw new Error(`${prefix} Current address must be defined`);
-  }
-
   // event handlers
-  const createShop = async (securityCode?: string) => {
-    let paymentMethod: PaymentMethod = 'TO_AGREE';
-    let paymentInfo;
-    if (securityCode) {
-      paymentMethod = 'CREDIT_CARD';
-      paymentInfo = {
-        securityCode,
-        installments: 1,
-      };
-    }
-
-    const response = await shopClient.create({
-      body: {
-        customer: {
-          id: user.id,
-          email: user.email as string,
-          firstName: user.firstName as string,
-          lastName: user.lastName,
-          photoUrl: user.photoUrl as string,
-          mercadoPagoCustomerId: user.customerId as string,
-          phone: user.phone as string,
-        },
-        transaction: {
-          country: 'CL',
-          currency: 'CLP',
-          language: 'ES',
-          deliveryAddress: currentAddress,
-          shoppingCart,
-          paymentMethod,
-          paymentInfo,
-        },
-      },
-      idempotency: idempotency as string,
-      source: ['id'],
-    });
-    return response.id as string;
-  };
-  const confirmHandler = async (securityCode?: string) => {
-    setModalConfirmationVisible(false);
-    try {
-      setLoading(true);
-      loadingOverlayRef.current?.show();
-      const shopId = await createShop(securityCode);
-      setShopId(shopId);
-    } catch (error) {
-      setLoading(false);
-      loadingOverlayRef.current?.hide();
-      toastRef.current?.show({
-        message: 'Ocurrió un error procesando el pago',
-        type: 'ERROR',
-        expiration: 3,
-      });
-    }
-  };
   const pressImageMapHandler = () => {
     Linking.openURL(
       createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/search/`, {
@@ -150,48 +103,158 @@ export default ({ navigation }: CheckoutProps) => {
       })
     );
   };
-  const pressPayHandler = () => {
-    setModalConfirmationVisible(true);
+  const showView = (status: string) => {
+    switch (status) {
+      case 'pending':
+        dispatch({
+          type: 'change_view',
+          view: CheckoutView.PENDING,
+        });
+        return;
+      case 'in_process':
+        dispatch({
+          type: 'change_view',
+          view: CheckoutView.IN_PROCESS,
+        });
+        return;
+      case 'approved':
+        dispatch({
+          type: 'change_view',
+          view: CheckoutView.APPROVED,
+        });
+        return;
+      case 'rejected':
+        dispatch({
+          type: 'change_view',
+          view: CheckoutView.REJECTED,
+        });
+        return;
+      default:
+        dispatch({
+          type: 'change_view',
+          view: CheckoutView.FORM,
+        });
+    }
   };
-  const requestCloseHandler = () => {
-    setModalConfirmationVisible(false);
+  const openCheckout = async (initPoint: string, redirectUrl: string) => {
+    const result = await WebBrowser.openAuthSessionAsync(
+      initPoint,
+      redirectUrl
+    );
+    let redirect: any = {
+      id: '',
+      status: '',
+    };
+    if (result.type === 'success') {
+      const redirectData = Linking.parse(result.url);
+      redirect = redirectData.queryParams;
+    }
+    return redirect;
   };
-  useEffect(() => {
-    setIdempotency(generatePushID());
-  }, []);
-  useEffect(() => {
-    if (orders) {
-      // orders length must be the shopping cart lenght
-      if (orders.length < shoppingCart.length) {
+  const createPayment = async (redirectUrl: string) => {
+    const response = await paymentClient.create({
+      body: {
+        customer: {
+          id: user.id,
+          email: user.email as string,
+          firstName: user.firstName as string,
+          lastName: user.lastName,
+          photoUrl: user.photoUrl as string,
+          phone: user.phone as string,
+        },
+        transaction: {
+          country: Constants.manifest.extra.BEAST_COUNTRY,
+          currency: Constants.manifest.extra.BEAST_CURRENCY,
+          language: Constants.manifest.extra.BEAST_LANGUAGE,
+          deliveryAddress: currentAddress,
+          shoppingCart,
+          store,
+        },
+        redirectUrl,
+      },
+      idempotency: state.idempotency as string,
+      source: ['id', 'provider'],
+    });
+    return response;
+  };
+  const pressPayHandler = async () => {
+    try {
+      loadingOverlayRef.current?.show();
+      const redirectUrl = Linking.makeUrl();
+      if (!redirectUrl) {
+        throw new Error(`${prefix} Redirect must be defined`);
+      }
+      const payment = await createPayment(redirectUrl);
+
+      // payment already processed
+      if (payment.provider.status !== MercadopagoPaymentStatus.STARTED) {
+        showView(payment.provider.status);
         return;
       }
-
-      for (let i = 0; i < orders.length; i++) {
-        const order = orders[i];
-        // processing not finished yet
-        if (
-          order.status === 'payment_pending' ||
-          order.status === 'payment_in_process'
-        ) {
-          return;
-        }
-      }
-      // clear current cart
-      cartContainer.clear();
-      // hide loading
-      setLoading(false);
-      loadingOverlayRef.current?.hide();
-      // reset to home
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [{ name: 'MainTab' }],
-        })
+      // open checkout
+      const redirect = await openCheckout(
+        payment.provider.checkout.initPoint,
+        redirectUrl
       );
+      showView(redirect.status as string);
+    } catch (error) {
+      // TODO: log error
+      console.log(error);
+      toastRef.current?.show({
+        message: 'Ocurrió un error inesperado, por favor reintente',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
     }
-  }, [orders]);
+  };
+
+  useEffect(() => {
+    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
+  }, []);
 
   // render logic
+  if (state.view === CheckoutView.PENDING) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.white }}>
+        <Text level={6} weight="bold">
+          El pago se encuentra pendiente
+        </Text>
+      </View>
+    );
+  }
+
+  if (state.view === CheckoutView.IN_PROCESS) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.white }}>
+        <Text level={6} weight="bold">
+          El pago se encuentra en processo. Le notificaremos cuando cambie
+        </Text>
+      </View>
+    );
+  }
+
+  if (state.view === CheckoutView.APPROVED) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.white }}>
+        <Text level={6} weight="bold">
+          Su pago se procesó correctamente
+        </Text>
+      </View>
+    );
+  }
+
+  if (state.view === CheckoutView.REJECTED) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.white }}>
+        <Text level={6} weight="bold">
+          Ocurrió un error procesando el pago
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
@@ -236,8 +299,6 @@ export default ({ navigation }: CheckoutProps) => {
             </Text>
           </View>
         </View>
-
-        <InputSelectCard />
 
         <View style={{ marginTop: 30 }}>
           {Object.keys(stats.byStores).map((storeId) => {
@@ -284,18 +345,10 @@ export default ({ navigation }: CheckoutProps) => {
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Pagar"
-          disabled={loading}
           onPress={pressPayHandler}
           style={globalStyles.withMainActionAir}
         />
       </View>
-      {modalConfirmationVisible && (
-        <ModalSecurityCode
-          card={currentCard as Card}
-          onConfirm={confirmHandler}
-          onRequestClose={requestCloseHandler}
-        />
-      )}
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
