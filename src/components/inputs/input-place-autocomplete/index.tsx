@@ -69,7 +69,12 @@ type State = {
   open: boolean;
   address: string;
   place?: Place;
-  view: 'SEARCH_TIPS' | 'PREDICTIONS' | 'ERROR' | 'LOADING_DETAILS';
+  view:
+  | 'SEARCH_TIPS'
+  | 'PREDICTIONS'
+  | 'ERROR'
+  | 'LOADING_DETAILS'
+  | 'NO_PREDICTIONS';
   predictions: PlacesAutocompletePrediction[];
 };
 const reducer = (state: State, action: Action): State => {
@@ -89,7 +94,7 @@ const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         view: !action.response.predictions.length
-          ? 'SEARCH_TIPS'
+          ? 'NO_PREDICTIONS'
           : 'PREDICTIONS',
         predictions: action.response.predictions,
       };
@@ -108,7 +113,7 @@ const reducer = (state: State, action: Action): State => {
         };
       }
       // invalid address selected
-      return { ...state, view: 'SEARCH_TIPS', predictions: [] };
+      return { ...state, view: 'NO_PREDICTIONS', predictions: [] };
     default:
       return state;
   }
@@ -274,6 +279,16 @@ export default ({
               );
             })}
           </>
+        );
+        break;
+      case 'NO_PREDICTIONS':
+        content = (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Icon name="info" style={{ marginRight: 10 }} />
+            <Text level={6} style={{}}>
+              No encontramos esa dirección, por favor prueba de nuevo
+            </Text>
+          </View>
         );
         break;
       case 'ERROR':
