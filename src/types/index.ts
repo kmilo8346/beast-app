@@ -344,3 +344,14 @@ export interface Order extends CreateOrder {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface CreateDevice {
+  token: string;
+  userId: string;
+}
+
+export interface Device extends CreateDevice {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

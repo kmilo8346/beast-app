@@ -35,7 +35,9 @@ const getIp = () => {
 };
 
 if (envContent?.BEAST_API_URL.includes('[IP]')) {
-  envContent.BEAST_API_URL = envContent.BEAST_API_URL.replace('[IP]', getIp());
+  const ip = getIp();
+  envContent.BEAST_API_URL = envContent.BEAST_API_URL.replace('[IP]', ip);
+  envContent.IP = ip;
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => {

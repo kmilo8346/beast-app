@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
@@ -40,13 +39,7 @@ import {
   HelpScreen,
 } from './screens';
 // components
-import {
-  Icon,
-  Text,
-  ButtonCart,
-  Loading,
-  KeyboardAvoidingView,
-} from './components';
+import { Icon, Text, ButtonCart, KeyboardAvoidingView } from './components';
 // containers
 import UserProvider from './containers/user';
 // libs

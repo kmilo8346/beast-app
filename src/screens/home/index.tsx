@@ -1,5 +1,8 @@
-import React, { useRef } from 'react';
-import { View } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 
 // components
 import {
@@ -12,8 +15,6 @@ import {
   IToast,
   Icon,
 } from '../../components';
-// local components
-import ButtonPay from './button-pay';
 // containers
 import UserProvider from '../../containers/user';
 import OrderProvider from '../../containers/order';
@@ -29,16 +30,49 @@ export interface Props {
 
 export default ({ navigation }: Props) => {
   // state
-  const toastRef = useRef<IToast>(null);
   const userContainer = UserProvider.useContainer();
   const user = userContainer.get();
   const orderContainer = OrderProvider.useContainer();
   const purchases = orderContainer.purchases();
+  const toastRef = useRef<IToast>(null);
 
   // preconditions
   if (!user || !user.currentAddress) {
     throw new Error(`${prefix} User must be defined`);
   }
+
+  // event handlers
+  const askNotificationPermisions = async (): Promise<void> => {
+    if (!Constants.isDevice) {
+      return;
+    }
+
+    const { status: existingStatus } = await Permissions.getAsync(
+      Permissions.NOTIFICATIONS
+    );
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      console.log('askAsync', status);
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      console.log(finalStatus);
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  };
+  useEffect(() => {
+    askNotificationPermisions();
+  }, []);
 
   // render logic
   let ordersInProgress = null;
@@ -81,8 +115,6 @@ export default ({ navigation }: Props) => {
       </View>
       <View style={{ height: 40 }} />
       <InputSelectAddress />
-      <View style={{ height: 20 }} />
-      <ButtonPay />
 
       <View style={{ height: 40 }} />
       <Button

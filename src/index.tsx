@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
-import Boot from './boot';
+import Navigation from './navigation';
 // components
 import { ErrorView, Loading } from './components';
 // containers
@@ -12,6 +12,7 @@ import OrderContainer from './containers/order';
 // libs
 import firebase from './lib/firebase';
 import { noop } from './lib/utils';
+import deviceAgent from './lib/device-agent';
 // types
 import { User } from './types';
 // clients
@@ -43,7 +44,14 @@ class App extends React.Component<{}, State> {
   }
 
   componentDidMount() {
+    // creo de forma async el app container
     this.unsubAuth = auth.onAuthStateChanged(async (authUser) => {
+      // sync device state
+      if (authUser) {
+        deviceAgent.sync({
+          userId: authUser.uid,
+        });
+      }
       const { hydrated } = this.state;
       if (!hydrated || !authUser) {
         this.hydrate();
@@ -74,9 +82,10 @@ class App extends React.Component<{}, State> {
     if (!auth.currentUser) {
       throw new Error(`${prefix} Current user must be defined`);
     }
-    const user = await userClient.get(auth.currentUser.uid);
+    let user = await userClient.get(auth.currentUser.uid);
     if (!user) {
       await userClient.create(auth.currentUser);
+      user = await userClient.get(auth.currentUser.uid);
     }
     this.setState({ hydrated: true, user });
   }
@@ -109,7 +118,7 @@ class App extends React.Component<{}, State> {
       <UserContainer.Provider initialState={user}>
         <CartContainer.Provider>
           <OrderContainer.Provider>
-            <Boot />
+            <Navigation />
           </OrderContainer.Provider>
         </CartContainer.Provider>
       </UserContainer.Provider>

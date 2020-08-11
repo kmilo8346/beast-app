@@ -22,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 if (Constants.manifest.extra.BEAST_ENVIRONMENT === 'local') {
   const db = firebase.firestore();
   db.settings({
-    host: 'localhost:8080',
+    host: `${Constants.manifest.extra.IP}:8080`,
     ssl: false,
   });
 }
