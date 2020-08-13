@@ -133,6 +133,7 @@ export enum DispatchProvider {
 
 export interface Store {
   id: string;
+  user: string;
   version: number;
   name: string | undefined;
   phone: string | undefined;

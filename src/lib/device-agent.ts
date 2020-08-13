@@ -77,6 +77,7 @@ class DeviceAgent {
 
       // update device
       device = { ...device, ...created };
+
       await this.save(device as Device);
     } catch (error) {
       // TODO: log error

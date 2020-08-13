@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
@@ -7,6 +7,7 @@ import {
   StackNavigationOptions,
 } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 
 // screens
 import {
@@ -43,9 +44,17 @@ import { Icon, Text, ButtonCart, KeyboardAvoidingView } from './components';
 // containers
 import UserProvider from './containers/user';
 // libs
-import { navigationRef } from './lib/root-navigation';
+import { navigationRef, onReady, navigate } from './lib/root-navigation';
 // styles
 import colors from './styles/colors';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const cartStyle = { marginRight: 20, marginTop: 5 };
 const commonStackOptions: StackNavigationOptions = {
@@ -105,12 +114,12 @@ function HomeStackScreen() {
         component={SignInScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="SetPhone"
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="VerifyPhone"
         component={VerifyPhoneScreen}
         options={{ title: '' }}
@@ -157,12 +166,12 @@ function SearchStackScreen() {
         component={SignInScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="SetPhone"
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="VerifyPhone"
         component={VerifyPhoneScreen}
         options={{ title: '' }}
@@ -314,12 +323,12 @@ function MenuStackScreen() {
         component={SignInScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="SetPhone"
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <MainStack.Screen
+      <RootStack.Screen
         name="VerifyPhone"
         component={VerifyPhoneScreen}
         options={{ title: '' }}
@@ -387,15 +396,15 @@ function MainTabScreen() {
   );
 }
 
-const MainStack = createStackNavigator();
+const RootStack = createStackNavigator();
 
-const prefix = '[boot component]';
+const prefix = '[navigation component]';
 /**
  * Boot component control de navigation in boot time
  *
  * navigation
  *
- * MainStack
+ * RootStack
  *  TermsScreen
  *  OnboardingScreen
  *  *SignInScreen
@@ -419,9 +428,22 @@ export default () => {
     throw new Error(`${prefix} User must be defined`);
   }
 
-  // Valid in MainTab
-  // user anonymous with current address
-  // user logged with phone verified and current address
+  // event handlers
+  useEffect(() => {
+    const listener = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data: any = response.notification.request.content.data.body;
+        if (data.navigate) {
+          navigate(data.navigate.name, data.navigate.params);
+        }
+      }
+    );
+    return () => {
+      Notifications.removeNotificationSubscription(listener);
+    };
+  }, []);
+
+  // set initial route using user state
   let initialRoute = 'MainTab';
   if (!user.email && (!user.currentAddress || !(user.addresses || []).length)) {
     initialRoute = 'Onboarding';
@@ -433,22 +455,22 @@ export default () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer ref={navigationRef}>
-        <MainStack.Navigator
+      <NavigationContainer ref={navigationRef} onReady={onReady}>
+        <RootStack.Navigator
           screenOptions={commonStackOptions}
           initialRouteName={initialRoute}
         >
-          <MainStack.Screen
+          <RootStack.Screen
             name="Onboarding"
             component={OnboardingScreen}
             options={{ headerShown: false }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="Terms"
             component={TermsScreen}
             options={{ title: '' }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="SignIn"
             component={SignInScreen}
             options={{ title: '' }}
@@ -458,7 +480,7 @@ export default () => {
               },
             }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="SetPhone"
             component={SetPhoneScreen}
             options={{ title: '' }}
@@ -468,7 +490,7 @@ export default () => {
               },
             }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="VerifyPhone"
             component={VerifyPhoneScreen}
             options={{ title: '' }}
@@ -478,17 +500,17 @@ export default () => {
               },
             }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="SetAddress"
             component={SetAddressScreen}
             options={{ title: '' }}
           />
-          <MainStack.Screen
+          <RootStack.Screen
             name="MainTab"
             component={MainTabScreen}
             options={{ headerShown: false }}
           />
-        </MainStack.Navigator>
+        </RootStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );

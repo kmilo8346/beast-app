@@ -3,7 +3,6 @@ import { View, ScrollView, Vibration } from 'react-native';
 
 // components
 import {
-  Container,
   Text,
   Input,
   Button,
@@ -164,6 +163,7 @@ export default ({ navigation }: ScreenProps) => {
         user.id,
         {
           'store.id': generatePushID(),
+          'store.user': user.id,
           'store.phone': user.phone,
           'store.version': new Date().getTime(),
           'store.paymentProvider': PaymentProvider.MERCADOPAGO,
