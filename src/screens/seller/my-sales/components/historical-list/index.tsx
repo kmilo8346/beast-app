@@ -14,6 +14,8 @@ import * as utils from '../../../../../lib/utils';
 import orderClient from '../../../../../clients/order-client';
 // containers
 import UserProvider from '../../../../../containers/user';
+// cache
+import storeCache from '../../../../../cache/store';
 // styles
 import globalStyles from '../../../../../styles';
 // images
@@ -76,7 +78,7 @@ export default ({
   if (!user) {
     throw new Error(`${prefix} user must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }

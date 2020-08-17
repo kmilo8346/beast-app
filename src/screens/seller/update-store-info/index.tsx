@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
@@ -9,33 +9,39 @@ import {
   InputSetDeliveryArea,
   InputSetDeliveryTime,
   InputSetOpeningHours,
+  LoadingOverlay,
+  ILoadingOverlay,
+  Toast,
+  IToast,
 } from '../../../components';
 // clients
-import userClient from '../../../clients/user-client';
+import storeClient from '../../../clients/store-client';
 // containers
 import UserProvider from '../../../containers/user';
+// cache
+import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
 // constraints
 import constraints from './constraints';
 // types
-import { IntegerRange, OpeningHours, DeliveryArea } from '../../../types';
+import { Store } from '../../../types';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-// instances outside component
 
+// instances outside component
 const prefix = '[update store info screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
   attribute: string;
-  value: string;
+  value: any;
 };
 type ValidateValueAction = {
   type: 'validate_value';
   attribute: string;
-  value: string;
+  value: any;
 };
 type SetFormSubmittedAction = {
   type: 'set_form_submitted';
@@ -44,64 +50,40 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
-type SetSubmitOpIdAction = {
-  type: 'set_submit_op_id';
-  opId: number;
-};
 
 type Action =
   | ChangeValueAction
   | ValidateValueAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction
-  | SetSubmitOpIdAction;
+  | SetFormErrorsAction;
 type State = {
-  form: {
-    // fields
-    name: string;
-    images: string[];
-    deliveryArea?: DeliveryArea;
-    deliveryTime?: IntegerRange;
-    openingHours?: OpeningHours;
-    // other form states
-    submitted: boolean;
-    // identify the submit
-    submitOpId?: number;
-    errors?: { [key: string]: string[] };
-  };
+  // fields
+  store: Store;
+  // other form states
+  submitted: boolean;
+  errors?: { [key: string]: string[] };
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'change_value':
       return {
         ...state,
-        form: { ...state.form, [action.attribute]: action.value },
+        store: { ...state.store, [action.attribute]: action.value },
       };
     case 'validate_value':
-      if (!state.form.submitted) return state;
+      if (!state.submitted) return state;
 
       return {
         ...state,
-        form: {
-          ...state.form,
-          errors: validate(state.form, constraints),
-        },
+        errors: validate(state.store, constraints),
       };
     case 'set_form_submitted':
       return {
         ...state,
-        form: {
-          ...state.form,
-          submitted: true,
-        },
+        submitted: true,
       };
     case 'set_form_errors':
-      return { ...state, form: { ...state.form, errors: action.errors } };
-    case 'set_submit_op_id':
-      return {
-        ...state,
-        form: { ...state.form, submitOpId: action.opId },
-      };
+      return { ...state, errors: action.errors };
     default:
       return state;
   }
@@ -119,31 +101,16 @@ export default ({ navigation }: ScreenProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const store = user.store;
-  if (
-    !store ||
-    !store.name ||
-    !store.images ||
-    !store.deliveryArea ||
-    !store.deliveryTime ||
-    !store.openingHours
-  ) {
+  const store = storeCache.getData();
+  if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
-
   const [state, dispatch] = useReducer(reducer, {
-    form: {
-      // fields
-      name: store.name,
-      images: store.images,
-      deliveryArea: store.deliveryArea,
-      deliveryTime: store.deliveryTime,
-      openingHours: store.openingHours,
-
-      // other form states
-      submitted: false,
-    },
+    store,
+    submitted: false,
   });
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // events handlers
   const changeHandler = (attribute: string, value: any) => {
@@ -151,45 +118,38 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'validate_value', attribute, value });
   };
 
-  const pressContinueHandler = () => {
+  const pressContinueHandler = async () => {
     dispatch({ type: 'set_form_submitted' });
     // validate
-    const errors = validate(state.form, constraints);
+    const errors = validate(state.store, constraints);
     if (errors) {
       dispatch({ type: 'set_form_errors', errors });
       Vibration.vibrate(400);
       return;
     }
-    // update store
-    const version = new Date().getTime();
-    userClient.update(
-      user.id,
-      {
-        'store.name': state.form.name,
-        'store.images': state.form.images,
-        'store.deliveryArea': state.form.deliveryArea,
-        'store.deliveryTime': state.form.deliveryTime,
-        'store.openingHours': state.form.openingHours,
-        'store.version': new Date().getTime(),
-      },
-      version
-    );
-    // mark end of submit
-    dispatch({ type: 'set_submit_op_id', opId: version });
-  };
-
-  useEffect(() => {
-    if (state.form.submitOpId === user.version) {
+    try {
+      loadingOverlayRef.current?.show();
+      const { id, ...store } = state.store;
+      await storeClient.update({
+        pathVars: { id },
+        body: store,
+      });
+      // set updated store in cache
+      storeCache.setData(state.store);
       navigation.navigate('SellerDashboard');
+    } catch (error) {
+      // TODO: log error
+      console.log(error);
+
+      toastRef.current?.show({
+        message: 'Ocurrió un error inesperado',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
     }
-  }, [
-    state.form.submitOpId,
-    store.name,
-    store.images,
-    store.deliveryArea,
-    store.deliveryTime,
-    store.openingHours,
-  ]);
+  };
 
   // render logic
   return (
@@ -205,8 +165,8 @@ export default ({ navigation }: ScreenProps) => {
         <Input
           placeholder="Minimarket Don Juan"
           label="Nombre de tienda"
-          value={state.form.name}
-          errors={state.form.errors?.name}
+          value={state.store.name}
+          errors={state.errors?.name}
           onChangeText={(text) => {
             changeHandler('name', text);
           }}
@@ -214,32 +174,32 @@ export default ({ navigation }: ScreenProps) => {
         <InputImages
           size={1}
           label="Imagen"
-          path={`stores/${store?.id}/images/\${}`}
-          value={state.form.images}
-          errors={state.form.errors?.images}
+          path={`stores/${store.id}/images/\${}`}
+          value={state.store.images}
+          errors={state.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);
           }}
         />
         <InputSetDeliveryArea
-          value={state.form.deliveryArea}
-          errors={state.form.errors?.deliveryArea}
-          onChange={(deliveryArea) => {
-            changeHandler('deliveryArea', deliveryArea);
+          value={state.store.delivery_area}
+          errors={state.errors?.delivery_area}
+          onChange={(delivery_area) => {
+            changeHandler('delivery_area', delivery_area);
           }}
         />
         <InputSetDeliveryTime
-          value={state.form.deliveryTime}
-          errors={state.form.errors?.deliveryTime}
-          onChange={(deliveryTime) => {
-            changeHandler('deliveryTime', deliveryTime);
+          value={state.store.delivery_time}
+          errors={state.errors?.delivery_time}
+          onChange={(delivery_time) => {
+            changeHandler('delivery_time', delivery_time);
           }}
         />
         <InputSetOpeningHours
-          value={state.form.openingHours}
-          errors={state.form.errors?.openingHours}
-          onChange={(openingHours) => {
-            changeHandler('openingHours', openingHours);
+          value={state.store.opening_hours}
+          errors={state.errors?.opening_hours}
+          onChange={(opening_hours) => {
+            changeHandler('opening_hours', opening_hours);
           }}
         />
         <View style={globalStyles.withScreenAir} />
@@ -250,12 +210,14 @@ export default ({ navigation }: ScreenProps) => {
           globalStyles.withMargin,
         ]}
       >
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"
           onPress={pressContinueHandler}
           style={globalStyles.withMainActionAir}
         />
       </View>
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

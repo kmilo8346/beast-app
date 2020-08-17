@@ -1,6 +1,6 @@
 import RestClient from './rest-client';
-import { Store } from '../types';
+import { Store, CreateStore } from '../types';
 
-class StoreClient extends RestClient<Partial<Store>> {}
+class StoreClient extends RestClient<Store, CreateStore> {}
 
 export default new StoreClient('stores');

@@ -1,5 +1,11 @@
 import React, { useReducer, useRef } from 'react';
-import { ScrollView, View, Image, Vibration } from 'react-native';
+import {
+  ScrollView,
+  View,
+  Image,
+  Vibration,
+  GestureResponderEvent,
+} from 'react-native';
 
 // components
 import {
@@ -24,6 +30,8 @@ import stringParser from '../../../lib/parsers/string-parser';
 import { noop } from '../../../lib/utils';
 // containers
 import UserProvider from '../../../containers/user';
+// cache
+import storeCache from '../../../cache/store';
 // types
 import { Product } from '../../../types';
 // constraints
@@ -38,6 +46,10 @@ const publishedImage = require('../../../../assets/icons/check.png');
 // instances outside component
 const prefix = '[create or update product component]';
 
+enum CreateOrUpdateProductView {
+  FORM = 'form',
+  PUBLISHED = 'published',
+}
 type ChangeValueAction = {
   type: 'change_value';
   attribute: string;
@@ -65,7 +77,7 @@ type Action =
   | SetFormErrorsAction
   | ShowPublishedAction;
 type State = {
-  view: 'FORM' | 'PUBLISHED';
+  view: CreateOrUpdateProductView;
   form: {
     // fields
     product?: Product;
@@ -102,7 +114,7 @@ const reducer = (state: State, action: Action): State => {
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
     case 'show_published':
-      return { ...state, view: 'PUBLISHED' };
+      return { ...state, view: CreateOrUpdateProductView.PUBLISHED };
     default:
       return state;
   }
@@ -115,13 +127,13 @@ export interface CreateOrUpdateProps {
 
 export default ({ navigation, route }: CreateOrUpdateProps) => {
   // state
-  const product = route.params?.product;
+  const product: Product | undefined = route.params?.product;
   const onChangeProduct = route.params?.onChangeProduct || noop;
 
   const [state, dispatch] = useReducer(reducer, {
-    view: 'FORM',
+    view: CreateOrUpdateProductView.FORM,
     form: {
-      product: { enabled: true, ...product },
+      product,
       // other form states
       submitted: false,
     },
@@ -131,14 +143,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
-  }
-  if (product && product.type !== 'product') {
-    throw new Error(
-      `${prefix} Product type must be 'product', invalid type: ${product.type}`
-    );
   }
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
   const toastRef = useRef<IToast>(null);
@@ -153,18 +160,17 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             storeId: store.id,
             id: product.id,
           },
-          index: `products-${store.id}`,
           body: product,
         });
         onChangeProduct('updated', product);
       } else {
-        const productCreated = await productClient.create({
+        const created = await productClient.create({
           pathVars: {
             storeId: store.id,
           },
           body: product,
         });
-        onChangeProduct('created', productCreated);
+        onChangeProduct('created', created);
       }
 
       dispatch({ type: 'show_published' });
@@ -195,16 +201,17 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     }
 
     createOrUpdateProduct({
+      enabled: true, // default value
       ...state.form.product,
-      // set type
-      type: 'product',
-      // set updated store
-      store,
     } as Product);
+  };
+  const pressContinueHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.goBack();
   };
 
   // render logic
-  if (state.view === 'PUBLISHED') {
+  if (state.view === CreateOrUpdateProductView.PUBLISHED) {
     return (
       <View
         style={[
@@ -232,9 +239,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           <Button
             title="Continuar"
             style={globalStyles.withMainActionAir}
-            onPress={() => {
-              navigation.goBack();
-            }}
+            onPress={pressContinueHandler}
           />
         </View>
       </View>
@@ -344,6 +349,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             </Text>
           </View>
           <Switch
+            defaultValue
             value={state.form.product?.enabled}
             onValueChange={(value) => {
               changeHandler('enabled', value);

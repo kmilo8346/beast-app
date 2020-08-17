@@ -17,5 +17,6 @@ module.exports = {
     'no-unused-expressions': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-use-before-define': 0,
+    'consistent-return': 0,
   },
 };

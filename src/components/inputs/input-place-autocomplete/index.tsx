@@ -26,7 +26,7 @@ import colors from '../../../styles/colors';
 // instances outside component
 const toAddress = (place?: Place): string => {
   if (!place) return '';
-  return `${place.route.shortName} ${place.streetNumber.shortName}, ${place.locality.shortName}, ${place.administrativeAreaLevel1.shortName}`;
+  return `${place.route.short_name} ${place.street_number.short_name}, ${place.locality.short_name}, ${place.administrative_area_level_1.short_name}`;
 };
 let autocompleteRequestSource: CancelTokenSource;
 let detailsRequestSource: CancelTokenSource;
@@ -104,7 +104,7 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, view: 'LOADING_DETAILS' };
     case 'set_details_response':
       // valid address
-      if (action.response.streetNumber) {
+      if (action.response.street_number) {
         return {
           ...state,
           open: false,

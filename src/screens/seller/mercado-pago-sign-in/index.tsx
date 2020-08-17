@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { Image, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
@@ -7,21 +7,26 @@ import Constants from 'expo-constants';
 
 // components
 import {
-  Container,
   Text,
   Icon,
   Button,
   ErrorView,
   Loading,
+  LoadingOverlay,
+  ILoadingOverlay,
 } from '../../../components';
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
-import userClient from '../../../clients/user-client';
+import storeClient from '../../../clients/store-client';
 // container
 import UserProvider from '../../../containers/user';
+// cache
+import storeCache from '../../../cache/store';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
+import { CreateStore } from '../../../types';
+import userClient from '../../../clients/user-client';
 
 const mercadoPagoImage = require('../../../../assets/mercado_pago.png');
 
@@ -68,29 +73,24 @@ export default ({ navigation }: ScreenProps) => {
   });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.get();
-  // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
   const createCredentials = async (code: string) => {
     try {
       dispatch({ type: 'show_loading' });
       const credentials = await oauthTokenClient.create({ body: { code } });
-      const version = new Date().getTime();
-      userClient.update(
-        user.id,
-        {
-          'store.sellerCredentials': credentials,
-          'store.version': new Date().getTime(),
-        },
-        version
-      );
+      await storeCache.updateData({
+        seller_credentials: credentials,
+      });
+      dispatch({ type: 'show_ready' });
     } catch (error) {
       console.log(error);
       // TODO: log error
@@ -127,22 +127,44 @@ export default ({ navigation }: ScreenProps) => {
   const pressMercadoPagoSignInHandler = async () => {
     openMercadoPagoSignIn();
   };
-  const retryHandler = () => {
-    openMercadoPagoSignIn();
-  };
-  const pressLetsStart = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [{ name: 'SellerDashboard' }],
-      })
-    );
-  };
-  useEffect(() => {
-    if (store.sellerCredentials?.userId) {
-      dispatch({ type: 'show_ready' });
+  const pressLetsStart = async () => {
+    try {
+      loadingOverlayRef.current?.show();
+      // create store in api
+      const created = await storeClient.create({
+        body: storeCache.getData() as CreateStore,
+      });
+      // set created store in cache
+      storeCache.setData(created);
+      // set current store in user
+      userClient.update(
+        user.id,
+        { currentStore: created.id },
+        new Date().getTime()
+      );
+      // navigate
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'SellerDashboard' }],
+        })
+      );
+    } catch (error) {
+      // TODO: log error
+      console.log(error);
+      dispatch({ type: 'show_error' });
+    } finally {
+      loadingOverlayRef.current?.hide();
     }
-  }, [store.sellerCredentials?.userId]);
+  };
+  const retryHandler = () => {
+    const store = storeCache.getData();
+    if (!store?.seller_credentials) {
+      openMercadoPagoSignIn();
+    } else {
+      pressLetsStart();
+    }
+  };
 
   // render logic
   let content = null;
@@ -238,5 +260,15 @@ export default ({ navigation }: ScreenProps) => {
       );
       break;
   }
-  return <Container withMargin>{content}</Container>;
+  return (
+    <View
+      style={[
+        { flex: 1, backgroundColor: colors.white },
+        globalStyles.withPadding,
+      ]}
+    >
+      {content}
+      <LoadingOverlay ref={loadingOverlayRef} />
+    </View>
+  );
 };

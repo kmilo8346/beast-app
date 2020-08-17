@@ -36,7 +36,7 @@ export default ({
   // render logic
   let areaText = '';
   if (value) {
-    areaText = `${value.center.route.shortName} ${value.center.streetNumber.shortName}, ${value.radius}`;
+    areaText = `${value.center.route.short_name} ${value.center.street_number.short_name}, ${value.radius}`;
   }
 
   return (

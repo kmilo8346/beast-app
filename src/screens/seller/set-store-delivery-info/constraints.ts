@@ -1,17 +1,17 @@
 export default {
-  deliveryArea: {
+  delivery_area: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
   },
-  deliveryTime: {
+  delivery_time: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
   },
-  openingHours: {
+  opening_hours: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',

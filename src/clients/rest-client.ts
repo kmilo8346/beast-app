@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
 import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
 import Constants from 'expo-constants';
+import { AsyncStorage } from 'react-native';
 
 // libs
 import firebase from '../lib/firebase';
@@ -16,6 +17,7 @@ import {
   ActionParams,
 } from '../types';
 
+const prefix = '[rest client]';
 axios.defaults.baseURL = Constants.manifest.extra.BEAST_API_URL;
 
 const interpolate = (
@@ -80,12 +82,51 @@ export default class RESTClient<T, V> {
 
     // interceptor to transform backend response keys to came case
     this.axios.interceptors.response.use(
-      (response) => ({
-        ...response,
-        data: camelCaseKeys(response.data, { deep: true }),
-      }),
+      (response) => {
+        // remove after migration
+        if (
+          response.config.url?.includes('stores') ||
+          response.config.url?.includes('products') ||
+          response.config.url?.includes('details')
+        ) {
+          return response;
+        }
+        return {
+          ...response,
+          data: camelCaseKeys(response.data, { deep: true }),
+        };
+      },
       (error) => Promise.reject(error)
     );
+  }
+
+  private async getEtag(): Promise<string> {
+    let etag = '';
+    try {
+      const raw: string | null = await AsyncStorage.getItem(
+        `@etag/${this.prefix}`
+      );
+      if (raw) {
+        etag = raw;
+      }
+    } catch (error) {
+      console.log(
+        `${prefix} Unexpected error loading etag from local storage`,
+        error
+      );
+    }
+    return etag;
+  }
+
+  private async setEtag(etag: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(`@etag/${this.prefix}`, etag);
+    } catch (error) {
+      console.log(
+        `${prefix} Unexpected error setting etag in local storage`,
+        error
+      );
+    }
   }
 
   async create(params: CreateParams<V>, cancelToken?: CancelToken): Promise<T> {
@@ -125,15 +166,21 @@ export default class RESTClient<T, V> {
 
   async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
     const { pathVars, source } = params;
+    const etag = await this.getEtag();
+
     const response = await this.axios.get<T>(
       interpolate(`${this.prefix}/:id`, pathVars),
       {
         params: {
           source,
         },
+        headers: {
+          'If-None-Match': etag,
+        },
         cancelToken,
       }
     );
+    await this.setEtag(response.headers.etag);
     return response.data;
   }
 

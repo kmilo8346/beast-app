@@ -20,10 +20,12 @@ import { ProductItem, Search, NotData } from './components';
 import productClient from '../../../clients/product-client';
 // containers
 import UserProvider from '../../../containers/user';
+// cache
+import storeCache from '../../../cache/store';
 // libs
 import useDebounce from '../../../lib/hooks/use-debounce';
 // types
-import { Product, SearchResponse, Service } from '../../../types';
+import { Product, SearchResponse } from '../../../types';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
@@ -34,7 +36,17 @@ const addProductImage = require('../../../../assets/icons/plus.png');
 const prefix = '[my products component]';
 let fetchRequestSource: CancelTokenSource;
 const defaultSize = 10;
-type MyProductsView = 'LOADING' | 'DATA' | 'ERROR';
+const defaultProducts: SearchResponse<Product> = {
+  from: 0,
+  size: defaultSize,
+  total: 0,
+  hits: [],
+};
+enum MyProductsView {
+  LOADING = 'loading',
+  DATA = 'data',
+  ERROR = 'error',
+}
 type ChangeQueryAction = {
   type: 'change_query';
   query: string;
@@ -43,33 +55,33 @@ type ChangeViewAction = {
   type: 'change_view';
   view: MyProductsView;
 };
-type SetResponseAction = {
-  type: 'set_response';
-  response: SearchResponse<Product | Service>;
+type SetProductsAction = {
+  type: 'set_products';
+  products: SearchResponse<Product>;
 };
 type ToogleEdittingAction = {
   type: 'toogle_editting';
 };
 type CreateProductAction = {
   type: 'create_product';
-  product: Product | Service;
+  product: Product;
 };
 type UpdateProductAction = {
   type: 'update_product';
-  product: Product | Service;
+  product: Product;
 };
 type DeleteProductAction = {
   type: 'delete_product';
-  product: Product | Service;
+  product: Product;
 };
 type SetFetchingMoreAction = {
   type: 'set_fetching_more';
-  fetchingMore: boolean;
+  fetching_more: boolean;
 };
 type Action =
   | ChangeQueryAction
   | ChangeViewAction
-  | SetResponseAction
+  | SetProductsAction
   | ToogleEdittingAction
   | CreateProductAction
   | UpdateProductAction
@@ -78,53 +90,59 @@ type Action =
 type State = {
   view: MyProductsView;
   editting: boolean;
-  fetchingMore: boolean;
-
+  fetching_more: boolean;
   query: string;
-  from: number;
-  size: number;
-  total: number;
-  hits: (Product | Service)[];
+  products?: SearchResponse<Product>;
 };
 const reducer = (state: State, action: Action): State => {
+  let products;
   switch (action.type) {
     case 'change_query':
-      return { ...state, query: action.query, from: 0 };
+      return { ...state, query: action.query };
     case 'change_view':
       return { ...state, view: action.view };
-    case 'set_response':
+    case 'set_products':
       return {
         ...state,
-        view: 'DATA',
-        from: action.response.from + action.response.hits.length,
-        total: action.response.total,
-        size: action.response.size,
-        hits: [...state.hits, ...action.response.hits] as (Product | Service)[],
+        view: MyProductsView.DATA,
+        products: action.products,
       };
     case 'toogle_editting':
       return { ...state, editting: !state.editting };
     case 'create_product':
+      products = { ...(state.products || defaultProducts) };
+      products.from += 1;
+      products.total += 1;
+      products.hits = [...products.hits, action.product];
       return {
         ...state,
-        hits: [action.product, ...state.hits],
+        products,
       };
     case 'update_product':
+      products = { ...(state.products as SearchResponse<Product>) };
+      products.hits = products.hits.map((hit) => {
+        if (hit.id === action.product.id) {
+          return { ...action.product };
+        }
+        return hit;
+      });
       return {
         ...state,
-        hits: state.hits.map((hit) => {
-          if (hit.id === action.product.id) {
-            return { ...action.product };
-          }
-          return hit;
-        }),
+        products,
       };
     case 'delete_product':
+      products = { ...(state.products as SearchResponse<Product>) };
+      products.from -= 1;
+      products.total -= 1;
+      products.hits = products.hits.filter(
+        (hit) => hit.id !== action.product.id
+      );
       return {
         ...state,
-        hits: state.hits.filter((hit) => hit.id !== action.product.id),
+        products,
       };
     case 'set_fetching_more':
-      return { ...state, fetchingMore: action.fetchingMore };
+      return { ...state, fetching_more: action.fetching_more };
     default:
       return state;
   }
@@ -132,22 +150,15 @@ const reducer = (state: State, action: Action): State => {
 
 export interface MyProductsProps {
   navigation: any;
-  route: any;
 }
 
-export default ({ navigation, route }: MyProductsProps) => {
+export default ({ navigation }: MyProductsProps) => {
   // state
-  const type = route.params.type;
   const [state, dispatch] = useReducer(reducer, {
-    view: 'LOADING',
+    view: MyProductsView.LOADING,
     editting: false,
-    fetchingMore: false,
-
+    fetching_more: false,
     query: '',
-    from: 0,
-    size: defaultSize,
-    total: 0,
-    hits: [],
   });
   const userContainer = UserProvider.useContainer();
   const user = userContainer.get();
@@ -155,12 +166,9 @@ export default ({ navigation, route }: MyProductsProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
-  }
-  if (type !== 'product' && type !== 'service') {
-    throw new Error(`${prefix} Invalid product type, invalid type: ${type}`);
   }
   const debouncedQuery = useDebounce(state.query, 200);
   const toastRef = useRef<IToast>(null);
@@ -177,12 +185,9 @@ export default ({ navigation, route }: MyProductsProps) => {
           storeId: store.id,
         },
         query,
-        filters: {
-          type,
-        },
+        filters: {},
         from,
         size,
-        sort: [{ field: 'updated_at', order: 'desc' }],
       },
       fetchRequestSource.token
     );
@@ -190,33 +195,54 @@ export default ({ navigation, route }: MyProductsProps) => {
   };
   const loadProducts = async (query: string) => {
     try {
-      dispatch({ type: 'change_view', view: 'LOADING' });
+      dispatch({ type: 'change_view', view: MyProductsView.LOADING });
       const response = await fetchProducts(query);
-      dispatch({ type: 'set_response', response });
+      dispatch({
+        type: 'set_products',
+        products: {
+          ...response,
+          from: response.from + response.hits.length,
+        },
+      });
     } catch (error) {
       if (!axios.isCancel(error)) {
         // TODO: Log error
         console.log(error);
 
-        dispatch({ type: 'change_view', view: 'ERROR' });
+        dispatch({ type: 'change_view', view: MyProductsView.ERROR });
       }
     }
   };
   const fetchMoreProducts = async () => {
+    // precondition
+    if (!state.products) {
+      console.warn(`${prefix} Cant call fetch more with products undefined`);
+      return;
+    }
     try {
-      console.log('fecthing more products');
-      dispatch({ type: 'set_fetching_more', fetchingMore: true });
-      const response = await fetchProducts(state.query, state.from, state.size);
-      dispatch({ type: 'set_response', response });
+      dispatch({ type: 'set_fetching_more', fetching_more: true });
+      const products = await fetchProducts(
+        state.query,
+        state.products.from,
+        state.products.size
+      );
+      dispatch({
+        type: 'set_products',
+        products: {
+          ...products,
+          from: products.from + products.hits.length,
+          hits: [...state.products.hits, ...products.hits],
+        },
+      });
     } catch (error) {
       if (!axios.isCancel(error)) {
         // TODO: Log error
         console.log(error);
 
-        dispatch({ type: 'change_view', view: 'ERROR' });
+        dispatch({ type: 'change_view', view: MyProductsView.ERROR });
       }
     } finally {
-      dispatch({ type: 'set_fetching_more', fetchingMore: false });
+      dispatch({ type: 'set_fetching_more', fetching_more: false });
     }
   };
   const updateProduct = async (id: string, data: Partial<Product>) => {
@@ -226,16 +252,11 @@ export default ({ navigation, route }: MyProductsProps) => {
           storeId: store.id,
           id,
         },
-        index: `products-${store.id}`,
         body: data,
       });
-      let entity = 'Producto';
-      if (type === 'service') {
-        entity = 'Servicio';
-      }
       toastRef.current?.show({
         type: 'SUCCESS',
-        message: `${entity} actualizado correctamente`,
+        message: `Producto actualizado correctamente`,
         expiration: 3,
       });
     } catch (error) {
@@ -257,13 +278,9 @@ export default ({ navigation, route }: MyProductsProps) => {
           id,
         },
       });
-      let entity = 'Producto';
-      if (type === 'service') {
-        entity = 'Servicio';
-      }
       toastRef.current?.show({
         type: 'SUCCESS',
-        message: `${entity} eliminado correctamente`,
+        message: `Producto eliminado correctamente`,
         expiration: 3,
       });
     } catch (error) {
@@ -282,7 +299,7 @@ export default ({ navigation, route }: MyProductsProps) => {
   };
   const changeProductHandler = (
     state: 'created' | 'updated',
-    product: Product | Service
+    product: Product
   ) => {
     switch (state) {
       case 'created':
@@ -297,18 +314,11 @@ export default ({ navigation, route }: MyProductsProps) => {
         );
     }
   };
-  const pressEditProductHandler = (product: Product | Service) => {
-    let args = [
-      'CreateOrUpdateProduct',
-      { product, onChangeProduct: changeProductHandler } as any,
-    ];
-    if (product.type === 'service') {
-      args = [
-        'CreateOrUpdateService',
-        { service: product, onChangeProduct: changeProductHandler } as any,
-      ];
-    }
-    navigation.navigate(...args);
+  const pressEditProductHandler = (product: Product) => {
+    navigation.navigate('CreateOrUpdateProduct', {
+      product,
+      onChangeProduct: changeProductHandler,
+    });
   };
   const pressDeleteProductHandler = (product: Product) => {
     // edit local state
@@ -322,23 +332,8 @@ export default ({ navigation, route }: MyProductsProps) => {
       enabled,
     });
   };
-  const renderItem = ({ item }: { item: Product }) => {
-    return (
-      <ProductItem
-        data={item}
-        editting={state.editting}
-        onChangeEnabled={changeEnabledHandler}
-        onPressEdit={pressEditProductHandler}
-        onPressDelete={pressDeleteProductHandler}
-      />
-    );
-  };
   const addProductHandler = () => {
-    let screen = 'CreateOrUpdateProduct';
-    if (type === 'service') {
-      screen = 'CreateOrUpdateService';
-    }
-    navigation.navigate(screen, {
+    navigation.navigate('CreateOrUpdateProduct', {
       onChangeProduct: changeProductHandler,
     });
   };
@@ -360,25 +355,12 @@ export default ({ navigation, route }: MyProductsProps) => {
       ),
     });
   }, [state.editting]);
-  useLayoutEffect(() => {
-    let title = 'Mis productos';
-    if (type === 'service') {
-      title = 'Mis servicios';
-    }
-    navigation.setOptions({ title });
-  }, [type]);
 
   // render logic
   let content = null;
-  let placeholderText = 'Buscar productos';
-  let addText = 'Agregar producto';
-  if (type === 'service') {
-    placeholderText = 'Buscar servicios';
-    addText = 'Agregar servicio';
-  }
   switch (state.view) {
-    case 'DATA':
-      if (!state.hits.length) {
+    case MyProductsView.DATA:
+      if (!state.products?.hits.length) {
         if (state.query) {
           content = (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -412,8 +394,18 @@ export default ({ navigation, route }: MyProductsProps) => {
         content = (
           <View style={{ flex: 1 }}>
             <FlatList
-              data={state.hits}
-              renderItem={renderItem}
+              data={state.products.hits}
+              renderItem={({ item }) => {
+                return (
+                  <ProductItem
+                    data={item}
+                    editting={state.editting}
+                    onChangeEnabled={changeEnabledHandler}
+                    onPressEdit={pressEditProductHandler}
+                    onPressDelete={pressDeleteProductHandler}
+                  />
+                );
+              }}
               keyExtractor={(product) => product.id}
               initialNumToRender={defaultSize}
               ListFooterComponent={<View style={globalStyles.withScreenAir} />}
@@ -428,7 +420,7 @@ export default ({ navigation, route }: MyProductsProps) => {
               <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
               <Shortcut
                 image={addProductImage}
-                title={addText}
+                title="Agregar producto"
                 onPress={addProductHandler}
                 style={[globalStyles.withMainActionAir]}
               />
@@ -437,7 +429,7 @@ export default ({ navigation, route }: MyProductsProps) => {
         );
       }
       break;
-    case 'ERROR':
+    case MyProductsView.ERROR:
       content = (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ flex: 1 }}>
@@ -461,7 +453,7 @@ export default ({ navigation, route }: MyProductsProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <Search
-        placeholder={placeholderText}
+        placeholder="Buscar productos"
         value={state.query}
         onChangeText={changeQueryHandler}
         containerStyle={[globalStyles.withMargin, { marginBottom: 10 }]}

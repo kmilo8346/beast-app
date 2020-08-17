@@ -169,7 +169,7 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'set_submit_op_id', opId: version });
   };
   useEffect(() => {
-    if (state.form.submitOpId === user.version) {
+    if (state.form.submitOpId && state.form.submitOpId === user.version) {
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
@@ -177,7 +177,7 @@ export default ({ navigation }: ScreenProps) => {
         })
       );
     }
-  }, [state.form.submitOpId, user.currentAddress]);
+  }, [state.form.submitOpId, user.version, user.currentAddress]);
 
   // render logic
   let text = null;

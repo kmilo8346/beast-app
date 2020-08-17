@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
@@ -10,19 +10,18 @@ import {
   IToast,
   InputImages,
 } from '../../../components';
-// clients
-import userClient from '../../../clients/user-client';
+
 // containers
 import UserProvider from '../../../containers/user';
+// cache
+import storeCache from '../../../cache/store';
 // libs
-import { generatePushID } from '../../../lib/uuid';
 import validate from '../../../lib/validate';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-import { PaymentProvider, DispatchProvider } from '../../../types';
 
 // instances outside component
 const prefix = '[set store info screen]';
@@ -44,25 +43,18 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
-type SetSubmitOpIdAction = {
-  type: 'set_submit_op_id';
-  opId: number;
-};
 type Action =
   | ChangeValueAction
   | ValidateValueAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction
-  | SetSubmitOpIdAction;
+  | SetFormErrorsAction;
 type State = {
   form: {
     // fields
-    name: string;
-    images: string[];
+    name?: string;
+    images?: string[];
     // other form states
     submitted: boolean;
-    // identify the submit
-    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -93,11 +85,6 @@ const reducer = (state: State, action: Action): State => {
       };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
-    case 'set_submit_op_id':
-      return {
-        ...state,
-        form: { ...state.form, submitOpId: action.opId },
-      };
     default:
       return state;
   }
@@ -111,9 +98,6 @@ export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     form: {
-      // fields
-      name: '',
-      images: [],
       // other form states
       submitted: false,
     },
@@ -124,7 +108,10 @@ export default ({ navigation }: ScreenProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
+  if (!store) {
+    throw new Error(`${prefix} Store must be in cache`);
+  }
 
   // events handlers
   const changeHandler = (attribute: string, value: any) => {
@@ -132,7 +119,7 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'validate_value', attribute, value });
   };
 
-  const pressContinueHandler = () => {
+  const pressContinueHandler = async () => {
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form, constraints);
@@ -141,49 +128,13 @@ export default ({ navigation }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
-    // update store
-    const version = new Date().getTime();
-    userClient.update(
-      user.id,
-      {
-        'store.name': state.form.name,
-        'store.images': state.form.images,
-        'store.version': new Date().getTime(),
-      },
-      version
-    );
-    // mark end of submit
-    dispatch({ type: 'set_submit_op_id', opId: version });
+    // update store cache
+    storeCache.updateData({
+      name: state.form.name,
+      images: state.form.images,
+    });
+    navigation.navigate('SetStoreDeliveryInfo');
   };
-
-  useEffect(() => {
-    // if not store initilized, initialized one with default values
-    if (!store) {
-      userClient.update(
-        user.id,
-        {
-          'store.id': generatePushID(),
-          'store.user': user.id,
-          'store.phone': user.phone,
-          'store.version': new Date().getTime(),
-          'store.paymentProvider': PaymentProvider.MERCADOPAGO,
-          'store.dispatchProvider': DispatchProvider.OWNER,
-        },
-        new Date().getTime()
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    if (
-      state.form.submitOpId === user.version &&
-      store &&
-      store.name &&
-      store.images
-    ) {
-      navigation.navigate('SetStoreDeliveryInfo');
-    }
-  }, [state.form.submitOpId, store, store?.name, store?.images]);
 
   // render logic
   return (
@@ -208,8 +159,8 @@ export default ({ navigation }: ScreenProps) => {
           size={1}
           label="Imagen"
           tip="Agrega la imagen de tu tienda para que tus clientes te identifiquen."
-          path={`stores/${store?.id}/images/\${}`}
-          value={store?.images}
+          path={`stores/images/\${}`}
+          value={state.form.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
             changeHandler('images', images);

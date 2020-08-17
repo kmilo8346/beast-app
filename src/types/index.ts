@@ -55,6 +55,11 @@ export interface SearchResponse<T> {
   hits: Partial<T>[];
 }
 
+export interface Redirect {
+  name: string;
+  params: { [key: string]: any };
+}
+
 export interface PlacesAutocompletePrediction {
   description: string;
   placeId: string;
@@ -78,24 +83,34 @@ export interface Circle {
 }
 
 export interface AddressProp {
-  shortName: string;
-  longName: string;
+  short_name: string;
+  long_name: string;
 }
 
 export interface Place {
   id: string;
   url: string;
-  streetNumber: AddressProp;
+  street_number: AddressProp;
   route: AddressProp;
   locality: AddressProp;
-  administrativeAreaLevel3: AddressProp;
-  administrativeAreaLevel2: AddressProp;
-  administrativeAreaLevel1: AddressProp;
+  administrative_area_level_3: AddressProp;
+  administrative_area_level_2: AddressProp;
+  administrative_area_level_1: AddressProp;
   apartment: string;
   geometry: {
     location: {
       lat: number;
       lng: number;
+    };
+    viewport: {
+      northeast: {
+        lat: number;
+        lng: number;
+      };
+      southwest: {
+        lat: number;
+        lng: number;
+      };
     };
   };
 }
@@ -107,14 +122,14 @@ export type OpeningHours = {
 }[];
 
 export interface SellerCredentials {
-  accessToken: string;
-  expiresIn: number;
-  liveMode: boolean;
-  publicKey: string;
-  refreshToken: string;
+  access_token: string;
+  expires_in: number;
+  live_mode: boolean;
+  public_key: string;
+  refresh_token: string;
   scope: string;
-  tokenType: string;
-  userId: number;
+  token_type: string;
+  user_id: number;
 }
 
 export interface DeliveryArea {
@@ -131,24 +146,26 @@ export enum DispatchProvider {
   OWNER = 'owner',
 }
 
-export interface Store {
-  id: string;
+export interface CreateStore {
   user: string;
-  version: number;
-  name: string | undefined;
-  phone: string | undefined;
-  images: string[] | undefined;
-  deliveryTime: IntegerRange | undefined;
-  deliveryArea: DeliveryArea | undefined;
-  openingHours: OpeningHours | undefined;
-  sellerCredentials: SellerCredentials | undefined;
-  paymentProvider: PaymentProvider;
-  dispatchProvider: DispatchProvider;
+  name: string;
+  phone: string;
+  images: string[];
+  delivery_time: IntegerRange;
+  delivery_area: DeliveryArea;
+  opening_hours: OpeningHours;
+  seller_credentials: SellerCredentials;
+  payment_provider: PaymentProvider;
+  dispatch_provider: DispatchProvider;
 }
 
-export interface Product {
+export interface Store extends CreateStore {
   id: string;
-  type: 'product';
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CreateProduct {
   name: string;
   description: string;
   images: string[];
@@ -156,19 +173,13 @@ export interface Product {
   brand?: string;
   tags?: string[];
   enabled: boolean;
-  store: Store;
 }
 
-export interface Service {
+export interface Product extends CreateProduct {
   id: string;
-  type: 'service';
-  name: string;
-  description: string;
-  images: string[];
-  price: number | null;
-  tags?: string[];
-  enabled: boolean;
-  store: Store;
+  store: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Card {
@@ -218,7 +229,7 @@ export interface User {
   currentAddress: string | undefined;
   addresses: Place[];
   // store
-  store: Store | undefined;
+  currentStore?: string;
 
   metaData: { [key: string]: any };
 
