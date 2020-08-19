@@ -5,14 +5,15 @@ import axios, { CancelTokenSource } from 'axios';
 // components
 import { Loading, ErrorView } from '../../../components';
 // clients
+import userClient from '../../../clients/user-client-v2';
 import storeClient from '../../../clients/store-client';
-// containers
-import UserProvider from '../../../containers/user';
+// types
+import { LoggedUser } from '../../../types';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // styles
 import colors from '../../../styles/colors';
-import userClient from '../../../clients/user-client';
 
 // instances outside component
 const prefix = '[seller boot screen]';
@@ -50,14 +51,13 @@ export default ({ navigation, route }: SellerBootProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: SellerBootView.LOADING,
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
 
   // params
-  const store_id = route.params?.store_id || user.currentStore;
+  const store_id = route.params?.store_id || user.current_store;
   const redirect = route.params?.redirect || { name: 'SellerDashboard' };
 
   // event hanlders
@@ -77,6 +77,7 @@ export default ({ navigation, route }: SellerBootProps) => {
     );
     return store;
   };
+
   const boot = async () => {
     dispatch({ type: 'change_view', view: SellerBootView.LOADING });
     if (!user.email) {
@@ -85,10 +86,11 @@ export default ({ navigation, route }: SellerBootProps) => {
           name: 'SellerBoot',
           params: route.params,
         },
+        dont_allow_guest: true,
       });
       return;
     }
-    if (!user.phone || !user.phoneVerified) {
+    if (!user.phone || !user.phone_verified) {
       navigation.replace('SetPhone', {
         redirect: {
           name: 'SellerBoot',
@@ -101,14 +103,19 @@ export default ({ navigation, route }: SellerBootProps) => {
     if (store_id) {
       try {
         const store = await fetchStore(store_id);
+        if (user.current_store !== store_id) {
+          // set current store
+          await userClient.update({
+            pathVars: {
+              id: user.id,
+            },
+            body: {
+              current_store: store_id,
+            },
+          });
+        }
         // set cache
         storeCache.setData(store);
-        // set current store
-        userClient.update(
-          user.id,
-          { currentStore: store.id },
-          new Date().getTime()
-        );
 
         navigation.replace(redirect.name, redirect.params);
       } catch (error) {

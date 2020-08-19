@@ -1,5 +1,5 @@
 // cache
-import Cache from './base';
+import Cache from './cache';
 // types
 import { Store } from '../types';
 

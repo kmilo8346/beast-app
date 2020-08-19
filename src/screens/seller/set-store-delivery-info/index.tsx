@@ -3,7 +3,6 @@ import { View, Vibration } from 'react-native';
 
 // components
 import {
-  Container,
   Text,
   Button,
   InputSetDeliveryArea,
@@ -14,9 +13,8 @@ import {
 } from '../../../components';
 // libs
 import validate from '../../../lib/validate';
-// containers
-import UserProvider from '../../../containers/user';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // constraints
 import constraints from './constraints';
@@ -102,8 +100,7 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
 
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }

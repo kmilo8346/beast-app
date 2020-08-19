@@ -11,6 +11,7 @@ import * as Notifications from 'expo-notifications';
 
 // screens
 import {
+  BootScreen,
   OnboardingScreen,
   TermsScreen,
   SignInScreen,
@@ -42,9 +43,6 @@ import {
 } from './screens';
 // components
 import { Icon, Text, ButtonCart, KeyboardAvoidingView } from './components';
-// containers
-import UserProvider from './containers/user';
-import StoreContainer from './containers/store';
 // libs
 import { navigationRef, onReady, navigate } from './lib/root-navigation';
 // styles
@@ -192,95 +190,93 @@ const SellerStack = createStackNavigator();
 // https://github.com/react-navigation/react-navigation/issues/3971
 function SellerStackScreen() {
   return (
-    <StoreContainer.Provider>
-      <KeyboardAvoidingView>
-        <SellerStack.Navigator
-          screenOptions={commonStackOptions}
-          initialRouteName="SellerBoot"
-        >
-          <SellerStack.Screen
-            name="SellerBoot"
-            component={SellerBootScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="SignIn"
-            component={SignInScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="SetPhone"
-            component={SetPhoneScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="VerifyPhone"
-            component={VerifyPhoneScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="SelectOrCreateStore"
-            component={SelectOrCreateStoreScreen}
-            options={{ headerShown: false }}
-          />
-          <SellerStack.Screen
-            name="SetStoreInfo"
-            component={SetStoreInfoScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="SetStoreDeliveryInfo"
-            component={SetStoreDeliveryInfoScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="MercadoPagoSignIn"
-            component={MercadoPagoSignInScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="SellerDashboard"
-            component={SellerDashboardScreen}
-            options={{ title: '' }}
-          />
-          <SellerStack.Screen
-            name="UpdateStoreInfo"
-            component={UpdateStoreInfoScreen}
-            options={{ title: 'Información de tienda' }}
-          />
-          <SellerStack.Screen
-            name="CreateOrUpdateProduct"
-            component={CreateOrUpdateProductScreen}
-            options={{ headerTitle: '' }}
-          />
-          <SellerStack.Screen
-            name="CreateOrUpdateService"
-            component={CreateOrUpdateServiceScreen}
-            options={{ headerTitle: '' }}
-          />
-          <SellerStack.Screen
-            name="MyProducts"
-            component={MyProductsScreen}
-            options={{ headerTitle: 'Mis productos' }}
-          />
-          <SellerStack.Screen
-            name="MySales"
-            component={MySalesScreen}
-            options={{ headerTitle: 'Ventas' }}
-          />
-          <SellerStack.Screen
-            name="SaleDetails"
-            component={SaleDetailsScreen}
-            options={{ headerTitle: 'Detalle de venta' }}
-          />
-          <SellerStack.Screen
-            name="StockVerificaton"
-            component={StockVerificationScreen}
-            options={{ headerTitle: 'Verificación de stock' }}
-          />
-        </SellerStack.Navigator>
-      </KeyboardAvoidingView>
-    </StoreContainer.Provider>
+    <KeyboardAvoidingView>
+      <SellerStack.Navigator
+        screenOptions={commonStackOptions}
+        initialRouteName="SellerBoot"
+      >
+        <SellerStack.Screen
+          name="SellerBoot"
+          component={SellerBootScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="SignIn"
+          component={SignInScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="SetPhone"
+          component={SetPhoneScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="VerifyPhone"
+          component={VerifyPhoneScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="SelectOrCreateStore"
+          component={SelectOrCreateStoreScreen}
+          options={{ headerShown: false }}
+        />
+        <SellerStack.Screen
+          name="SetStoreInfo"
+          component={SetStoreInfoScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="SetStoreDeliveryInfo"
+          component={SetStoreDeliveryInfoScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="MercadoPagoSignIn"
+          component={MercadoPagoSignInScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="SellerDashboard"
+          component={SellerDashboardScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="UpdateStoreInfo"
+          component={UpdateStoreInfoScreen}
+          options={{ title: 'Información de tienda' }}
+        />
+        <SellerStack.Screen
+          name="CreateOrUpdateProduct"
+          component={CreateOrUpdateProductScreen}
+          options={{ headerTitle: '' }}
+        />
+        <SellerStack.Screen
+          name="CreateOrUpdateService"
+          component={CreateOrUpdateServiceScreen}
+          options={{ headerTitle: '' }}
+        />
+        <SellerStack.Screen
+          name="MyProducts"
+          component={MyProductsScreen}
+          options={{ headerTitle: 'Mis productos' }}
+        />
+        <SellerStack.Screen
+          name="MySales"
+          component={MySalesScreen}
+          options={{ headerTitle: 'Ventas' }}
+        />
+        <SellerStack.Screen
+          name="SaleDetails"
+          component={SaleDetailsScreen}
+          options={{ headerTitle: 'Detalle de venta' }}
+        />
+        <SellerStack.Screen
+          name="StockVerificaton"
+          component={StockVerificationScreen}
+          options={{ headerTitle: 'Verificación de stock' }}
+        />
+      </SellerStack.Navigator>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -389,7 +385,6 @@ function MainTabScreen() {
 
 const RootStack = createStackNavigator();
 
-const prefix = '[navigation component]';
 /**
  * Boot component control de navigation in boot time
  *
@@ -411,14 +406,6 @@ const prefix = '[navigation component]';
  *      ...
  */
 export default () => {
-  // state
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
-
   // event handlers
   useEffect(() => {
     const listener = Notifications.addNotificationResponseReceivedListener(
@@ -434,23 +421,18 @@ export default () => {
     };
   }, []);
 
-  // set initial route using user state
-  let initialRoute = 'MainTab';
-  if (!user.email && (!user.currentAddress || !(user.addresses || []).length)) {
-    initialRoute = 'Onboarding';
-  } else if (user.email && (!user.phone || !user.phoneVerified)) {
-    initialRoute = 'SetPhone';
-  } else if (user.email && !user.currentAddress) {
-    initialRoute = 'SetAddress';
-  }
-
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef} onReady={onReady}>
         <RootStack.Navigator
           screenOptions={commonStackOptions}
-          initialRouteName={initialRoute}
+          initialRouteName="Boot"
         >
+          <RootStack.Screen
+            name="Boot"
+            component={BootScreen}
+            options={{ headerShown: false }}
+          />
           <RootStack.Screen
             name="Onboarding"
             component={OnboardingScreen}

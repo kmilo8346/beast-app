@@ -18,9 +18,8 @@ import { Shortcut } from '../components';
 import { ProductItem, Search, NotData } from './components';
 // clients
 import productClient from '../../../clients/product-client';
-// containers
-import UserProvider from '../../../containers/user';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import useDebounce from '../../../lib/hooks/use-debounce';
@@ -160,8 +159,7 @@ export default ({ navigation }: MyProductsProps) => {
     fetching_more: false,
     query: '',
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
@@ -410,7 +408,10 @@ export default ({ navigation }: MyProductsProps) => {
               initialNumToRender={defaultSize}
               ListFooterComponent={<View style={globalStyles.withScreenAir} />}
               onBeastEndReached={() => {
-                if (state.from < state.total) {
+                if (
+                  state.products &&
+                  state.products.from < state.products.total
+                ) {
                   fetchMoreProducts();
                 }
               }}

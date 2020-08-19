@@ -10,10 +10,8 @@ import {
   IToast,
   InputImages,
 } from '../../../components';
-
-// containers
-import UserProvider from '../../../containers/user';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
@@ -103,8 +101,7 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
   const toastRef = useRef<IToast>(null);
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }

@@ -6,8 +6,8 @@ import validate from 'validate.js';
 import { Text, Input, Button } from '../../components';
 // clients
 import userClient from '../../clients/user-client';
-// containers
-import UserProvider from '../../containers/user';
+// cache
+import userCache from '../../cache/user';
 // constraints
 import constraints from './constraints';
 // styles
@@ -29,24 +29,17 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
-type SetSubmitOpIdAction = {
-  type: 'set_submit_op_id';
-  opId: number;
-};
 type Action =
   | ChangePhoneAction
   | ValidatePhoneAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction
-  | SetSubmitOpIdAction;
+  | SetFormErrorsAction;
 type State = {
   form: {
     // fields
     phone: string;
     // other states
     submitted: boolean;
-    // identify the submit
-    submitOpId?: number;
     errors?: { [key: string]: string[] };
   };
 };
@@ -71,22 +64,15 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
-    case 'set_submit_op_id':
-      return {
-        ...state,
-        form: { ...state.form, submitOpId: action.opId },
-      };
     default:
       return state;
   }
 };
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
   route: any;
 }
-
-// validate phone, parse, format phone
 
 export default ({ navigation, route }: ScreenProps) => {
   // state
@@ -96,10 +82,7 @@ export default ({ navigation, route }: ScreenProps) => {
       submitted: false,
     },
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-
-  // preconditions
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
@@ -109,7 +92,8 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'change_phone', phone });
     dispatch({ type: 'validate_phone', phone });
   };
-  const submitHandler = () => {
+
+  const submitHandler = async () => {
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form, constraints);
@@ -118,22 +102,12 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    const version = new Date().getTime();
-    userClient.update(
-      user.id,
-      {
-        phone: `+569${state.form.phone}`,
-        phoneVerified: false,
-      },
-      version
-    );
-    dispatch({ type: 'set_submit_op_id', opId: version });
+    await userCache.updateData({
+      phone: `+569${state.form.phone}`,
+      phone_verified: false,
+    });
+    navigation.navigate('VerifyPhone', route.params);
   };
-  useEffect(() => {
-    if (state.form.submitOpId && state.form.submitOpId === user.version) {
-      navigation.navigate('VerifyPhone', route.params);
-    }
-  }, [state.form.submitOpId, user.version, user.phone, user.phoneVerified]);
 
   // render logic
   return (

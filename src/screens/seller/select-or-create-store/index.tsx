@@ -17,10 +17,9 @@ import { StoreItem } from './components';
 import { Shortcut } from '../components';
 // clients
 import storeClient from '../../../clients/store-client';
-import userClient from '../../../clients/user-client';
-// containers
-import UserProvider from '../../../containers/user';
+import userClient from '../../../clients/user-client-v2';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // types
 import {
@@ -28,6 +27,7 @@ import {
   DispatchProvider,
   SearchResponse,
   Store,
+  LoggedUser,
 } from '../../../types';
 // styles
 import globalStyles from '../../../styles';
@@ -86,8 +86,7 @@ export default ({ navigation }: SelectStoreProps) => {
     fetching_more: false,
   });
 
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} user must be defined`);
   }
@@ -174,13 +173,14 @@ export default ({ navigation }: SelectStoreProps) => {
     navigation.navigate('SetStoreInfo');
   };
   const pressItemHandler = async (store: Store) => {
+    // TODO: handler error
+    await userClient.update({
+      pathVars: { id: user.id },
+      body: {
+        current_store: store.id,
+      },
+    });
     storeCache.setData(store);
-    // set current store
-    userClient.update(
-      user.id,
-      { currentStore: store.id },
-      new Date().getTime()
-    );
     navigation.replace('SellerDashboard');
   };
   useEffect(() => {

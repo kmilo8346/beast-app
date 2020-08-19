@@ -23,9 +23,8 @@ import * as utils from '../../../../../lib/utils';
 
 // clients
 import orderClient from '../../../../../clients/order-client';
-// containers
-import UserProvider from '../../../../../containers/user';
 // cache
+import userCache from '../../../../../cache/user';
 import storeCache from '../../../../../cache/store';
 // styles
 import colors from '../../../../../styles/colors';
@@ -106,8 +105,7 @@ export default ({
     fetchingMore: false,
     refreshing: false,
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }

@@ -1,5 +1,6 @@
-export { default as TermsScreen } from './terms';
+export { default as BootScreen } from './boot';
 export { default as OnboardingScreen } from './onboarding';
+export { default as TermsScreen } from './terms';
 export { default as SignInScreen } from './sign-in';
 export { default as SetPhoneScreen } from './set-phone';
 export { default as VerifyPhoneScreen } from './verify-phone';

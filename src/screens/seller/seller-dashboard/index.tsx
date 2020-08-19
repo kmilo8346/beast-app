@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React from 'react';
 import { ScrollView, View, Image, ImageBackground } from 'react-native';
 
 // components
@@ -6,10 +6,9 @@ import { Touchable, Text, Icon, ButtonIcon } from '../../../components';
 // seller components
 import { Shortcut as DashboardShorcut } from '../components';
 // local components
-import { Link as DashboardLink, ModalSelectProductType } from './components';
-// containers
-import UserProvider from '../../../containers/user';
+import { Link as DashboardLink } from './components';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // styles
 import globalStyles from '../../../styles';
@@ -30,8 +29,7 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);

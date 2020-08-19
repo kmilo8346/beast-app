@@ -2,57 +2,61 @@ import React from 'react';
 import { View } from 'react-native';
 
 // components
-import { Container, Text, Button } from '../../components';
+import { Text, Button } from '../../components';
 // styles
 import globalStyles from '../../styles';
+import colors from '../../styles/colors';
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
-  route: any;
 }
 
-export default ({ navigation, route }: ScreenProps) => {
+export default ({ navigation }: ScreenProps) => {
   // event handlers
-  const pressContinueHandler = () => {
-    const { redirect } = route.params;
-    if (redirect.name === 'SignIn') {
-      navigation.navigate('SignIn', {
-        redirect: {
-          name: 'MainTab',
-        },
-      });
-      return;
-    }
-    if (redirect.name === 'SetAddress') {
-      navigation.navigate('SetAddress');
-      return;
-    }
-    throw new Error(
-      `Redirect name (${route.params.redirect.name}) not supported`
-    );
+  const pressMainActionHandler = () => {
+    navigation.navigate('SignIn', {
+      redirect: {
+        name: 'MainTab',
+      },
+    });
   };
+
+  // render logic
   return (
-    <Container safeArea withMargin>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text level={5} style={{ lineHeight: 30 }}>
-            Al continuar, aceptas los{' '}
-            <Text level={5} weight="bold">
-              Términos de uso
-            </Text>{' '}
-            y la{' '}
-            <Text level={5} weight="bold">
-              Política de Privacidad
-            </Text>{' '}
-            de Shop-Shop
-          </Text>
-        </View>
+    <View
+      style={[
+        {
+          flex: 1,
+          backgroundColor: colors.white,
+        },
+        globalStyles.withPadding,
+      ]}
+    >
+      <View style={{ alignItems: 'center', marginTop: '70%' }}>
+        <Text level={5} style={{ lineHeight: 30 }}>
+          Al continuar, estas aceptando los
+        </Text>
+        <Text
+          level={5}
+          color={colors.blue}
+          weight="bold"
+          style={{ textAlign: 'center' }}
+        >
+          Términos de servicio y políticas de privacidad.
+        </Text>
       </View>
-      <Button
-        title="Continuar"
-        onPress={pressContinueHandler}
-        style={globalStyles.withMainActionAir}
-      />
-    </Container>
+      <View
+        style={[
+          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          globalStyles.withMargin,
+        ]}
+      >
+        <Button
+          title="Aceptar y continuar"
+          onPress={pressMainActionHandler}
+          style={globalStyles.withMainActionAir}
+        />
+      </View>
+    </View>
   );
 };

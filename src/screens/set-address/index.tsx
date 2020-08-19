@@ -4,11 +4,20 @@ import validate from 'validate.js';
 import { CommonActions } from '@react-navigation/native';
 
 // components
-import { Input, Button, Text, InputPlaceAutocomplete } from '../../components';
+import {
+  Input,
+  Button,
+  Text,
+  InputPlaceAutocomplete,
+  Toast,
+  IToast,
+  LoadingOverlay,
+  ILoadingOverlay,
+} from '../../components';
 // clients
-import userClient from '../../clients/user-client';
-// containers
-import UserProvider from '../../containers/user';
+import userClient from '../../clients/user-client-v2';
+// cache
+import userCache from '../../cache/user';
 // types
 import { Place } from '../../types';
 // constraints
@@ -105,7 +114,7 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
 }
 
@@ -115,7 +124,6 @@ export default ({ navigation }: ScreenProps) => {
     view: 'FORM',
     form: {
       // fields
-      address: undefined,
       apartment: '',
 
       // other states
@@ -123,27 +131,29 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
 
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-  const apartmentInput = useRef<TextInput>(null);
-
-  // preconditions
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const apartmentInput = useRef<TextInput>(null);
+  const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
   const changeHandler = (attribute: string, value: any) => {
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value' });
   };
-  const openAutomcompleteHandler = () => {
+
+  const openAutocompleteHandler = () => {
     dispatch({ type: 'change_view', view: 'AUTOCOMPLETE' });
   };
-  const closeAutomcompleteHandler = () => {
+
+  const closeAutocompleteHandler = () => {
     dispatch({ type: 'change_view', view: 'FORM' });
   };
-  const pressContinueHandler = () => {
+
+  const pressContinueHandler = async () => {
     // set submitted
     dispatch({ type: 'set_submitted' });
     // validate
@@ -153,31 +163,42 @@ export default ({ navigation }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
-    const address: Place = {
-      ...(state.form.address as Place),
-      apartment: state.form.apartment,
-    };
-    const version = new Date().getTime();
-    userClient.update(
-      user.id,
-      {
-        currentAddress: address.id,
+
+    try {
+      loadingOverlayRef.current?.show();
+      const user = userCache.getData();
+      const address: Place = {
+        ...(state.form.address as Place),
+        apartment: state.form.apartment,
+      };
+      const toSave = {
+        ...user,
+        current_address: address.id,
         addresses: [address],
-      },
-      version
-    );
-    dispatch({ type: 'set_submit_op_id', opId: version });
-  };
-  useEffect(() => {
-    if (state.form.submitOpId && state.form.submitOpId === user.version) {
+      };
+      const created = await userClient.create({
+        body: toSave,
+      });
+      await userCache.setData(created);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
           routes: [{ name: 'MainTab' }],
         })
       );
+    } catch (error) {
+      // TODO: log error
+      console.log(error);
+
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: 'Error inesperado, reintente por favor',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
     }
-  }, [state.form.submitOpId, user.version, user.currentAddress]);
+  };
 
   // render logic
   let text = null;
@@ -218,19 +239,21 @@ export default ({ navigation }: ScreenProps) => {
           onChange={(address) => {
             changeHandler('address', address);
           }}
-          onOpen={openAutomcompleteHandler}
-          onClose={closeAutomcompleteHandler}
+          onOpen={openAutocompleteHandler}
+          onClose={closeAutocompleteHandler}
           errors={state.form.errors?.address}
         />
         {apartment}
       </ScrollView>
       <View style={globalStyles.withMargin}>
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"
           onPress={pressContinueHandler}
           style={globalStyles.withMainActionAir}
         />
       </View>
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

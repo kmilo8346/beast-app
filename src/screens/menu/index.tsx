@@ -1,21 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useIsFocused } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Container, Button } from '../../components';
+import { Text, Button } from '../../components';
 // local components
 import { Item } from './components';
-// clients
-import userClient from '../../clients/user-client';
-// containers
-import UserProvider from '../../containers/user';
+// lib
+import firebase from '../../lib/firebase';
+// cache
+import userCache from '../../cache/user';
 // styles
 import globalStyle from '../../styles';
+import colors from '../../styles/colors';
 import styles from './styles';
 
 // instances outside component
 const prefix = '[menu screen]';
+
+function useForceUpdate() {
+  const [, setValue] = useState(0); // integer state
+  return () => setValue((value) => value + 1); // update the state to force render
+}
 
 export interface MenuProps {
   navigation: any;
@@ -23,33 +30,35 @@ export interface MenuProps {
 
 export default ({ navigation }: MenuProps) => {
   // state
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-  // preconditions
+  useIsFocused();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const insets = useSafeAreaInsets();
 
   // event handlers
   const pressToogleSessionHandler = async () => {
     try {
-      if (user && user.email) {
-        await userClient.signOut();
-        // navigation.dispatch(
-        //   CommonActions.reset({
-        //     index: 1,
-        //     routes: [{ name: 'Onboarding' }],
-        //   })
-        // );
+      if (userCache.isLogged()) {
+        await firebase.auth().signOut();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'Boot' }],
+          })
+        );
       } else {
         navigation.navigate('SignIn', {
           redirect: {
             name: 'MainTab',
           },
+          dont_allow_guest: true,
         });
       }
     } catch (error) {
-      // TODO: manage error
+      // TODO: log error
+      console.log(error);
     }
   };
 
@@ -57,14 +66,21 @@ export default ({ navigation }: MenuProps) => {
     navigation.navigate(screen);
   };
 
+  // useFocusEffect(() => {
+  //   console.log('calling force update');
+  //   forceUpdate();
+  // });
+
   // render logic
   let toogleSessionMessage = 'Iniciar Session';
-  if (user && user.email) {
+  if (userCache.isLogged()) {
     toogleSessionMessage = 'Cerrar Session';
   }
 
   return (
-    <Container safeArea fakeHeader>
+    <View
+      style={{ flex: 1, backgroundColor: colors.white, paddingTop: insets.top }}
+    >
       <Text level={1} weight="bold" style={globalStyle.withMargin}>
         Menú
       </Text>
@@ -93,6 +109,6 @@ export default ({ navigation }: MenuProps) => {
           onPress={pressToogleSessionHandler}
         />
       </View>
-    </Container>
+    </View>
   );
 };

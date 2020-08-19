@@ -102,16 +102,6 @@ export interface Place {
       lat: number;
       lng: number;
     };
-    viewport: {
-      northeast: {
-        lat: number;
-        lng: number;
-      };
-      southwest: {
-        lat: number;
-        lng: number;
-      };
-    };
   };
 }
 
@@ -216,26 +206,50 @@ export interface Card {
   dateLastUpdated: string;
 }
 
-export interface User {
+export interface CreateAnonymouslyUser {
   id: string;
-  version: number;
-  email: string | undefined;
-  firstName: string | undefined;
-  lastName: string | undefined;
-  photoUrl: string | undefined;
-  phone: string | undefined;
-  phoneVerified: boolean;
-  // addresses
-  currentAddress: string | undefined;
+  current_address: string;
   addresses: Place[];
-  // store
-  currentStore?: string;
-
-  metaData: { [key: string]: any };
-
-  // trick for dot notation used in firestore
-  [key: string]: any;
 }
+
+export interface CreateLoggedUser {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name?: string;
+  photo_url: string;
+  phone: string;
+  phone_verified: boolean;
+  current_address: string;
+  addresses: Place[];
+}
+
+export type CreateUser = CreateAnonymouslyUser | CreateLoggedUser;
+
+export interface AnonymouslyUser {
+  id: string;
+  current_address: string;
+  addresses: Place[];
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface LoggedUser {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name?: string;
+  photo_url: string;
+  phone: string;
+  phone_verified: boolean;
+  current_address: string;
+  addresses: Place[];
+  current_store?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export type User = AnonymouslyUser | LoggedUser;
 
 export interface Customer {
   id: string;

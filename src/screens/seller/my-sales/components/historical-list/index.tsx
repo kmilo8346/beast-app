@@ -12,9 +12,8 @@ import { Order, SearchResponse } from '../../../../../types';
 import * as utils from '../../../../../lib/utils';
 // clients
 import orderClient from '../../../../../clients/order-client';
-// containers
-import UserProvider from '../../../../../containers/user';
 // cache
+import userCache from '../../../../../cache/user';
 import storeCache from '../../../../../cache/store';
 // styles
 import globalStyles from '../../../../../styles';
@@ -73,8 +72,7 @@ export default ({
     fetchingMore: false,
     refreshing: false,
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} user must be defined`);
   }

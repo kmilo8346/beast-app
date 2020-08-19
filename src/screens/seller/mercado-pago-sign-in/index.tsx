@@ -18,15 +18,15 @@ import {
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 import storeClient from '../../../clients/store-client';
-// container
-import UserProvider from '../../../containers/user';
+import userClient from '../../../clients/user-client-v2';
+// types
+import { CreateStore } from '../../../types';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-import { CreateStore } from '../../../types';
-import userClient from '../../../clients/user-client';
 
 const mercadoPagoImage = require('../../../../assets/mercado_pago.png');
 
@@ -71,8 +71,7 @@ export default ({ navigation }: ScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: 'MERCADO_PAGO_BENEFITS',
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
@@ -134,14 +133,17 @@ export default ({ navigation }: ScreenProps) => {
       const created = await storeClient.create({
         body: storeCache.getData() as CreateStore,
       });
-      // set created store in cache
-      storeCache.setData(created);
-      // set current store in user
-      userClient.update(
-        user.id,
-        { currentStore: created.id },
-        new Date().getTime()
-      );
+      // set current store
+      await userClient.update({
+        pathVars: {
+          id: user.id,
+        },
+        body: {
+          current_store: created.id,
+        },
+      });
+      storeCache // set created store in cache
+        .setData(created);
       // navigate
       navigation.dispatch(
         CommonActions.reset({

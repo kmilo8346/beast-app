@@ -2,24 +2,18 @@ import React, { useCallback } from 'react';
 import { View } from 'react-native';
 
 // components
-import { Container, Text, Button } from '../../components';
+import { Text, Button } from '../../components';
 // styles
 import globalStyles from '../../styles';
+import colors from '../../styles/colors';
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
 }
 
 export default ({ navigation }: ScreenProps) => {
   // event handlers
-  const pressOmitHandler = useCallback(() => {
-    navigation.navigate('Terms', {
-      redirect: {
-        name: 'SetAddress',
-      },
-    });
-  }, []);
-  const pressStartToShopHandler = useCallback(async () => {
+  const pressMainActionHandler = useCallback(async () => {
     navigation.navigate('Terms', {
       redirect: {
         name: 'SignIn',
@@ -29,27 +23,33 @@ export default ({ navigation }: ScreenProps) => {
 
   // render logic
   return (
-    <Container safeArea withMargin>
-      <View style={{ flexDirection: 'row' }}>
-        <View style={{ flex: 1 }} />
+    <View
+      style={[
+        {
+          flex: 1,
+          backgroundColor: colors.white,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        globalStyles.withPadding,
+      ]}
+    >
+      <Text level={5}>
+        Aki mostramos lo que un comprador y un vendedor pueden lograr con
+        Shop-Shop
+      </Text>
+      <View
+        style={[
+          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          globalStyles.withMargin,
+        ]}
+      >
         <Button
-          title="Omitir"
-          type="link"
-          style={{ alignItems: 'flex-end' }}
-          onPress={pressOmitHandler}
+          title="Empieza hacer tus compras"
+          onPress={pressMainActionHandler}
+          style={globalStyles.withMainActionAir}
         />
       </View>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text level={5}>
-          Aki mostramos lo que un comprador y un vendedor pueden lograr con
-          Shop-Shop
-        </Text>
-      </View>
-      <Button
-        title="Empieza hacer tus compras"
-        onPress={pressStartToShopHandler}
-        style={globalStyles.withMainActionAir}
-      />
-    </Container>
+    </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useRef } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
@@ -16,9 +16,8 @@ import {
 } from '../../../components';
 // clients
 import storeClient from '../../../clients/store-client';
-// containers
-import UserProvider from '../../../containers/user';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
@@ -95,8 +94,7 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);

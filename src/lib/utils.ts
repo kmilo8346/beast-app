@@ -1,4 +1,4 @@
-import { Item } from '../types';
+import { Item, User, CreateUser } from '../types';
 
 export const noop = () => {
   return null;
@@ -112,4 +112,39 @@ export const getStats = (items: Item[]) => {
       ammount: 0,
     }
   );
+};
+
+export const extract = (
+  authUser: firebase.User,
+  profile?: { [key: string]: any }
+): Partial<CreateUser> => {
+  if (authUser.isAnonymous) {
+    return {
+      id: authUser.uid,
+    };
+  }
+
+  let first_name = authUser.displayName as string;
+  let last_name = '';
+  if (profile) {
+    if (profile.first_name) {
+      first_name = profile.first_name;
+    } else if (profile.given_name) {
+      first_name = profile.given_name;
+    }
+
+    if (profile.last_name) {
+      last_name = profile.last_name;
+    } else if (profile.family_name) {
+      last_name = profile.family_name;
+    }
+  }
+
+  return {
+    id: authUser.uid,
+    email: authUser.email as string,
+    first_name,
+    last_name,
+    photo_url: authUser.photoURL as string,
+  };
 };

@@ -4,117 +4,98 @@ import { CommonActions } from '@react-navigation/native';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 
 // components
-import { Container, Text, Button, Toast, IToast } from '../../components';
+import {
+  Text,
+  Button,
+  Toast,
+  IToast,
+  LoadingOverlay,
+  ILoadingOverlay,
+} from '../../components';
 // clients
 import phoneClient from '../../clients/phone-client';
-import userClient from '../../clients/user-client';
-// libs
-import firebase from '../../lib/firebase';
-// containers
-import UserProvider from '../../containers/user';
+import userClient from '../../clients/user-client-v2';
+// cache
+import userCache from '../../cache/user';
+// types
+import { LoggedUser } from '../../types';
 // styles
 import colors from '../../styles/colors';
+import globalStyles from '../../styles';
 
 // instances outside component
 const prefix = '[verify phone screen]';
 
-type ChangeCodeAction = {
-  type: 'change_code';
-  code: string;
+type ChangeUserCodeAction = {
+  type: 'change_user_code';
+  user_code: string;
+};
+type AddBeastCodeAction = {
+  type: 'add_beast_code';
+  beast_code: string;
 };
 type SetHasVerificationErrorAction = {
   type: 'set_has_verfication_error';
-  hasError: boolean;
-};
-type SetSubmitOpIdAction = {
-  type: 'set_submit_op_id';
-  opId: number;
+  error: boolean;
 };
 
 type Action =
-  | ChangeCodeAction
-  | SetHasVerificationErrorAction
-  | SetSubmitOpIdAction;
+  | ChangeUserCodeAction
+  | AddBeastCodeAction
+  | SetHasVerificationErrorAction;
 
 type State = {
-  code: string;
-  hasVerficationError: boolean;
-  submitOpId?: number;
+  user_code: string;
+  beast_codes: string[];
+  has_verfication_error: boolean;
 };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'change_code':
-      return { ...state, code: action.code };
-    case 'set_has_verfication_error':
-      return { ...state, hasVerficationError: action.hasError };
-    case 'set_submit_op_id':
+    case 'change_user_code':
+      return { ...state, user_code: action.user_code };
+    case 'add_beast_code':
       return {
         ...state,
-        submitOpId: action.opId,
+        beast_codes: [...state.beast_codes, action.beast_code],
       };
+    case 'set_has_verfication_error':
+      return { ...state, has_verfication_error: action.error };
     default:
       return state;
   }
 };
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
   route: any;
 }
 
 export default ({ navigation, route }: ScreenProps) => {
+  // params
+  const redirect = route.params.redirect;
   // state
   const [state, dispatch] = useReducer(reducer, {
-    code: '',
-    hasVerficationError: false,
+    user_code: '',
+    beast_codes: [],
+    has_verfication_error: false,
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-  const toastRef = useRef<IToast>(null);
-
-  // preconditions
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
-  const submitHandler = async (code: string) => {
-    try {
-      if ((user.metaData.codes || []).indexOf(code) !== -1) {
-        const version = new Date().getTime();
-        userClient.update(
-          user.id,
-          {
-            phoneVerified: true,
-            'metaData.codes': [],
-          },
-          version
-        );
-        dispatch({ type: 'set_submit_op_id', opId: version });
-        return;
-      }
-      dispatch({ type: 'set_has_verfication_error', hasError: true });
-    } catch (error) {
-      // TODO: log error and show toast
-    }
-  };
-  const changeCodeHandler = (code: string) => {
-    dispatch({ type: 'change_code', code });
-  };
   const sendCode = async (initial = false) => {
     try {
-      dispatch({ type: 'set_has_verfication_error', hasError: false });
-      const { code } = await phoneClient.code({
-        phone: user?.phone as string,
+      dispatch({ type: 'set_has_verfication_error', error: false });
+      const { code: beast_code } = await phoneClient.code({
+        phone: user.phone,
       });
-      await userClient.update(
-        user.id,
-        {
-          'metaData.codes': firebase.firestore.FieldValue.arrayUnion(code),
-        },
-        new Date().getTime()
-      );
+      dispatch({ type: 'add_beast_code', beast_code });
+
       if (!initial) {
         toastRef.current?.show({
           type: 'SUCCESS',
@@ -123,6 +104,9 @@ export default ({ navigation, route }: ScreenProps) => {
         });
       }
     } catch (error) {
+      // TODO: log error
+      console.log(error);
+
       toastRef.current?.show({
         type: 'ERROR',
         message: 'Error al enviar código',
@@ -130,61 +114,112 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     }
   };
-  useEffect(() => {
-    if (user?.phone) {
-      sendCode(true);
-    }
-  }, [user?.phone]);
-  useEffect(() => {
-    // phone was verified
-    if (user.version === state.submitOpId && user.phoneVerified) {
-      // not current address
-      if (!user.currentAddress) {
-        navigation.replace('SetAddress');
-        return;
-      }
-      // redirect to MainTab
-      if (route.params.redirect.name === 'MainTab') {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [{ name: 'MainTab' }],
-          })
-        );
-        return;
-      }
-      // redirect to SellerDashboard
-      if (route.params.redirect.name === 'SellerDashboard') {
-        const store = user.store;
-        if (!store || !store.name || !store.images) {
-          navigation.replace('SetStoreInfo');
-          return;
-        }
-        if (!store.deliveryArea || !store.deliveryTime || !store.openingHours) {
-          navigation.replace('SetStoreDeliveryInfo');
-          return;
-        }
-        if (!store.sellerCredentials?.userId) {
-          navigation.replace('MercadoPagoSignIn');
-          return;
-        }
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [{ name: 'SellerDashboard' }],
-          })
-        );
-        return;
-      }
 
-      navigation.pop();
-      navigation.replace(route.params.redirect.name);
+  const changeUserCodeHandler = (userCode: string) => {
+    dispatch({ type: 'change_user_code', user_code: userCode });
+  };
+
+  const submitHandler = async (code: string) => {
+    if (state.beast_codes.indexOf(code) === -1) {
+      dispatch({ type: 'set_has_verfication_error', error: true });
+      return;
     }
-  }, [state.submitOpId, user.phoneVerified]);
+
+    await userCache.updateData({
+      phone_verified: true,
+    });
+
+    const user = userCache.getData() as LoggedUser;
+    if (user.current_address && user.addresses.length) {
+      try {
+        loadingOverlayRef.current?.show();
+        const created = await userClient.create({
+          body: user,
+        });
+        await userCache.setData(created);
+        if (redirect.name === 'MainTab') {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 1,
+              routes: [{ name: 'MainTab' }],
+            })
+          );
+        } else {
+          navigation.pop();
+          navigation.replace(redirect.name, redirect.params);
+        }
+      } catch (error) {
+        // TODO: log error
+        console.log(error);
+
+        toastRef.current?.show({
+          type: 'ERROR',
+          message: 'Error inesperado, reintente por favor',
+          expiration: 3,
+        });
+      } finally {
+        loadingOverlayRef.current?.hide();
+      }
+    } else {
+      navigation.pop();
+      navigation.replace('SetAddress');
+    }
+  };
+
+  useEffect(() => {
+    sendCode(true);
+  }, [user.phone]);
+
+  // useEffect(() => {
+  //   // phone was verified
+  //   if (user.version === state.submitOpId && user.phoneVerified) {
+  //     // not current address
+  //     if (!user.currentAddress) {
+  //       navigation.replace('SetAddress');
+  //       return;
+  //     }
+  //     // redirect to MainTab
+  //     if (route.params.redirect.name === 'MainTab') {
+  //       navigation.dispatch(
+  //         CommonActions.reset({
+  //           index: 1,
+  //           routes: [{ name: 'MainTab' }],
+  //         })
+  //       );
+  //       return;
+  //     }
+  //     // redirect to SellerDashboard
+  //     if (route.params.redirect.name === 'SellerDashboard') {
+  //       const store = user.store;
+  //       if (!store || !store.name || !store.images) {
+  //         navigation.replace('SetStoreInfo');
+  //         return;
+  //       }
+  //       if (!store.deliveryArea || !store.deliveryTime || !store.openingHours) {
+  //         navigation.replace('SetStoreDeliveryInfo');
+  //         return;
+  //       }
+  //       if (!store.sellerCredentials?.userId) {
+  //         navigation.replace('MercadoPagoSignIn');
+  //         return;
+  //       }
+  //       navigation.dispatch(
+  //         CommonActions.reset({
+  //           index: 1,
+  //           routes: [{ name: 'SellerDashboard' }],
+  //         })
+  //       );
+  //       return;
+  //     }
+
+  //     navigation.pop();
+  //     navigation.replace(route.params.redirect.name);
+  //   }
+  // }, [state.submitOpId, user.phoneVerified]);
 
   // render logic
   let verficationError = null;
-  if (state.hasVerficationError) {
+  if (state.has_verfication_error) {
     verficationError = (
       <Text level={7} color={colors.red} style={{ marginLeft: 20 }}>
         El código es incorrecto
@@ -192,7 +227,12 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   }
   return (
-    <Container safeArea withMargin>
+    <View
+      style={[
+        { flex: 1, backgroundColor: colors.white },
+        globalStyles.withPadding,
+      ]}
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={[{ height: '100%', width: '100%' }]}>
           <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
@@ -207,8 +247,8 @@ export default ({ navigation, route }: ScreenProps) => {
             </Text>
           </Text>
           <OTPInputView
-            code={state.code}
-            onCodeChanged={changeCodeHandler}
+            code={state.user_code}
+            onCodeChanged={changeUserCodeHandler}
             pinCount={4}
             autoFocusOnLoad
             style={{
@@ -256,6 +296,7 @@ export default ({ navigation, route }: ScreenProps) => {
           </View>
         </View>
       </TouchableWithoutFeedback>
-    </Container>
+      <LoadingOverlay ref={loadingOverlayRef} />
+    </View>
   );
 };
