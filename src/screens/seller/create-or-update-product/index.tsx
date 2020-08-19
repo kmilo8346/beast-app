@@ -28,9 +28,8 @@ import validate from '../../../lib/validate';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import stringParser from '../../../lib/parsers/string-parser';
 import { noop } from '../../../lib/utils';
-// containers
-import UserProvider from '../../../containers/user';
 // cache
+import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // types
 import { Product } from '../../../types';
@@ -138,8 +137,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
       submitted: false,
     },
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
