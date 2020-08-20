@@ -77,9 +77,10 @@ export default ({ navigation }: BootProps) => {
 
       console.log('Anonymously user');
       console.log(`User id              :     ${user.id}`);
-      console.log(`User current address :     ${user.current_address || ''}`);
-      console.log(`User created at      :     ${user.created_at || ''}`);
-      console.log(`User updated at      :     ${user.updated_at || ''}`);
+      console.log(`User current address :     ${user.current_address}`);
+      console.log(`User addresses       :     ${user.addresses}`);
+      console.log(`User created at      :     ${user.created_at}`);
+      console.log(`User updated at      :     ${user.updated_at}`);
     }
   };
 

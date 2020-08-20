@@ -1,33 +1,79 @@
-import React from 'react';
-import { ActivityIndicator, View, ActivityIndicatorProps } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Animated } from 'react-native';
+import LottieView from 'lottie-react-native';
 
-// components
-import Text from '../text';
-// styles
-import colors from '../../styles/colors';
-import styles from './styles';
+// assets
+import Loading from '../../../assets/lotties/carga.json';
 
-export interface LoadingProps extends ActivityIndicatorProps {
-  message?: string;
-}
+const messages = [
+  'Conectando reflectores.',
+  'Enviando la señal.',
+  'Despertando a Batman.',
+  'Poniendole bencina al batimovil.',
+  'Llamando a Robin.',
+];
 
-export default ({
-  size = 'small',
-  color = colors.black,
-  message = 'Cargando...',
-  ...otherProps
-}: LoadingProps) => {
+export default () => {
+  // state
+  const [currentMessage, setCurrentMessage] = useState(0);
+  // message logic
+  const resetMessage = () => {
+    if (currentMessage === messages.length - 1) {
+      setCurrentMessage(0);
+      return;
+    }
+    setCurrentMessage((currentMessage) => currentMessage + 1);
+  };
+  const changeMessage = setInterval(resetMessage, 3500);
+
+  // animation logic
+  const animated = new Animated.Value(0);
+  const slideIn = () => {
+    Animated.timing(animated, {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 1400,
+    }).start();
+  };
+  const translateX = animated.interpolate({
+    inputRange: [0, 1],
+    outputRange: [350, 0],
+  });
+  const transform = [{ translateX }];
+  // event handlers
+  useEffect(() => {
+    slideIn();
+    return () => {
+      // clear interval
+      clearInterval(changeMessage);
+    };
+  });
+
   return (
-    <View style={[styles.container]}>
-      <ActivityIndicator
-        {...otherProps}
-        size={size}
-        color={color}
-        style={[styles.indicator, otherProps.style]}
+    <View
+      style={{
+        alignItems: 'center',
+      }}
+    >
+      <LottieView
+        style={{
+          height: 300,
+          marginBottom: -50,
+        }}
+        autoPlay
+        source={Loading}
       />
-      <Text level={7} weight="bold" style={styles.message}>
-        {message}
-      </Text>
+      <Animated.Text
+        style={[
+          {
+            width: '100%',
+            textAlign: 'center',
+          },
+          { transform },
+        ]}
+      >
+        {messages[currentMessage]}
+      </Animated.Text>
     </View>
   );
 };

@@ -29,7 +29,6 @@ export { default as ActionSheetContact } from './modals/action-sheet-contact';
 export { default as ErrorView } from './error-view';
 export { default as NotSearchResult } from './not-search-result';
 export { default as Loading } from './loading';
-export { default as LottieLoading } from './lottie-loading';
 export { default as LoadingOverlay, ILoadingOverlay } from './loading-overlay';
 export { default as FlatList } from './flat-list';
 export { default as SectionList } from './section-list';

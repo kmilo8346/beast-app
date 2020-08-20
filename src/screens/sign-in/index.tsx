@@ -170,7 +170,7 @@ export default ({ navigation, route }: ScreenProps) => {
     } catch (error) {
       // dont crash app for that
       console.log(
-        `${prefix} Unexpected error deleting anonymously user, id: ${prevAuthUser?.uid}`
+        `${prefix} Unexpected error deleting anonymously user, id: ${anonymously?.uid}`
       );
     }
   };

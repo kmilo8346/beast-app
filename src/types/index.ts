@@ -226,24 +226,12 @@ export interface CreateLoggedUser {
 
 export type CreateUser = CreateAnonymouslyUser | CreateLoggedUser;
 
-export interface AnonymouslyUser {
-  id: string;
-  current_address: string;
-  addresses: Place[];
+export interface AnonymouslyUser extends CreateAnonymouslyUser {
   created_at: Date;
   updated_at: Date;
 }
 
-export interface LoggedUser {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name?: string;
-  photo_url: string;
-  phone: string;
-  phone_verified: boolean;
-  current_address: string;
-  addresses: Place[];
+export interface LoggedUser extends CreateLoggedUser {
   current_store?: string;
   created_at: Date;
   updated_at: Date;
