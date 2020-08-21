@@ -4,9 +4,14 @@ import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Input, Button, Loading } from '../../components';
+import Loading from '../../components/loading';
+import Text from '../../components/text';
+import Input from '../../components/inputs/input';
+import Button from '../../components/buttons/button';
+import BagLogoBackgroundBlue from '../../components/svgs/images/bag-logo-background-blue';
 // local components
-import { ButtonGoogle, ButtonFacebook } from './components';
+import ButtonGoogle from './components/button-google';
+import ButtonFacebook from './components/button-facebook';
 // clients
 import userClient from '../../clients/user-client-v2';
 // libs
@@ -332,7 +337,7 @@ export default ({ navigation, route }: ScreenProps) => {
           alignItems: 'center',
         }}
       >
-        <Loading message="Conectándonos a la Matrix" />
+        <Loading />
       </View>
     );
   }
@@ -397,22 +402,18 @@ export default ({ navigation, route }: ScreenProps) => {
         globalStyles.withPadding,
       ]}
     >
-      <Text
-        level={1}
-        weight="bold"
-        style={{ marginBottom: 35, color: colors.blue }}
-      >
-        Logo
+      <View style={{ flexDirection: 'row', marginBottom: 20 }} />
+      <BagLogoBackgroundBlue />
+      <Text level={1} weight="bold" style={{ marginBottom: 15, marginTop: 10 }}>
+        !Bienvenido!
       </Text>
-      <Text level={1} weight="bold" style={{ marginBottom: 15 }}>
-        !Hola¡
-      </Text>
-      <Text level={5} style={{ marginBottom: 50 }}>
-        Para empezar ingresa con tu email
+      <Text level={5} weight="200" style={{ marginBottom: 50 }}>
+        Inicia sesión con tu correo electrónico
       </Text>
       <Input
-        placeholder="Email"
-        label=""
+        placeholder="youremail@email.com"
+        label="Email"
+        labelStyles={{ color: colors.blue, fontWeight: 'bold' }}
         returnKeyType="done"
         onSubmitEditing={submitHandler}
         value={state.form.email}

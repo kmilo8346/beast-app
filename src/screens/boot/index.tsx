@@ -2,7 +2,8 @@ import React, { useReducer, useEffect } from 'react';
 import { View } from 'react-native';
 
 // components
-import { Loading, ErrorView } from '../../components';
+import Loading from '../../components/loading';
+import ErrorView from '../../components/error-view';
 // clients
 import userClient from '../../clients/user-client-v2';
 // cache

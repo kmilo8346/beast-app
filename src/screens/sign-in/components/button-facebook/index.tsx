@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -12,8 +12,11 @@ import Constants from 'expo-constants';
 
 // components
 import Button from '../../../../components/buttons/button';
+import Text from '../../../../components/text';
+import Facebook from '../../../../components/svgs/icons/facebook';
 // libs
 import firebase from '../../../../lib/firebase';
+import colors from '../../../../styles/colors';
 
 // instances outside component
 WebBrowser.maybeCompleteAuthSession();
@@ -86,12 +89,21 @@ export default ({
   }, [response]);
 
   // render logic
+  const titleComponent: ReactNode = (
+    <Text level={5} weight="normal" color={colors.blackLight1}>
+      Ingresar con Facebook
+    </Text>
+  );
   return (
     <Button
-      title="Entrar con Facebook"
-      type="secondary"
+      title={titleComponent}
+      icon={<Facebook />}
       disabled={!request}
       onPress={pressHandler}
+      style={{
+        backgroundColor: colors.blackLight7,
+        borderWidth: 0,
+      }}
     />
   );
 };

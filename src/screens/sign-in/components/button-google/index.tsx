@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -14,8 +14,12 @@ import Constants from 'expo-constants';
 
 // components
 import Button from '../../../../components/buttons/button';
+import Text from '../../../../components/text';
+import Google from '../../../../components/svgs/icons/google';
 // libs
 import firebase from '../../../../lib/firebase';
+// styles
+import colors from '../../../../styles/colors';
 
 // instances outside component
 WebBrowser.maybeCompleteAuthSession();
@@ -89,12 +93,21 @@ export default ({
   }, [response]);
 
   // render logic
+  const titleComponent: ReactNode = (
+    <Text level={5} weight="normal" color={colors.blackLight1}>
+      Ingresar con Google
+    </Text>
+  );
   return (
     <Button
-      title="Entrar con Google"
-      type="secondary"
+      title={titleComponent}
+      icon={<Google />}
       disabled={!request || !nonce}
       onPress={pressButtonHandler}
+      style={{
+        backgroundColor: colors.blackLight7,
+        borderWidth: 0,
+      }}
     />
   );
 };

@@ -17,6 +17,7 @@ import styles from './styles';
 
 export interface InputProps extends TextInputProps {
   label?: string;
+  labelStyles?: TextStyle;
   errors?: string[];
   lengthCounter?: boolean;
   prefix?: string | JSX.Element;
@@ -34,6 +35,7 @@ export default forwardRef<Ref, InputProps>(
   (
     {
       label = '',
+      labelStyles = {},
       value,
       errors = [],
       lengthCounter = false,
@@ -120,7 +122,7 @@ export default forwardRef<Ref, InputProps>(
     return (
       <View style={finalContainerStyle}>
         {!!label && (
-          <Text level={6} style={styles.label}>
+          <Text level={6} style={[styles.label, labelStyles]}>
             {label}
           </Text>
         )}

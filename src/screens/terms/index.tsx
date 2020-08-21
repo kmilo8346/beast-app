@@ -1,8 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Button } from '../../components';
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
+import SignedDocumentBlue from '../../components/svgs/images/signed-document-blue';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -12,6 +15,7 @@ interface ScreenProps {
 }
 
 export default ({ navigation }: ScreenProps) => {
+  const insets = useSafeAreaInsets();
   // event handlers
   const pressMainActionHandler = () => {
     navigation.navigate('SignIn', {
@@ -32,9 +36,11 @@ export default ({ navigation }: ScreenProps) => {
         globalStyles.withPadding,
       ]}
     >
-      <View style={{ alignItems: 'center', marginTop: '70%' }}>
-        <Text level={5} style={{ lineHeight: 30 }}>
-          Al continuar, estas aceptando los
+      <View style={{ alignItems: 'center', marginTop: '50%' }}>
+        <SignedDocumentBlue />
+        <View style={{ height: 20 }} />
+        <Text level={5} weight="200" style={{ lineHeight: 30 }}>
+          Al continuar, estás aceptando los
         </Text>
         <Text
           level={5}
@@ -47,7 +53,13 @@ export default ({ navigation }: ScreenProps) => {
       </View>
       <View
         style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingBottom: insets.bottom,
+          },
           globalStyles.withMargin,
         ]}
       >
