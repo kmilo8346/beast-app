@@ -11,7 +11,7 @@ import styles from './styles';
 
 export interface ButtonProps extends Partial<TouchableProps> {
   title: string | ReactNode;
-  icon?: string;
+  icon?: string | ReactNode;
   loading?: boolean;
   disabled?: boolean;
   type?: 'primary' | 'secondary' | 'link';
@@ -62,11 +62,20 @@ export default ({
   if (typeof title !== 'string') {
     titleComponent = title;
   }
+  let iconComponent = null;
+  if (icon) {
+    if (typeof icon !== 'string') {
+      iconComponent = icon;
+    } else {
+      iconComponent = (
+        <Icon name={icon} color={colors.white} style={styles.icon} />
+      );
+    }
+  }
+
   return (
     <Touchable disabled={disabled} {...otherProps} style={containerStyle}>
-      <View style={styles.iconContainer}>
-        {icon && <Icon name={icon} color={colors.white} style={styles.icon} />}
-      </View>
+      <View style={styles.iconContainer}>{iconComponent}</View>
       {titleComponent}
       <View style={styles.loadingContainer}>
         {loading && <ActivityIndicator color={colors.white} />}

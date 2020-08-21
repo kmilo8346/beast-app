@@ -1,21 +1,22 @@
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { View, TextInput, Vibration, ScrollView } from 'react-native';
-import validate from 'validate.js';
 import { CommonActions } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import {
-  Input,
-  Button,
-  Text,
-  InputPlaceAutocomplete,
-  Toast,
-  IToast,
-  LoadingOverlay,
+import Input from '../../components/inputs/input';
+import Button from '../../components/buttons/button';
+import Text from '../../components/text';
+import InputPlaceAutocomplete from '../../components/inputs/input-place-autocomplete';
+import Toast, { IToast } from '../../components/toast';
+import LoadingOverlay, {
   ILoadingOverlay,
-} from '../../components';
+} from '../../components/loading-overlay';
+import MapPinShadedBlue from '../../components/svgs/icons/map-pin-shaded-blue';
 // clients
 import userClient from '../../clients/user-client-v2';
+// libs
+import validate from '../../lib/validate';
 // cache
 import userCache from '../../cache/user';
 // types
@@ -119,6 +120,7 @@ interface ScreenProps {
 }
 
 export default ({ navigation }: ScreenProps) => {
+  const insets = useSafeAreaInsets();
   // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'FORM',
@@ -207,11 +209,11 @@ export default ({ navigation }: ScreenProps) => {
   if (state.view === 'FORM') {
     text = (
       <Text
-        level={5}
-        style={{ marginBottom: 30, marginTop: 0, lineHeight: 25 }}
+        level={4}
+        weight="200"
+        style={{ marginBottom: 40, marginTop: 20, lineHeight: 25 }}
       >
-        Usaremos tu dirección para mostrarte todo lo que hay cerca tuyo. Te
-        sorprendería saber lo que se vende en tu edificio
+        Para ofrecerte una mejor búsqueda de comercios cerca de ti.
       </Text>
     );
     apartment = (
@@ -231,6 +233,12 @@ export default ({ navigation }: ScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
+        <View style={{ flexDirection: 'row', marginTop: 20 }}>
+          <MapPinShadedBlue />
+          <Text level={1} weight="bold" style={{ marginLeft: 10 }}>
+            Agrega tu dirección
+          </Text>
+        </View>
         {text}
         <InputPlaceAutocomplete
           label="Dirección"
@@ -245,7 +253,7 @@ export default ({ navigation }: ScreenProps) => {
         />
         {apartment}
       </ScrollView>
-      <View style={globalStyles.withMargin}>
+      <View style={[globalStyles.withMargin, { paddingBottom: insets.bottom }]}>
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"

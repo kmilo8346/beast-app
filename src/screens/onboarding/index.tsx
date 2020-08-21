@@ -1,8 +1,11 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Button } from '../../components';
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
+import UsersWithLogo from '../../components/svgs/images/users-with-logo';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -12,6 +15,7 @@ interface ScreenProps {
 }
 
 export default ({ navigation }: ScreenProps) => {
+  const insets = useSafeAreaInsets();
   // event handlers
   const pressMainActionHandler = useCallback(async () => {
     navigation.navigate('Terms', {
@@ -34,13 +38,20 @@ export default ({ navigation }: ScreenProps) => {
         globalStyles.withPadding,
       ]}
     >
-      <Text level={5}>
+      <UsersWithLogo />
+      <Text level={5} weight="200" style={{ marginTop: 30 }}>
         Aki mostramos lo que un comprador y un vendedor pueden lograr con
         Shop-Shop
       </Text>
       <View
         style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingBottom: insets.bottom,
+          },
           globalStyles.withMargin,
         ]}
       >
