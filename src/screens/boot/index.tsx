@@ -168,7 +168,7 @@ export default ({ navigation }: BootProps) => {
         alignItems: 'center',
       }}
     >
-      <Loading message="Conectando con la fuerza" />
+      <Loading />
     </View>
   );
 };

@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Modal, ViewStyle, StyleProp } from 'react-native';
 
 // components
-import Loading from '../loading';
+// import Loading from '../loading';
 // styles
 import colors from '../../styles/colors';
 
@@ -30,6 +30,7 @@ export default forwardRef<Ref, LoadingOverlayProps>(
         setIsVisible(false);
       },
     }));
+    console.log('loading overlay', isVisible);
     return (
       <Modal visible={isVisible} animationType="fade" transparent>
         <View
@@ -43,7 +44,7 @@ export default forwardRef<Ref, LoadingOverlayProps>(
             containerStyle,
           ]}
         >
-          <Loading />
+          {/* <Loading /> */}
         </View>
       </Modal>
     );

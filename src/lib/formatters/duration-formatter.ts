@@ -41,9 +41,9 @@ class DurationFormatter {
     const lteType = rowLte.split(' ')[1];
 
     if (lteType.charAt(0) === gteType.charAt(0)) {
-      return `Entregas entre ${gteValue} y ${lteValue} ${gteType}`;
+      return `Entre ${gteValue} y ${lteValue} ${gteType}`;
     }
-    return `Entregas entre ${rowGte} y ${rowLte}`;
+    return `Entre ${rowGte} y ${rowLte}`;
   };
 }
 

@@ -88,7 +88,8 @@ export default class RESTClient<T, V> {
           response.config.url?.includes('stores') ||
           response.config.url?.includes('products') ||
           response.config.url?.includes('details') ||
-          response.config.url?.includes('users')
+          response.config.url?.includes('users') ||
+          response.config.url?.includes('widgets')
         ) {
           return response;
         }

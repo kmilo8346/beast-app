@@ -32,6 +32,8 @@ export interface GetParams {
   source?: string[];
 }
 
+export type SortParam = { field: string; order: 'asc' | 'desc' }[];
+
 export interface SearchParams {
   pathVars?: { [key: string]: any };
   query?: string;
@@ -49,10 +51,13 @@ export interface DeleteParams {
 }
 
 export interface SearchResponse<T> {
+  query?: string;
+  filters?: { [key: string]: any };
   from: number;
   size: number;
+  sort?: SortParam;
   total: number;
-  hits: Partial<T>[];
+  hits: T[];
 }
 
 export interface Redirect {
@@ -85,6 +90,11 @@ export interface Circle {
 export interface AddressProp {
   short_name: string;
   long_name: string;
+}
+
+export interface Location {
+  lat: number;
+  lng: number;
 }
 
 export interface Place {
@@ -368,4 +378,75 @@ export interface Device extends CreateDevice {
   id: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum WidgetType {
+  BANNER = 'banner',
+  NEARBY_STORES = 'nearby_stores',
+}
+
+export interface BannerInstructions {
+  image: string;
+}
+
+export interface NearbyStoresInstructions {
+  title: string;
+  from: number;
+  size: number;
+}
+
+export interface CreateWidget {
+  type: WidgetType;
+  tags: string[];
+  sort: number;
+  instructions: BannerInstructions | NearbyStoresInstructions;
+}
+
+export interface Widget extends CreateWidget {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface BannerContent {
+  image: string;
+}
+
+export interface NearbyStoresContent {
+  title: string;
+  initial: SearchResponse<Store>;
+}
+
+export interface ComputedWidget {
+  id: string;
+  type: WidgetType;
+  content: BannerContent | NearbyStoresContent;
+}
+
+export interface ComputeContext {
+  location: Location;
+}
+
+export interface ComputeFilters {
+  tag: string;
+}
+
+export interface ComputeParams {
+  filters: ComputeFilters;
+  context: ComputeContext;
+  from: number;
+  size: number;
+}
+
+export interface ComputeResponse {
+  filters: ComputeFilters;
+  from: number;
+  size: number;
+  total: number;
+  hits: ComputedWidget[];
+}
+
+export interface AddressInfo {
+  current_address: string;
+  addresses: Place[];
 }

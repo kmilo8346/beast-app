@@ -1,13 +1,16 @@
 import { AsyncStorage } from 'react-native';
 
+import Cache from './cache';
+
 const prefix = '[persisted cache]';
 
-export default class PersistedCache<T> {
+export default class PersistedCache<T> extends Cache<T> {
   protected data?: T;
 
   private path: string;
 
   constructor(path: string) {
+    super();
     this.path = path;
   }
 
@@ -41,22 +44,18 @@ export default class PersistedCache<T> {
     }
   }
 
-  getData(): T | undefined {
-    return this.data;
-  }
-
   async setData(data: T) {
-    this.data = data;
+    super.setData(data);
     await this.persist();
   }
 
   async updateData(update: Partial<T>) {
-    this.data = { ...this.data, ...update } as T;
+    super.updateData(update);
     await this.persist();
   }
 
   async replaceData(replace: Partial<T>) {
-    this.data = { ...replace } as T;
+    super.replaceData(replace);
     await this.persist();
   }
 }
