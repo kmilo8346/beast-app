@@ -11,6 +11,7 @@ import {
 import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
+import MapPinGreyIcon from '../../../../components/svgs/icons/map-pin-grey';
 // home components
 import ModalManageAddress from '../modal-manage-address';
 // types
@@ -67,14 +68,15 @@ export default ({
   return (
     <View style={style}>
       <Touchable
-        style={{ flexDirection: 'row', alignItems: 'center' }}
+        style={{ flexDirection: 'row', alignItems: 'center', minHeight: 30 }}
         onPress={pressSelectHandler}
       >
+        <MapPinGreyIcon />
         <Text
           level={7}
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={{ marginRight: 5 }}
+          style={{ marginHorizontal: 5 }}
         >
           {text}
         </Text>
