@@ -7,6 +7,8 @@ import { Touchable, Text, Icon, ButtonIcon } from '../../../components';
 import { Shortcut as DashboardShorcut } from '../components';
 // local components
 import { Link as DashboardLink } from './components';
+// types
+import { LoggedUser } from '../../../types';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -29,7 +31,7 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const user = userCache.getData();
+  const user = userCache.getData() as LoggedUser;
   // preconditions
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
@@ -49,6 +51,10 @@ export default ({ navigation }: ScreenProps) => {
 
   // render logic
   const image = store.images[0];
+  let sellerName = '';
+  if (user.first_name) {
+    sellerName = user.first_name.split(' ')[0];
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[globalStyles.withPadding]}>
@@ -121,7 +127,7 @@ export default ({ navigation }: ScreenProps) => {
           >
             <View style={{ flex: 5 }}>
               <Text level={1} weight="bold" color={colors.white}>
-                Hola Camilo
+                {`Hola ${sellerName}`}
               </Text>
               <Text level={5} color={colors.white}>
                 Productos vendidos en total

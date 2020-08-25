@@ -38,7 +38,7 @@ import {
   StockVerificationScreen,
   MenuScreen,
   UpdateAccountScreen,
-  PurchasesScreen,
+  OrdersScreen,
   HelpScreen,
 } from './screens';
 // components
@@ -296,9 +296,9 @@ function MenuStackScreen() {
         options={{ title: 'Cuenta' }}
       />
       <MenuStack.Screen
-        name="Purchases"
-        component={PurchasesScreen}
-        options={{ title: 'Compras' }}
+        name="Orders"
+        component={OrdersScreen}
+        options={{ title: 'Pedidos' }}
       />
       <MenuStack.Screen
         name="Help"

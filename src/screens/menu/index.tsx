@@ -4,7 +4,8 @@ import { CommonActions, useIsFocused } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Button } from '../../components';
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
 // local components
 import { Item } from './components';
 // lib
@@ -63,7 +64,15 @@ export default ({ navigation }: MenuProps) => {
   };
 
   const pressMenuItemHandler = (screen: string) => {
-    navigation.navigate(screen);
+    switch (screen) {
+      case 'Orders':
+        navigation.navigate('Orders', { view: 'HISTORICAL' });
+        break;
+
+      default:
+        navigation.navigate(screen);
+        break;
+    }
   };
 
   // useFocusEffect(() => {
@@ -92,9 +101,9 @@ export default ({ navigation }: MenuProps) => {
           onPress={() => pressMenuItemHandler('UpdateAccount')}
         />
         <Item
-          name="Compras"
-          description="Historial de compras"
-          onPress={() => pressMenuItemHandler('Purchases')}
+          name="Mis Pedidos"
+          description="En curso, historial de pedidos"
+          onPress={() => pressMenuItemHandler('Orders')}
         />
         <Item
           name="Ayuda"
