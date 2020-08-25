@@ -1,11 +1,13 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer } from 'react';
 import { View, Vibration, ScrollView } from 'react-native';
-import validate from 'validate.js';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import { Text, Input, Button } from '../../components';
-// clients
-import userClient from '../../clients/user-client';
+import Text from '../../components/text';
+import Input from '../../components/inputs/input';
+import Button from '../../components/buttons/button';
+// libs
+import validate from '../../lib/validate';
 // cache
 import userCache from '../../cache/user';
 // constraints
@@ -75,6 +77,7 @@ interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
+  const insets = useSafeAreaInsets();
   // state
   const [state, dispatch] = useReducer(reducer, {
     form: {
@@ -141,6 +144,7 @@ export default ({ navigation, route }: ScreenProps) => {
         style={[
           { position: 'absolute', left: 0, right: 0, bottom: 0 },
           globalStyles.withMargin,
+          { paddingBottom: insets.bottom },
         ]}
       >
         <Button
