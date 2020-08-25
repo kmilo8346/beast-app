@@ -1,9 +1,8 @@
-/* eslint-disable react/require-default-props */
 import React from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
 
 // styles
-import colors from '../../../../styles/colors';
+import colors from '../../styles/colors';
 
 interface ComponentProps {
   width?: number | string;
@@ -17,7 +16,7 @@ interface ComponentProps {
 export default ({
   width = '100%',
   height = 10,
-  borderRadius = 7.5,
+  borderRadius = 10,
   marginLeft,
   marginBottom,
   style,

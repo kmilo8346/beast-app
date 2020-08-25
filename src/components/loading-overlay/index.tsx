@@ -30,7 +30,7 @@ export default forwardRef<Ref, LoadingOverlayProps>(
         setIsVisible(false);
       },
     }));
-    console.log('loading overlay', isVisible);
+
     return (
       <Modal visible={isVisible} animationType="fade" transparent>
         <View

@@ -12,10 +12,11 @@ import {
   IToast,
   Toast,
 } from '../../../components';
+import Search from '../../../components/inputs/search';
 // seller components
 import { Shortcut } from '../components';
 // local components
-import { ProductItem, Search, NotData } from './components';
+import { ProductItem, NotData } from './components';
 // clients
 import productClient from '../../../clients/product-client';
 // cache

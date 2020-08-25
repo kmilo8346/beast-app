@@ -34,10 +34,12 @@ export interface GetParams {
 
 export type SortParam = { field: string; order: 'asc' | 'desc' }[];
 
+export type SearchFilters = { [key: string]: any };
+
 export interface SearchParams {
   pathVars?: { [key: string]: any };
   query?: string;
-  filters?: { [key: string]: any };
+  filters?: SearchFilters;
   from?: number;
   size?: number;
   sort?: { field: string; order: 'asc' | 'desc' }[];
@@ -52,7 +54,7 @@ export interface DeleteParams {
 
 export interface SearchResponse<T> {
   query?: string;
-  filters?: { [key: string]: any };
+  filters?: SearchFilters;
   from: number;
   size: number;
   sort?: SortParam;

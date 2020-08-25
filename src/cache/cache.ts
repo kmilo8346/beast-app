@@ -18,7 +18,7 @@ export default class Cache<T> {
   }
 
   setData(data: T) {
-    this.data = data;
+    this.data = { ...data };
     this.notify(this.data);
   }
 

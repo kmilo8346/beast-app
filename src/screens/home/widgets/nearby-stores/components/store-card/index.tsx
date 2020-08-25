@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
-import { Image, View } from 'react-native';
+import { Image, View, GestureResponderEvent } from 'react-native';
 
 // components
 import Touchable from '../../../../../../components/touchable';
 import Text from '../../../../../../components/text';
 // libs
 import durationFormatter from '../../../../../../lib/formatters/duration-formatter';
+import { navigate } from '../../../../../../lib/root-navigation';
 // types
 import { Store } from '../../../../../../types';
 // styles
@@ -23,6 +24,12 @@ export default memo(({ data }: ComponentProps) => {
     data.delivery_time.lte
   );
 
+  // event handlers
+  const pressHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigate('Store', { store: data });
+  };
+
   // render logic
   return (
     <Touchable
@@ -39,6 +46,7 @@ export default memo(({ data }: ComponentProps) => {
 
         elevation: 1,
       }}
+      onPress={pressHandler}
     >
       <Image
         source={{ uri: image }}

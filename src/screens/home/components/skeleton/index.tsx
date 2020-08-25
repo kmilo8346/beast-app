@@ -1,8 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
 
-// home components
-import Bone from '../bone';
+// components
+import Bone from '../../../../components/bone';
 // styles
 import globalStyles from '../../../../styles';
 

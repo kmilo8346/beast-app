@@ -9,8 +9,8 @@ import Text from '../../components/text';
 import Toast, { IToast } from '../../components/toast';
 import ErrorView from '../../components/error-view';
 import FlatList from '../../components/flat-list';
+import Divider from '../../components/divider';
 // local components
-import Divider from './components/divider';
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
 import WidgetComponent from './widgets/widget';
@@ -32,7 +32,6 @@ import {
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
-import user from '../../cache/user';
 
 // instances outside component
 const prefix = '[home screen]';
@@ -304,7 +303,7 @@ export default () => {
         />
       </View>
 
-      <Divider />
+      <Divider type="thick" />
 
       <FlatList
         data={state.widgets.hits}

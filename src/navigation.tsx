@@ -19,6 +19,7 @@ import {
   VerifyPhoneScreen,
   SetAddressScreen,
   HomeScreen,
+  StoreScreen,
   PLPScreen,
   PLPInStoreScreen,
   PDPScreen,
@@ -85,6 +86,13 @@ function HomeStackScreen() {
         name="Home"
         component={HomeScreen}
         options={{ headerShown: false }}
+      />
+      <HomeStack.Screen
+        name="Store"
+        component={StoreScreen}
+        options={{
+          title: '',
+        }}
       />
       <HomeStack.Screen
         name="PLP"

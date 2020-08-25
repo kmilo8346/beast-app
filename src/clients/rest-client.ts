@@ -2,7 +2,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
 import camelCaseKeys from 'camelcase-keys';
 import snakeCaseKeys from 'snakecase-keys';
 import Constants from 'expo-constants';
-import { AsyncStorage } from 'react-native';
 
 // libs
 import firebase from '../lib/firebase';
@@ -17,7 +16,6 @@ import {
   ActionParams,
 } from '../types';
 
-const prefix = '[rest client]';
 axios.defaults.baseURL = Constants.manifest.extra.BEAST_API_URL;
 
 const interpolate = (
@@ -102,35 +100,6 @@ export default class RESTClient<T, V> {
     );
   }
 
-  private async getEtag(): Promise<string> {
-    let etag = '';
-    try {
-      const raw: string | null = await AsyncStorage.getItem(
-        `@etag/${this.prefix}`
-      );
-      if (raw) {
-        etag = raw;
-      }
-    } catch (error) {
-      console.log(
-        `${prefix} Unexpected error loading etag from local storage`,
-        error
-      );
-    }
-    return etag;
-  }
-
-  private async setEtag(etag: string): Promise<void> {
-    try {
-      await AsyncStorage.setItem(`@etag/${this.prefix}`, etag);
-    } catch (error) {
-      console.log(
-        `${prefix} Unexpected error setting etag in local storage`,
-        error
-      );
-    }
-  }
-
   async create(params: CreateParams<V>, cancelToken?: CancelToken): Promise<T> {
     const { pathVars, ...data } = params;
     const response = await this.axios.post<T>(
@@ -168,21 +137,15 @@ export default class RESTClient<T, V> {
 
   async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
     const { pathVars, source } = params;
-    const etag = await this.getEtag();
-
     const response = await this.axios.get<T>(
       interpolate(`${this.prefix}/:id`, pathVars),
       {
         params: {
           source,
         },
-        headers: {
-          'If-None-Match': etag,
-        },
         cancelToken,
       }
     );
-    await this.setEtag(response.headers.etag);
     return response.data;
   }
 
