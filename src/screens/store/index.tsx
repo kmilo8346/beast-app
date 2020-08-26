@@ -170,11 +170,11 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'set_shopping_cart_cache', shopping_cart_cache: cache });
   };
 
-  const searchFocusHandler = () => {
+  const searchActivatedHandler = () => {
     dispatch({ type: 'set_header', header: false });
   };
 
-  const searchBlurHandler = () => {
+  const searchDeactivatedHandler = () => {
     dispatch({ type: 'set_header', header: true });
   };
 
@@ -505,10 +505,10 @@ export default ({ navigation, route }: ScreenProps) => {
       <Search
         value={state.query}
         placeholder="Buscar productos"
-        onChangeText={changeQuery}
-        onFocus={searchFocusHandler}
-        onBlur={searchBlurHandler}
         containerStyle={globalStyles.withMargin}
+        onChangeText={changeQuery}
+        onActivated={searchActivatedHandler}
+        onDeactivated={searchDeactivatedHandler}
       />
       {content}
       <View
