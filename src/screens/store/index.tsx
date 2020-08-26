@@ -10,6 +10,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Keyboard,
+  GestureResponderEvent,
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
@@ -26,9 +27,11 @@ import Divider from '../../components/divider';
 // local components
 import Skeletton from './components/skeleton';
 import Item from './components/item';
+import ShoppingCartModal from './components/shopping-cart-modal';
 // clients
 import productClient from '../../clients/product-client';
 // cache
+import userCache from '../../cache/user';
 import shoppingCartsCache from '../../cache/shopping-carts';
 import ShoppingCartCache, {
   ShoppingCartSnapshot,
@@ -38,7 +41,13 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import useDebounce from '../../lib/hooks/use-debounce';
 import * as utils from '../../lib/utils';
 // types
-import { SearchResponse, Product, SearchFilters, Store } from '../../types';
+import {
+  SearchResponse,
+  Product,
+  SearchFilters,
+  Store,
+  User,
+} from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -84,6 +93,10 @@ type SetFetchingMoreAction = {
   type: 'set_fetching_more';
   fetching_more: boolean;
 };
+type SetModalAction = {
+  type: 'set_modal';
+  modal: boolean;
+};
 type Action =
   | SetHeaderAction
   | SetQueryAction
@@ -93,7 +106,8 @@ type Action =
   | SetProductsAction
   | SetErrorAction
   | SetRefreshingAction
-  | SetFetchingMoreAction;
+  | SetFetchingMoreAction
+  | SetModalAction;
 type State = {
   header: boolean;
   query: string;
@@ -103,6 +117,7 @@ type State = {
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
+  modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -127,6 +142,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, refreshing: action.refreshing };
     case 'set_fetching_more':
       return { ...state, fetching_more: action.fetching_more };
+    case 'set_modal':
+      return { ...state, modal: action.modal };
     default:
       return state;
   }
@@ -149,7 +166,9 @@ export default ({ navigation, route }: ScreenProps) => {
     query: '',
     refreshing: false,
     fetching_more: false,
+    modal: false,
   });
+  const user = userCache.getData();
   const debouncedQuery = useDebounce(state.query, 500);
   const insets = useSafeAreaInsets();
 
@@ -287,6 +306,20 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
+  const pressMyOrderHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_modal', modal: true });
+  };
+
+  const pressShoppingCartHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_modal', modal: true });
+  };
+
+  const closeShoppingCartHandler = () => {
+    dispatch({ type: 'set_modal', modal: false });
+  };
+
   useEffect(() => {
     instanceCache();
   }, []);
@@ -330,6 +363,7 @@ export default ({ navigation, route }: ScreenProps) => {
                 paddingVertical: 2,
                 marginRight: 10,
               }}
+              onPress={pressShoppingCartHandler}
             >
               <View
                 style={{
@@ -464,6 +498,7 @@ export default ({ navigation, route }: ScreenProps) => {
           </View>
         }
         style={globalStyles.withMainActionAir}
+        onPress={pressMyOrderHandler}
       />
     );
   }
@@ -492,6 +527,14 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
+      {state.modal && (
+        <ShoppingCartModal
+          user={user as User}
+          store={store}
+          snapshot={state.shopping_cart_snapshot as ShoppingCartSnapshot}
+          onClose={closeShoppingCartHandler}
+        />
+      )}
     </View>
   );
 };

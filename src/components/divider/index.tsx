@@ -1,14 +1,15 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleProp, ViewStyle } from 'react-native';
 
 // styles
 import colors from '../../styles/colors';
 
 interface ComponentProps {
   type?: 'thin' | 'thick';
+  style?: StyleProp<ViewStyle>;
 }
 
-export default ({ type = 'thin' }: ComponentProps) => {
+export default ({ type = 'thin', style }: ComponentProps) => {
   // computed
   let height = 1;
   if (type === 'thick') {
@@ -18,7 +19,10 @@ export default ({ type = 'thin' }: ComponentProps) => {
   // render logic
   return (
     <View
-      style={{ width: '100%', height, backgroundColor: colors.blackLight8 }}
+      style={[
+        { width: '100%', height, backgroundColor: colors.blackLight8 },
+        style,
+      ]}
     />
   );
 };

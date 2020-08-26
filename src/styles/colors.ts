@@ -14,6 +14,7 @@ export default {
   blackLight6: '#F2F2F2',
   blackLight7: '#F8F8F8',
   blackLight8: '#EFF1F4',
+  blackLight9: '#E7E7E7',
   white: '#FFFFFF',
   red: '#EB5757',
   redLight1: '#FEF0F0',
