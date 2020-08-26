@@ -20,6 +20,7 @@ import {
   SetAddressScreen,
   HomeScreen,
   StoreScreen,
+  CheckoutV2Screen,
   PLPScreen,
   PLPInStoreScreen,
   PDPScreen,
@@ -90,6 +91,13 @@ function HomeStackScreen() {
       <HomeStack.Screen
         name="Store"
         component={StoreScreen}
+        options={{
+          title: '',
+        }}
+      />
+      <HomeStack.Screen
+        name="CheckoutV2"
+        component={CheckoutV2Screen}
         options={{
           title: '',
         }}

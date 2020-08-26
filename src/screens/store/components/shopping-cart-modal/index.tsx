@@ -16,11 +16,12 @@ import FullModal, { FullModalProps } from '../full-modal';
 import Item from './components/item';
 // lib
 import durationFormatter from '../../../../lib/formatters/duration-formatter';
+import { navigate } from '../../../../lib/root-navigation';
 // cache
 import userCache from '../../../../cache/user';
 import { ShoppingCartSnapshot } from '../../../../cache/shopping-cart';
 // types
-import { Store } from '../../../../types';
+import { Store, LoggedUser } from '../../../../types';
 // styles
 import globalStyles from '../../../../styles';
 import colors from '../../../../styles/colors';
@@ -47,6 +48,40 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
 
   const contactCloseHandler = () => {
     setContact(false);
+  };
+
+  const goToPayHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    if (userCache.isLogged()) {
+      const logged = userCache.getData() as LoggedUser;
+      if (!logged.phone || !logged.phone_verified) {
+        navigate('SetPhone', {
+          redirect: {
+            name: 'CheckoutV2',
+            params: {
+              store,
+              shopping_cart: snapshot,
+            },
+          },
+        });
+      } else {
+        navigate('CheckoutV2', {
+          store,
+          shopping_cart: snapshot,
+        });
+      }
+    } else {
+      navigate('SignIn', {
+        redirect: {
+          name: 'CheckoutV2',
+          params: {
+            store,
+            shopping_cart: snapshot,
+          },
+        },
+      });
+    }
+    otherProps.onClose && otherProps.onClose();
   };
 
   // render logic
@@ -187,7 +222,11 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
           globalStyles.withMargin,
         ]}
       >
-        <Button title="Ir a pagar" style={globalStyles.withMainActionAir} />
+        <Button
+          title="Ir a pagar"
+          style={globalStyles.withMainActionAir}
+          onPress={goToPayHandler}
+        />
       </View>
 
       {contact && (

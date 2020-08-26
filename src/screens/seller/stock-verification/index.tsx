@@ -133,7 +133,7 @@ export default ({ navigation, route }: ScreenProps) => {
       <ScrollView
         style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
       >
-        {sale.transaction.shoppingCart.map((item) => {
+        {sale.transaction.shopping_cart.map((item) => {
           const confirmation = hash[item.id];
           return (
             <Item
@@ -157,7 +157,7 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         <ProgressBar
           progress={state.confirmation.length}
-          goal={sale.transaction.shoppingCart.length}
+          goal={sale.transaction.shopping_cart.length}
           style={{ marginBottom: 10 }}
         />
         <View style={globalStyles.withMargin}>
@@ -174,13 +174,13 @@ export default ({ navigation, route }: ScreenProps) => {
             <Text
               level={4}
               weight="bold"
-            >{`${state.confirmation.length} de ${sale.transaction.shoppingCart.length}`}</Text>
+            >{`${state.confirmation.length} de ${sale.transaction.shopping_cart.length}`}</Text>
           </View>
 
           <Button
             title="Continuemos"
             disabled={
-              state.confirmation.length < sale.transaction.shoppingCart.length
+              state.confirmation.length < sale.transaction.shopping_cart.length
             }
             style={globalStyles.withMainActionAir}
             onPress={pressContinueHandler}

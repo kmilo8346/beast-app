@@ -70,6 +70,10 @@ export default class ShoppingCartCache extends PersistedCache<{
     this.notifyItemChange(product.id, data[product.id]);
   }
 
+  clear() {
+    this.setData({});
+  }
+
   onChangeItem(id: string, callback: (data: Item | undefined) => void) {
     const item = (this.data || {})[id];
     // initialize

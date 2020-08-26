@@ -254,9 +254,9 @@ export type User = AnonymouslyUser | LoggedUser;
 export interface Customer {
   id: string;
   email: string;
-  firstName: string;
-  lastName?: string;
-  photoUrl?: string;
+  first_name: string;
+  last_name?: string;
+  photo_url?: string;
   phone: string;
 }
 
@@ -268,22 +268,22 @@ export interface Transaction {
   country: string;
   currency: string;
   language: string;
-  deliveryAddress: Place;
-  shoppingCart: Item[];
+  delivery_address: Place;
+  shopping_cart: Item[];
   store: Store;
 }
 
 export interface CreatePayment {
   customer: Customer;
   transaction: Transaction;
-  redirectUrl: string;
+  redirect_url: string;
 }
 
 export interface CreateCheckout {
   reference: string;
   customer: Customer;
   transaction: Transaction;
-  redirectUrl: string;
+  redirect_url: string;
 }
 
 export enum MercadopagoPaymentStatus {
@@ -302,7 +302,7 @@ export enum MercadopagoPaymentStatus {
 export type PaymentProviderState = {
   id: PaymentProvider.MERCADOPAGO;
   status: MercadopagoPaymentStatus;
-  checkout: { id: string; initPoint: string };
+  checkout: { id: string; init_point: string };
   data: { [key: string]: any };
 };
 
@@ -319,8 +319,8 @@ export interface Payment extends CreatePayment {
   status: PaymentStatus;
   provider: PaymentProviderState;
   idempotency?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export enum OrderStatus {
@@ -367,8 +367,8 @@ export interface Order extends CreateOrder {
   id: string;
   status: OrderStatus;
   provider: DispatchProviderState;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface CreateDevice {

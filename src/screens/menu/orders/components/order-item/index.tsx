@@ -35,7 +35,7 @@ export default ({ order, onPress = () => null, style }: OrderItemProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const stats = utils.getStats(order.transaction.shoppingCart);
+  const stats = utils.getStats(order.transaction.shopping_cart);
 
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
@@ -44,9 +44,9 @@ export default ({ order, onPress = () => null, style }: OrderItemProps) => {
   };
 
   // render logic
-  let fullName = order.customer.firstName;
-  if (order.customer.lastName) {
-    fullName = `${fullName} ${order.customer.lastName}`;
+  let fullName = order.customer.first_name;
+  if (order.customer.last_name) {
+    fullName = `${fullName} ${order.customer.last_name}`;
   }
   let totalLabel = 'producto';
   if (stats.total > 1) {
@@ -58,8 +58,8 @@ export default ({ order, onPress = () => null, style }: OrderItemProps) => {
     const distance = utils.distance(
       order.transaction.store.delivery_area?.center.geometry.location.lat,
       order.transaction.store.delivery_area.center.geometry.location.lng,
-      order.transaction.deliveryAddress.geometry.location.lat,
-      order.transaction.deliveryAddress.geometry.location.lng,
+      order.transaction.delivery_address.geometry.location.lat,
+      order.transaction.delivery_address.geometry.location.lng,
       'K'
     );
     distanceText = ` · A ${numberFormatter.humanizeDistance(
@@ -108,7 +108,7 @@ export default ({ order, onPress = () => null, style }: OrderItemProps) => {
         </Text>
         <Text level={7} color={colors.blackLight3}>
           {dateFormatter.format(
-            new Date(order.createdAt),
+            new Date(order.created_at),
             "dd MMMM, yyyy · HH:mm 'hrs'"
           )}
         </Text>

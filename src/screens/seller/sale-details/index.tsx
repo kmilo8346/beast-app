@@ -128,8 +128,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     Linking.openURL(
       utils.createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/search/`, {
         api: 1,
-        query: `${sale.transaction.deliveryAddress.geometry.location.lat},${sale.transaction.deliveryAddress.geometry.location.lng}`,
-        query_place_id: sale.transaction.deliveryAddress.id,
+        query: `${sale.transaction.delivery_address.geometry.location.lat},${sale.transaction.delivery_address.geometry.location.lng}`,
+        query_place_id: sale.transaction.delivery_address.id,
       })
     );
   };
@@ -140,8 +140,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         api: 1,
         origin: `${store.deliveryArea?.center.geometry.location.lat},${store.deliveryArea?.center.geometry.location.lng}`,
         origin_place_id: store.deliveryArea?.center.id,
-        destination: `${sale.transaction.deliveryAddress.geometry.location.lat},${sale.transaction.deliveryAddress.geometry.location.lng}`,
-        destination_place_id: sale.transaction.deliveryAddress.id,
+        destination: `${sale.transaction.delivery_address.geometry.location.lat},${sale.transaction.delivery_address.geometry.location.lng}`,
+        destination_place_id: sale.transaction.delivery_address.id,
       })
     );
   };
@@ -236,14 +236,14 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   };
 
   // render logic
-  const stats = utils.getStats(sale.transaction.shoppingCart);
+  const stats = utils.getStats(sale.transaction.shopping_cart);
   // current step status
   let status: StepStatus = 'finish';
   if (sale.provider.status === OwnerDispatchStatus.CREATED) {
     status = 'process';
     if (
       sale.provider.confirmation &&
-      sale.provider.confirmation.length >= sale.transaction.shoppingCart.length
+      sale.provider.confirmation.length >= sale.transaction.shopping_cart.length
     ) {
       status = 'finish';
     }
@@ -254,26 +254,26 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   const mapImageUrl = utils.createUrl(
     `${Constants.manifest.extra.GOOGLE_MAPS_API_URL}/staticmap`,
     {
-      center: `${sale.transaction.deliveryAddress.geometry.location.lat},${sale.transaction.deliveryAddress.geometry.location.lng}`,
+      center: `${sale.transaction.delivery_address.geometry.location.lat},${sale.transaction.delivery_address.geometry.location.lng}`,
       zoom: 13,
       size: '140x105',
       scale: 2,
       format: 'png',
-      markers: `icon:${Constants.manifest.extra.GOOGLE_MAPS_CUSTOM_MARKER}|scale:2|${sale.transaction.deliveryAddress.geometry.location.lat},${sale.transaction.deliveryAddress.geometry.location.lng}`,
+      markers: `icon:${Constants.manifest.extra.GOOGLE_MAPS_CUSTOM_MARKER}|scale:2|${sale.transaction.delivery_address.geometry.location.lat},${sale.transaction.delivery_address.geometry.location.lng}`,
       key: Constants.manifest.extra.GOOGLE_MAPS_API_KEY,
     }
   );
   // formmatted delivered address
-  let deliveryAddress = `${sale.transaction.deliveryAddress.route.shortName} ${sale.transaction.deliveryAddress.streetNumber.shortName}`;
-  if (sale.transaction.deliveryAddress.apartment) {
-    deliveryAddress = `${deliveryAddress} · ${sale.transaction.deliveryAddress.apartment}`;
+  let deliveryAddress = `${sale.transaction.delivery_address.route.shortName} ${sale.transaction.delivery_address.streetNumber.shortName}`;
+  if (sale.transaction.delivery_address.apartment) {
+    deliveryAddress = `${deliveryAddress} · ${sale.transaction.delivery_address.apartment}`;
   }
   // distance from store to delivery address
   const distance = utils.distance(
     store.deliveryArea.center.geometry.location.lat,
     store.deliveryArea.center.geometry.location.lng,
-    sale.transaction.deliveryAddress.geometry.location.lat,
-    sale.transaction.deliveryAddress.geometry.location.lng,
+    sale.transaction.delivery_address.geometry.location.lat,
+    sale.transaction.delivery_address.geometry.location.lng,
     'K'
   );
   let distanceText = `A ${numberFormatter.humanizeDistance(
@@ -309,9 +309,9 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   }
 
   // full name
-  let fullName = sale.customer.firstName;
-  if (sale.customer.lastName) {
-    fullName = `${fullName} ${sale.customer.lastName}`;
+  let fullName = sale.customer.first_name;
+  if (sale.customer.last_name) {
+    fullName = `${fullName} ${sale.customer.last_name}`;
   }
 
   // edit confirmation
@@ -330,7 +330,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     );
   }
   // products and collpase button
-  let products = sale.transaction.shoppingCart;
+  let products = sale.transaction.shopping_cart;
   let collapseButton: ReactNode | null = (
     <ButtonIcon icon="chevron-up" onPress={pressCollapseHandler} />
   );
@@ -340,7 +340,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       <ButtonIcon icon="chevron-down" onPress={pressExpandHandler} />
     );
   }
-  if (sale.transaction.shoppingCart.length <= 3) {
+  if (sale.transaction.shopping_cart.length <= 3) {
     collapseButton = null;
   }
   // hash to easy search product confirmations
@@ -370,7 +370,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (
     sale.provider.status === OwnerDispatchStatus.CREATED &&
     sale.provider.confirmation &&
-    sale.provider.confirmation.length >= sale.transaction.shoppingCart.length
+    sale.provider.confirmation.length >= sale.transaction.shopping_cart.length
   ) {
     mainAction = (
       <Button

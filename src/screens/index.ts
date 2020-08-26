@@ -7,6 +7,7 @@ export { default as VerifyPhoneScreen } from './verify-phone';
 export { default as SetAddressScreen } from './set-address';
 export { default as HomeScreen } from './home';
 export { default as StoreScreen } from './store';
+export { default as CheckoutV2Screen } from './checkoutv2';
 export { default as PLPScreen } from './plp';
 export { default as PLPInStoreScreen } from './plp/in-store';
 export { default as PDPScreen } from './pdp';

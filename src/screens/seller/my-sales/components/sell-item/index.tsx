@@ -40,7 +40,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   if (!store.deliveryArea) {
     throw new Error(`${prefix} Store must have a delivery area`);
   }
-  const stats = utils.getStats(sell.transaction.shoppingCart);
+  const stats = utils.getStats(sell.transaction.shopping_cart);
 
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
@@ -49,9 +49,9 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   };
 
   // render logic
-  let fullName = sell.customer.firstName;
-  if (sell.customer.lastName) {
-    fullName = `${fullName} ${sell.customer.lastName}`;
+  let fullName = sell.customer.first_name;
+  if (sell.customer.last_name) {
+    fullName = `${fullName} ${sell.customer.last_name}`;
   }
   let totalLabel = 'producto';
   if (stats.total > 1) {
@@ -63,8 +63,8 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
     const distance = utils.distance(
       store.deliveryArea?.center.geometry.location.lat,
       store.deliveryArea.center.geometry.location.lng,
-      sell.transaction.deliveryAddress.geometry.location.lat,
-      sell.transaction.deliveryAddress.geometry.location.lng,
+      sell.transaction.delivery_address.geometry.location.lat,
+      sell.transaction.delivery_address.geometry.location.lng,
       'K'
     );
     distanceText = ` · A ${numberFormatter.humanizeDistance(
@@ -113,7 +113,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
         </Text>
         <Text level={7} color={colors.blackLight3}>
           {dateFormatter.format(
-            new Date(sell.createdAt),
+            new Date(sell.created_at),
             "dd MMMM, yyyy · HH:mm 'hrs'"
           )}
         </Text>
