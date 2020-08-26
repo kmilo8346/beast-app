@@ -14,38 +14,44 @@ import {
 import Icon from '../../icon';
 import Button from '../../buttons/button';
 import Text from '../../text';
+// libs
+import * as utils from '../../../lib/utils';
 // styles
 import colors from '../../../styles/colors';
 
 export interface SearchProps extends TextInputProps {
   containerStyle?: StyleProp<ViewStyle>;
+  onActivated?: () => void;
+  onDeactivated?: () => void;
 }
 
-export default ({ containerStyle, ...otherProps }: SearchProps) => {
+export default ({
+  containerStyle,
+  onActivated = utils.noop,
+  onDeactivated = utils.noop,
+  ...otherProps
+}: SearchProps) => {
   // state
-  const [focus, setFocus] = useState(false);
+  const [activated, setActivated] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   // event handlers
   const focusHandler = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
-    setFocus(true);
     otherProps.onFocus && otherProps.onFocus(e);
-  };
-
-  const blurHandler = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
-    setFocus(false);
-    otherProps.onBlur && otherProps.onBlur(e);
+    setActivated(true);
+    onActivated();
   };
 
   const pressCancelHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     otherProps.onChangeText && otherProps.onChangeText('');
-    inputRef.current?.blur();
+    setActivated(false);
+    onDeactivated();
   };
 
   // render logic
   let cancelButton: ReactNode | null = null;
-  if (focus) {
+  if (activated) {
     cancelButton = (
       <Button
         type="link"
@@ -78,7 +84,6 @@ export default ({ containerStyle, ...otherProps }: SearchProps) => {
           clearButtonMode="always"
           ref={inputRef}
           onFocus={focusHandler}
-          onBlur={blurHandler}
           style={[{ flex: 1, marginLeft: 10 }, otherProps.style]}
         />
       </View>

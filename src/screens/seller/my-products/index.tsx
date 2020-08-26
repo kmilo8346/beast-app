@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import {
@@ -47,6 +48,10 @@ enum MyProductsView {
   DATA = 'data',
   ERROR = 'error',
 }
+type SetHeaderAction = {
+  type: 'set_header';
+  header: boolean;
+};
 type ChangeQueryAction = {
   type: 'change_query';
   query: string;
@@ -79,6 +84,7 @@ type SetFetchingMoreAction = {
   fetching_more: boolean;
 };
 type Action =
+  | SetHeaderAction
   | ChangeQueryAction
   | ChangeViewAction
   | SetProductsAction
@@ -88,6 +94,7 @@ type Action =
   | DeleteProductAction
   | SetFetchingMoreAction;
 type State = {
+  header: boolean;
   view: MyProductsView;
   editting: boolean;
   fetching_more: boolean;
@@ -97,6 +104,8 @@ type State = {
 const reducer = (state: State, action: Action): State => {
   let products;
   switch (action.type) {
+    case 'set_header':
+      return { ...state, header: action.header };
     case 'change_query':
       return { ...state, query: action.query };
     case 'change_view':
@@ -155,6 +164,7 @@ export interface MyProductsProps {
 export default ({ navigation }: MyProductsProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
+    header: true,
     view: MyProductsView.LOADING,
     editting: false,
     fetching_more: false,
@@ -171,6 +181,7 @@ export default ({ navigation }: MyProductsProps) => {
   }
   const debouncedQuery = useDebounce(state.query, 200);
   const toastRef = useRef<IToast>(null);
+  const insets = useSafeAreaInsets();
 
   // event handlers
   const fetchProducts = async (query = '', from = 0, size = defaultSize) => {
@@ -192,6 +203,7 @@ export default ({ navigation }: MyProductsProps) => {
     );
     return response;
   };
+
   const loadProducts = async (query: string) => {
     try {
       dispatch({ type: 'change_view', view: MyProductsView.LOADING });
@@ -212,6 +224,7 @@ export default ({ navigation }: MyProductsProps) => {
       }
     }
   };
+
   const fetchMoreProducts = async () => {
     // precondition
     if (!state.products) {
@@ -244,6 +257,7 @@ export default ({ navigation }: MyProductsProps) => {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
     }
   };
+
   const updateProduct = async (id: string, data: Partial<Product>) => {
     try {
       await productClient.update({
@@ -269,6 +283,7 @@ export default ({ navigation }: MyProductsProps) => {
       });
     }
   };
+
   const deleteProduct = async (id: string) => {
     try {
       await productClient.delete({
@@ -293,9 +308,11 @@ export default ({ navigation }: MyProductsProps) => {
       });
     }
   };
+
   const changeQueryHandler = (query: string) => {
     dispatch({ type: 'change_query', query });
   };
+
   const changeProductHandler = (
     state: 'created' | 'updated',
     product: Product
@@ -313,36 +330,50 @@ export default ({ navigation }: MyProductsProps) => {
         );
     }
   };
+
   const pressEditProductHandler = (product: Product) => {
     navigation.navigate('CreateOrUpdateProduct', {
       product,
       onChangeProduct: changeProductHandler,
     });
   };
+
   const pressDeleteProductHandler = (product: Product) => {
     // edit local state
     dispatch({ type: 'delete_product', product });
     // try to edit backend state
     deleteProduct(product.id);
   };
+
   const changeEnabledHandler = (id: string, enabled: boolean) => {
     // try to edit backend state
     updateProduct(id, {
       enabled,
     });
   };
+
   const addProductHandler = () => {
     navigation.navigate('CreateOrUpdateProduct', {
       onChangeProduct: changeProductHandler,
     });
   };
+
   const pressHeaderLink = () => {
     dispatch({ type: 'toogle_editting' });
+  };
+
+  const searchActivatedHandler = () => {
+    dispatch({ type: 'set_header', header: false });
+  };
+
+  const searchDeactivatedHandler = () => {
+    dispatch({ type: 'set_header', header: true });
   };
 
   useEffect(() => {
     loadProducts(debouncedQuery);
   }, [debouncedQuery]);
+
   useLayoutEffect(() => {
     let text = 'Editar';
     if (state.editting) {
@@ -354,6 +385,12 @@ export default ({ navigation }: MyProductsProps) => {
       ),
     });
   }, [state.editting]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: state.header,
+    });
+  }, [state.header]);
 
   // render logic
   let content = null;
@@ -453,12 +490,20 @@ export default ({ navigation }: MyProductsProps) => {
       break;
   }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.white }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.white,
+        paddingTop: state.header ? 0 : insets.top,
+      }}
+    >
       <Search
         placeholder="Buscar productos"
         value={state.query}
         onChangeText={changeQueryHandler}
         containerStyle={[globalStyles.withMargin, { marginBottom: 10 }]}
+        onActivated={searchActivatedHandler}
+        onDeactivated={searchDeactivatedHandler}
       />
       {content}
     </View>
