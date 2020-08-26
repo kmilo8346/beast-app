@@ -1,10 +1,12 @@
 import React, { ReactNode, useState, useEffect } from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, GestureResponderEvent } from 'react-native';
 
 // components
 import Touchable from '../../../../components/touchable';
 import Badge from '../../../../components/badge';
 import Text from '../../../../components/text';
+// store components
+import ProductDetailsModal from '../product-details-modal';
 // local components
 import NumberInput from './components/number-input';
 // libs
@@ -25,6 +27,7 @@ export default ({ data }: ComponentProps) => {
     ShoppingCartCache | undefined
   >();
   const [qty, setQty] = useState<number | undefined>();
+  const [modal, setModal] = useState(false);
 
   // event handlers
   const instanceCache = async () => {
@@ -34,6 +37,15 @@ export default ({ data }: ComponentProps) => {
 
   const changeHandler = (qty: number) => {
     shoppingCartCache?.set(data, qty);
+  };
+
+  const closeModalHandler = () => {
+    setModal(false);
+  };
+
+  const pressItemHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    setModal(true);
   };
 
   useEffect(() => {
@@ -74,7 +86,7 @@ export default ({ data }: ComponentProps) => {
     numberInput = <NumberInput value={qty} onChange={changeHandler} />;
   }
   return (
-    <Touchable style={{ flexDirection: 'row' }}>
+    <Touchable style={{ flexDirection: 'row' }} onPress={pressItemHandler}>
       <View style={{ position: 'relative' }}>
         <Image
           source={{ uri: image }}
@@ -100,7 +112,11 @@ export default ({ data }: ComponentProps) => {
         </Text>
       </View>
 
-      <View style={{ paddingTop: 15 }}>{numberInput}</View>
+      <View style={{ marginLeft: 5, paddingTop: 15 }}>{numberInput}</View>
+
+      {modal && (
+        <ProductDetailsModal product={data} onClose={closeModalHandler} />
+      )}
     </Touchable>
   );
 };

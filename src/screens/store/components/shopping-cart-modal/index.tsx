@@ -20,7 +20,7 @@ import durationFormatter from '../../../../lib/formatters/duration-formatter';
 import userCache from '../../../../cache/user';
 import { ShoppingCartSnapshot } from '../../../../cache/shopping-cart';
 // types
-import { Store, User } from '../../../../types';
+import { Store } from '../../../../types';
 // styles
 import globalStyles from '../../../../styles';
 import colors from '../../../../styles/colors';
@@ -30,12 +30,11 @@ import numberFormatter from '../../../../lib/formatters/number-formatter';
 const prefix = '[shopping cart modal]';
 
 interface ComponentProps extends Omit<FullModalProps, 'children'> {
-  user: User;
   store: Store;
   snapshot: ShoppingCartSnapshot;
 }
 
-export default ({ user, store, snapshot, ...otherProps }: ComponentProps) => {
+export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
   // state
   const [contact, setContact] = useState(false);
   const insets = useSafeAreaInsets();

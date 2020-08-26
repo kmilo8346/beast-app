@@ -59,6 +59,17 @@ export default class ShoppingCartCache extends PersistedCache<{
     this.notifyItemChange(product.id, data[product.id]);
   }
 
+  add(product: Product, qty: number) {
+    const data = this.data || {};
+    const item = data[product.id] || {};
+    data[product.id] = { ...product, qty: (item.qty || 0) + qty };
+
+    // set data
+    this.setData(data);
+    // notify
+    this.notifyItemChange(product.id, data[product.id]);
+  }
+
   onChangeItem(id: string, callback: (data: Item | undefined) => void) {
     const item = (this.data || {})[id];
     // initialize
