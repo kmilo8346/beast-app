@@ -2,13 +2,11 @@ import React, { ReactNode, memo, useState } from 'react';
 import { Image, View } from 'react-native';
 
 // components
-import {
-  Touchable,
-  Text,
-  Icon,
-  Badge,
-  ButtonIcon,
-} from '../../../../../components';
+import Touchable from '../../../../../components/touchable';
+import Text from '../../../../../components/text';
+import Icon from '../../../../../components/icon';
+import Badge from '../../../../../components/badge';
+import ButtonIcon from '../../../../../components/buttons/button-icon';
 // local components
 import ModalConfirmation from '../modal-confirmation';
 // types

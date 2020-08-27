@@ -2,13 +2,11 @@ import React, { useState, memo, useEffect } from 'react';
 import { Image, View, GestureResponderEvent } from 'react-native';
 
 // components
-import {
-  Touchable,
-  Text,
-  Switch,
-  ButtonIcon,
-  Icon,
-} from '../../../../../components';
+import Touchable from '../../../../../components/touchable';
+import Text from '../../../../../components/text';
+import Switch from '../../../../../components/switch';
+import ButtonIcon from '../../../../../components/buttons/button-icon';
+import Icon from '../../../../../components/icon';
 // types
 import { Product, Service } from '../../../../../types';
 // libs

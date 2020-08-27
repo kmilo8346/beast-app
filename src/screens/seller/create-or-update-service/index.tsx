@@ -2,20 +2,18 @@ import React, { useReducer, useRef } from 'react';
 import { ScrollView, View, Image, Vibration } from 'react-native';
 
 // components
-import {
-  Text,
-  Input,
-  InputNumeric,
-  InputTags,
-  Button,
-  LoadingOverlay,
+import Text from '../../../components/text';
+import Input from '../../../components/inputs/input';
+import InputNumeric from '../../../components/inputs/input-numeric';
+import Button from '../../../components/buttons/button';
+import LoadingOverlay, {
   ILoadingOverlay,
-  Toast,
-  IToast,
-  InputImages,
-  Checkbox,
-  Switch,
-} from '../../../components';
+} from '../../../components/loading-overlay';
+import Toast, { IToast } from '../../../components/toast';
+import InputImages from '../../../components/inputs/input-images';
+import Switch from '../../../components/switch';
+import InputTags from '../../../components/inputs/input-tags';
+import Checkbox from '../../../components/checkbox';
 // clients
 import productClient from '../../../clients/product-client';
 // libs

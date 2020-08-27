@@ -6,18 +6,17 @@ import { View } from 'react-native';
 import productClient from '../../clients/product-client';
 import storeClient from '../../clients/store-client';
 // components
-import {
-  Container,
-  Text,
-  ErrorView,
-  NotSearchResult,
-  Loading,
-  FlatList,
-  SectionList,
-  ProductItem,
-} from '../../components';
+import Container from '../../components/container';
+import Text from '../../components/text';
+import ErrorView from '../../components/error-view';
+import NotSearchResult from '../../components/not-search-result';
+import Loading from '../../components/loading';
+import FlatList from '../../components/flat-list';
+import SectionList from '../../components/section-list';
+import ProductItem from '../../components/product-item';
 // local components
-import { StoreCard, InputSearch } from './components';
+import StoreCard from './components/store-card';
+import InputSearch from './components/input-search';
 // containers
 import UserProvider from '../../containers/user';
 // types

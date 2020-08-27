@@ -2,11 +2,15 @@ import React from 'react';
 import { ScrollView, View, Image, ImageBackground } from 'react-native';
 
 // components
-import { Touchable, Text, Icon, ButtonIcon } from '../../../components';
+import Touchable from '../../../components/touchable';
+import Text from '../../../components/text';
+import Icon from '../../../components/icon';
+import ButtonIcon from '../../../components/buttons/button-icon';
 // seller components
-import { Shortcut as DashboardShorcut } from '../components';
+import DashboardShorcut from '../components/shortcut';
 // local components
-import { Link as DashboardLink } from './components';
+import DashboardLink from './components/link';
+import MercadopagoLink from './components/link-mercadopago';
 // types
 import { LoggedUser } from '../../../types';
 // cache
@@ -107,11 +111,12 @@ export default ({ navigation }: ScreenProps) => {
             </View>
           </Touchable>
           <ButtonIcon
-            icon="bell"
+            icon="log-out"
             style={{ alignSelf: 'center' }}
-            onPress={() => null}
+            onPress={() => navigation.navigate('SelectOrCreateStore')}
           />
         </View>
+        <MercadopagoLink />
         <Touchable onPress={() => null}>
           <ImageBackground
             source={bgAcumuladoImage}

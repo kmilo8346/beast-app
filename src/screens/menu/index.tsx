@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from '../../components/text';
 import Button from '../../components/buttons/button';
 // local components
-import { Item } from './components';
+import Item from './components/item';
 // lib
 import firebase from '../../lib/firebase';
 // cache

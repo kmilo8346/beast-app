@@ -2,15 +2,12 @@ import React, { useReducer, useRef } from 'react';
 import { View, Vibration } from 'react-native';
 
 // components
-import {
-  Text,
-  Button,
-  InputSetDeliveryArea,
-  InputSetDeliveryTime,
-  InputSetOpeningHours,
-  Toast,
-  IToast,
-} from '../../../components';
+import Text from '../../../components/text';
+import Button from '../../../components/buttons/button';
+import InputSetDeliveryArea from '../../../components/inputs/input-set-delivery-area';
+import InputSetDeliveryTime from '../../../components/inputs/input-set-delivery-time';
+import InputSetOpeningHours from '../../../components/inputs/input-set-opening-hours';
+import Toast, { IToast } from '../../../components/toast';
 // libs
 import validate from '../../../lib/validate';
 // cache

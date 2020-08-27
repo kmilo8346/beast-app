@@ -2,13 +2,11 @@ import React, { useReducer, useEffect } from 'react';
 import { ScrollView, View, Vibration } from 'react-native';
 
 // components
-import {
-  Container,
-  Button,
-  Input,
-  InputImages,
-  InputSelectAddress,
-} from '../../../components';
+import Container from '../../../components/container';
+import Button from '../../../components/buttons/button';
+import Input from '../../../components/inputs/input';
+import InputImages from '../../../components/inputs/input-images';
+import InputSelectAddress from '../../../components/inputs/input-select-address';
 // containers
 import UserProvider from '../../../containers/user';
 // libs

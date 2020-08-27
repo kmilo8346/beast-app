@@ -3,13 +3,11 @@ import { View } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import {
-  Loading,
-  ErrorView,
-  SectionList,
-  Icon,
-  Text,
-} from '../../../../../components';
+import Loading from '../../../../../components/loading';
+import ErrorView from '../../../../../components/error-view';
+import SectionList from '../../../../../components/section-list';
+import Icon from '../../../../../components/icon';
+import Text from '../../../../../components/text';
 // local components
 import SellItem from '../sell-item';
 // types
@@ -20,7 +18,6 @@ import {
 } from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
-
 // clients
 import orderClient from '../../../../../clients/order-client';
 // cache

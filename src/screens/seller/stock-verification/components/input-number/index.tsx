@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
 
 // components
-import { Touchable, Icon, Text } from '../../../../../components';
+import Touchable from '../../../../../components/touchable';
+import Icon from '../../../../../components/icon';
+import Text from '../../../../../components/text';
 // libs
 import * as utils from '../../../../../lib/utils';
 // styles

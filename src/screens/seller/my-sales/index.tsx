@@ -9,9 +9,12 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 
 // components
-import { Touchable, Text, Badge } from '../../../components';
+import Touchable from '../../../components/touchable';
+import Text from '../../../components/text';
+import Badge from '../../../components/badge';
 // local components
-import { InProgressList, HistoricalList } from './components';
+import InProgressList from './components/in-progress-list';
+import HistoricalList from './components/historical-list';
 // types
 import { SearchResponse, Order } from '../../../types';
 // styles

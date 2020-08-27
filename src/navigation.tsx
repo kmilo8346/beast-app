@@ -44,7 +44,10 @@ import {
   HelpScreen,
 } from './screens';
 // components
-import { Icon, Text, ButtonCart, KeyboardAvoidingView } from './components';
+import Icon from './components/icon';
+import Text from './components/text';
+import ButtonCart from './components/buttons/button-cart';
+import KeyboardAvoidingView from './components/keyboard-avoiding-view';
 // libs
 import { navigationRef, onReady, navigate } from './lib/root-navigation';
 // styles

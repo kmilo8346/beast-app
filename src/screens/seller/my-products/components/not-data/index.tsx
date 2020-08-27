@@ -2,9 +2,9 @@ import React from 'react';
 import { View } from 'react-native';
 
 // components
-import { Text } from '../../../../../components';
+import Text from '../../../../../components/text';
 // seller components
-import { Shortcut } from '../../../components';
+import Shortcut from '../../../components/shortcut';
 
 const addProductImage = require('../../../../../../assets/icons/plus.png');
 

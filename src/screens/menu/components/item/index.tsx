@@ -2,7 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { Icon, Text } from '../../../../components';
+// components
+import Icon from '../../../../components/icon';
+import Text from '../../../../components/text';
+// styles
 import styles from './styles';
 import colors from '../../../../styles/colors';
 

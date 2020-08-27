@@ -9,7 +9,9 @@ import {
   TextStyle,
 } from 'react-native';
 
-import { ButtonIcon } from '../../../../components';
+// components
+import ButtonIcon from '../../../../components/buttons/button-icon';
+// styles
 import colors from '../../../../styles/colors';
 
 export interface InputSearchProps extends TextInputProps {

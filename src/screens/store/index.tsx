@@ -24,6 +24,8 @@ import Badge from '../../components/badge';
 import Search from '../../components/inputs/search';
 import NotSearchResult from '../../components/not-search-result';
 import Divider from '../../components/divider';
+import Touchable from '../../components/touchable';
+import ErrorView from '../../components/error-view';
 // local components
 import Skeletton from './components/skeleton';
 import Item from './components/item';
@@ -44,7 +46,6 @@ import { SearchResponse, Product, SearchFilters, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
-import { Touchable, ErrorView } from '../../components';
 
 // instances outside component
 const prefix = '[store screen]';

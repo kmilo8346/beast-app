@@ -3,7 +3,9 @@ import { View, TextInput, Image } from 'react-native';
 import validate from 'validate.js';
 
 // components
-import { Modal, ModalProps, Button, Text } from '../../../../components';
+import Modal, { ModalProps } from '../../../../components/modals/modal';
+import Button from '../../../../components/buttons/button';
+import Text from '../../../../components/text';
 // types
 import { Card } from '../../../../types';
 // constraints

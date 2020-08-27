@@ -3,7 +3,10 @@ import { View, Image } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import { Loading, ErrorView, Text, FlatList } from '../../../../../components';
+import Loading from '../../../../../components/loading';
+import ErrorView from '../../../../../components/error-view';
+import Text from '../../../../../components/text';
+import FlatList from '../../../../../components/flat-list';
 // local components
 import SellItem from '../sell-item';
 // types

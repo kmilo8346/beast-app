@@ -8,7 +8,10 @@ import {
 } from 'react-native';
 
 // components
-import { Text, Touchable, Icon } from '../../../../components';
+import Text from '../../../../components/text';
+import Touchable from '../../../../components/touchable';
+import Icon from '../../../../components/icon';
+// styles
 import colors from '../../../../styles/colors';
 
 export interface ShortcutProps {

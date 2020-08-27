@@ -8,7 +8,7 @@ import Icon from '../../../../components/icon';
 import * as utils from '../../../../lib/utils';
 // styles
 import colors from '../../../../styles/colors';
-import { Touchable } from '../../../../components';
+import Touchable from '../../../../components/touchable';
 
 export interface FullModalProps {
   children: ReactNode;

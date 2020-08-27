@@ -7,7 +7,10 @@ import {
   StyleProp,
 } from 'react-native';
 
-import { Text, Touchable } from '../../../../components';
+// components
+import Text from '../../../../components/text';
+import Touchable from '../../../../components/touchable';
+// styles
 import colors from '../../../../styles/colors';
 
 export interface StoreCardProps {

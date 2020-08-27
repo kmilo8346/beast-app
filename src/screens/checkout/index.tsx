@@ -5,15 +5,13 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 
 // components
-import {
-  Text,
-  Button,
-  Touchable,
-  Toast,
-  IToast,
-  LoadingOverlay,
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
+import Touchable from '../../components/touchable';
+import Toast, { IToast } from '../../components/toast';
+import LoadingOverlay, {
   ILoadingOverlay,
-} from '../../components';
+} from '../../components/loading-overlay';
 // clients
 import paymentClient from '../../clients/payment-client';
 // containers

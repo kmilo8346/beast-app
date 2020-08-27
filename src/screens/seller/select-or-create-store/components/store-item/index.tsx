@@ -2,7 +2,9 @@ import React from 'react';
 import { GestureResponderEvent, Image } from 'react-native';
 
 // components
-import { Touchable, Text, Icon } from '../../../../../components';
+import Touchable from '../../../../../components/touchable';
+import Text from '../../../../../components/text';
+import Icon from '../../../../../components/icon';
 // types
 import { Store } from '../../../../../types';
 // libs

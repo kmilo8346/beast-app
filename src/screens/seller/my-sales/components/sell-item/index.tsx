@@ -7,7 +7,9 @@ import {
 } from 'react-native';
 
 // components
-import { Touchable, Text, Icon } from '../../../../../components';
+import Touchable from '../../../../../components/touchable';
+import Text from '../../../../../components/text';
+import Icon from '../../../../../components/icon';
 // cache
 import storeCache from '../../../../../cache/store';
 // libs

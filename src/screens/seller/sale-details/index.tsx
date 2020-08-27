@@ -5,20 +5,20 @@ import Constants from 'expo-constants';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import {
-  Text,
-  Button,
-  Touchable,
-  ButtonIcon,
-  LoadingOverlay,
-  IToast,
+import Text from '../../../components/text';
+import Button from '../../../components/buttons/button';
+import ButtonIcon from '../../../components/buttons/button-icon';
+import Touchable from '../../../components/touchable';
+import LoadingOverlay, {
   ILoadingOverlay,
-  Toast,
-  Icon,
-  ActionSheetContact,
-} from '../../../components';
+} from '../../../components/loading-overlay';
+import Toast, { IToast } from '../../../components/toast';
+import Icon from '../../../components/icon';
+import ActionSheetContact from '../../../components/modals/action-sheet-contact';
+
 // local components
-import { Steps, Step, StepStatus, Item } from './components';
+import Steps, { Step, StepStatus } from './components/steps';
+import Item from './components/item';
 // libs
 import * as utils from '../../../lib/utils';
 import numberFormatter from '../../../lib/formatters/number-formatter';

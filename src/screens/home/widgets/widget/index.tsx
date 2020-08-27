@@ -1,7 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
 
-// components
 // widgets
 import Banner from '../banner';
 import NearbyStores from '../nearby-stores';
