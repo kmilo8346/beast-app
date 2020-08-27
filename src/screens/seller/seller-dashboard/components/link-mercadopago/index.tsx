@@ -9,11 +9,14 @@ import MercadopagoSmallLogo from '../../../../../components/svgs/icons/mercadopa
 import colors from '../../../../../styles/colors';
 
 export default () => {
-  const onPressHandler = () => {
+  // event handlers
+  const pressHandler = () => {
     // TODO: implement linking to mercadopago
   };
+
+  // render logic
   return (
-    <Touchable onPress={onPressHandler}>
+    <Touchable onPress={pressHandler}>
       <View
         style={{
           flexDirection: 'row',

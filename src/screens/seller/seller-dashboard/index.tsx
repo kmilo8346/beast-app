@@ -1,10 +1,10 @@
 import React from 'react';
-import { ScrollView, View, Image, ImageBackground } from 'react-native';
+import { ScrollView, View, Image, GestureResponderEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import Touchable from '../../../components/touchable';
 import Text from '../../../components/text';
-import Icon from '../../../components/icon';
 import ButtonIcon from '../../../components/buttons/button-icon';
 // seller components
 import DashboardShorcut from '../components/shortcut';
@@ -20,7 +20,6 @@ import storeCache from '../../../cache/store';
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
 
-const bgAcumuladoImage = require('../../../../assets/bg-acumulado.png');
 const myProductsImage = require('../../../../assets/icons/tag.png');
 const mySalesImage = require('../../../../assets/icons/sale.png');
 const addProductOrServiceImage = require('../../../../assets/icons/plus.png');
@@ -47,20 +46,28 @@ export default ({ navigation }: ScreenProps) => {
   if (!store.images) {
     throw new Error(`${prefix} Store images must be defined`);
   }
+  const insets = useSafeAreaInsets();
 
   // event handlers
   const pressAddProductHandler = () => {
     navigation.navigate('CreateOrUpdateProduct');
   };
 
+  const pressSelectOrCreateStoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.replace('SelectOrCreateStore');
+  };
+
   // render logic
   const image = store.images[0];
-  let sellerName = '';
-  if (user.first_name) {
-    sellerName = user.first_name.split(' ')[0];
-  }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.white }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.white,
+        paddingTop: insets.top,
+      }}
+    >
       <ScrollView style={[globalStyles.withPadding]}>
         <View
           style={{
@@ -98,12 +105,13 @@ export default ({ navigation }: ScreenProps) => {
               >
                 <Text
                   level={2}
-                  style={{ marginBottom: 2, marginRight: 3 }}
                   weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 2, marginRight: 3 }}
                 >
-                  Mi tienda
+                  {store.name}
                 </Text>
-                <Icon name="chevron-down" />
               </View>
               <Text level={5} color={colors.blackLight2}>
                 Editar datos de tienda
@@ -111,43 +119,14 @@ export default ({ navigation }: ScreenProps) => {
             </View>
           </Touchable>
           <ButtonIcon
-            icon="log-out"
+            icon="repeat"
             style={{ alignSelf: 'center' }}
-            onPress={() => navigation.navigate('SelectOrCreateStore')}
+            onPress={pressSelectOrCreateStoreHandler}
           />
         </View>
+
         <MercadopagoLink />
-        <Touchable onPress={() => null}>
-          <ImageBackground
-            source={bgAcumuladoImage}
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              height: 100,
-              marginBottom: 20,
-              borderRadius: 13,
-              paddingLeft: 20,
-            }}
-          >
-            <View style={{ flex: 5 }}>
-              <Text level={1} weight="bold" color={colors.white}>
-                {`Hola ${sellerName}`}
-              </Text>
-              <Text level={5} color={colors.white}>
-                Productos vendidos en total
-              </Text>
-            </View>
-            <Text
-              style={{ flex: 1 }}
-              level={1}
-              weight="bold"
-              color={colors.white}
-            >
-              7
-            </Text>
-          </ImageBackground>
-        </Touchable>
+
         <DashboardLink
           image={myProductsImage}
           title="Mis productos"

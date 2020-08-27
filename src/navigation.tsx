@@ -257,7 +257,7 @@ function SellerStackScreen() {
         <SellerStack.Screen
           name="SellerDashboard"
           component={SellerDashboardScreen}
-          options={{ title: '' }}
+          options={{ headerShown: false }}
         />
         <SellerStack.Screen
           name="UpdateStoreInfo"
