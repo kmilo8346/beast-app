@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useReducer, useEffect } from 'react';
 import { View } from 'react-native';
 
@@ -103,7 +104,25 @@ export default ({ navigation }: BootProps) => {
         }
         printUserInfo();
         if (userCache.isLogged()) {
-          const user = userCache.getData() as LoggedUser;
+          let user = userCache.getData() as LoggedUser;
+          if (user.created_at) {
+            // user not found in db but has a created at prop in cache
+            // this happen for developers when change environments
+
+            // adapting user to current environment
+
+            const {
+              current_address,
+              addresses,
+              current_store,
+              created_at,
+              updated_at,
+              ...safeData
+            } = user;
+            await userCache.replaceData(safeData);
+            user = userCache.getData() as LoggedUser;
+          }
+
           if (!user.phone || !user.phone_verified) {
             navigation.replace('SetPhone');
           } else {

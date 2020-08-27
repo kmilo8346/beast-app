@@ -173,11 +173,12 @@ export default ({ navigation }: ScreenProps) => {
         ...(state.form.address as Place),
         apartment: state.form.apartment,
       };
-      const toSave = {
+      const toSave: any = {
         ...user,
         current_address: address.id,
         addresses: [address],
       };
+
       const created = await userClient.create({
         body: toSave,
       });

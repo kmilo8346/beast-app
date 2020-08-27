@@ -8,8 +8,8 @@ import {
 
 // components
 import { Touchable, Text, Icon } from '../../../../../components';
-// containers
-import UserProvider from '../../../../../containers/user';
+// cache
+import storeCache from '../../../../../cache/store';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../../lib/formatters/date-formatter';
@@ -28,16 +28,11 @@ export interface SellItemProps {
 }
 
 export default ({ sell, onPress = () => null, style }: SellItemProps) => {
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
-  if (!store.deliveryArea) {
+  if (!store.delivery_area) {
     throw new Error(`${prefix} Store must have a delivery area`);
   }
   const stats = utils.getStats(sell.transaction.shopping_cart);
@@ -61,8 +56,8 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   let distanceText = '';
   if (sell.provider.status !== OwnerDispatchStatus.DELIVERED) {
     const distance = utils.distance(
-      store.deliveryArea?.center.geometry.location.lat,
-      store.deliveryArea.center.geometry.location.lng,
+      store.delivery_area?.center.geometry.location.lat,
+      store.delivery_area.center.geometry.location.lng,
       sell.transaction.delivery_address.geometry.location.lat,
       sell.transaction.delivery_address.geometry.location.lng,
       'K'

@@ -194,7 +194,7 @@ export default ({
       dispatch({ type: 'show_loading_details' });
       const response = await placesClient.details(
         {
-          placeId,
+          place_id: placeId,
           sessiontoken: currentSessiontoken,
         },
         autocompleteRequestSource.token
@@ -260,7 +260,7 @@ export default ({
                     alignItems: 'center',
                   }}
                   onPress={() => {
-                    fetchDetail(prediction.placeId);
+                    fetchDetail(prediction.place_id);
                   }}
                 >
                   <Icon name="map-pin" size={18} />

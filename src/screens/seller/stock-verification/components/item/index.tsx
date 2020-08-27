@@ -103,10 +103,10 @@ export default memo(
         text = 'Sin stock';
         containerColor = colors.redLight3;
         textColor = colors.redLight2;
-        if (productConfirmation.qtyPosible === product.qty) {
+        if (productConfirmation.qty_posible === product.qty) {
           text = ``;
-        } else if (productConfirmation.qtyPosible >= 1) {
-          text = `Se entregará ${productConfirmation.qtyPosible} de ${product.qty}`;
+        } else if (productConfirmation.qty_posible >= 1) {
+          text = `Se entregará ${productConfirmation.qty_posible} de ${product.qty}`;
           containerColor = colors.yellowLight2;
           textColor = colors.yellow;
         }
@@ -136,9 +136,9 @@ export default memo(
     if (productConfirmation) {
       rightPart = null;
       if (productConfirmation.type === ProductConfirmationType.UPDATE) {
-        if (productConfirmation.qtyPosible === 0) {
+        if (productConfirmation.qty_posible === 0) {
           rightPart = <Image source={checkErrorImage} />;
-        } else if (productConfirmation.qtyPosible < product.qty) {
+        } else if (productConfirmation.qty_posible < product.qty) {
           rightPart = <Image source={checkWarningImage} />;
         } else {
           rightPart = <Image source={checkSuccessImage} />;

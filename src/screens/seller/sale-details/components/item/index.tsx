@@ -27,10 +27,10 @@ export default ({ product, productConfirmation }: ItemProps) => {
     productConfirmation.type === ProductConfirmationType.UPDATE
   ) {
     badgeColor = colors.redLight2;
-    if (productConfirmation.qtyPosible >= 1) {
+    if (productConfirmation.qty_posible >= 1) {
       badgeColor = colors.yellow;
     }
-    if (productConfirmation.qtyPosible === product.qty) {
+    if (productConfirmation.qty_posible === product.qty) {
       badgeColor = colors.green2;
     }
   }
@@ -43,10 +43,10 @@ export default ({ product, productConfirmation }: ItemProps) => {
       text = 'Sin stock';
       containerColor = colors.redLight3;
       textColor = colors.redLight2;
-      if (productConfirmation.qtyPosible === product.qty) {
+      if (productConfirmation.qty_posible === product.qty) {
         text = ``;
-      } else if (productConfirmation.qtyPosible >= 1) {
-        text = `Se entregará ${productConfirmation.qtyPosible} de ${product.qty}`;
+      } else if (productConfirmation.qty_posible >= 1) {
+        text = `Se entregará ${productConfirmation.qty_posible} de ${product.qty}`;
         containerColor = colors.yellowLight2;
         textColor = colors.yellow;
       }

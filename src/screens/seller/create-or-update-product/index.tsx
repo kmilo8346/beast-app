@@ -199,7 +199,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
     }
 
     createOrUpdateProduct({
-      enabled: true, // default value
+      // default value
+      enabled: true,
+      tags: [],
       ...state.form.product,
     } as Product);
   };

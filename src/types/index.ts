@@ -69,7 +69,7 @@ export interface Redirect {
 
 export interface PlacesAutocompletePrediction {
   description: string;
-  placeId: string;
+  place_id: string;
 }
 
 export interface PlacesAutocompletResponse {
@@ -338,7 +338,7 @@ export enum ProductConfirmationType {
 }
 
 export type ProductConfirmation =
-  | { type: ProductConfirmationType.UPDATE; id: string; qtyPosible: number }
+  | { type: ProductConfirmationType.UPDATE; id: string; qty_posible: number }
   | { type: ProductConfirmationType.DELETE; id: string };
 
 export type Confirmation = ProductConfirmation[];
@@ -373,13 +373,13 @@ export interface Order extends CreateOrder {
 
 export interface CreateDevice {
   token: string;
-  userId: string;
+  user_id: string;
 }
 
 export interface Device extends CreateDevice {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export enum WidgetType {

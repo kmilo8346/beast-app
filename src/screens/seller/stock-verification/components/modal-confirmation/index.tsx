@@ -45,7 +45,7 @@ export default ({
     confirmation || {
       type: ProductConfirmationType.UPDATE,
       id: product.id,
-      qtyPosible: 0,
+      qty_posible: 0,
     }
   );
   // precondition
@@ -57,7 +57,7 @@ export default ({
 
   // event handlers
   const changeHandler = (qty: number) => {
-    setState((prevState) => ({ ...prevState, qtyPosible: qty }));
+    setState((prevState) => ({ ...prevState, qty_posible: qty }));
   };
   const pressIHaveAllHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -71,9 +71,9 @@ export default ({
   // render logic
   const image = product.images[0];
   let inputStatus: InputNumberStatus = 'error';
-  if (state.qtyPosible >= 1) {
+  if (state.qty_posible >= 1) {
     inputStatus = 'warning';
-    if (state.qtyPosible === product.qty) {
+    if (state.qty_posible === product.qty) {
       inputStatus = 'success';
     }
   }
@@ -116,7 +116,7 @@ export default ({
           }}
         >
           <InputNumber
-            value={state.qtyPosible}
+            value={state.qty_posible}
             min={0}
             max={product.qty}
             status={inputStatus}

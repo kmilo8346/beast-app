@@ -47,22 +47,6 @@ export default class RESTClient<T, V> {
     this.axios = axios.create(config);
 
     this.axios.interceptors.request.use(
-      (config) => {
-        const newConfig = { ...config };
-        // axios url params ex: ?place_id=
-        if (config.params) {
-          newConfig.params = snakeCaseKeys(config.params, { deep: true });
-        }
-        // axios body data
-        if (config.data) {
-          newConfig.data = snakeCaseKeys(config.data, { deep: true });
-        }
-
-        return newConfig;
-      },
-      (error) => Promise.reject(error)
-    );
-    this.axios.interceptors.request.use(
       async (config) => {
         const newConfig = { ...config };
         const currentuser = firebase.auth().currentUser;
@@ -76,29 +60,6 @@ export default class RESTClient<T, V> {
       (error) => {
         throw error;
       }
-    );
-
-    // interceptor to transform backend response keys to came case
-    this.axios.interceptors.response.use(
-      (response) => {
-        // remove after migration
-        if (
-          response.config.url?.includes('stores') ||
-          response.config.url?.includes('products') ||
-          response.config.url?.includes('details') ||
-          response.config.url?.includes('users') ||
-          response.config.url?.includes('widgets') ||
-          response.config.url?.includes('payments') ||
-          response.config.url?.includes('orders')
-        ) {
-          return response;
-        }
-        return {
-          ...response,
-          data: camelCaseKeys(response.data, { deep: true }),
-        };
-      },
-      (error) => Promise.reject(error)
     );
   }
 

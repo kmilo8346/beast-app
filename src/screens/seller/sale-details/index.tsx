@@ -25,7 +25,7 @@ import numberFormatter from '../../../lib/formatters/number-formatter';
 // clients
 import orderClient from '../../../clients/order-client';
 // containers
-import UserProvider from '../../../containers/user';
+import storeCache from '../../../cache/store';
 // types
 import {
   Order,
@@ -103,20 +103,14 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     contact: false,
   });
   const sale: Order = route.params.sale;
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
-  // precondition
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   if (!sale) {
     throw new Error(`${prefix} Sale must be defined`);
   }
-  const store = user.store;
+  const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);
   }
-  if (!store.deliveryArea) {
+  if (!store.delivery_area) {
     throw new Error(`${prefix} Store must have a delivery area`);
   }
 
@@ -138,8 +132,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     Linking.openURL(
       utils.createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/dir/`, {
         api: 1,
-        origin: `${store.deliveryArea?.center.geometry.location.lat},${store.deliveryArea?.center.geometry.location.lng}`,
-        origin_place_id: store.deliveryArea?.center.id,
+        origin: `${store.delivery_area?.center.geometry.location.lat},${store.delivery_area?.center.geometry.location.lng}`,
+        origin_place_id: store.delivery_area?.center.id,
         destination: `${sale.transaction.delivery_address.geometry.location.lat},${sale.transaction.delivery_address.geometry.location.lng}`,
         destination_place_id: sale.transaction.delivery_address.id,
       })
@@ -264,14 +258,14 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     }
   );
   // formmatted delivered address
-  let deliveryAddress = `${sale.transaction.delivery_address.route.shortName} ${sale.transaction.delivery_address.streetNumber.shortName}`;
+  let deliveryAddress = `${sale.transaction.delivery_address.route.short_name} ${sale.transaction.delivery_address.street_number.short_name}`;
   if (sale.transaction.delivery_address.apartment) {
     deliveryAddress = `${deliveryAddress} · ${sale.transaction.delivery_address.apartment}`;
   }
   // distance from store to delivery address
   const distance = utils.distance(
-    store.deliveryArea.center.geometry.location.lat,
-    store.deliveryArea.center.geometry.location.lng,
+    store.delivery_area.center.geometry.location.lat,
+    store.delivery_area.center.geometry.location.lng,
     sale.transaction.delivery_address.geometry.location.lat,
     sale.transaction.delivery_address.geometry.location.lng,
     'K'
