@@ -1,8 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { View, Modal, ViewStyle, StyleProp } from 'react-native';
+import {
+  View,
+  Modal,
+  ViewStyle,
+  StyleProp,
+  ActivityIndicator,
+} from 'react-native';
 
-// components
-// import Loading from '../loading';
 // styles
 import colors from '../../styles/colors';
 
@@ -44,7 +48,7 @@ export default forwardRef<Ref, LoadingOverlayProps>(
             containerStyle,
           ]}
         >
-          {/* <Loading /> */}
+          <ActivityIndicator size="small" color={colors.white} />
         </View>
       </Modal>
     );
