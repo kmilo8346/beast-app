@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Animated } from 'react-native';
+import { View, Animated, Platform } from 'react-native';
 import LottieView from 'lottie-react-native';
 
 // assets
-import Loading from '../../../assets/lotties/carga.json';
+const Loading = require('../../../assets/lotties/test.json');
 
 const messages = [
   'Conectando reflectores.',
@@ -55,14 +55,17 @@ export default () => {
         alignItems: 'center',
       }}
     >
-      <LottieView
-        style={{
-          height: 300,
-          marginBottom: -50,
-        }}
-        autoPlay
-        source={Loading}
-      />
+      {Platform.OS === 'android' ? null : (
+        <LottieView
+          style={{
+            height: 300,
+            marginBottom: -50,
+          }}
+          autoPlay
+          source={Loading}
+        />
+      )}
+
       <Animated.Text
         style={[
           {

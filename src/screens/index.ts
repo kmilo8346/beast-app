@@ -7,10 +7,6 @@ export { default as VerifyPhoneScreen } from './verify-phone';
 export { default as SetAddressScreen } from './set-address';
 export { default as HomeScreen } from './home';
 export { default as StoreScreen } from './store';
-export { default as CheckoutV2Screen } from './checkoutv2';
-export { default as PLPScreen } from './plp';
-export { default as PLPInStoreScreen } from './plp/in-store';
-export { default as PDPScreen } from './pdp';
 export { default as CheckoutScreen } from './checkout';
 export { default as SellerBootScreen } from './seller/seller-boot';
 export { default as SelectOrCreateStoreScreen } from './seller/select-or-create-store';
@@ -20,7 +16,6 @@ export { default as SetStoreDeliveryInfoScreen } from './seller/set-store-delive
 export { default as MercadoPagoSignInScreen } from './seller/mercado-pago-sign-in';
 export { default as SellerDashboardScreen } from './seller/seller-dashboard';
 export { default as CreateOrUpdateProductScreen } from './seller/create-or-update-product';
-export { default as CreateOrUpdateServiceScreen } from './seller/create-or-update-service';
 export { default as MyProductsScreen } from './seller/my-products';
 export { default as MySalesScreen } from './seller/my-sales';
 export { default as SaleDetailsScreen } from './seller/sale-details';

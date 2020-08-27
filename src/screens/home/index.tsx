@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useRef, useCallback } from 'react';
-import { View } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
@@ -8,7 +8,6 @@ import axios, { CancelTokenSource } from 'axios';
 import Text from '../../components/text';
 import Toast, { IToast } from '../../components/toast';
 import ErrorView from '../../components/error-view';
-import FlatList from '../../components/flat-list';
 import Divider from '../../components/divider';
 // local components
 import SelectAddress from './components/select-address';
@@ -16,7 +15,7 @@ import Skeleton from './components/skeleton';
 import WidgetComponent from './widgets/widget';
 // clients
 import widgetClient from '../../clients/widget-client';
-import userClient from '../../clients/user-client-v2';
+import userClient from '../../clients/user-client';
 // cache
 import userCache from '../../cache/user';
 // types

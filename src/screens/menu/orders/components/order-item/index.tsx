@@ -10,14 +10,14 @@ import {
 import Touchable from '../../../../../components/touchable';
 import Text from '../../../../../components/text';
 import Icon from '../../../../../components/icon';
-// containers
-import UserProvider from '../../../../../containers/user';
+// cache
+import userCache from '../../../../../cache/user';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../../lib/formatters/date-formatter';
 import * as utils from '../../../../../lib/utils';
 // types
-import { Order, OwnerDispatchStatus } from '../../../../../types';
+import { Order, OwnerDispatchStatus, LoggedUser } from '../../../../../types';
 // styles
 import colors from '../../../../../styles/colors';
 
@@ -30,8 +30,7 @@ export interface OrderItemProps {
 }
 
 export default ({ order, onPress = () => null, style }: OrderItemProps) => {
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }

@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, GestureResponderEvent } from 'react-native';
+import { View, GestureResponderEvent, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,14 +8,13 @@ import ErrorView from '../../../components/error-view';
 import Loading from '../../../components/loading';
 import Text from '../../../components/text';
 import Button from '../../../components/buttons/button';
-import FlatList from '../../../components/flat-list';
 // local components
 import StoreItem from './components/store-item';
 // seller components
 import Shortcut from '../components/shortcut';
 // clients
 import storeClient from '../../../clients/store-client';
-import userClient from '../../../clients/user-client-v2';
+import userClient from '../../../clients/user-client';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -272,7 +271,7 @@ export default ({ navigation }: SelectStoreProps) => {
           return <StoreItem data={item} onPress={pressItemHandler} />;
         }}
         ListFooterComponent={<View style={globalStyles.withScreenAir} />}
-        onBeastEndReached={() => {
+        onEndReached={() => {
           if (state.stores && state.stores.from < state.stores.total) {
             fetchMore();
           }

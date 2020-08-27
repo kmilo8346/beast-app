@@ -17,7 +17,7 @@ import LoadingOverlay, {
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 import storeClient from '../../../clients/store-client';
-import userClient from '../../../clients/user-client-v2';
+import userClient from '../../../clients/user-client';
 // types
 import { CreateStore } from '../../../types';
 // cache

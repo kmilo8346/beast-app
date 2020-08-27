@@ -14,7 +14,7 @@ import LoadingOverlay, {
 } from '../../components/loading-overlay';
 import MapPinShadedBlue from '../../components/svgs/icons/map-pin-shaded-blue';
 // clients
-import userClient from '../../clients/user-client-v2';
+import userClient from '../../clients/user-client';
 // libs
 import validate from '../../lib/validate';
 // cache

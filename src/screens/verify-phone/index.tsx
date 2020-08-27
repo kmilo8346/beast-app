@@ -12,7 +12,7 @@ import LoadingOverlay, {
 } from '../../components/loading-overlay';
 // clients
 import phoneClient from '../../clients/phone-client';
-import userClient from '../../clients/user-client-v2';
+import userClient from '../../clients/user-client';
 // cache
 import userCache from '../../cache/user';
 // types

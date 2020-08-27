@@ -1,11 +1,10 @@
 import React, { useReducer, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, SectionList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Loading from '../../../../../components/loading';
 import ErrorView from '../../../../../components/error-view';
-import SectionList from '../../../../../components/section-list';
 import Icon from '../../../../../components/icon';
 import Text from '../../../../../components/text';
 // local components
@@ -303,7 +302,7 @@ export default ({
       }}
       ListFooterComponent={<View style={globalStyles.withScreenAir} />}
       onRefresh={refresh}
-      onBeastEndReached={() => {
+      onEndReached={() => {
         if (orders.from < orders.total) {
           fetchMore();
         }

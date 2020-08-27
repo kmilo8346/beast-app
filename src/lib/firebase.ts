@@ -1,7 +1,5 @@
-import 'expo-firestore-offline-persistence';
 import * as firebase from 'firebase';
 import 'firebase/auth';
-import 'firebase/firestore';
 import 'firebase/storage';
 import Constants from 'expo-constants';
 
@@ -18,16 +16,5 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-if (Constants.manifest.extra.BEAST_ENVIRONMENT === 'local') {
-  const db = firebase.firestore();
-  db.settings({
-    host: `${Constants.manifest.extra.IP}:8080`,
-    ssl: false,
-  });
-}
-
-// enabling online persistence
-firebase.firestore().enablePersistence();
 
 export default firebase;

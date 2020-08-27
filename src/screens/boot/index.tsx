@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import Loading from '../../components/loading';
 import ErrorView from '../../components/error-view';
 // clients
-import userClient from '../../clients/user-client-v2';
+import userClient from '../../clients/user-client';
 // cache
 import userCache from '../../cache/user';
 // libs

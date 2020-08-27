@@ -5,8 +5,8 @@ import axios, { CancelTokenSource } from 'axios';
 // components
 import Loading from '../../../components/loading';
 import ErrorView from '../../../components/error-view';
-// clients
-import userClient from '../../../clients/user-client-v2';
+// clients../../../clients/user-client
+import userClient from '../../../clients/user-client';
 import storeClient from '../../../clients/store-client';
 // types
 import { LoggedUser } from '../../../types';

@@ -1,10 +1,14 @@
 import React, { useReducer, useEffect, useLayoutEffect, useRef } from 'react';
-import { View, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import {
+  View,
+  Keyboard,
+  TouchableWithoutFeedback,
+  FlatList,
+} from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import FlatList from '../../../components/flat-list';
 import Loading from '../../../components/loading';
 import ErrorView from '../../../components/error-view';
 import NotSearchResult from '../../../components/not-search-result';
@@ -443,7 +447,7 @@ export default ({ navigation }: MyProductsProps) => {
               keyExtractor={(product) => product.id}
               initialNumToRender={defaultSize}
               ListFooterComponent={<View style={globalStyles.withScreenAir} />}
-              onBeastEndReached={() => {
+              onEndReached={() => {
                 if (
                   state.products &&
                   state.products.from < state.products.total

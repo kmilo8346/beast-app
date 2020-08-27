@@ -1,353 +1,554 @@
-import React, { useRef, useEffect, useReducer } from 'react';
-import { View, Image, ScrollView } from 'react-native';
+import React, { useReducer, useEffect } from 'react';
+import { View, GestureResponderEvent } from 'react-native';
 import Constants from 'expo-constants';
-import * as WebBrowser from 'expo-web-browser';
+import axios, { CancelTokenSource } from 'axios';
 import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+import { CommonActions } from '@react-navigation/native';
 
 // components
+import ErrorView from '../../components/error-view';
 import Text from '../../components/text';
+import CheckBlueThinImage from '../../components/svgs/images/check-blue-thin';
+import SearchingCardImage from '../../components/svgs/images/searching-card';
+import RapidCashImage from '../../components/svgs/images/rapid-cash';
+import BrokenCardImage from '../../components/svgs/images/broken-card';
+import MercadoPagoImage from '../../components/svgs/images/mercadopago-logo';
 import Button from '../../components/buttons/button';
-import Touchable from '../../components/touchable';
-import Toast, { IToast } from '../../components/toast';
-import LoadingOverlay, {
-  ILoadingOverlay,
-} from '../../components/loading-overlay';
 // clients
 import paymentClient from '../../clients/payment-client';
-// containers
-import UserProvider from '../../containers/user';
-import CartProvider from '../../containers/cart';
-// libs
-import numberFormatter from '../../lib/formatters/number-formatter';
-import { generatePushID } from '../../lib/uuid';
-import { createUrl } from '../../lib/utils';
 // types
-import { MercadopagoPaymentStatus } from '../../types';
+import {
+  Store,
+  MercadopagoPaymentStatus,
+  LoggedUser,
+  PaymentProvider,
+} from '../../types';
+// cache
+import userCache from '../../cache/user';
+import shoppingCartsCache from '../../cache/shopping-carts';
+import ShoppingCartCache, {
+  ShoppingCartSnapshot,
+} from '../../cache/shopping-cart';
+// libs
+import { generatePushID } from '../../lib/uuid';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
 
 // instances outside component
 const prefix = '[checkout screen]';
+let fetchRequestSource: CancelTokenSource;
+const redirectUrl = Linking.makeUrl();
 
-export enum CheckoutView {
-  FORM = 'form',
-  PENDING = 'pending',
-  IN_PROCESS = 'in_process',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-}
 type SetIdempotencyAction = {
   type: 'set_idempotency';
   idempotency: string;
 };
-type ChangeViewAction = {
-  type: 'change_view';
-  view: CheckoutView;
+type SetShoppingCartCacheAction = {
+  type: 'set_shopping_cart_cache';
+  shopping_cart_cache: ShoppingCartCache;
 };
-
-type Action = SetIdempotencyAction | ChangeViewAction;
+type ResetAction = {
+  type: 'reset';
+};
+type SetCancelledAction = {
+  type: 'set_cancelled';
+  cancelled: boolean;
+};
+type SetRedirectStatusAction = {
+  type: 'set_redirect_status';
+  redirect_status?: MercadopagoPaymentStatus;
+};
+type SetErrorAction = {
+  type: 'set_error';
+  error?: Error;
+};
+type Action =
+  | SetIdempotencyAction
+  | SetShoppingCartCacheAction
+  | ResetAction
+  | SetCancelledAction
+  | SetRedirectStatusAction
+  | SetErrorAction;
 type State = {
-  view: CheckoutView;
   idempotency?: string;
+  shopping_cart_cache?: ShoppingCartCache;
+  cancelled: boolean;
+  redirect_status?: MercadopagoPaymentStatus;
+  error?: Error;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_idempotency':
       return { ...state, idempotency: action.idempotency };
-    case 'change_view':
-      return { ...state, view: action.view };
+    case 'set_shopping_cart_cache':
+      return { ...state, shopping_cart_cache: action.shopping_cart_cache };
+    case 'reset':
+      return {
+        ...state,
+        error: undefined,
+        cancelled: false,
+        redirect_status: undefined,
+      };
+    case 'set_cancelled':
+      return { ...state, cancelled: action.cancelled };
+    case 'set_redirect_status':
+      return { ...state, redirect_status: action.redirect_status };
+    case 'set_error':
+      return { ...state, error: action.error };
     default:
       return state;
   }
 };
 
-interface CheckoutProps {
+interface ScreenProps {
   navigation: any;
+  route: any;
 }
 
-export default ({ navigation }: CheckoutProps) => {
+export default ({ navigation, route }: ScreenProps) => {
+  // params
+  const store = route.params?.store as Store;
+  if (!store) {
+    throw new Error(`${prefix} Store param must be defined`);
+  }
+  const shopping_cart = route.params?.shopping_cart as ShoppingCartSnapshot;
+  if (!shopping_cart) {
+    throw new Error(`${prefix} Shopping cart param must be defined`);
+  }
   // state
   const [state, dispatch] = useReducer(reducer, {
-    view: CheckoutView.FORM,
+    cancelled: false,
   });
-  const userContainer = UserProvider.useContainer();
-  const user = userContainer.get();
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const currentAddress = user.addresses.find(
-    (address) => address.id === user.currentAddress
-  );
-  if (!currentAddress) {
-    throw new Error(`${prefix} Current address must be defined`);
+  const address = userCache.getAddress();
+  if (!address) {
+    throw new Error(`${prefix} User address must be defined`);
   }
-  const cartContainer = CartProvider.useContainer();
-  const cart = cartContainer.getCart();
-  const shoppingCart = cart[0].data;
-  const store = cart[0].store;
-  const stats = cartContainer.getStats();
-
-  const toastRef = useRef<IToast>(null);
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
-  const pressImageMapHandler = () => {
-    Linking.openURL(
-      createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/search/`, {
-        api: 1,
-        query: `${currentAddress?.geometry.location.lat},${currentAddress?.geometry.location.lng}`,
-        query_place_id: currentAddress?.id,
-      })
-    );
+  const instanceCache = async () => {
+    const cache = await shoppingCartsCache.get(store.id);
+    dispatch({ type: 'set_shopping_cart_cache', shopping_cart_cache: cache });
   };
-  const showView = (status: string) => {
-    switch (status) {
-      case 'pending':
-        dispatch({
-          type: 'change_view',
-          view: CheckoutView.PENDING,
-        });
-        return;
-      case 'in_process':
-        dispatch({
-          type: 'change_view',
-          view: CheckoutView.IN_PROCESS,
-        });
-        return;
-      case 'approved':
-        dispatch({
-          type: 'change_view',
-          view: CheckoutView.APPROVED,
-        });
-        return;
-      case 'rejected':
-        dispatch({
-          type: 'change_view',
-          view: CheckoutView.REJECTED,
-        });
-        return;
-      default:
-        dispatch({
-          type: 'change_view',
-          view: CheckoutView.FORM,
-        });
+
+  const createPayment = async (idempotency: string, redirectUrl: string) => {
+    if (fetchRequestSource) {
+      fetchRequestSource.cancel();
     }
-  };
-  const openCheckout = async (initPoint: string, redirectUrl: string) => {
-    const result = await WebBrowser.openAuthSessionAsync(
-      initPoint,
-      redirectUrl
-    );
-    let redirect: any = {
-      id: '',
-      status: '',
-    };
-    if (result.type === 'success') {
-      const redirectData = Linking.parse(result.url);
-      redirect = redirectData.queryParams;
-    }
-    return redirect;
-  };
-  const createPayment = async (redirectUrl: string) => {
-    const response = await paymentClient.create({
-      body: {
-        customer: {
-          id: user.id,
-          email: user.email as string,
-          first_name: user.firstName as string,
-          last_name: user.lastName,
-          photo_url: user.photoUrl as string,
-          phone: user.phone as string,
+    fetchRequestSource = axios.CancelToken.source();
+    const response = await paymentClient.create(
+      {
+        body: {
+          customer: {
+            id: user.id,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            photo_url: user.photo_url,
+            phone: user.phone,
+          },
+          transaction: {
+            country: Constants.manifest.extra.BEAST_COUNTRY,
+            currency: Constants.manifest.extra.BEAST_CURRENCY,
+            language: Constants.manifest.extra.BEAST_LANGUAGE,
+            delivery_address: address,
+            shopping_cart: shopping_cart.items,
+            store,
+          },
+          redirect_url: redirectUrl,
         },
-        transaction: {
-          country: Constants.manifest.extra.BEAST_COUNTRY,
-          currency: Constants.manifest.extra.BEAST_CURRENCY,
-          language: Constants.manifest.extra.BEAST_LANGUAGE,
-          delivery_address: currentAddress,
-          shopping_cart: shoppingCart,
-          store,
-        },
-        redirect_url: redirectUrl,
+        idempotency,
+        source: ['id', 'provider'],
       },
-      idempotency: state.idempotency as string,
-      source: ['id', 'provider'],
-    });
+      fetchRequestSource.token
+    );
     return response;
   };
-  const pressPayHandler = async () => {
-    try {
-      loadingOverlayRef.current?.show();
-      const redirectUrl = Linking.makeUrl();
-      if (!redirectUrl) {
-        throw new Error(`${prefix} Redirect must be defined`);
-      }
-      const payment = await createPayment(redirectUrl);
 
-      // payment already processed
+  const openCheckout = async (idempotency: string) => {
+    if (!redirectUrl) {
+      throw new Error(`${prefix} Redirect url must be defined`);
+    }
+    try {
+      dispatch({ type: 'reset' });
+      const payment = await createPayment(idempotency, redirectUrl);
       if (payment.provider.status !== MercadopagoPaymentStatus.STARTED) {
-        showView(payment.provider.status);
+        dispatch({
+          type: 'set_redirect_status',
+          redirect_status: payment.provider.status,
+        });
         return;
       }
+
       // open checkout
-      const redirect = await openCheckout(
-        payment.provider.checkout.initPoint,
+      const result = await WebBrowser.openAuthSessionAsync(
+        payment.provider.checkout.init_point,
         redirectUrl
       );
-      showView(redirect.status as string);
+      if (result.type === 'success') {
+        const redirectData = Linking.parse(result.url);
+        if (!redirectData?.queryParams?.status) {
+          throw new Error(
+            `${prefix} Success redirect must return redirect data status`
+          );
+        }
+        dispatch({
+          type: 'set_redirect_status',
+          redirect_status: redirectData.queryParams
+            .status as MercadopagoPaymentStatus,
+        });
+      } else {
+        dispatch({ type: 'set_cancelled', cancelled: true });
+      }
     } catch (error) {
-      // TODO: log error
-      console.log(error);
-      toastRef.current?.show({
-        message: 'Ocurrió un error inesperado, por favor reintente',
-        type: 'ERROR',
-        expiration: 3,
-      });
-    } finally {
-      loadingOverlayRef.current?.hide();
+      if (!axios.isCancel(error)) {
+        // TODO: Log error
+        console.log(error);
+
+        dispatch({ type: 'set_error', error });
+      }
     }
+  };
+
+  const retryHandler = () => {
+    openCheckout(state.idempotency as string);
+  };
+
+  const retryNewPaymentHandler = () => {
+    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
+  };
+
+  const pressContinueHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'MainTab' }],
+      })
+    );
   };
 
   useEffect(() => {
     dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
   }, []);
 
+  useEffect(() => {
+    instanceCache();
+  }, []);
+
+  useEffect(() => {
+    if (state.idempotency) {
+      openCheckout(state.idempotency);
+    }
+  }, [state.idempotency]);
+
+  useEffect(() => {
+    if (state.redirect_status && state.shopping_cart_cache) {
+      if (store.payment_provider === PaymentProvider.MERCADOPAGO) {
+        switch (state.redirect_status) {
+          case MercadopagoPaymentStatus.APPROVED:
+          case MercadopagoPaymentStatus.IN_PROCESS:
+          case MercadopagoPaymentStatus.PENDING:
+            // state.shopping_cart_cache.clear();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }, [state.redirect_status, state.shopping_cart_cache]);
+
   // render logic
-  if (state.view === CheckoutView.PENDING) {
+  if (state.error) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.white }}>
-        <Text level={6} weight="bold">
-          El pago se encuentra pendiente
-        </Text>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.white,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ErrorView onRetry={retryHandler} />
       </View>
     );
   }
 
-  if (state.view === CheckoutView.IN_PROCESS) {
+  if (state.cancelled) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.white }}>
-        <Text level={6} weight="bold">
-          El pago se encuentra en processo. Le notificaremos cuando cambie
-        </Text>
-      </View>
-    );
-  }
-
-  if (state.view === CheckoutView.APPROVED) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.white }}>
-        <Text level={6} weight="bold">
-          Su pago se procesó correctamente
-        </Text>
-      </View>
-    );
-  }
-
-  if (state.view === CheckoutView.REJECTED) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.white }}>
-        <Text level={6} weight="bold">
-          Ocurrió un error procesando el pago
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.white }}>
-      <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-        <View style={{ flexDirection: 'row', marginTop: 10, marginBottom: 20 }}>
-          <Touchable onPress={pressImageMapHandler}>
-            <Image
-              source={{
-                uri: createUrl(
-                  `${Constants.manifest.extra.GOOGLE_MAPS_API_URL}/staticmap`,
-                  {
-                    center: `${currentAddress?.geometry.location.lat},${currentAddress?.geometry.location.lng}`,
-                    zoom: 13,
-                    size: '130x130',
-                    scale: 2,
-                    format: 'png',
-                    markers: `icon:${Constants.manifest.extra.GOOGLE_MAPS_CUSTOM_MARKER}|scale:2|${currentAddress?.geometry.location.lat},${currentAddress?.geometry.location.lng}`,
-                    key: Constants.manifest.extra.GOOGLE_MAPS_API_KEY,
-                  }
-                ),
-              }}
-              style={{ width: 130, height: 130, borderRadius: 10 }}
-            />
-          </Touchable>
-          <View style={{ flex: 1, marginLeft: 20 }}>
-            <Text
-              level={5}
-              numberOfLines={2}
-              style={{
-                marginTop: 10,
-                lineHeight: 20,
-                color: colors.blackLight3,
-              }}
-            >
-              Tu compra llegará a la dirección
-            </Text>
-            <Text
-              level={6}
-              numberOfLines={2}
-              style={{ marginTop: 10, lineHeight: 20 }}
-            >
-              {`${currentAddress?.route.shortName} ${currentAddress?.streetNumber.shortName}, ${currentAddress?.apartment}`}
-            </Text>
-          </View>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.white,
+          justifyContent: 'center',
+        }}
+      >
+        <View style={{ alignItems: 'center' }}>
+          <BrokenCardImage />
+          <Text
+            level={1}
+            weight="bold"
+            style={{ marginTop: 25, marginBottom: 10 }}
+          >
+            ¡Ups!
+          </Text>
+          <Text
+            level={5}
+            style={{
+              lineHeight: 23,
+              textAlign: 'center',
+              marginHorizontal: 20,
+            }}
+          >
+            Al parecer haz cancelado, si el pago se realizó te notificaremos.
+          </Text>
+          <Button
+            type="link"
+            title="Reintentar"
+            style={{ marginTop: 50 }}
+            onPress={retryNewPaymentHandler}
+          />
         </View>
 
-        <View style={{ marginTop: 30 }}>
-          {Object.keys(stats.byStores).map((storeId) => {
-            const storeStats = stats.byStores[storeId];
-            return (
-              <View
-                key={storeId}
+        <View
+          style={[
+            { position: 'absolute', left: 0, right: 0, bottom: 0 },
+            globalStyles.withMargin,
+          ]}
+        >
+          <Button
+            title="Continuar"
+            style={globalStyles.withMainActionAir}
+            onPress={pressContinueHandler}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  if (store.payment_provider === PaymentProvider.MERCADOPAGO) {
+    switch (state.redirect_status) {
+      case MercadopagoPaymentStatus.APPROVED:
+        return (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.white,
+              justifyContent: 'center',
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <CheckBlueThinImage />
+              <Text
+                level={1}
+                weight="bold"
+                style={{ marginTop: 25, marginBottom: 10 }}
+              >
+                ¡Listo!
+              </Text>
+              <Text
+                level={5}
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  lineHeight: 23,
+                  textAlign: 'center',
+                  marginHorizontal: 20,
+                }}
+              >
+                Te notificaremos cuando{' '}
+                <Text level={5} weight="bold">
+                  {store.name}
+                </Text>{' '}
+                confirme y este en camino.
+              </Text>
+            </View>
+
+            <View
+              style={[
+                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                globalStyles.withMargin,
+              ]}
+            >
+              <Button
+                title="Continuar"
+                style={globalStyles.withMainActionAir}
+                onPress={pressContinueHandler}
+              />
+            </View>
+          </View>
+        );
+      case MercadopagoPaymentStatus.IN_PROCESS:
+        return (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.white,
+              justifyContent: 'center',
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <SearchingCardImage />
+              <Text
+                level={1}
+                weight="bold"
+                style={{
+                  marginTop: 25,
                   marginBottom: 10,
                 }}
               >
-                <Text level={5}>{storeStats.name}</Text>
-                <Text level={6}>
-                  {numberFormatter.toCurrency(storeStats.ammount)}
-                </Text>
-              </View>
-            );
-          })}
+                ¡Casi listo!
+              </Text>
+              <Text
+                level={5}
+                style={{
+                  lineHeight: 23,
+                  textAlign: 'center',
+                  marginHorizontal: 20,
+                }}
+              >
+                El pago está en proceso, te notificaremos cuando este listo.
+              </Text>
+            </View>
+
+            <View
+              style={[
+                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                globalStyles.withMargin,
+              ]}
+            >
+              <Button
+                title="Continuar"
+                style={globalStyles.withMainActionAir}
+                onPress={pressContinueHandler}
+              />
+            </View>
+          </View>
+        );
+      case MercadopagoPaymentStatus.PENDING:
+        return (
           <View
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: 5,
+              flex: 1,
+              backgroundColor: colors.white,
+              justifyContent: 'center',
             }}
           >
-            <Text level={5} weight="bold">
-              Total
-            </Text>
-            <Text level={6} weight="bold">
-              {numberFormatter.toCurrency(stats.ammount)}
-            </Text>
+            <View style={{ alignItems: 'center' }}>
+              <RapidCashImage />
+              <Text
+                level={1}
+                weight="bold"
+                style={{ marginTop: 25, marginBottom: 10 }}
+              >
+                ¡Solo falta un paso!
+              </Text>
+              <Text
+                level={5}
+                style={{
+                  lineHeight: 23,
+                  textAlign: 'center',
+                  marginHorizontal: 20,
+                }}
+              >
+                Revisa las instrucciones en tu correo para finalizar el pago.
+              </Text>
+            </View>
+
+            <View
+              style={[
+                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                globalStyles.withMargin,
+              ]}
+            >
+              <Button
+                title="Continuar"
+                style={globalStyles.withMainActionAir}
+                onPress={pressContinueHandler}
+              />
+            </View>
           </View>
-        </View>
-        <View style={globalStyles.withScreenAir} />
-      </ScrollView>
-      <View
-        style={[
-          { position: 'absolute', bottom: 0, left: 0, right: 0 },
-          globalStyles.withMargin,
-        ]}
-      >
-        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
-        <Button
-          title="Pagar"
-          onPress={pressPayHandler}
-          style={globalStyles.withMainActionAir}
-        />
-      </View>
-      <LoadingOverlay ref={loadingOverlayRef} />
-    </View>
+        );
+      case MercadopagoPaymentStatus.REJECTED:
+        return (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.white,
+              justifyContent: 'center',
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <BrokenCardImage />
+              <Text
+                level={1}
+                weight="bold"
+                style={{ marginTop: 25, marginBottom: 10 }}
+              >
+                ¡Ups!
+              </Text>
+              <Text
+                level={5}
+                style={{
+                  lineHeight: 23,
+                  textAlign: 'center',
+                  marginHorizontal: 20,
+                }}
+              >
+                Parece que ocurrió un problema con el pago.
+              </Text>
+              <Button
+                type="link"
+                title="Reintentar"
+                style={{ marginTop: 50 }}
+                onPress={retryNewPaymentHandler}
+              />
+            </View>
+          </View>
+        );
+      default:
+        return (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: colors.white,
+              justifyContent: 'center',
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <Text
+                level={2}
+                style={{ marginBottom: 15, width: 226, textAlign: 'center' }}
+              >
+                Conectando con{' '}
+                <Text level={2} weight="bold">
+                  MercadoPago
+                </Text>
+              </Text>
+              <MercadoPagoImage />
+
+              <Text
+                level={5}
+                style={{
+                  marginTop: 15,
+                  lineHeight: 23,
+                  textAlign: 'center',
+                  marginHorizontal: 20,
+                  width: 270,
+                }}
+              >
+                Allá podrás seleccionar el medio de pago que prefieras.
+              </Text>
+            </View>
+          </View>
+        );
+    }
+  }
+
+  throw new Error(
+    `${prefix} Payment provider not supported, provider: ${store.payment_provider}`
   );
 };

@@ -57,7 +57,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
       if (!logged.phone || !logged.phone_verified) {
         navigate('SetPhone', {
           redirect: {
-            name: 'CheckoutV2',
+            name: 'Checkout',
             params: {
               store,
               shopping_cart: snapshot,
@@ -65,7 +65,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
           },
         });
       } else {
-        navigate('CheckoutV2', {
+        navigate('Checkout', {
           store,
           shopping_cart: snapshot,
         });
@@ -73,7 +73,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
     } else {
       navigate('SignIn', {
         redirect: {
-          name: 'CheckoutV2',
+          name: 'Checkout',
           params: {
             store,
             shopping_cart: snapshot,

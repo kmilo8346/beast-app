@@ -20,7 +20,6 @@ import {
 } from '../../../types';
 // libs
 import { v4 as uuidv4 } from '../../../lib/uuid';
-import useDebounce from '../../../lib/hooks/use-debounce';
 import colors from '../../../styles/colors';
 
 // instances outside component
@@ -146,7 +145,6 @@ export default ({
     view: 'SEARCH_TIPS',
     predictions: [],
   });
-  const debouncedAddress = useDebounce(state.address, 200);
 
   // event handlers
   const changeHandler = (attribute: string, value: string) => {
@@ -212,10 +210,10 @@ export default ({
   }, []);
   // fetch predictions using debounced address
   useEffect(() => {
-    if (debouncedAddress) {
-      fetchPredictions(debouncedAddress);
+    if (state.address) {
+      fetchPredictions(state.address);
     }
-  }, [debouncedAddress]);
+  }, [state.address]);
   // cancel request on detach component
   useEffect(() => {
     return () => {

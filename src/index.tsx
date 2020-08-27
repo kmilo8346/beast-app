@@ -9,10 +9,6 @@ import ErrorView from './components/error-view';
 import firebase from './lib/firebase';
 import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
-// containers
-import UserContainer from './containers/user';
-import CartContainer from './containers/cart';
-import OrderContainer from './containers/order';
 
 // instances outside component
 const auth = firebase.auth();
@@ -65,15 +61,7 @@ class App extends React.Component<{}, State> {
       return <ErrorView onRetry={this.retryHandler} />;
     }
 
-    return (
-      <UserContainer.Provider>
-        <CartContainer.Provider>
-          <OrderContainer.Provider>
-            <Navigation />
-          </OrderContainer.Provider>
-        </CartContainer.Provider>
-      </UserContainer.Provider>
-    );
+    return <Navigation />;
   }
 }
 

@@ -13,7 +13,7 @@ import BagLogoBackgroundBlue from '../../components/svgs/images/bag-logo-backgro
 import ButtonGoogle from './components/button-google';
 import ButtonFacebook from './components/button-facebook';
 // clients
-import userClient from '../../clients/user-client-v2';
+import userClient from '../../clients/user-client';
 // libs
 import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
@@ -367,7 +367,12 @@ export default ({ navigation, route }: ScreenProps) => {
         break;
     }
     return (
-      <View style={{ flex: 1, backgroundColor: colors.white }}>
+      <View
+        style={[
+          { flex: 1, backgroundColor: colors.white },
+          globalStyles.withPadding,
+        ]}
+      >
         <View style={{ height: '40%' }} />
         <Text level={3} weight="bold" style={{ paddingBottom: 30 }}>
           Vinculación de cuentas

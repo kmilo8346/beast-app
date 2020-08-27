@@ -1,4 +1,4 @@
-import { Item, User, CreateUser } from '../types';
+import { Item, CreateUser } from '../types';
 
 export const noop = () => {
   return null;

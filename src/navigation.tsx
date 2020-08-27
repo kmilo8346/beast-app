@@ -20,10 +20,6 @@ import {
   SetAddressScreen,
   HomeScreen,
   StoreScreen,
-  CheckoutV2Screen,
-  PLPScreen,
-  PLPInStoreScreen,
-  PDPScreen,
   CheckoutScreen,
   SellerBootScreen,
   SelectOrCreateStoreScreen,
@@ -33,7 +29,6 @@ import {
   MercadoPagoSignInScreen,
   SellerDashboardScreen,
   CreateOrUpdateProductScreen,
-  CreateOrUpdateServiceScreen,
   MyProductsScreen,
   MySalesScreen,
   SaleDetailsScreen,
@@ -46,7 +41,6 @@ import {
 // components
 import Icon from './components/icon';
 import Text from './components/text';
-import ButtonCart from './components/buttons/button-cart';
 import KeyboardAvoidingView from './components/keyboard-avoiding-view';
 // libs
 import { navigationRef, onReady, navigate } from './lib/root-navigation';
@@ -61,7 +55,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const cartStyle = { marginRight: 20, marginTop: 5 };
 const commonStackOptions: StackNavigationOptions = {
   headerBackImage: () => <Icon name="chevron-left" />,
   headerLeftContainerStyle: {
@@ -99,33 +92,10 @@ function HomeStackScreen() {
         }}
       />
       <HomeStack.Screen
-        name="CheckoutV2"
-        component={CheckoutV2Screen}
+        name="Checkout"
+        component={CheckoutScreen}
         options={{
           title: '',
-        }}
-      />
-      <HomeStack.Screen
-        name="PLP"
-        component={PLPScreen}
-        options={{
-          title: 'Buscar',
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
-        }}
-      />
-      <HomeStack.Screen
-        name="PLPInStore"
-        component={PLPInStoreScreen}
-        options={{
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
-        }}
-      />
-      <HomeStack.Screen
-        name="PDP"
-        component={PDPScreen}
-        options={{
-          title: '',
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
         }}
       />
       <HomeStack.Screen
@@ -142,65 +112,8 @@ function HomeStackScreen() {
         name="VerifyPhone"
         component={VerifyPhoneScreen}
         options={{ title: '' }}
-      />
-      <HomeStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ title: 'Mi Pedido' }}
       />
     </HomeStack.Navigator>
-  );
-}
-
-const SearchStack = createStackNavigator();
-
-function SearchStackScreen() {
-  return (
-    <SearchStack.Navigator screenOptions={commonStackOptions}>
-      <HomeStack.Screen
-        name="PLP"
-        component={PLPScreen}
-        options={{
-          title: '',
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
-        }}
-      />
-      <HomeStack.Screen
-        name="PLPInStore"
-        component={PLPInStoreScreen}
-        options={{
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
-        }}
-      />
-      <HomeStack.Screen
-        name="PDP"
-        component={PDPScreen}
-        options={{
-          title: '',
-          headerRight: () => <ButtonCart containerStyle={cartStyle} />,
-        }}
-      />
-      <HomeStack.Screen
-        name="SignIn"
-        component={SignInScreen}
-        options={{ title: '' }}
-      />
-      <RootStack.Screen
-        name="SetPhone"
-        component={SetPhoneScreen}
-        options={{ title: '' }}
-      />
-      <RootStack.Screen
-        name="VerifyPhone"
-        component={VerifyPhoneScreen}
-        options={{ title: '' }}
-      />
-      <HomeStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ title: 'Mi Pedido' }}
-      />
-    </SearchStack.Navigator>
   );
 }
 
@@ -267,11 +180,6 @@ function SellerStackScreen() {
         <SellerStack.Screen
           name="CreateOrUpdateProduct"
           component={CreateOrUpdateProductScreen}
-          options={{ headerTitle: '' }}
-        />
-        <SellerStack.Screen
-          name="CreateOrUpdateService"
-          component={CreateOrUpdateServiceScreen}
           options={{ headerTitle: '' }}
         />
         <SellerStack.Screen
@@ -353,9 +261,6 @@ function MainTabScreen() {
           tabBarIcon: ({ color, size }) => {
             let name;
             switch (route.name) {
-              case 'SearchStack':
-                name = 'search';
-                break;
               case 'SellerStack':
                 name = 'tag';
                 break;
@@ -371,9 +276,6 @@ function MainTabScreen() {
           tabBarLabel: () => {
             let text;
             switch (route.name) {
-              case 'SearchStack':
-                text = 'Buscar';
-                break;
               case 'SellerStack':
                 text = 'Vender';
                 break;
@@ -395,7 +297,6 @@ function MainTabScreen() {
       initialRouteName="HomeStack"
     >
       <MainTab.Screen name="HomeStack" component={HomeStackScreen} />
-      <MainTab.Screen name="SearchStack" component={SearchStackScreen} />
       <MainTab.Screen name="SellerStack" component={SellerStackScreen} />
       <MainTab.Screen name="MenuStack" component={MenuStackScreen} />
     </MainTab.Navigator>
@@ -404,26 +305,6 @@ function MainTabScreen() {
 
 const RootStack = createStackNavigator();
 
-/**
- * Boot component control de navigation in boot time
- *
- * navigation
- *
- * RootStack
- *  TermsScreen
- *  OnboardingScreen
- *  *SignInScreen
- *  SetAddressScreen
- *  MainTab
- *    HomeStack
- *      ....
- *    SearchStack
- *      ...
- *    ToSaleStack
- *      ...
- *    MenuStack
- *      ...
- */
 export default () => {
   // event handlers
   useEffect(() => {
@@ -440,6 +321,7 @@ export default () => {
     };
   }, []);
 
+  // render logic
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef} onReady={onReady}>
