@@ -3,7 +3,8 @@ import { View } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import { Loading, ErrorView } from '../../../components';
+import Loading from '../../../components/loading';
+import ErrorView from '../../../components/error-view';
 // clients
 import userClient from '../../../clients/user-client-v2';
 import storeClient from '../../../clients/store-client';

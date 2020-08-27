@@ -2,7 +2,9 @@ import React from 'react';
 import { View } from 'react-native';
 
 // components
-import { Container, Text, Button } from '../../../components';
+import Container from '../../../components/container';
+import Text from '../../../components/text';
+import Button from '../../../components/buttons/button';
 // containers
 import UserProvider from '../../../containers/user';
 // styles

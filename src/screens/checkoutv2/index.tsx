@@ -36,8 +36,6 @@ import { generatePushID } from '../../lib/uuid';
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
 
-// styles
-
 // instances outside component
 const prefix = '[checkout screen]';
 let fetchRequestSource: CancelTokenSource;

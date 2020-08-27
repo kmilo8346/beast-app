@@ -2,7 +2,9 @@ import React from 'react';
 import { View, ScrollView } from 'react-native';
 
 // components
-import { Container, Text, Button } from '../../../components';
+import Container from '../../../components/container';
+import Text from '../../../components/text';
+import Button from '../../../components/buttons/button';
 // styles
 import globalStyles from '../../../styles';
 
@@ -40,4 +42,3 @@ export default ({ navigation }: ScreenProps) => {
     </Container>
   );
 };
-

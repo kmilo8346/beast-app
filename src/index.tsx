@@ -4,7 +4,7 @@ import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
 import Navigation from './navigation';
 // components
-import { ErrorView } from './components';
+import ErrorView from './components/error-view';
 // containers
 import UserContainer from './containers/user';
 import CartContainer from './containers/cart';

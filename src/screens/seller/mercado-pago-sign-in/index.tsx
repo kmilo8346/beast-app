@@ -6,15 +6,14 @@ import { CommonActions } from '@react-navigation/native';
 import Constants from 'expo-constants';
 
 // components
-import {
-  Text,
-  Icon,
-  Button,
-  ErrorView,
-  Loading,
-  LoadingOverlay,
+import Text from '../../../components/text';
+import Icon from '../../../components/icon';
+import Button from '../../../components/buttons/button';
+import ErrorView from '../../../components/error-view';
+import Loading from '../../../components/loading';
+import LoadingOverlay, {
   ILoadingOverlay,
-} from '../../../components';
+} from '../../../components/loading-overlay';
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 import storeClient from '../../../clients/store-client';

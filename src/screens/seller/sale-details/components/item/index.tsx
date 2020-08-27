@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import { View } from 'react-native';
 
 // components
-import { Text } from '../../../../../components';
+import Text from '../../../../../components/text';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
 // types

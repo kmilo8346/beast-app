@@ -2,7 +2,9 @@ import React from 'react';
 import { View, Image, ImageSourcePropType } from 'react-native';
 
 // components
-import { Text, Touchable, Icon } from '../../../../../components';
+import Text from '../../../../../components/text';
+import Touchable from '../../../../../components/touchable';
+import Icon from '../../../../../components/icon';
 import colors from '../../../../../styles/colors';
 
 export interface LinkProps {

@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { View, Image, GestureResponderEvent } from 'react-native';
 
 // components
-import {
-  Modal,
-  ModalProps,
-  Button,
-  Text,
-  Touchable,
-  Icon,
-} from '../../../../../components';
+import Modal, { ModalProps } from '../../../../../components/modals/modal';
+import Button from '../../../../../components/buttons/button';
+import Text from '../../../../../components/text';
+import Touchable from '../../../../../components/touchable';
+import Icon from '../../../../../components/icon';
 // local components
 import InputNumber, { InputNumberStatus } from '../input-number';
 // libs
@@ -18,7 +15,6 @@ import * as utils from '../../../../../lib/utils';
 import {
   ProductConfirmation,
   Item,
-  ProductConfirmationStatus,
   ProductConfirmationType,
 } from '../../../../../types';
 // styles

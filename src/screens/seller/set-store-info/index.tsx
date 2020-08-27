@@ -2,14 +2,11 @@ import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
-import {
-  Text,
-  Input,
-  Button,
-  Toast,
-  IToast,
-  InputImages,
-} from '../../../components';
+import Text from '../../../components/text';
+import Input from '../../../components/inputs/input';
+import Button from '../../../components/buttons/button';
+import Toast, { IToast } from '../../../components/toast';
+import InputImages from '../../../components/inputs/input-images';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';

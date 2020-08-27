@@ -4,17 +4,15 @@ import axios, { CancelTokenSource } from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // components
-import {
-  ErrorView,
-  Loading,
-  Text,
-  Button,
-  FlatList,
-} from '../../../components';
+import ErrorView from '../../../components/error-view';
+import Loading from '../../../components/loading';
+import Text from '../../../components/text';
+import Button from '../../../components/buttons/button';
+import FlatList from '../../../components/flat-list';
 // local components
-import { StoreItem } from './components';
+import StoreItem from './components/store-item';
 // seller components
-import { Shortcut } from '../components';
+import Shortcut from '../components/shortcut';
 // clients
 import storeClient from '../../../clients/store-client';
 import userClient from '../../../clients/user-client-v2';
@@ -213,7 +211,7 @@ export default ({ navigation }: SelectStoreProps) => {
           alignItems: 'center',
         }}
       >
-        <Loading message="Cargando..." />
+        <Loading />
       </View>
     );
   }

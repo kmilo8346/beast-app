@@ -2,15 +2,17 @@ import React from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { View, Image } from 'react-native';
 
-import {
-  Container,
-  Text,
-  InputNumber,
-  Button,
-  ButtonContact,
-} from '../../components';
+// components
+import Container from '../../components/container';
+import Text from '../../components/text';
+import InputNumber from '../../components/inputs/input-numeric';
+import Button from '../../components/buttons/button';
+import ButtonContact from '../../components/buttons/button-contact';
+// libs
 import numberFormatter from '../../lib/formatters/number-formatter';
+// containers
 import Cart from '../../containers/cart';
+// styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
 

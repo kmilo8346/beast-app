@@ -2,9 +2,11 @@ import React, { useReducer, useLayoutEffect } from 'react';
 import { View, ScrollView, GestureResponderEvent } from 'react-native';
 
 // components
-import { Button, Text } from '../../../components';
+import Button from '../../../components/buttons/button';
+import Text from '../../../components/text';
 // local components
-import { Item, ProgressBar } from './components';
+import Item from './components/item';
+import ProgressBar from './components/progress-bar';
 // types
 import { Confirmation, Order, ProductConfirmation } from '../../../types';
 // syles

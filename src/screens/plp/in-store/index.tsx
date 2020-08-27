@@ -2,17 +2,15 @@ import React, { useReducer, useEffect, ReactNode } from 'react';
 import { View } from 'react-native';
 
 // components
-import {
-  Container,
-  ErrorView,
-  NotSearchResult,
-  Loading,
-  FlatList,
-  Text,
-  ProductItem,
-} from '../../../components';
+import Container from '../../../components/container';
+import ErrorView from '../../../components/error-view';
+import NotSearchResult from '../../../components/not-search-result';
+import Loading from '../../../components/loading';
+import FlatList from '../../../components/flat-list';
+import Text from '../../../components/text';
+import ProductItem from '../../../components/product-item';
 // local components
-import { InputSearch } from '../components';
+import InputSearch from '../components/input-search';
 // containers
 import UserProvider from '../../../containers/user';
 // types

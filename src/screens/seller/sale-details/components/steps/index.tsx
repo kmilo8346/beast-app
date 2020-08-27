@@ -2,7 +2,8 @@ import React, { ReactNodeArray, ReactNode } from 'react';
 import { View, TextStyle, StyleProp, ViewStyle } from 'react-native';
 
 // components
-import { Text, Icon } from '../../../../../components';
+import Text from '../../../../../components/text';
+import Icon from '../../../../../components/icon';
 // styles
 import colors from '../../../../../styles/colors';
 

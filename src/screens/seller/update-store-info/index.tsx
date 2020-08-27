@@ -2,18 +2,16 @@ import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
 
 // components
-import {
-  Input,
-  InputImages,
-  Button,
-  InputSetDeliveryArea,
-  InputSetDeliveryTime,
-  InputSetOpeningHours,
-  LoadingOverlay,
+import Input from '../../../components/inputs/input';
+import InputImages from '../../../components/inputs/input-images';
+import Button from '../../../components/buttons/button';
+import InputSetDeliveryArea from '../../../components/inputs/input-set-delivery-area';
+import InputSetDeliveryTime from '../../../components/inputs/input-set-delivery-time';
+import InputSetOpeningHours from '../../../components/inputs/input-set-opening-hours';
+import LoadingOverlay, {
   ILoadingOverlay,
-  Toast,
-  IToast,
-} from '../../../components';
+} from '../../../components/loading-overlay';
+import Toast, { IToast } from '../../../components/toast';
 // clients
 import storeClient from '../../../clients/store-client';
 // cache

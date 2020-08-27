@@ -4,20 +4,18 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import {
-  FlatList,
-  Loading,
-  ErrorView,
-  NotSearchResult,
-  Button,
-  IToast,
-  Toast,
-} from '../../../components';
+import FlatList from '../../../components/flat-list';
+import Loading from '../../../components/loading';
+import ErrorView from '../../../components/error-view';
+import NotSearchResult from '../../../components/not-search-result';
+import Button from '../../../components/buttons/button';
+import Toast, { IToast } from '../../../components/toast';
 import Search from '../../../components/inputs/search';
 // seller components
-import { Shortcut } from '../components';
+import Shortcut from '../components/shortcut';
 // local components
-import { ProductItem, NotData } from './components';
+import ProductItem from './components/product-item';
+import NotData from './components/not-data';
 // clients
 import productClient from '../../../clients/product-client';
 // cache

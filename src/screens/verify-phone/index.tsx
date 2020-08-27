@@ -4,14 +4,12 @@ import { CommonActions } from '@react-navigation/native';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 
 // components
-import {
-  Text,
-  Button,
-  Toast,
-  IToast,
-  LoadingOverlay,
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
+import Toast, { IToast } from '../../components/toast';
+import LoadingOverlay, {
   ILoadingOverlay,
-} from '../../components';
+} from '../../components/loading-overlay';
 // clients
 import phoneClient from '../../clients/phone-client';
 import userClient from '../../clients/user-client-v2';

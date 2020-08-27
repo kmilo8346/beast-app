@@ -1,9 +1,10 @@
 import React from 'react';
 import { Image } from 'react-native';
 
+// components
+import Touchable from '../../../../components/touchable';
 // types
 import { ComputedWidget, BannerContent } from '../../../../types';
-import { Touchable } from '../../../../components';
 
 interface ComponentProps {
   data: ComputedWidget;
