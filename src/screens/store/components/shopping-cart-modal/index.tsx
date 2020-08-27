@@ -79,6 +79,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
             shopping_cart: snapshot,
           },
         },
+        dont_allow_guest: true,
       });
     }
     otherProps.onClose && otherProps.onClose();

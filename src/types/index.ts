@@ -184,40 +184,6 @@ export interface Product extends CreateProduct {
   updated_at: Date;
 }
 
-export interface Card {
-  id: string;
-  customerId: string;
-  expirationMonth: number;
-  expirationYear: number;
-  firstSixDigits: string;
-  lastFourDigits: string;
-  paymentMethod: {
-    id: string;
-    name: string;
-    paymentTypeId: string;
-    thumbnail: string;
-    secureThumbnail: string;
-  };
-  securityCode: {
-    length: number;
-    cardLocation: string;
-  };
-  issuer: {
-    id: number;
-    name: string;
-  };
-  cardholder: {
-    name: string;
-    identification: {
-      number: string;
-      type: string;
-    };
-  };
-  liveMode: boolean;
-  dateCreated: string;
-  dateLastUpdated: string;
-}
-
 export interface CreateAnonymouslyUser {
   id: string;
   current_address: string;
