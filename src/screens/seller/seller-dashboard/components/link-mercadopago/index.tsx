@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import * as Linking from 'expo-linking';
 
 // components
 import Text from '../../../../../components/text';
@@ -10,8 +11,15 @@ import colors from '../../../../../styles/colors';
 
 export default () => {
   // event handlers
-  const pressHandler = () => {
-    // TODO: implement linking to mercadopago
+  const pressHandler = async () => {
+    try {
+      await Linking.openURL('mercadopago://');
+    } catch (error) {
+      // TODO: log errors
+      console.log(error);
+
+      Linking.openURL('https://mercadopago.com');
+    }
   };
 
   // render logic
