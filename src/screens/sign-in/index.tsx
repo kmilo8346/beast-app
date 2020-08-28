@@ -396,7 +396,7 @@ export default ({ navigation, route }: ScreenProps) => {
         !Bienvenido!
       </Text>
       <Text level={5} weight="200" style={{ marginBottom: 50 }}>
-        Inicia sesión con algunos de tus usuarios
+        Inicia sesión con tus redes sociales
       </Text>
       <View style={{ marginBottom: 25 }} />
       <ButtonGoogle onOK={signInOkHandler} onFail={signInFailHandler} />
