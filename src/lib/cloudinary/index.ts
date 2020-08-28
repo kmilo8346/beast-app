@@ -38,17 +38,13 @@ class Cloudinary {
     form.append('timestamp', timestamp);
     form.append('public_id', params.public_id);
     form.append('signature', signature);
-    const { data } = await axios.post(
-      'http://api.cloudinary.com/v1_1/firedevs/image/upload',
-      form,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        cancelToken,
-      }
-    );
-    console.log('cloudinary response', data);
+    const { data } = await axios.post('v1_1/firedevs/image/upload', form, {
+      baseURL: 'http://api.cloudinary.com',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      cancelToken,
+    });
     return data.secure_url;
   }
 

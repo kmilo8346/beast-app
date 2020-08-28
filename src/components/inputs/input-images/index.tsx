@@ -149,7 +149,7 @@ export default ({
           file: {
             uri: result.uri,
             name: `${newImage.id}.jpg`,
-            type: result.type as string,
+            type: 'image/jpeg',
           },
           public_id,
         },
