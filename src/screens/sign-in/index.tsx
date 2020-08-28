@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // components
 import Loading from '../../components/loading';
 import Text from '../../components/text';
-import Input from '../../components/inputs/input';
 import Button from '../../components/buttons/button';
 import BagLogoBackgroundBlue from '../../components/svgs/images/bag-logo-background-blue';
 // local components
@@ -306,22 +305,6 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'show_error' });
   };
 
-  const changeEmailHandler = (email: string) => {
-    dispatch({ type: 'change_email', email });
-  };
-
-  const submitHandler = () => {
-    dispatch({ type: 'set_form_submitted' });
-    // validate
-    const errors = validate(state.form, constraints);
-    if (errors) {
-      dispatch({ type: 'set_form_errors', errors });
-      return;
-    }
-    // TODO: implement signInWithEmail
-    console.log('signInWithEmail');
-  };
-
   const pressEnterAsGuestHandler = () => {
     navigation.replace('SetAddress');
   };
@@ -413,24 +396,9 @@ export default ({ navigation, route }: ScreenProps) => {
         !Bienvenido!
       </Text>
       <Text level={5} weight="200" style={{ marginBottom: 50 }}>
-        Inicia sesión con tu correo electrónico
+        Inicia sesión con algunos de tus usuarios
       </Text>
-      <Input
-        placeholder="youremail@email.com"
-        label="Email"
-        labelStyles={{ color: colors.blue, fontWeight: 'bold' }}
-        returnKeyType="done"
-        onSubmitEditing={submitHandler}
-        value={state.form.email}
-        errors={state.form.errors?.email}
-        onChangeText={changeEmailHandler}
-        containerStyle={{ marginBottom: 30 }}
-      />
-      <Button
-        title="Continuar"
-        onPress={submitHandler}
-        style={{ marginBottom: 15 }}
-      />
+      <View style={{ marginBottom: 25 }} />
       <ButtonGoogle onOK={signInOkHandler} onFail={signInFailHandler} />
       <View style={{ marginBottom: 15 }} />
       <ButtonFacebook onOK={signInOkHandler} onFail={signInFailHandler} />
