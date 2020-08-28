@@ -170,7 +170,7 @@ export default ({ navigation }: ScreenProps) => {
         <InputImages
           size={1}
           label="Imagen"
-          path={`stores/${store.id}/images/\${}`}
+          path={`beast/stores/${store.reference}/\${}`}
           value={state.store.images}
           errors={state.errors?.images}
           onChange={(images) => {

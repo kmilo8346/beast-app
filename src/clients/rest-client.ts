@@ -1,6 +1,4 @@
 import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
-import camelCaseKeys from 'camelcase-keys';
-import snakeCaseKeys from 'snakecase-keys';
 import Constants from 'expo-constants';
 
 // libs

@@ -8,14 +8,15 @@ import Switch from '../../../../../components/switch';
 import ButtonIcon from '../../../../../components/buttons/button-icon';
 import Icon from '../../../../../components/icon';
 // types
-import { Product, Service } from '../../../../../types';
+import { Product } from '../../../../../types';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
+import cloudinary from '../../../../../lib/cloudinary';
 // styles
 import colors from '../../../../../styles/colors';
 
 export interface ProductItemProps {
-  data: Product | Service;
+  data: Product;
   editting: boolean;
   onChangeEnabled?: (id: string, enabled: boolean) => void;
   onPressEdit?: (product: Product) => void;
@@ -83,8 +84,8 @@ export default memo(
           onPress={pressItemHandler}
         >
           <Image
-            source={{ uri: image }}
-            style={{ width: 55, height: 55, borderRadius: 10 }}
+            source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
+            style={{ width: 50, height: 50, borderRadius: 10 }}
           />
           <View
             style={{ flex: 1, marginHorizontal: 10, justifyContent: 'center' }}

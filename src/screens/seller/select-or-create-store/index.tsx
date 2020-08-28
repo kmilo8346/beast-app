@@ -15,6 +15,8 @@ import Shortcut from '../components/shortcut';
 // clients
 import storeClient from '../../../clients/store-client';
 import userClient from '../../../clients/user-client';
+// libs
+import { v4 as uuidv4 } from '../../../lib/uuid';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -164,6 +166,7 @@ export default ({ navigation }: SelectStoreProps) => {
     storeCache.replaceData({
       user: user.id,
       phone: user.phone as string,
+      reference: uuidv4(),
       payment_provider: PaymentProvider.MERCADOPAGO,
       dispatch_provider: DispatchProvider.OWNER,
     });

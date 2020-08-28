@@ -17,6 +17,7 @@ import Item from './components/item';
 // lib
 import durationFormatter from '../../../../lib/formatters/duration-formatter';
 import { navigate } from '../../../../lib/root-navigation';
+import cloudinary from '../../../../lib/cloudinary';
 // cache
 import userCache from '../../../../cache/user';
 import { ShoppingCartSnapshot } from '../../../../cache/shopping-cart';
@@ -117,7 +118,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
           ]}
         >
           <Image
-            source={{ uri: image }}
+            source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
             style={{ width: 50, height: 50, borderRadius: 10 }}
           />
           <View style={{ marginLeft: 15, paddingTop: 5 }}>

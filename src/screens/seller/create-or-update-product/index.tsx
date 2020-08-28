@@ -26,6 +26,7 @@ import validate from '../../../lib/validate';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 import stringParser from '../../../lib/parsers/string-parser';
 import { noop } from '../../../lib/utils';
+import { v4 as uuidv4 } from '../../../lib/uuid';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -76,6 +77,7 @@ type Action =
 type State = {
   view: CreateOrUpdateProductView;
   form: {
+    reference: string;
     // fields
     product?: Product;
     // other form states
@@ -130,6 +132,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   const [state, dispatch] = useReducer(reducer, {
     view: CreateOrUpdateProductView.FORM,
     form: {
+      reference: uuidv4(),
       product,
       // other form states
       submitted: false,
@@ -198,8 +201,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
 
     createOrUpdateProduct({
       // default value
-      enabled: true,
       tags: [],
+      enabled: true,
+      reference: state.form.reference,
       ...state.form.product,
     } as Product);
   };
@@ -289,7 +293,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         <InputImages
           label="Imágenes"
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
-          path={`stores/${store.id}/products/images/\${}`}
+          path={`beast/stores/${store.reference}/products/${
+            product?.reference || state.form.reference
+          }/\${}`}
           value={state.form.product?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
