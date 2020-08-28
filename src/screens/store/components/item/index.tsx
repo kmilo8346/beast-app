@@ -11,6 +11,7 @@ import ProductDetailsModal from '../product-details-modal';
 import NumberInput from './components/number-input';
 // libs
 import numberFormatter from '../../../../lib/formatters/number-formatter';
+import cloudinary from '../../../../lib/cloudinary';
 // cache
 import shoppingCartsCache from '../../../../cache/shopping-carts';
 // types
@@ -89,7 +90,7 @@ export default ({ data }: ComponentProps) => {
     <Touchable style={{ flexDirection: 'row' }} onPress={pressItemHandler}>
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: image }}
+          source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
           style={{ width: 50, height: 50, borderRadius: 10 }}
         />
         {badge}

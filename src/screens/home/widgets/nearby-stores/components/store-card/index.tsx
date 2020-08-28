@@ -7,6 +7,7 @@ import Text from '../../../../../../components/text';
 // libs
 import durationFormatter from '../../../../../../lib/formatters/duration-formatter';
 import { navigate } from '../../../../../../lib/root-navigation';
+import cloudinary from '../../../../../../lib/cloudinary';
 // types
 import { Store } from '../../../../../../types';
 // styles
@@ -49,7 +50,7 @@ export default memo(({ data }: ComponentProps) => {
       onPress={pressHandler}
     >
       <Image
-        source={{ uri: image }}
+        source={{ uri: cloudinary.dynamicUrl(image, 'h_250') }}
         style={{
           width: '100%',
           height: 250,

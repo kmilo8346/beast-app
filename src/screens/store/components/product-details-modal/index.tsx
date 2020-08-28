@@ -15,6 +15,7 @@ import shoppingCartsCache from '../../../../cache/shopping-carts';
 import ShoppingCartCache from '../../../../cache/shopping-cart';
 // libs
 import numberFormatter from '../../../../lib/formatters/number-formatter';
+import cloudinary from '../../../../lib/cloudinary';
 // types
 import { Product } from '../../../../types';
 // styles
@@ -59,7 +60,7 @@ export default ({ product, ...otherProps }: ComponentProps) => {
       <ScrollView style={{ flex: 1 }}>
         <View style={[{ paddingTop: 7 }, globalStyles.withMargin]}>
           <Image
-            source={{ uri: image }}
+            source={{ uri: cloudinary.dynamicUrl(image, 'h_234') }}
             style={{
               width: '100%',
               height: 234,

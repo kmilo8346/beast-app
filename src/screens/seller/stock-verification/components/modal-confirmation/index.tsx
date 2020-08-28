@@ -11,6 +11,7 @@ import Icon from '../../../../../components/icon';
 import InputNumber, { InputNumberStatus } from '../input-number';
 // libs
 import * as utils from '../../../../../lib/utils';
+import cloudinary from '../../../../../lib/cloudinary';
 // types
 import {
   ProductConfirmation,
@@ -77,7 +78,7 @@ export default ({
     <Modal {...otherProps}>
       <View style={globalStyles.withMargin}>
         <Image
-          source={{ uri: image }}
+          source={{ uri: cloudinary.dynamicUrl(image, 'w_200,h_200,c_scale') }}
           style={{
             alignSelf: 'center',
             width: 200,

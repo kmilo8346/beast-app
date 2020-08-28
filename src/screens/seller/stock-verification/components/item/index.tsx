@@ -17,6 +17,8 @@ import {
 } from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
+import cloudinary from '../../../../../lib/cloudinary';
+// styles
 import colors from '../../../../../styles/colors';
 
 const checkSuccessImage = require('../../../../../../assets/icons/check_success.png');
@@ -158,8 +160,10 @@ export default memo(
         >
           <View style={{ position: 'relative' }}>
             <Image
-              source={{ uri: image }}
-              style={{ width: 55, height: 55, borderRadius: 10 }}
+              source={{
+                uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale'),
+              }}
+              style={{ width: 50, height: 50, borderRadius: 10 }}
             />
             <Badge
               count={product.qty}

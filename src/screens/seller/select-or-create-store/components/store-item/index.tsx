@@ -5,6 +5,8 @@ import { GestureResponderEvent, Image } from 'react-native';
 import Touchable from '../../../../../components/touchable';
 import Text from '../../../../../components/text';
 import Icon from '../../../../../components/icon';
+// libs
+import cloudinary from '../../../../../lib/cloudinary';
 // types
 import { Store } from '../../../../../types';
 // libs
@@ -30,8 +32,8 @@ export default ({ data, onPress = utils.noop }: StoreItemProps) => {
       onPress={pressHandler}
     >
       <Image
-        source={{ uri: image }}
-        style={{ width: 55, height: 55, borderRadius: 10 }}
+        source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
+        style={{ width: 50, height: 50, borderRadius: 10 }}
       />
       <Text level={5} weight="bold" style={{ flex: 1, marginHorizontal: 15 }}>
         {data.name}

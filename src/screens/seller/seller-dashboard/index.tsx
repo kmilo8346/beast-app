@@ -11,6 +11,8 @@ import DashboardShorcut from '../components/shortcut';
 // local components
 import DashboardLink from './components/link';
 import MercadopagoLink from './components/link-mercadopago';
+// libs
+import cloudinary from '../../../lib/cloudinary';
 // types
 import { LoggedUser } from '../../../types';
 // cache
@@ -85,7 +87,9 @@ export default ({ navigation }: ScreenProps) => {
             }}
           >
             <Image
-              source={{ uri: image }}
+              source={{
+                uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale'),
+              }}
               style={{
                 height: 50,
                 width: 50,

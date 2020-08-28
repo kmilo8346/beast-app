@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Touchable from '../../touchable';
@@ -9,19 +10,18 @@ import Text from '../../text';
 import ButtonIcon from '../../buttons/button-icon';
 import ActionSheet from '../../modals/action-sheet';
 // libs
-import firebase from '../../../lib/firebase';
-import { generatePushID } from '../../../lib/uuid';
+import cloudinary from '../../../lib/cloudinary';
 // styles
 import colors from '../../../styles/colors';
 
 // instances outside component
 const prefix = '[input images component]';
+const sources: { [key: string]: CancelTokenSource } = {};
 interface InputImage {
   id: string;
   uri: string;
   url: string;
   uploading: boolean;
-  progress: number;
 }
 const fromValue = (value?: string[]): InputImage[] => {
   if (!value) {
@@ -36,11 +36,25 @@ const fromValue = (value?: string[]): InputImage[] => {
       url: v,
       uri: '',
       uploading: false,
-      progress: 0,
     };
   });
 };
-let uploadTaskRef: firebase.storage.UploadTask | null = null;
+
+const getAvailableId = (images: InputImage[], size: number): string | null => {
+  const checks = new Array<boolean>(size);
+  images.forEach((image) => {
+    checks[parseInt(image.id, 10)] = true;
+  });
+  let available: string | null = null;
+  for (let index = 0; index < checks.length; index++) {
+    const check = checks[index];
+    if (!check) {
+      available = `${index}`;
+      break;
+    }
+  }
+  return available;
+};
 
 export interface InputImagesProps {
   label?: string;
@@ -71,12 +85,15 @@ export default ({
 
   // event handlers
   const addImage = (uri: string) => {
+    const id = getAvailableId(images, size);
+    if (id === null) {
+      throw new Error(`${prefix} Available id is null`);
+    }
     const newImage = {
-      id: generatePushID(),
+      id,
       uri,
       url: '',
-      uploading: false,
-      progress: 0,
+      uploading: true,
     };
 
     setImages((prevImages) => {
@@ -85,6 +102,7 @@ export default ({
 
     return newImage;
   };
+
   const updateImage = (id: string, update: Partial<InputImage>) => {
     setImages((prevImages) => {
       return prevImages.map((image) => {
@@ -95,81 +113,61 @@ export default ({
       });
     });
   };
+
   const removeImage = (id: string) => {
     setImages((prevImages) => {
       return prevImages.filter((image) => image.id !== id);
     });
   };
+
   const pressClearImageHandler = (id: string) => {
     removeImage(id);
 
-    if (uploadTaskRef) {
-      try {
-        uploadTaskRef.cancel();
-      } catch (error) {
-        // TODO: manage error
-        console.log(`${prefix} Error canceling task`);
-      }
+    if (sources[id]) {
+      sources[id].cancel();
     }
   };
+
   const imagePickedHandler = async (result: ImagePicker.ImagePickerResult) => {
+    // preconditions
+    if (result.cancelled) {
+      throw new Error(`${prefix} Cant manage image picked if user cancelled`);
+    }
+
+    // set image to immediately feedback
+    const newImage = addImage(result.uri);
+
     try {
-      // preconditions
-      if (result.cancelled) {
-        throw new Error(`${prefix} Cant manage image picked if user cancelled`);
+      if (sources[newImage.id]) {
+        sources[newImage.id].cancel();
       }
-      // set image uri to show to the user
-      const newImage = addImage(result.uri);
-
-      // use this notation to override images and avoid clean tasks
-      const fileName = `${newImage.id}.jpg`;
-      const metadata = {
-        contentType: 'image/jpeg',
-      };
-      const response = await fetch(result.uri);
-      const blob = await response.blob();
-
-      const storageRef = firebase.storage().ref();
-      uploadTaskRef = storageRef
-        .child(path.replace('${}', fileName))
-        .put(blob, metadata);
-
-      updateImage(newImage.id, { uploading: true });
-      // Listen for state changes, errors, and completion of the upload.
-      uploadTaskRef.on(
-        firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-        (snapshot) => {
-          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          updateImage(newImage.id, { progress });
+      sources[newImage.id] = axios.CancelToken.source();
+      // upload to cloudinary
+      const public_id = path.replace('${}', newImage.id);
+      const url = await cloudinary.upload(
+        {
+          file: {
+            uri: result.uri,
+            name: `${newImage.id}.jpg`,
+            type: result.type as string,
+          },
+          public_id,
         },
-        (error: any) => {
-          updateImage(newImage.id, { uploading: false });
-
-          // A full list of error codes is available at
-          // https://firebase.google.com/docs/storage/web/handle-errors
-          // eslint-disable-next-line no-underscore-dangle
-          const code = error.code || error.code_;
-          if (code !== 'storage/canceled') {
-            onError(error);
-          }
-        },
-        async () => {
-          updateImage(newImage.id, { uploading: false });
-          try {
-            // Upload completed successfully, now we can get the download URL
-            const url = await uploadTaskRef?.snapshot.ref.getDownloadURL();
-            updateImage(newImage.id, { url });
-          } catch (error) {
-            onError(error);
-          }
-        }
+        sources[newImage.id].token
       );
+      updateImage(newImage.id, { url });
     } catch (error) {
-      onError(error);
+      if (!axios.isCancel(error)) {
+        // TODO: Log error
+        console.log(error);
+
+        onError(error);
+      }
+    } finally {
+      updateImage(newImage.id, { uploading: false });
     }
   };
+
   const pickImageFromImageLibrary = async () => {
     try {
       if (Platform.OS === 'ios') {
@@ -184,9 +182,8 @@ export default ({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 4],
         quality: 1,
-        base64: true,
       });
       if (result.cancelled) {
         return;
@@ -197,6 +194,7 @@ export default ({
       onError(error);
     }
   };
+
   const takePhotoUsingCamera = async () => {
     try {
       const cameraRollPermisionResponse = await ImagePicker.requestCameraRollPermissionsAsync();
@@ -214,9 +212,8 @@ export default ({
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 4],
         quality: 1,
-        base64: true,
       });
       if (result.cancelled) {
         return;
@@ -227,9 +224,11 @@ export default ({
       onError(error);
     }
   };
+
   const selectorRequestCloseHandler = () => {
     setSelector(false);
   };
+
   const selectorCallActionHandler = async (key: string) => {
     try {
       switch (key) {
@@ -246,21 +245,21 @@ export default ({
       setSelector(false);
     }
   };
+
   const pressAddImageHandler = () => {
     setSelector(true);
   };
+
   useEffect(() => {
     return () => {
-      if (uploadTaskRef) {
-        try {
-          uploadTaskRef.cancel();
-        } catch (error) {
-          // TODO: manage error
-          console.log(`${prefix} Error canceling task`);
+      Object.keys(sources).forEach((key) => {
+        if (sources[key]) {
+          sources[key].cancel();
         }
-      }
+      });
     };
   }, []);
+
   useEffect(() => {
     onChange(images.map((image) => (image.url ? image.url : '')));
   }, [images]);
@@ -317,6 +316,9 @@ export default ({
       {tipComponent}
       <View style={{ flexDirection: 'row' }}>
         {images.map((image) => {
+          const uri = image.uri
+            ? image.uri
+            : cloudinary.dynamicUrl(image.url, 'w_107,h_107,c_scale');
           return (
             <View
               key={image.id}
@@ -337,7 +339,7 @@ export default ({
                 }}
               />
               <Image
-                source={{ uri: image.uri || image.url }}
+                source={{ uri }}
                 style={{
                   width: 107,
                   height: 107,
@@ -345,9 +347,7 @@ export default ({
                 }}
               />
               <Text level={8} style={{ marginTop: 10, textAlign: 'center' }}>
-                {image.uploading && image.progress
-                  ? `Subiendo ${Math.round(image.progress)}%`
-                  : ''}
+                {image.uploading ? `Subiendo...` : ''}
               </Text>
             </View>
           );
