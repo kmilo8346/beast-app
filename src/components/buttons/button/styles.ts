@@ -52,6 +52,7 @@ export default StyleSheet.create<Styles>({
     color: colors.blue,
   },
   title_link: {
+    textAlign: 'center',
     color: colors.blue,
   },
   iconContainer: {
