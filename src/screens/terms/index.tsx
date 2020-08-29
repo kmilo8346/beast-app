@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 
 // components
 import Text from '../../components/text';
@@ -24,6 +25,9 @@ export default ({ navigation }: ScreenProps) => {
       },
     });
   };
+  const pressTermHandler = () => {
+    Linking.openURL('https://beast-production.web.app/policies/');
+  };
 
   // render logic
   return (
@@ -36,20 +40,17 @@ export default ({ navigation }: ScreenProps) => {
         globalStyles.withPadding,
       ]}
     >
-      <View style={{ alignItems: 'center', marginTop: '50%' }}>
+      <View style={{ alignItems: 'center', marginTop: '30%' }}>
         <SignedDocumentBlue />
         <View style={{ height: 20 }} />
         <Text level={5} weight="200" style={{ lineHeight: 30 }}>
           Al continuar, estás aceptando los
         </Text>
-        <Text
-          level={5}
-          color={colors.blue}
-          weight="bold"
-          style={{ textAlign: 'center' }}
-        >
-          Términos de servicio y políticas de privacidad.
-        </Text>
+        <Button
+          title="Términos de servicio y políticas de privacidad."
+          type="link"
+          onPress={pressTermHandler}
+        />
       </View>
       <View
         style={[
