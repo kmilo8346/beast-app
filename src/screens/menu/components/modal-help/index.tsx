@@ -39,7 +39,7 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
       <View style={[globalStyle.withMargin, globalStyle.withScreenAir]}>
         <Text level={5} style={{ lineHeight: 23 }}>
           Shop Shop es una herramienta gratis para que todos podamos comprar y
-          vender productos sin fricción. Si tienes un problema con tu pedido
+          vender productos de forma fácil. Si tienes un problema con tu pedido
           porfavor contacta a la tienda.
         </Text>
       </View>
