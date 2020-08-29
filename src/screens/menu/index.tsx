@@ -208,7 +208,7 @@ export default ({ navigation }: MenuProps) => {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 30,
+            marginBottom: 15,
           }}
         >
           <BagHeadImage />
@@ -222,6 +222,11 @@ export default ({ navigation }: MenuProps) => {
             ¡Hola invitado!
           </Text>
         </View>
+
+        <Text level={6} style={{ marginBottom: 10, lineHeight: 20 }}>
+          Crea una cuenta para poder realizar compras y ofrecerte una mejor
+          experiencia.
+        </Text>
 
         <Item
           name="Mis direcciones"
