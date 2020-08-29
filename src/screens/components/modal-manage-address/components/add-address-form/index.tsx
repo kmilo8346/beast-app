@@ -3,15 +3,15 @@ import { GestureResponderEvent, Vibration } from 'react-native';
 import validate from 'validate.js';
 
 // components
-import Button from '../../../../../../components/buttons/button';
-import Input from '../../../../../../components/inputs/input';
-import InputPlaceAutocomplete from '../../../../../../components/inputs/input-place-autocomplete';
+import Button from '../../../../../components/buttons/button';
+import Input from '../../../../../components/inputs/input';
+import InputPlaceAutocomplete from '../../../../../components/inputs/input-place-autocomplete';
 // types
-import { Place } from '../../../../../../types';
+import { Place } from '../../../../../types';
 // constraints
 import constraints from './constraints';
 // styles
-import globalStyle from '../../../../../../styles';
+import globalStyle from '../../../../../styles';
 
 type ChangeValueAction = {
   type: 'change_value';

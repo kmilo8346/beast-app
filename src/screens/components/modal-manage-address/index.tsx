@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 
 // components
-import Modal from '../../../../components/modals/modal';
-import SelectFriendly from '../../../../components/select-friendly';
+import Modal from '../../../components/modals/modal';
+import SelectFriendly from '../../../components/select-friendly';
 // local components
 import AddAddressForm from './components/add-address-form';
 // libs
-import * as utils from '../../../../lib/utils';
+import * as utils from '../../../lib/utils';
 // types
-import { Place, AddressInfo } from '../../../../types';
+import { Place, AddressInfo } from '../../../types';
 // styles
-import globalStyle from '../../../../styles';
+import globalStyle from '../../../styles';
 
 interface ComponentProps {
   value: AddressInfo;

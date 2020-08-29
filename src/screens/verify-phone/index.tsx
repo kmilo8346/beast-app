@@ -131,10 +131,25 @@ export default ({ navigation, route }: ScreenProps) => {
     if (user.current_address && user.addresses.length) {
       try {
         loadingOverlayRef.current?.show();
-        const created = await userClient.create({
-          body: user,
-        });
-        await userCache.setData(created);
+        if (user.created_at) {
+          // update
+          await userClient.update({
+            pathVars: {
+              id: user.id,
+            },
+            body: {
+              phone: user.phone,
+              phone_verified: user.phone_verified,
+            },
+          });
+        } else {
+          // create
+          const created = await userClient.create({
+            body: user,
+          });
+          await userCache.setData(created);
+        }
+
         if (redirect.name === 'MainTab') {
           navigation.dispatch(
             CommonActions.reset({

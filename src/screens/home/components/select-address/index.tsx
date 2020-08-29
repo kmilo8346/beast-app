@@ -12,8 +12,8 @@ import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
 import MapPinGreyIcon from '../../../../components/svgs/icons/map-pin-grey';
-// home components
-import ModalManageAddress from '../modal-manage-address';
+// screen components
+import ModalManageAddress from '../../../components/modal-manage-address';
 // types
 import { AddressInfo } from '../../../../types';
 import colors from '../../../../styles/colors';

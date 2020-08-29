@@ -39,7 +39,9 @@ export default ({ navigation }: ScreenProps) => {
     }
     if (!user.phone || !user.phoneVerified) {
       navigation.navigate('SetPhone', {
-        redirect: 'SellerDashboard',
+        redirect: {
+          name: 'SellerDashboard',
+        },
       });
       return;
     }

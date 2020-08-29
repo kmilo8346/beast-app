@@ -15,7 +15,7 @@ export default StyleSheet.create<Styles>({
     borderBottomWidth: 1,
     borderStyle: 'solid',
     borderColor: '#F5F5F5',
-    marginBottom: 24,
+    marginBottom: 35,
     paddingLeft: 3,
   },
   textContainer: {
