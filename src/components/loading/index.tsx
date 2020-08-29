@@ -3,7 +3,7 @@ import { View, Animated, Platform } from 'react-native';
 import LottieView from 'lottie-react-native';
 
 // assets
-const Loading = require('../../../assets/lotties/test.json');
+const Loading = require('../../../assets/lotties/carga.json');
 
 const messages = [
   'Conectando reflectores.',

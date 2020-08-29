@@ -30,6 +30,7 @@ import ErrorView from '../../components/error-view';
 import Skeletton from './components/skeleton';
 import Item from './components/item';
 import ShoppingCartModal from './components/shopping-cart-modal';
+import NotData from './components/not-data';
 // clients
 import productClient from '../../clients/product-client';
 // cache
@@ -415,9 +416,7 @@ export default ({ navigation, route }: ScreenProps) => {
           globalStyles.withPadding,
         ]}
       >
-        <Text level={7} weight="bold">
-          El vendedor aún no ha publicado productos
-        </Text>
+        <NotData />
       </View>
     );
   } else if (debouncedQuery && !state.products.hits.length) {

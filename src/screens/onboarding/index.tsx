@@ -39,9 +39,16 @@ export default ({ navigation }: ScreenProps) => {
       ]}
     >
       <UsersWithLogo />
-      <Text level={5} weight="200" style={{ marginTop: 30 }}>
-        Aki mostramos lo que un comprador y un vendedor pueden lograr con
-        Shop-Shop
+      <Text level={5} weight="200" style={{ marginTop: 30, lineHeight: 23 }}>
+        Comprar y vender{' '}
+        <Text level={5} weight="bold">
+          gratis
+        </Text>{' '}
+        nunca fue tan sencillo. Descubre lo que venden tus{' '}
+        <Text level={5} weight="bold">
+          vecinos y más
+        </Text>
+        .
       </Text>
       <View
         style={[
