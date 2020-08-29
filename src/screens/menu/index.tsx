@@ -6,7 +6,7 @@ import {
   GestureResponderEvent,
   Vibration,
 } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useIsFocused } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
@@ -49,6 +49,8 @@ export default ({ navigation }: MenuProps) => {
   }
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
+  // trick to render on focus
+  useIsFocused();
 
   // event handlers
   const pressMyAddressesHandler = (event: GestureResponderEvent) => {
