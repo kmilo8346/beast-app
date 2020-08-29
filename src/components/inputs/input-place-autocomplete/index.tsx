@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, TextInput } from 'react-native';
+import { View, TextInput, ActivityIndicator } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
@@ -8,7 +8,6 @@ import ButtonIcon from '../../buttons/button-icon';
 import Icon from '../../icon';
 import Text from '../../text';
 import Touchable from '../../touchable';
-import Loading from '../../loading';
 // clients
 import placesClient from '../../../clients/google/places-client';
 // types
@@ -301,7 +300,7 @@ export default ({
           <View
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
           >
-            <Loading />
+            <ActivityIndicator size="small" color={colors.black} />
           </View>
         );
         break;
