@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Image, GestureResponderEvent } from 'react-native';
+import { ScrollView, View, GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
@@ -10,6 +10,7 @@ import Button from '../../../../components/buttons/button';
 import FullModal, { FullModalProps } from '../full-modal';
 // local components
 import NumberInput from './components/number-input';
+import Carousell from './components/carousell';
 // cache
 import shoppingCartsCache from '../../../../cache/shopping-carts';
 import ShoppingCartCache from '../../../../cache/shopping-cart';
@@ -54,21 +55,17 @@ export default ({ product, ...otherProps }: ComponentProps) => {
   }, []);
 
   // render logic
-  const image = product.images[0];
+  const productImages: string[] = [];
+  product.images.forEach((image) => {
+    const resizedImage = cloudinary.dynamicUrl(image, 'h_234');
+    productImages.push(resizedImage);
+  });
+
   return (
     <FullModal {...otherProps}>
       <ScrollView style={{ flex: 1 }}>
         <View style={[{ paddingTop: 7 }, globalStyles.withMargin]}>
-          <Image
-            source={{ uri: cloudinary.dynamicUrl(image, 'h_234') }}
-            style={{
-              width: '100%',
-              height: 234,
-              borderRadius: 9,
-              marginBottom: 20,
-            }}
-          />
-
+          <Carousell images={productImages} />
           <Text
             level={4}
             weight="bold"
