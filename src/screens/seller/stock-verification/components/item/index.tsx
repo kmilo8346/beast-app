@@ -7,6 +7,9 @@ import Text from '../../../../../components/text';
 import Icon from '../../../../../components/icon';
 import Badge from '../../../../../components/badge';
 import ButtonIcon from '../../../../../components/buttons/button-icon';
+import CheckGreenIcon from '../../../../../components/svgs/icons/check-green';
+import CheckYellowIcon from '../../../../../components/svgs/icons/check-yellow';
+import CircleMinusRedIcon from '../../../../../components/svgs/icons/circle-minus-red';
 // local components
 import ModalConfirmation from '../modal-confirmation';
 // types
@@ -20,10 +23,6 @@ import * as utils from '../../../../../lib/utils';
 import cloudinary from '../../../../../lib/cloudinary';
 // styles
 import colors from '../../../../../styles/colors';
-
-const checkSuccessImage = require('../../../../../../assets/icons/check_success.png');
-const checkWarningImage = require('../../../../../../assets/icons/check_warning.png');
-const checkErrorImage = require('../../../../../../assets/icons/check_error.png');
 
 export interface ItemProps {
   product: Item;
@@ -137,11 +136,11 @@ export default memo(
       rightPart = null;
       if (productConfirmation.type === ProductConfirmationType.UPDATE) {
         if (productConfirmation.qty_posible === 0) {
-          rightPart = <Image source={checkErrorImage} />;
+          rightPart = <CircleMinusRedIcon />;
         } else if (productConfirmation.qty_posible < product.qty) {
-          rightPart = <Image source={checkWarningImage} />;
+          rightPart = <CheckYellowIcon />;
         } else {
-          rightPart = <Image source={checkSuccessImage} />;
+          rightPart = <CheckGreenIcon />;
         }
       }
     }

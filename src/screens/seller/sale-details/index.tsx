@@ -15,6 +15,10 @@ import LoadingOverlay, {
 import Toast, { IToast } from '../../../components/toast';
 import Icon from '../../../components/icon';
 import ActionSheetContact from '../../../components/modals/action-sheet-contact';
+import HappyManImage from '../../../components/svgs/images/happy-man';
+import CheckImage from '../../../components/svgs/images/check-blue';
+import PhoneFilledDotsImage from '../../../components/svgs/icons/phone-filled-dots-blue';
+import RouteBlueImage from '../../../components/svgs/icons/route-blue';
 
 // local components
 import Steps, { Step, StepStatus } from './components/steps';
@@ -35,11 +39,6 @@ import {
 // styles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
-
-const checkImage = require('../../../../assets/icons/check.png');
-const happyImage = require('../../../../assets/success.png');
-const routeImage = require('../../../../assets/icons/route.png');
-const callImage = require('../../../../assets/icons/call.png');
 
 // instaces outside component
 const prefix = '[sale details screen]';
@@ -282,7 +281,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       style={{ flexDirection: 'row', alignItems: 'center' }}
       onPress={pressSeeRouteHandler}
     >
-      <Image source={routeImage} style={{ width: 18.75, height: 18.75 }} />
+      <RouteBlueImage />
       <Text
         level={5}
         weight="bold"
@@ -388,16 +387,14 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   switch (state.view) {
     case 'CONFIRMED':
       content = (
-        <View style={[{ flex: 1 }, globalStyles.withMargin]}>
-          <Image
-            source={checkImage}
-            style={{
-              width: 90,
-              height: 90,
-              marginTop: 70,
-              alignSelf: 'center',
-            }}
-          />
+        <View
+          style={[
+            { flex: 1, paddingTop: 70, alignItems: 'center' },
+            globalStyles.withMargin,
+          ]}
+        >
+          <View style={{ flex: 1 }} />
+          <CheckImage />
           <Text
             level={1}
             weight="bold"
@@ -418,26 +415,36 @@ export default ({ navigation, route }: SaleDetailsProps) => {
             style={{ marginTop: 35 }}
           />
           <View style={{ flex: 1 }} />
-          <Button
+          {/* <Button
             title="Continuar"
             onPress={backToSales}
             style={globalStyles.withMainActionAir}
-          />
+          /> */}
+          <View
+            style={[
+              { position: 'absolute', left: 0, right: 0, bottom: 0 },
+              globalStyles.withMargin,
+            ]}
+          >
+            <Button
+              title="Continuar"
+              onPress={backToSales}
+              style={globalStyles.withMainActionAir}
+            />
+          </View>
         </View>
       );
       break;
     case 'DELIVERED':
       content = (
-        <View style={[{ flex: 1 }, globalStyles.withMargin]}>
-          <Image
-            source={happyImage}
-            style={{
-              width: 250,
-              height: 260,
-              marginTop: 70,
-              alignSelf: 'center',
-            }}
-          />
+        <View
+          style={[
+            { flex: 1, alignItems: 'center', justifyContent: 'center' },
+            globalStyles.withMargin,
+          ]}
+        >
+          <View style={{ flex: 1 }} />
+          <HappyManImage />
           <Text
             level={1}
             weight="bold"
@@ -445,13 +452,19 @@ export default ({ navigation, route }: SaleDetailsProps) => {
           >
             ¡Genial! vamos por más.
           </Text>
-
           <View style={{ flex: 1 }} />
-          <Button
-            title="Volver a ventas"
-            onPress={backToSales}
-            style={globalStyles.withMainActionAir}
-          />
+          <View
+            style={[
+              { position: 'absolute', left: 0, right: 0, bottom: 0 },
+              globalStyles.withMargin,
+            ]}
+          >
+            <Button
+              title="Volver a ventas"
+              onPress={backToSales}
+              style={globalStyles.withMainActionAir}
+            />
+          </View>
         </View>
       );
       break;
@@ -530,11 +543,12 @@ export default ({ navigation, route }: SaleDetailsProps) => {
                 paddingHorizontal: 20,
                 paddingVertical: 12,
                 flexDirection: 'row',
+                alignItems: 'center',
                 marginTop: 20,
               }}
               onPress={pressCallClientHandler}
             >
-              <Image source={callImage} style={{ width: 27.5, height: 24.1 }} />
+              <PhoneFilledDotsImage />
               <Text
                 level={5}
                 weight="bold"

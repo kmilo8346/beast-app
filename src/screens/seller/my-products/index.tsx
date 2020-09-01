@@ -15,6 +15,7 @@ import NotSearchResult from '../../../components/not-search-result';
 import Button from '../../../components/buttons/button';
 import Toast, { IToast } from '../../../components/toast';
 import Search from '../../../components/inputs/search';
+import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
 // seller components
 import Shortcut from '../components/shortcut';
 // local components
@@ -32,8 +33,6 @@ import { Product, SearchResponse } from '../../../types';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-
-const addProductImage = require('../../../../assets/icons/plus.png');
 
 // instances outside component
 const prefix = '[my products component]';
@@ -460,7 +459,7 @@ export default ({ navigation }: MyProductsProps) => {
             <View style={globalStyles.withMargin}>
               <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
               <Shortcut
-                image={addProductImage}
+                image={<AddCircleBlueIcon />}
                 title="Agregar producto"
                 onPress={addProductHandler}
                 style={[globalStyles.withMainActionAir]}

@@ -1,11 +1,12 @@
 import React, { useReducer, useEffect } from 'react';
-import { View, Image, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Loading from '../../../../../components/loading';
 import ErrorView from '../../../../../components/error-view';
 import Text from '../../../../../components/text';
+import DesertImage from '../../../../../components/svgs/images/desert';
 // local components
 import OrderItem from '../order-item';
 // types
@@ -18,8 +19,6 @@ import orderClient from '../../../../../clients/order-client';
 import userCache from '../../../../../cache/user';
 // styles
 import globalStyles from '../../../../../styles';
-// images
-const desertImage = require('../../../../../../assets/desert.png');
 
 // instances outside component
 const prefix = '[historical list component]';
@@ -235,11 +234,7 @@ export default ({
               marginTop: '40%',
             }}
           >
-            <Image
-              source={desertImage}
-              style={{ marginBottom: 20 }}
-              resizeMode="contain"
-            />
+            <DesertImage />
             <Text level={1} weight="bold" style={{ marginBottom: 10 }}>
               Nada por aquí
             </Text>

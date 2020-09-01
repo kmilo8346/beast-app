@@ -8,6 +8,7 @@ import ErrorView from '../../../components/error-view';
 import Loading from '../../../components/loading';
 import Text from '../../../components/text';
 import Button from '../../../components/buttons/button';
+import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
 // local components
 import StoreItem from './components/store-item';
 // seller components
@@ -31,8 +32,6 @@ import {
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-
-const addImage = require('../../../../assets/icons/plus.png');
 
 // instances outside component
 const prefix = '[select or create store screen]';
@@ -288,7 +287,7 @@ export default ({ navigation }: SelectStoreProps) => {
         ]}
       >
         <Shortcut
-          image={addImage}
+          image={<AddCircleBlueIcon />}
           title="Agregar tienda"
           onPress={createStoreHandler}
           style={globalStyles.withMainActionAir}
