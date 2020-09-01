@@ -3,10 +3,9 @@ import { View } from 'react-native';
 
 // components
 import Text from '../../../../../components/text';
+import AddCircleBlueIcon from '../../../../../components/svgs/icons/add-circle-blue';
 // seller components
 import Shortcut from '../../../components/shortcut';
-
-const addProductImage = require('../../../../../../assets/icons/plus.png');
 
 export interface NotDataProps {
   onCallAction?: () => void;
@@ -26,7 +25,7 @@ export default ({ onCallAction = () => null }: NotDataProps) => {
         ¡Agrega tu primer producto!
       </Text>
       <Shortcut
-        image={addProductImage}
+        image={<AddCircleBlueIcon />}
         title="Agregar nuevo producto"
         onPress={onCallAction}
       />

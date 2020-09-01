@@ -1,5 +1,5 @@
 import React, { useReducer, useRef } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { CommonActions } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import Loading from '../../../components/loading';
 import LoadingOverlay, {
   ILoadingOverlay,
 } from '../../../components/loading-overlay';
+import MercadopagoImage from '../../../components/svgs/images/mercadopago-logo';
 // clients
 import oauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 import storeClient from '../../../clients/store-client';
@@ -26,8 +27,6 @@ import storeCache from '../../../cache/store';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-
-const mercadoPagoImage = require('../../../../assets/mercado_pago.png');
 
 // instances outside component
 const prefix = '[mercado pago sign in screen]';
@@ -175,7 +174,7 @@ export default ({ navigation }: ScreenProps) => {
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <Loading message="Creando credenciales..." />
+          <Loading />
         </View>
       );
       break;
@@ -208,17 +207,13 @@ export default ({ navigation }: ScreenProps) => {
       break;
     default:
       content = (
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Image
-            source={mercadoPagoImage}
-            style={{
-              width: 170,
-              height: 120,
-              marginTop: '18%',
-              marginBottom: 20,
-            }}
-          />
-          <Text level={2} weight="bold" style={{ marginBottom: 15 }}>
+        <View style={{ flex: 1, alignItems: 'center', paddingTop: '18%' }}>
+          <MercadopagoImage />
+          <Text
+            level={2}
+            weight="bold"
+            style={{ marginBottom: 15, marginTop: 20 }}
+          >
             ¡Bien! casi listo…
           </Text>
           <Text level={5} style={{ lineHeight: 23 }}>

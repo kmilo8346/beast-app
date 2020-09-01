@@ -2,7 +2,6 @@ import React, { useReducer, useRef } from 'react';
 import {
   ScrollView,
   View,
-  Image,
   Vibration,
   GestureResponderEvent,
 } from 'react-native';
@@ -19,6 +18,8 @@ import Toast, { IToast } from '../../../components/toast';
 import InputImages from '../../../components/inputs/input-images';
 import Switch from '../../../components/switch';
 import InputTags from '../../../components/inputs/input-tags';
+import TagBlueImage from '../../../components/svgs/images/tag-blue';
+import CheckBlueImage from '../../../components/svgs/images/check-blue';
 // clients
 import productClient from '../../../clients/product-client';
 // libs
@@ -37,9 +38,6 @@ import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-
-const productImage = require('../../../../assets/icons/tag.png');
-const publishedImage = require('../../../../assets/icons/check.png');
 
 // instances outside component
 const prefix = '[create or update product component]';
@@ -225,11 +223,12 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           },
         ]}
       >
-        <Image
-          source={publishedImage}
-          style={{ height: 90, width: 90, marginBottom: 20 }}
-        />
-        <Text level={1} weight="bold" style={{ textAlign: 'center' }}>
+        <CheckBlueImage />
+        <Text
+          level={1}
+          weight="bold"
+          style={{ textAlign: 'center', marginTop: 20 }}
+        >
           ¡Producto publicado con exito!
         </Text>
         <View
@@ -262,8 +261,8 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             marginBottom: 30,
           }}
         >
-          <Image source={productImage} style={{ width: 51, height: 51 }} />
-          <Text level={2} weight="bold">
+          <TagBlueImage />
+          <Text level={2} weight="bold" style={{ marginLeft: 10 }}>
             {title}
           </Text>
         </View>

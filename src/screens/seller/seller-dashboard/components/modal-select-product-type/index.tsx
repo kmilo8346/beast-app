@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Image } from 'react-native';
+import { View } from 'react-native';
 
 // components
-import { Modal, ModalProps, Text, Touchable } from '../../../../../components';
+import Modal, { ModalProps } from '../../../../../components/modals/modal';
+import Text from '../../../../../components/text';
+import Touchable from '../../../../../components/touchable';
+import HandShakeImage from '../../../../../components/svgs/images/hand-shake';
+import TagBlueImage from '../../../../../components/svgs/images/tag-blue';
 // styles
 import globalStyles from '../../../../../styles';
-
-const productsImage = require('../../../../../../assets/icons/tag_with_background.png');
-const servicesImage = require('../../../../../../assets/icons/hand_shake_with_background.png');
 
 export interface ModalSelectProductTypeProps extends ModalProps {
   onSelect?: (type: string) => void;
@@ -36,10 +37,7 @@ export default ({
           }}
         >
           <View>
-            <Image
-              source={productsImage}
-              style={{ width: 104, height: 104, marginBottom: 10 }}
-            />
+            <TagBlueImage />
             <Text level={5} weight="bold" style={{ textAlign: 'center' }}>
               Productos
             </Text>
@@ -51,10 +49,7 @@ export default ({
           }}
         >
           <View>
-            <Image
-              source={servicesImage}
-              style={{ width: 104, height: 104, marginBottom: 10 }}
-            />
+            <HandShakeImage />
             <Text level={5} weight="bold" style={{ textAlign: 'center' }}>
               Servicios
             </Text>

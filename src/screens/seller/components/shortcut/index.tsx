@@ -1,11 +1,5 @@
 import React, { ReactNode } from 'react';
-import {
-  View,
-  Image,
-  ImageSourcePropType,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, StyleProp, ViewStyle } from 'react-native';
 
 // components
 import Text from '../../../../components/text';
@@ -14,7 +8,7 @@ import Touchable from '../../../../components/touchable';
 import colors from '../../../../styles/colors';
 
 export interface ShortcutProps {
-  image: ImageSourcePropType;
+  image: ReactNode;
   title: string;
   counter?: number;
   style?: StyleProp<ViewStyle>;
@@ -55,7 +49,7 @@ export default ({
           {
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: colors.blueLight2,
+            backgroundColor: colors.blueLight3,
             borderRadius: 13,
             paddingVertical: 7,
             paddingHorizontal: 15,
@@ -63,7 +57,7 @@ export default ({
           style,
         ]}
       >
-        <Image source={image} style={{ width: 40, height: 40 }} />
+        {image}
         <Text
           level={5}
           weight="bold"

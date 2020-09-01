@@ -1,14 +1,15 @@
-import React from 'react';
-import { View, Image, ImageSourcePropType } from 'react-native';
+import React, { ReactNode } from 'react';
+import { View } from 'react-native';
 
 // components
 import Text from '../../../../../components/text';
 import Touchable from '../../../../../components/touchable';
 import Icon from '../../../../../components/icon';
+// styles
 import colors from '../../../../../styles/colors';
 
 export interface LinkProps {
-  image: ImageSourcePropType;
+  image: ReactNode;
   title: string;
   onPress?: () => void;
 }
@@ -27,7 +28,7 @@ export default ({ image, title, onPress = () => null }: LinkProps) => {
           marginBottom: 12,
         }}
       >
-        <Image source={image} style={{ width: 40, height: 40 }} />
+        {image}
         <Text level={5} style={{ flex: 1, marginLeft: 10 }}>
           {title}
         </Text>

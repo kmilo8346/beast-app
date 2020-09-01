@@ -7,6 +7,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import Touchable from '../../../components/touchable';
 import Text from '../../../components/text';
 import ButtonIcon from '../../../components/buttons/button-icon';
+import TagImage from '../../../components/svgs/images/tag-blue';
+import MoneyHandlingImage from '../../../components/svgs/images/handling-money';
+import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
+import StopwatchIcon from '../../../components/svgs/icons/stopwatch';
 // seller components
 import DashboardShorcut from '../components/shortcut';
 // local components
@@ -25,11 +29,6 @@ import ordersInProgressCacheManager from '../../../cache/orders-in-progress-cach
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
-
-const myProductsImage = require('../../../../assets/icons/tag.png');
-const mySalesImage = require('../../../../assets/icons/sale.png');
-const addProductOrServiceImage = require('../../../../assets/icons/plus.png');
-const salesInProgressImage = require('../../../../assets/icons/clock.png');
 
 // instances outside component
 const prefix = '[seller dashboard screen]';
@@ -214,14 +213,14 @@ export default ({ navigation }: ScreenProps) => {
         <MercadopagoLink />
 
         <DashboardLink
-          image={myProductsImage}
+          image={<TagImage />}
           title="Mis productos"
           onPress={() => {
             navigation.navigate('MyProducts', { type: 'product' });
           }}
         />
         <DashboardLink
-          image={mySalesImage}
+          image={<MoneyHandlingImage />}
           title="Mis ventas"
           onPress={() => {
             navigation.navigate('MySales', { view: 'HISTORICAL' });
@@ -235,13 +234,15 @@ export default ({ navigation }: ScreenProps) => {
         ]}
       >
         <DashboardShorcut
-          image={addProductOrServiceImage}
+          // image={addProductOrServiceImage}
+          image={<AddCircleBlueIcon />}
           title="Agregar producto"
           onPress={pressAddProductHandler}
           style={{ marginBottom: 12 }}
         />
         <DashboardShorcut
-          image={salesInProgressImage}
+          // image={salesInProgressImage}
+          image={<StopwatchIcon />}
           title="Ventas en curso"
           counter={state.in_progress_qty}
           style={{ marginBottom: 12 }}
