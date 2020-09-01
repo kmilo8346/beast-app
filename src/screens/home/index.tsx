@@ -1,5 +1,11 @@
-import React, { useReducer, useEffect, useRef, useCallback } from 'react';
-import { View, FlatList } from 'react-native';
+import React, {
+  useReducer,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactNode,
+} from 'react';
+import { View, FlatList, GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
@@ -9,6 +15,8 @@ import Text from '../../components/text';
 import Toast, { IToast } from '../../components/toast';
 import ErrorView from '../../components/error-view';
 import Divider from '../../components/divider';
+import Touchable from '../../components/touchable';
+import BagWhiteIcon from '../../components/svgs/icons/bag-white';
 // local components
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
@@ -16,8 +24,12 @@ import WidgetComponent from './widgets/widget';
 // clients
 import widgetClient from '../../clients/widget-client';
 import userClient from '../../clients/user-client';
+// libs
+import * as utils from '../../lib/utils';
 // cache
 import userCache from '../../cache/user';
+import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
+import OrdersInProgressCache from '../../cache/orders-in-progress-cache';
 // types
 import {
   LoggedUser,
@@ -60,19 +72,31 @@ type SetRefreshingAction = {
   type: 'set_refreshing';
   refreshing: boolean;
 };
+type SetOrdersInProgressCacheAction = {
+  type: 'set_orders_in_progress_cache';
+  cache: OrdersInProgressCache;
+};
+type SetInProgressQtyAction = {
+  type: 'set_in_progress_qty';
+  qty: number;
+};
 type Action =
   | SetUserAction
   | SetUpdatingAction
   | ResetAction
   | SetWidgetsAction
   | SetErrorAction
-  | SetRefreshingAction;
+  | SetRefreshingAction
+  | SetOrdersInProgressCacheAction
+  | SetInProgressQtyAction;
 type State = {
   user: User;
   updating: boolean;
   widgets?: ComputeResponse;
   error?: Error;
   refreshing: boolean;
+  orders_in_progress_cache?: OrdersInProgressCache;
+  in_progress_qty?: number;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -88,12 +112,20 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, error: action.error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
+    case 'set_orders_in_progress_cache':
+      return { ...state, orders_in_progress_cache: action.cache };
+    case 'set_in_progress_qty':
+      return { ...state, in_progress_qty: action.qty };
     default:
       return state;
   }
 };
 
-export default () => {
+interface ScreenProps {
+  navigation: any;
+}
+
+export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     user: userCache.getData() as User,
@@ -111,6 +143,11 @@ export default () => {
   const toastRef = useRef<IToast>(null);
 
   // event handlers
+  const instanceOrdersInProgressCache = async (user: string) => {
+    const cache = await ordersInProgressCacheManager.get(user);
+    dispatch({ type: 'set_orders_in_progress_cache', cache });
+  };
+
   const fetch = async (
     filters: ComputeFilters,
     context: ComputeContext,
@@ -220,6 +257,11 @@ export default () => {
     }
   };
 
+  const pressInProgressButtonHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('Orders', { view: 'IN_PROGRESS' });
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
@@ -235,12 +277,32 @@ export default () => {
     load();
   }, [state.user.current_address]);
 
+  useEffect(() => {
+    if (state.user.id) {
+      instanceOrdersInProgressCache(state.user.id);
+    }
+  }, [state.user.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let unsubscribe: () => void = utils.noop;
+      if (state.orders_in_progress_cache) {
+        unsubscribe = state.orders_in_progress_cache.onChange(() => {
+          if (state.orders_in_progress_cache) {
+            dispatch({
+              type: 'set_in_progress_qty',
+              qty: state.orders_in_progress_cache.getClientOrdersQty(),
+            });
+          }
+        });
+      }
+      return () => {
+        unsubscribe();
+      };
+    }, [state.orders_in_progress_cache])
+  );
+
   // render logic
-  let message = '¡Hola!';
-  if (userCache.isLogged()) {
-    const logged = state.user as LoggedUser;
-    message = `¡Hola ${logged.first_name}!`;
-  }
 
   // error
   if (state.error) {
@@ -282,6 +344,34 @@ export default () => {
     // TODO: try to resolve this problem
   }
 
+  let message = '¡Hola!';
+  if (userCache.isLogged()) {
+    const logged = state.user as LoggedUser;
+    message = `¡Hola ${logged.first_name}!`;
+  }
+  let inProgressComponent: ReactNode | null = null;
+  if (state.in_progress_qty && state.in_progress_qty > 0) {
+    inProgressComponent = (
+      <Touchable
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: colors.blue,
+          paddingLeft: 30,
+          paddingVertical: 7,
+        }}
+        onPress={pressInProgressButtonHandler}
+      >
+        <BagWhiteIcon />
+        <Text
+          level={6}
+          weight="bold"
+          color={colors.white}
+          style={{ marginLeft: 10 }}
+        >{`Tienes ${state.in_progress_qty} pedidos en curso`}</Text>
+      </Touchable>
+    );
+  }
   // data
   return (
     <View
@@ -322,6 +412,7 @@ export default () => {
 
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
+        {inProgressComponent}
       </View>
     </View>
   );

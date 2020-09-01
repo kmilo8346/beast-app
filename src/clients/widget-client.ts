@@ -1,4 +1,4 @@
-import axios, { CancelToken } from 'axios';
+import { CancelToken } from 'axios';
 
 import RestClient from './rest-client';
 import { Widget, CreateWidget, ComputeParams, ComputeResponse } from '../types';
@@ -8,10 +8,9 @@ class WidgetClient extends RestClient<Widget, CreateWidget> {
     params: ComputeParams,
     cancelToken?: CancelToken
   ): Promise<ComputeResponse> {
-    const response = await this.axios.post<ComputeResponse>(
+    const response = await this.axios.get<ComputeResponse>(
       `${this.prefix}/compute`,
-      params,
-      { cancelToken }
+      { params, cancelToken }
     );
     return response.data;
   }

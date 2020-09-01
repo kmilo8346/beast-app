@@ -119,7 +119,6 @@ export default ({
         },
         from,
         size,
-        sort: [{ field: 'updated_at', order: 'desc' }],
         // TODO: just ask the necesary data
         // source: []
       },

@@ -32,8 +32,6 @@ export interface GetParams {
   source?: string[];
 }
 
-export type SortParam = { field: string; order: 'asc' | 'desc' }[];
-
 export type SearchFilters = { [key: string]: any };
 
 export interface SearchParams {
@@ -42,7 +40,7 @@ export interface SearchParams {
   filters?: SearchFilters;
   from?: number;
   size?: number;
-  sort?: { field: string; order: 'asc' | 'desc' }[];
+  sort?: { [key: string]: 'asc' | 'desc' };
   source?: string[];
 }
 
@@ -57,7 +55,7 @@ export interface SearchResponse<T> {
   filters?: SearchFilters;
   from: number;
   size: number;
-  sort?: SortParam;
+  sort?: { [key: string]: 'asc' | 'desc' };
   total: number;
   hits: T[];
 }

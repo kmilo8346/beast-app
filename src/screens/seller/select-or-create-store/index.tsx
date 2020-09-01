@@ -1,7 +1,7 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
 import { View, GestureResponderEvent, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, CommonActions } from '@react-navigation/native';
 
 // components
 import ErrorView from '../../../components/error-view';
@@ -17,9 +17,12 @@ import storeClient from '../../../clients/store-client';
 import userClient from '../../../clients/user-client';
 // libs
 import { v4 as uuidv4 } from '../../../lib/uuid';
+import * as utils from '../../../lib/utils';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
+import OrdersInProgressCache from '../../../cache/orders-in-progress-cache';
+import ordersInProgressCacheManager from '../../../cache/orders-in-progress-cache-manager';
 // types
 import {
   PaymentProvider,
@@ -38,7 +41,22 @@ const addImage = require('../../../../assets/icons/plus.png');
 const prefix = '[select or create store screen]';
 const defaultSize = 10;
 let fetchRequestSource: CancelTokenSource;
+interface StoresOrdersInProgress {
+  [key: string]: number;
+}
 
+type SetUserAction = {
+  type: 'set_user';
+  user: LoggedUser;
+};
+type SetOrdersInProgressCacheAction = {
+  type: 'set_orders_in_progress_cache';
+  cache: OrdersInProgressCache;
+};
+type SetStoresOrdersInProgressAction = {
+  type: 'set_stores_orders_in_progress';
+  stores_orders_in_progress: StoresOrdersInProgress;
+};
 type SetStoresAction = {
   type: 'set_stores';
   stores: SearchResponse<Store>;
@@ -51,14 +69,35 @@ type SetFetchingMoreAction = {
   type: 'set_fetching_more';
   fetching_more: boolean;
 };
-type Action = SetStoresAction | SetErrorAction | SetFetchingMoreAction;
+type Action =
+  | SetUserAction
+  | SetOrdersInProgressCacheAction
+  | SetStoresOrdersInProgressAction
+  | SetStoresAction
+  | SetErrorAction
+  | SetFetchingMoreAction;
 type State = {
+  user: LoggedUser;
+  orders_in_progress_cache?: OrdersInProgressCache;
+  stores_orders_in_progress?: StoresOrdersInProgress;
   stores?: SearchResponse<Store>;
   error?: Error;
   fetching_more: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case 'set_user':
+      return {
+        ...state,
+        user: action.user,
+      };
+    case 'set_orders_in_progress_cache':
+      return { ...state, orders_in_progress_cache: action.cache };
+    case 'set_stores_orders_in_progress':
+      return {
+        ...state,
+        stores_orders_in_progress: action.stores_orders_in_progress,
+      };
     case 'set_stores':
       return {
         ...state,
@@ -82,15 +121,19 @@ interface SelectStoreProps {
 export default ({ navigation }: SelectStoreProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
+    user: userCache.getData() as LoggedUser,
     fetching_more: false,
   });
-
-  const user = userCache.getData() as LoggedUser;
-  if (!user) {
+  if (!state.user) {
     throw new Error(`${prefix} user must be defined`);
   }
 
   // event handlers
+  const instanceOrdersInProgressCache = async (user: string) => {
+    const cache = await ordersInProgressCacheManager.get(user);
+    dispatch({ type: 'set_orders_in_progress_cache', cache });
+  };
+
   const fetch = async (from = 0, size = defaultSize) => {
     if (fetchRequestSource) {
       fetchRequestSource.cancel();
@@ -99,7 +142,7 @@ export default ({ navigation }: SelectStoreProps) => {
     const stores = await storeClient.search(
       {
         filters: {
-          user: user.id,
+          user: state.user.id,
         },
         from,
         size,
@@ -164,8 +207,8 @@ export default ({ navigation }: SelectStoreProps) => {
   };
   const createStoreHandler = async () => {
     storeCache.replaceData({
-      user: user.id,
-      phone: user.phone as string,
+      user: state.user.id,
+      phone: state.user.phone as string,
       reference: uuidv4(),
       payment_provider: PaymentProvider.MERCADOPAGO,
       dispatch_provider: DispatchProvider.OWNER,
@@ -175,17 +218,58 @@ export default ({ navigation }: SelectStoreProps) => {
   const pressItemHandler = async (store: Store) => {
     // TODO: handler error
     await userClient.update({
-      pathVars: { id: user.id },
+      pathVars: { id: state.user.id },
       body: {
         current_store: store.id,
       },
     });
     storeCache.setData(store);
-    navigation.replace('SellerDashboard');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'SellerDashboard' }],
+      })
+    );
   };
   useEffect(() => {
     load();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        dispatch({ type: 'set_user', user: user as LoggedUser });
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (state.user.id) {
+      instanceOrdersInProgressCache(state.user.id);
+    }
+  }, [state.user.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let unsubscribe: () => void = utils.noop;
+      if (state.orders_in_progress_cache) {
+        unsubscribe = state.orders_in_progress_cache.onChange(() => {
+          if (state.orders_in_progress_cache) {
+            dispatch({
+              type: 'set_stores_orders_in_progress',
+              stores_orders_in_progress: state.orders_in_progress_cache.getSellerOrdersQtyByStore(),
+            });
+          }
+        });
+      }
+      return () => {
+        unsubscribe();
+      };
+    }, [state.orders_in_progress_cache])
+  );
 
   // render logic
   if (state.error) {
@@ -259,11 +343,10 @@ export default ({ navigation }: SelectStoreProps) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
       <Text
-        level={3}
-        weight="bold"
-        style={[{ marginTop: 20, marginBottom: 20 }, globalStyles.withPadding]}
+        level={5}
+        style={[{ marginTop: 5, marginBottom: 20 }, globalStyles.withPadding]}
       >
         Seleccione tienda
       </Text>
@@ -271,7 +354,17 @@ export default ({ navigation }: SelectStoreProps) => {
         data={state.stores.hits}
         keyExtractor={(store: Store) => store.id}
         renderItem={({ item }) => {
-          return <StoreItem data={item} onPress={pressItemHandler} />;
+          let progress: number | undefined;
+          if (state.stores_orders_in_progress) {
+            progress = state.stores_orders_in_progress[item.id];
+          }
+          return (
+            <StoreItem
+              data={item}
+              progress={progress}
+              onPress={pressItemHandler}
+            />
+          );
         }}
         ListFooterComponent={<View style={globalStyles.withScreenAir} />}
         onEndReached={() => {
@@ -294,6 +387,6 @@ export default ({ navigation }: SelectStoreProps) => {
           style={globalStyles.withMainActionAir}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };

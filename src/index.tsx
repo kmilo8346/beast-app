@@ -1,4 +1,6 @@
 import React from 'react';
+import io from 'socket.io-client';
+import Constants from 'expo-constants';
 
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
@@ -9,6 +11,10 @@ import ErrorView from './components/error-view';
 import firebase from './lib/firebase';
 import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
+// cache
+import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
+// types
+import { Order } from './types';
 
 // instances outside component
 const auth = firebase.auth();
@@ -34,9 +40,23 @@ class App extends React.Component<{}, State> {
   };
 
   componentDidMount() {
-    this.unsubscribe = auth.onAuthStateChanged((authUser) => {
+    // socket initialization
+    const socket = io(Constants.manifest.extra.BEAST_API_URL);
+
+    this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
         deviceAgent.sync({ user_id: authUser.uid });
+
+        const orderInProgressCache = await ordersInProgressCacheManager.get(
+          authUser.uid
+        );
+
+        socket.on(authUser.uid, (order: Order) => {
+          console.log(
+            `New order arrived from socket, id: ${order.id}, status: ${order.status}, current user ${authUser.uid}`
+          );
+          orderInProgressCache.add([order]);
+        });
       }
     });
   }

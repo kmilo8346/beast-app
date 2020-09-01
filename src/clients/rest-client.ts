@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
 import Constants from 'expo-constants';
+import axiosRetry from 'axios-retry';
+import qs from 'qs';
 
 // libs
 import firebase from '../lib/firebase';
@@ -42,7 +44,17 @@ export default class RESTClient<T, V> {
 
   constructor(prefix: string, config?: AxiosRequestConfig) {
     this.prefix = prefix;
-    this.axios = axios.create(config);
+    this.axios = axios.create({
+      paramsSerializer: (params) => {
+        return qs.stringify(params);
+      },
+      ...config,
+    });
+
+    axiosRetry(this.axios, {
+      retries: 5,
+      retryDelay: axiosRetry.exponentialDelay,
+    });
 
     this.axios.interceptors.request.use(
       async (config) => {
@@ -115,10 +127,12 @@ export default class RESTClient<T, V> {
     cancelToken?: CancelToken
   ): Promise<SearchResponse<T>> {
     const { pathVars, ...data } = params;
-    const response = await this.axios.post<SearchResponse<T>>(
-      interpolate(`${this.prefix}/search`, pathVars),
-      data,
-      { cancelToken }
+    const response = await this.axios.get<SearchResponse<T>>(
+      interpolate(`${this.prefix}`, pathVars),
+      {
+        params: data,
+        cancelToken,
+      }
     );
     return response.data;
   }

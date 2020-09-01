@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useReducer, useCallback, useEffect } from 'react';
 import { ScrollView, View, Image, GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Touchable from '../../../components/touchable';
@@ -13,11 +14,14 @@ import DashboardLink from './components/link';
 import MercadopagoLink from './components/link-mercadopago';
 // libs
 import cloudinary from '../../../lib/cloudinary';
+import * as utils from '../../../lib/utils';
 // types
 import { LoggedUser } from '../../../types';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
+import OrdersInProgressCache from '../../../cache/orders-in-progress-cache';
+import ordersInProgressCacheManager from '../../../cache/orders-in-progress-cache-manager';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
@@ -30,15 +34,50 @@ const salesInProgressImage = require('../../../../assets/icons/clock.png');
 // instances outside component
 const prefix = '[seller dashboard screen]';
 
+type SetUserAction = {
+  type: 'set_user';
+  user: LoggedUser;
+};
+type SetOrdersInProgressCacheAction = {
+  type: 'set_orders_in_progress_cache';
+  cache: OrdersInProgressCache;
+};
+type SetInProgressQtyAction = {
+  type: 'set_in_progress_qty';
+  qty: number;
+};
+type Action =
+  | SetUserAction
+  | SetOrdersInProgressCacheAction
+  | SetInProgressQtyAction;
+type State = {
+  user: LoggedUser;
+  orders_in_progress_cache?: OrdersInProgressCache;
+  in_progress_qty?: number;
+};
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'set_user':
+      return { ...state, user: action.user };
+    case 'set_orders_in_progress_cache':
+      return { ...state, orders_in_progress_cache: action.cache };
+    case 'set_in_progress_qty':
+      return { ...state, in_progress_qty: action.qty };
+    default:
+      return state;
+  }
+};
+
 export interface ScreenProps {
   navigation: any;
 }
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const user = userCache.getData() as LoggedUser;
-  // preconditions
-  if (!user) {
+  const [state, dispatch] = useReducer(reducer, {
+    user: userCache.getData() as LoggedUser,
+  });
+  if (!state.user) {
     throw new Error(`${prefix} User must be defined`);
   }
   const store = storeCache.getData();
@@ -51,14 +90,57 @@ export default ({ navigation }: ScreenProps) => {
   const insets = useSafeAreaInsets();
 
   // event handlers
+  const instanceOrdersInProgressCache = async (user: string) => {
+    const cache = await ordersInProgressCacheManager.get(user);
+    dispatch({ type: 'set_orders_in_progress_cache', cache });
+  };
+
   const pressAddProductHandler = () => {
     navigation.navigate('CreateOrUpdateProduct');
   };
 
   const pressSelectOrCreateStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.replace('SelectOrCreateStore');
+    navigation.navigate('SelectOrCreateStore');
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        dispatch({ type: 'set_user', user: user as LoggedUser });
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (state.user.id) {
+      instanceOrdersInProgressCache(state.user.id);
+    }
+  }, [state.user.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let unsubscribe: () => void = utils.noop;
+      if (state.orders_in_progress_cache) {
+        unsubscribe = state.orders_in_progress_cache.onChange(() => {
+          if (state.orders_in_progress_cache) {
+            dispatch({
+              type: 'set_in_progress_qty',
+              qty: state.orders_in_progress_cache.getSellerOrdersQtyInStore(
+                store.id
+              ),
+            });
+          }
+        });
+      }
+      return () => {
+        unsubscribe();
+      };
+    }, [state.orders_in_progress_cache])
+  );
 
   // render logic
   const image = store.images[0];
@@ -161,6 +243,7 @@ export default ({ navigation }: ScreenProps) => {
         <DashboardShorcut
           image={salesInProgressImage}
           title="Ventas en curso"
+          counter={state.in_progress_qty}
           style={{ marginBottom: 12 }}
           onPress={() => {
             navigation.navigate('MySales', { view: 'IN_PROGRESS' });

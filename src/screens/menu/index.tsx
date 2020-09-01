@@ -1,4 +1,10 @@
-import React, { useState, ReactNode, useRef } from 'react';
+import React, {
+  useState,
+  ReactNode,
+  useRef,
+  useCallback,
+  useEffect,
+} from 'react';
 import {
   ScrollView,
   View,
@@ -6,7 +12,7 @@ import {
   GestureResponderEvent,
   Vibration,
 } from 'react-native';
-import { CommonActions, useIsFocused } from '@react-navigation/native';
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
@@ -23,10 +29,13 @@ import ModalHelp from './components/modal-help';
 import userClient from '../../clients/user-client';
 // lib
 import firebase from '../../lib/firebase';
+import * as utils from '../../lib/utils';
 // types
 import { LoggedUser, Place } from '../../types';
 // cache
 import userCache from '../../cache/user';
+import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
+import OrdersInProgressCache from '../../cache/orders-in-progress-cache';
 // styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
@@ -40,19 +49,27 @@ export interface MenuProps {
 
 export default ({ navigation }: MenuProps) => {
   // state
+  const [user, setUser] = useState(userCache.getData());
+  const [
+    ordersInProgressCache,
+    setOrdersInProgressCache,
+  ] = useState<OrdersInProgressCache | null>(null);
+  const [inProgressQty, setInProgressQty] = useState<number | null>(null);
   const [modalManageAddress, setModalManageAddress] = useState(false);
   const [updatingAddressInfo, setUpdatingAddressInfo] = useState(false);
   const [modalHelp, setModalHelp] = useState(false);
-  const user = userCache.getData();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
-  // trick to render on focus
-  useIsFocused();
 
   // event handlers
+  const instanceOrdersInProgressCache = async (user: string) => {
+    const cache = await ordersInProgressCacheManager.get(user);
+    setOrdersInProgressCache(cache);
+  };
+
   const pressMyAddressesHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     setModalManageAddress(true);
@@ -69,7 +86,11 @@ export default ({ navigation }: MenuProps) => {
 
   const pressMyOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('Orders', { view: 'HISTORICAL' });
+    if (inProgressQty && inProgressQty > 0) {
+      navigation.navigate('Orders', { view: 'IN_PROGRESS' });
+    } else {
+      navigation.navigate('Orders', { view: 'HISTORICAL' });
+    }
   };
 
   const pressHelpHandler = (event: GestureResponderEvent) => {
@@ -137,6 +158,39 @@ export default ({ navigation }: MenuProps) => {
     setModalHelp(false);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        setUser(user);
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (user.id) {
+      instanceOrdersInProgressCache(user.id);
+    }
+  }, [user.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let unsubscribe: () => void = utils.noop;
+      if (ordersInProgressCache) {
+        unsubscribe = ordersInProgressCache.onChange(() => {
+          if (ordersInProgressCache) {
+            setInProgressQty(ordersInProgressCache.getClientOrdersQty());
+          }
+        });
+      }
+      return () => {
+        unsubscribe();
+      };
+    }, [ordersInProgressCache])
+  );
+
   // render logic
   const address = userCache.getAddress();
   if (!address) {
@@ -151,6 +205,10 @@ export default ({ navigation }: MenuProps) => {
   let mainAction: ReactNode | null = null;
   if (userCache.isLogged()) {
     const user = userCache.getData() as LoggedUser;
+    let myOrdersText = '';
+    if (inProgressQty && inProgressQty > 0) {
+      myOrdersText = `Tienes ${inProgressQty} pedidos en curso`;
+    }
     content = (
       <ScrollView
         style={[{ flex: 1, paddingTop: 15 }, globalStyle.withPadding]}
@@ -188,7 +246,11 @@ export default ({ navigation }: MenuProps) => {
           description={user.phone}
           onPress={pressPhoneNumberHandler}
         />
-        <Item name="Mis pedidos" onPress={pressMyOrdersHandler} />
+        <Item
+          name="Mis pedidos"
+          onPress={pressMyOrdersHandler}
+          description={myOrdersText}
+        />
         <Item name="Ayuda" onPress={pressHelpHandler} />
 
         <View style={globalStyle.withScreenAir} />
