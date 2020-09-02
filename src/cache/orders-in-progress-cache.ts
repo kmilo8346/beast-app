@@ -22,27 +22,6 @@ export default class OrdersInProgressCache extends PersistedCache<
   constructor(user: string) {
     super(`orders-in-progress-user-${user}`);
     this.user = user;
-
-    this.onChange((data) => {
-      if (!data) {
-        console.log('Order in progress cache is empty');
-      } else {
-        console.log(
-          `Order in progres cache: (water mark:${
-            data.water_mark
-          }, orders: [${data.orders.reduce((text, order) => {
-            let entity = 'unknown';
-            if (order.customer.id === this.user) {
-              entity = 'order';
-            }
-            if (order.transaction.store.user === this.user) {
-              entity = 'sale';
-            }
-            return `${text},${entity}-${order.status}`;
-          }, '')}]`
-        );
-      }
-    });
   }
 
   public async sync() {

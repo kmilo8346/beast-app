@@ -60,16 +60,12 @@ class App extends React.Component<{}, State> {
 
     if (user_id !== prevState.user_id || state !== prevState.state) {
       if (user_id && state === 'active') {
-        console.log('syncing in progress cache');
         const orderInProgressCache = await ordersInProgressCacheManager.get(
           user_id
         );
         await orderInProgressCache.sync();
 
         socket.on(user_id, (order: Order) => {
-          console.log(
-            `New order arrived from socket, id: ${order.id}, status: ${order.status}, current user ${user_id}`
-          );
           orderInProgressCache.add([order]);
         });
       }

@@ -1,4 +1,5 @@
 import { AsyncStorage } from 'react-native';
+import Constants from 'expo-constants';
 
 import Cache from './cache';
 
@@ -15,7 +16,7 @@ export default class PersistedCache<T> extends Cache<T> {
   async load() {
     try {
       const raw: string | null = await AsyncStorage.getItem(
-        `@cache/${this.path}`
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/${this.path}`
       );
       if (raw) {
         this.data = JSON.parse(raw);
@@ -31,7 +32,7 @@ export default class PersistedCache<T> extends Cache<T> {
   async persist() {
     try {
       await AsyncStorage.setItem(
-        `@cache/${this.path}`,
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/${this.path}`,
         JSON.stringify(this.data)
       );
     } catch (error) {

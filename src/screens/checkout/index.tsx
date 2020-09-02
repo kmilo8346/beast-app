@@ -5,6 +5,7 @@ import axios, { CancelTokenSource } from 'axios';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { CommonActions } from '@react-navigation/native';
+import * as Permissions from 'expo-permissions';
 
 // components
 import ErrorView from '../../components/error-view';
@@ -233,6 +234,34 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   };
 
+  const requestNotificationPermisions = async () => {
+    if (
+      state.redirect_status &&
+      [
+        MercadopagoPaymentStatus.APPROVED,
+        MercadopagoPaymentStatus.IN_PROCESS,
+        MercadopagoPaymentStatus.PENDING,
+      ].indexOf(state.redirect_status) !== -1
+    ) {
+      if (Constants.isDevice) {
+        const { status: existingStatus } = await Permissions.getAsync(
+          Permissions.NOTIFICATIONS
+        );
+        console.log(
+          `${prefix} Notification permision current status, status ${existingStatus}`
+        );
+        if (existingStatus !== 'granted') {
+          const { status } = await Permissions.askAsync(
+            Permissions.NOTIFICATIONS
+          );
+          console.log(
+            `${prefix} Notification permision status after request the user, status ${status}`
+          );
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
   }, []);
@@ -262,6 +291,10 @@ export default ({ navigation, route }: ScreenProps) => {
       }
     }
   }, [state.redirect_status, state.shopping_cart_cache]);
+
+  useEffect(() => {
+    requestNotificationPermisions();
+  }, [state.redirect_status]);
 
   // render logic
   if (state.error) {

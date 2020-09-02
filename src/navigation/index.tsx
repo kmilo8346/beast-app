@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -18,26 +18,19 @@ import {
 import MainTabScreen from './main-tab';
 import commonStackOptions from './common-stack-options';
 // libs
-import { navigationRef, onReady, navigate } from '../lib/root-navigation';
+import { navigationRef, onReady } from '../lib/root-navigation';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const RootStack = createStackNavigator();
 
 export default () => {
-  // event handlers
-  useEffect(() => {
-    const listener = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data: any = response.notification.request.content.data.body;
-        if (data.navigate) {
-          navigate(data.navigate.name, data.navigate.params);
-        }
-      }
-    );
-    return () => {
-      Notifications.removeNotificationSubscription(listener);
-    };
-  }, []);
-
   // render logic
   return (
     <SafeAreaProvider>
