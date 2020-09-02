@@ -2,6 +2,8 @@ import React, { useReducer, useCallback, useEffect } from 'react';
 import { ScrollView, View, Image, GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 
 // components
 import Touchable from '../../../components/touchable';
@@ -105,6 +107,25 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('SelectOrCreateStore');
   };
 
+  const requestNotificationPermisions = async () => {
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(
+        Permissions.NOTIFICATIONS
+      );
+      console.log(
+        `${prefix} Notification permision current status, status ${existingStatus}`
+      );
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(
+          Permissions.NOTIFICATIONS
+        );
+        console.log(
+          `${prefix} Notification permision status after request the user, status ${status}`
+        );
+      }
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
@@ -150,6 +171,10 @@ export default ({ navigation }: ScreenProps) => {
       };
     }, [state.orders_in_progress_cache])
   );
+
+  useEffect(() => {
+    requestNotificationPermisions();
+  }, []);
 
   // render logic
   const image = store.images[0];
