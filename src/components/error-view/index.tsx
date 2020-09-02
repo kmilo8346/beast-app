@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import React from 'react';
 import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import Text from '../text';
@@ -15,7 +13,6 @@ export interface ErrorProps {
 }
 
 export default ({ onRetry = () => null }: ErrorProps) => {
-  const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ flex: 1 }} />
@@ -33,7 +30,6 @@ export default ({ onRetry = () => null }: ErrorProps) => {
             left: 0,
             right: 0,
             bottom: 0,
-            paddingBottom: insets.bottom,
           },
           globalStyles.withMargin,
         ]}
