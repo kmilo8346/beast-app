@@ -269,7 +269,7 @@ export default ({ navigation }: MenuProps) => {
     );
     mainAction = (
       <Button
-        title="Cerrar sessión"
+        title="Cerrar sesión"
         style={globalStyle.withMainActionAir}
         onPress={pressCloseSessionHandler}
       />
