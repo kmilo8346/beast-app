@@ -24,7 +24,9 @@ import { LoggedUser } from '../../../types';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
-import OrdersInProgressCache from '../../../cache/orders-in-progress-cache';
+import OrdersInProgressCache, {
+  OrdersInProgressCacheData,
+} from '../../../cache/orders-in-progress-cache';
 import ordersInProgressCacheManager from '../../../cache/orders-in-progress-cache-manager';
 // styles
 import globalStyles from '../../../styles';
@@ -124,16 +126,24 @@ export default ({ navigation }: ScreenProps) => {
     useCallback(() => {
       let unsubscribe: () => void = utils.noop;
       if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(() => {
-          if (state.orders_in_progress_cache) {
-            dispatch({
-              type: 'set_in_progress_qty',
-              qty: state.orders_in_progress_cache.getSellerOrdersQtyInStore(
-                store.id
-              ),
-            });
+        unsubscribe = state.orders_in_progress_cache.onChange(
+          (data: OrdersInProgressCacheData | undefined) => {
+            if (data) {
+              dispatch({
+                type: 'set_in_progress_qty',
+                qty: data.orders.reduce((qty, order) => {
+                  if (
+                    order.transaction.store.user === data.user &&
+                    order.transaction.store.id === store.id
+                  ) {
+                    return qty + 1;
+                  }
+                  return qty;
+                }, 0),
+              });
+            }
           }
-        });
+        );
       }
       return () => {
         unsubscribe();

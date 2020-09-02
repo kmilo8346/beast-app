@@ -11,7 +11,9 @@ import Icon from '../components/icon';
 import Text from '../components/text';
 // cache
 import userCache from '../cache/user';
-import OrdersInProgressCache from '../cache/orders-in-progress-cache';
+import OrdersInProgressCache, {
+  OrdersInProgressCacheData,
+} from '../cache/orders-in-progress-cache';
 import ordersInProgressCacheManager from '../cache/orders-in-progress-cache-manager';
 // libs
 import * as utils from '../lib/utils';
@@ -88,14 +90,21 @@ export default () => {
     useCallback(() => {
       let unsubscribe: () => void = utils.noop;
       if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(() => {
-          if (state.orders_in_progress_cache) {
-            dispatch({
-              type: 'set_sales_in_progress_qty',
-              qty: state.orders_in_progress_cache.getSellerOrdersQty(),
-            });
+        unsubscribe = state.orders_in_progress_cache.onChange(
+          (data: OrdersInProgressCacheData | undefined) => {
+            if (data) {
+              dispatch({
+                type: 'set_sales_in_progress_qty',
+                qty: data.orders.reduce((qty, order) => {
+                  if (order.transaction.store.user === data.user) {
+                    return qty + 1;
+                  }
+                  return qty;
+                }, 0),
+              });
+            }
           }
-        });
+        );
       }
       return () => {
         unsubscribe();

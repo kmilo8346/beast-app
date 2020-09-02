@@ -1,14 +1,11 @@
 // cache
-import PersistedCache from './persisted-cache';
-// types
-import { Order } from '../types';
-// cache
 import OrdersInProgressCache from './orders-in-progress-cache';
 
 class OrdersInProgressCacheManager {
   private references: { [key: string]: OrdersInProgressCache } = {};
 
   async get(id: string): Promise<OrdersInProgressCache> {
+    console.log(Object.keys(this.references));
     if (id in this.references) {
       return this.references[id];
     }

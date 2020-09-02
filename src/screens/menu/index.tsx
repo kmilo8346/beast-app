@@ -35,7 +35,9 @@ import { LoggedUser, Place } from '../../types';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
-import OrdersInProgressCache from '../../cache/orders-in-progress-cache';
+import OrdersInProgressCache, {
+  OrdersInProgressCacheData,
+} from '../../cache/orders-in-progress-cache';
 // styles
 import globalStyle from '../../styles';
 import colors from '../../styles/colors';
@@ -179,11 +181,20 @@ export default ({ navigation }: MenuProps) => {
     useCallback(() => {
       let unsubscribe: () => void = utils.noop;
       if (ordersInProgressCache) {
-        unsubscribe = ordersInProgressCache.onChange(() => {
-          if (ordersInProgressCache) {
-            setInProgressQty(ordersInProgressCache.getClientOrdersQty());
+        unsubscribe = ordersInProgressCache.onChange(
+          (data: OrdersInProgressCacheData | undefined) => {
+            if (data) {
+              setInProgressQty(
+                data.orders.reduce((qty, order) => {
+                  if (order.customer.id === data.user) {
+                    return qty + 1;
+                  }
+                  return qty;
+                }, 0)
+              );
+            }
           }
-        });
+        );
       }
       return () => {
         unsubscribe();

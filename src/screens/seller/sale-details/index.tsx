@@ -390,7 +390,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         <View
           style={[
             { flex: 1, paddingTop: 70, alignItems: 'center' },
-            globalStyles.withMargin,
+            globalStyles.withPadding,
           ]}
         >
           <View style={{ flex: 1 }} />
@@ -415,11 +415,6 @@ export default ({ navigation, route }: SaleDetailsProps) => {
             style={{ marginTop: 35 }}
           />
           <View style={{ flex: 1 }} />
-          {/* <Button
-            title="Continuar"
-            onPress={backToSales}
-            style={globalStyles.withMainActionAir}
-          /> */}
           <View
             style={[
               { position: 'absolute', left: 0, right: 0, bottom: 0 },
@@ -440,7 +435,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         <View
           style={[
             { flex: 1, alignItems: 'center', justifyContent: 'center' },
-            globalStyles.withMargin,
+            globalStyles.withPadding,
           ]}
         >
           <View style={{ flex: 1 }} />

@@ -22,7 +22,9 @@ import * as utils from '../../../lib/utils';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
-import OrdersInProgressCache from '../../../cache/orders-in-progress-cache';
+import OrdersInProgressCache, {
+  OrdersInProgressCacheData,
+} from '../../../cache/orders-in-progress-cache';
 import ordersInProgressCacheManager from '../../../cache/orders-in-progress-cache-manager';
 // types
 import {
@@ -255,14 +257,24 @@ export default ({ navigation }: SelectStoreProps) => {
     useCallback(() => {
       let unsubscribe: () => void = utils.noop;
       if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(() => {
-          if (state.orders_in_progress_cache) {
-            dispatch({
-              type: 'set_stores_orders_in_progress',
-              stores_orders_in_progress: state.orders_in_progress_cache.getSellerOrdersQtyByStore(),
-            });
+        unsubscribe = state.orders_in_progress_cache.onChange(
+          (data: OrdersInProgressCacheData | undefined) => {
+            if (data) {
+              dispatch({
+                type: 'set_stores_orders_in_progress',
+                stores_orders_in_progress: data.orders.reduce<{
+                  [key: string]: number;
+                }>((hash, order) => {
+                  const result = { ...hash };
+                  result[order.transaction.store.id] =
+                    hash[order.transaction.store.id] || 0;
+                  result[order.transaction.store.id]++;
+                  return result;
+                }, {}),
+              });
+            }
           }
-        });
+        );
       }
       return () => {
         unsubscribe();

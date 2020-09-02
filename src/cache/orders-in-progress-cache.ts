@@ -8,29 +8,54 @@ import PersistedCache from './persisted-cache';
 // types
 import { Order, OrderStatus } from '../types';
 
-interface Data {
+export interface OrdersInProgressCacheData {
+  user: string;
   water_mark: string;
   orders: Order[];
 }
 
-export default class OrdersInProgressCache extends PersistedCache<Data> {
+export default class OrdersInProgressCache extends PersistedCache<
+  OrdersInProgressCacheData
+> {
   private user: string;
 
   constructor(user: string) {
     super(`orders-in-progress-user-${user}`);
     this.user = user;
+
+    this.onChange((data) => {
+      if (!data) {
+        console.log('Order in progress cache is empty');
+      } else {
+        console.log(
+          `Order in progres cache: (water mark:${
+            data.water_mark
+          }, orders: [${data.orders.reduce((text, order) => {
+            let entity = 'unknown';
+            if (order.customer.id === this.user) {
+              entity = 'order';
+            }
+            if (order.transaction.store.user === this.user) {
+              entity = 'sale';
+            }
+            return `${text},${entity}-${order.status}`;
+          }, '')}]`
+        );
+      }
+    });
   }
 
   public async sync() {
     await super.load();
     if (!this.data) {
       await this.setData({
+        user: this.user,
         water_mark: sub(new Date(), { days: 15 }).toISOString(),
         orders: [],
       });
     }
 
-    const data = this.data as Data;
+    const data = this.data as OrdersInProgressCacheData;
     let from = 0;
     let total = 0;
     do {
@@ -80,52 +105,10 @@ export default class OrdersInProgressCache extends PersistedCache<Data> {
         order.status === OrderStatus.CREATED ||
         order.status === OrderStatus.CONFIRMED
     );
-    await this.setData({
+    await this.updateData({
+      user: this.user,
       water_mark: mark,
       orders: newOrders,
     });
-  }
-
-  public getClientOrdersQty(): number {
-    return (this.getData()?.orders || []).reduce((qty, order) => {
-      if (order.customer.id === this.user) {
-        return qty + 1;
-      }
-      return qty;
-    }, 0);
-  }
-
-  public getSellerOrdersQty(): number {
-    return (this.getData()?.orders || []).reduce((qty, order) => {
-      if (order.transaction.store.user === this.user) {
-        return qty + 1;
-      }
-      return qty;
-    }, 0);
-  }
-
-  public getSellerOrdersQtyInStore(store: string): number {
-    return (this.getData()?.orders || []).reduce((qty, order) => {
-      if (
-        order.transaction.store.user === this.user &&
-        order.transaction.store.id === store
-      ) {
-        return qty + 1;
-      }
-      return qty;
-    }, 0);
-  }
-
-  public getSellerOrdersQtyByStore(): { [key: string]: number } {
-    return (this.getData()?.orders || []).reduce<{ [key: string]: number }>(
-      (hash, order) => {
-        const result = { ...hash };
-        result[order.transaction.store.id] =
-          hash[order.transaction.store.id] || 0;
-        result[order.transaction.store.id]++;
-        return result;
-      },
-      {}
-    );
   }
 }

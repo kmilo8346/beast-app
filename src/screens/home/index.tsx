@@ -29,7 +29,9 @@ import * as utils from '../../lib/utils';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
-import OrdersInProgressCache from '../../cache/orders-in-progress-cache';
+import OrdersInProgressCache, {
+  OrdersInProgressCacheData,
+} from '../../cache/orders-in-progress-cache';
 // types
 import {
   LoggedUser,
@@ -287,14 +289,21 @@ export default ({ navigation }: ScreenProps) => {
     useCallback(() => {
       let unsubscribe: () => void = utils.noop;
       if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(() => {
-          if (state.orders_in_progress_cache) {
-            dispatch({
-              type: 'set_in_progress_qty',
-              qty: state.orders_in_progress_cache.getClientOrdersQty(),
-            });
+        unsubscribe = state.orders_in_progress_cache.onChange(
+          (data: OrdersInProgressCacheData | undefined) => {
+            if (data) {
+              dispatch({
+                type: 'set_in_progress_qty',
+                qty: data.orders.reduce((qty, order) => {
+                  if (order.customer.id === data.user) {
+                    return qty + 1;
+                  }
+                  return qty;
+                }, 0),
+              });
+            }
           }
-        });
+        );
       }
       return () => {
         unsubscribe();

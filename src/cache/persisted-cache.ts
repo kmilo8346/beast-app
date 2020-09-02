@@ -5,8 +5,6 @@ import Cache from './cache';
 const prefix = '[persisted cache]';
 
 export default class PersistedCache<T> extends Cache<T> {
-  protected data?: T;
-
   private path: string;
 
   constructor(path: string) {
