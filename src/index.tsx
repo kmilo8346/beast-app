@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import io from 'socket.io-client';
 import Constants from 'expo-constants';
 
@@ -18,9 +19,12 @@ import { Order } from './types';
 
 // instances outside component
 const auth = firebase.auth();
+const socket = io(Constants.manifest.extra.BEAST_API_URL);
 
 interface State {
   has_error: boolean;
+  user_id?: string;
+  state: AppStateStatus;
 }
 
 class App extends React.Component<{}, State> {
@@ -30,6 +34,7 @@ class App extends React.Component<{}, State> {
     super(props);
     this.state = {
       has_error: false,
+      state: AppState.currentState,
     };
     this.unsubscribe = utils.noop;
   }
@@ -40,29 +45,40 @@ class App extends React.Component<{}, State> {
   };
 
   componentDidMount() {
-    // socket initialization
-    const socket = io(Constants.manifest.extra.BEAST_API_URL);
-
     this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
+        this.setState({ user_id: authUser.uid });
         deviceAgent.sync({ user_id: authUser.uid });
+      }
+    });
 
+    AppState.addEventListener('change', this.handleAppStateChange);
+  }
+
+  async componentDidUpdate(_prevProps: {}, prevState: State) {
+    const { user_id, state } = this.state;
+
+    if (user_id !== prevState.user_id || state !== prevState.state) {
+      if (user_id && state === 'active') {
+        console.log('syncing in progress cache');
         const orderInProgressCache = await ordersInProgressCacheManager.get(
-          authUser.uid
+          user_id
         );
+        await orderInProgressCache.sync();
 
-        socket.on(authUser.uid, (order: Order) => {
+        socket.on(user_id, (order: Order) => {
           console.log(
-            `New order arrived from socket, id: ${order.id}, status: ${order.status}, current user ${authUser.uid}`
+            `New order arrived from socket, id: ${order.id}, status: ${order.status}, current user ${user_id}`
           );
           orderInProgressCache.add([order]);
         });
       }
-    });
+    }
   }
 
   componentWillUnmount() {
     this.unsubscribe();
+    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
   componentDidCatch = (error: any, errorInfo: any) => {
@@ -72,6 +88,10 @@ class App extends React.Component<{}, State> {
 
   retryHandler = () => {
     this.setState({ has_error: false });
+  };
+
+  handleAppStateChange = (state: AppStateStatus) => {
+    this.setState({ state });
   };
 
   render() {
