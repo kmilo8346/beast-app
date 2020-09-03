@@ -126,6 +126,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       })
     );
   };
+
   const pressSeeRouteHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     Linking.openURL(
@@ -138,27 +139,33 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       })
     );
   };
+
   const pressCallClientHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_contact', contact: true });
   };
+
   const contactCloseHandler = () => {
     dispatch({ type: 'set_contact', contact: false });
   };
+
   const pressGoToStockVerificationHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('StockVerificaton', {
       sale,
     });
   };
+
   const pressExpandHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_collapsed', collapsed: false });
   };
+
   const pressCollapseHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_collapsed', collapsed: true });
   };
+
   const confirm = async () => {
     try {
       loadingOverlayRef.current?.show();
@@ -171,8 +178,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
           id: sale.id,
         },
         body: {
-          provider: {
-            confirmation: sale.provider.confirmation,
+          dispatch_provider: {
+            confirmation: sale.dispatch_provider.confirmation,
           },
         },
       });
@@ -192,6 +199,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       loadingOverlayRef.current?.hide();
     }
   };
+
   const deliver = async () => {
     try {
       loadingOverlayRef.current?.show();
@@ -220,6 +228,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       loadingOverlayRef.current?.hide();
     }
   };
+
   const backToSales = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('MySales', {
@@ -231,18 +240,55 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   // render logic
   const stats = utils.getStats(sale.transaction.shopping_cart);
   // current step status
-  let status: StepStatus = 'finish';
-  if (sale.provider.status === OwnerDispatchStatus.CREATED) {
-    status = 'process';
-    if (
-      sale.provider.confirmation &&
-      sale.provider.confirmation.length >= sale.transaction.shopping_cart.length
+
+  let statusComponent: ReactNode;
+  if (sale.dispatch_provider.status === OwnerDispatchStatus.CANCELLED) {
+    statusComponent = (
+      <View style={{}}>
+        <Text level={3}>Venta cancellada</Text>
+        <View
+          style={{
+            marginLeft: 15,
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderRadius: 5,
+            backgroundColor: colors.redLight3,
+            alignSelf: 'flex-start',
+            marginTop: 7,
+          }}
+        >
+          <Text level={6} color={colors.redLight2}>
+            Sin stock
+          </Text>
+        </View>
+      </View>
+    );
+  } else {
+    let status: StepStatus = 'finish';
+    if (sale.dispatch_provider.status === OwnerDispatchStatus.CREATED) {
+      status = 'process';
+      if (
+        sale.dispatch_provider.confirmation &&
+        sale.dispatch_provider.confirmation.product_confirmations.length >=
+          sale.transaction.shopping_cart.length
+      ) {
+        status = 'finish';
+      }
+    } else if (
+      sale.dispatch_provider.status === OwnerDispatchStatus.CONFIRMED
     ) {
-      status = 'finish';
+      status = 'process';
     }
-  } else if (sale.provider.status === OwnerDispatchStatus.CONFIRMED) {
-    status = 'process';
+    statusComponent = (
+      <Steps
+        current={sale.status}
+        status={status}
+        steps={steps}
+        style={{ marginTop: 10 }}
+      />
+    );
   }
+
   // delivery adddress map image
   const mapImageUrl = utils.createUrl(
     `${Constants.manifest.extra.GOOGLE_MAPS_API_URL}/staticmap`,
@@ -310,8 +356,8 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   // edit confirmation
   let editConfirmationButton = null;
   if (
-    sale.provider.status === OwnerDispatchStatus.CREATED &&
-    sale.provider.confirmation
+    sale.dispatch_provider.status === OwnerDispatchStatus.CREATED &&
+    sale.dispatch_provider.confirmation
   ) {
     editConfirmationButton = (
       <Button
@@ -338,9 +384,11 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   }
   // hash to easy search product confirmations
   const confirmationHash: { [key: string]: ProductConfirmation } = {};
-  (sale.provider.confirmation || []).forEach((productConfirmation) => {
-    confirmationHash[productConfirmation.id] = productConfirmation;
-  });
+  (sale.dispatch_provider.confirmation?.product_confirmations || []).forEach(
+    (pc) => {
+      confirmationHash[pc.id] = pc;
+    }
+  );
 
   // main action
   let mainAction: ReactNode = (
@@ -361,9 +409,10 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     </>
   );
   if (
-    sale.provider.status === OwnerDispatchStatus.CREATED &&
-    sale.provider.confirmation &&
-    sale.provider.confirmation.length >= sale.transaction.shopping_cart.length
+    sale.dispatch_provider.status === OwnerDispatchStatus.CREATED &&
+    sale.dispatch_provider.confirmation &&
+    sale.dispatch_provider.confirmation.product_confirmations.length >=
+      sale.transaction.shopping_cart.length
   ) {
     mainAction = (
       <Button
@@ -372,7 +421,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         onPress={confirm}
       />
     );
-  } else if (sale.provider.status === OwnerDispatchStatus.CONFIRMED) {
+  } else if (sale.dispatch_provider.status === OwnerDispatchStatus.CONFIRMED) {
     mainAction = (
       <Button
         title="¡Listo! entregado"
@@ -380,7 +429,10 @@ export default ({ navigation, route }: SaleDetailsProps) => {
         onPress={deliver}
       />
     );
-  } else if (sale.provider.status === OwnerDispatchStatus.DELIVERED) {
+  } else if (
+    sale.dispatch_provider.status === OwnerDispatchStatus.DELIVERED ||
+    sale.dispatch_provider.status === OwnerDispatchStatus.CANCELLED
+  ) {
     mainAction = null;
   }
   let content: ReactNode | null = null;
@@ -467,12 +519,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       content = (
         <View style={{ flex: 1 }}>
           <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-            <Steps
-              current={sale.status}
-              status={status}
-              steps={steps}
-              style={{ marginTop: 10 }}
-            />
+            {statusComponent}
 
             <View style={{ flexDirection: 'row', marginTop: 20 }}>
               <Touchable onPress={pressImageMapHandler}>
