@@ -56,7 +56,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   }
 
   let distanceText = '';
-  if (sell.provider.status !== OwnerDispatchStatus.DELIVERED) {
+  if (sell.dispatch_provider.status !== OwnerDispatchStatus.DELIVERED) {
     const distance = utils.distance(
       store.delivery_area?.center.geometry.location.lat,
       store.delivery_area.center.geometry.location.lng,

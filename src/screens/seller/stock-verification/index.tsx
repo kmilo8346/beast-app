@@ -7,8 +7,16 @@ import Text from '../../../components/text';
 // local components
 import Item from './components/item';
 import ProgressBar from './components/progress-bar';
+// libs
+import * as utils from '../../../lib/utils';
 // types
-import { Confirmation, Order, ProductConfirmation } from '../../../types';
+import {
+  Confirmation,
+  Order,
+  ProductConfirmation,
+  ConfirmationStatus,
+  ProductConfirmationType,
+} from '../../../types';
 // syles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
@@ -36,34 +44,30 @@ type State = {
   confirmation: Confirmation;
 };
 const reducer = (state: State, action: Action): State => {
-  let found: boolean;
-  let confirmation: Confirmation;
   switch (action.type) {
     case 'toogle_edit':
       return { ...state, editting: !state.editting };
     case 'change_product_confirmation':
-      found = false;
-      confirmation = state.confirmation.map((productConfirmation) => {
-        if (productConfirmation.id === action.productConfirmation.id) {
-          found = true;
-          return action.productConfirmation;
-        }
-        return productConfirmation;
-      });
-      if (!found) {
-        confirmation.push(action.productConfirmation);
-      }
       return {
         ...state,
-        confirmation,
+        confirmation: {
+          ...state.confirmation,
+          product_confirmations: utils.replaceOrAdd(
+            state.confirmation.product_confirmations,
+            action.productConfirmation,
+            (pc1, pc2) => pc1.id === pc2.id
+          ),
+        },
       };
     case 'revert_product_confirmation':
       return {
         ...state,
-        confirmation: state.confirmation.filter(
-          (productConfirmation) =>
-            productConfirmation.id !== action.productConfirmation.id
-        ),
+        confirmation: {
+          ...state.confirmation,
+          product_confirmations: state.confirmation.product_confirmations.filter(
+            (pc) => pc.id !== action.productConfirmation.id
+          ),
+        },
       };
     default:
       return state;
@@ -79,7 +83,10 @@ export default ({ navigation, route }: ScreenProps) => {
   const sale: Order = route.params.sale;
   const [state, dispatch] = useReducer(reducer, {
     editting: false,
-    confirmation: sale.provider.confirmation || [],
+    confirmation: sale.dispatch_provider.confirmation || {
+      status: ConfirmationStatus.FULL_STOCK,
+      product_confirmations: [],
+    },
   });
 
   // preconditions
@@ -90,28 +97,58 @@ export default ({ navigation, route }: ScreenProps) => {
   const pressEditHandler = () => {
     dispatch({ type: 'toogle_edit' });
   };
+
   const changeProductConfirmationHandler = (
     productConfirmation: ProductConfirmation
   ) => {
     dispatch({ type: 'change_product_confirmation', productConfirmation });
   };
+
   const revertProductConfirmationHandler = (
     productConfirmation: ProductConfirmation
   ) => {
     dispatch({ type: 'revert_product_confirmation', productConfirmation });
   };
+
   const pressContinueHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
+    // determining confirmation state
+    const totalInOrder = sale.transaction.shopping_cart.reduce(
+      (total, item) => total + item.qty,
+      0
+    );
+    const totalInConfirmation = state.confirmation.product_confirmations.reduce(
+      (total, pc) => {
+        if (pc.type === ProductConfirmationType.UPDATE) {
+          return total + pc.qty_posible;
+        }
+        return total;
+      },
+      0
+    );
+    let status: ConfirmationStatus = ConfirmationStatus.FULL_STOCK;
+    if (totalInConfirmation <= 0) {
+      status = ConfirmationStatus.OUT_OF_STOCK;
+    } else if (totalInConfirmation >= totalInOrder) {
+      status = ConfirmationStatus.FULL_STOCK;
+    } else {
+      status = ConfirmationStatus.PARTIAL_STOCK;
+    }
+    const confirmation = {
+      ...state.confirmation,
+      status,
+    };
     navigation.navigate('SaleDetails', {
       sale: {
         ...sale,
-        provider: {
-          ...sale.provider,
-          confirmation: state.confirmation,
+        dispatch_provider: {
+          ...sale.dispatch_provider,
+          confirmation,
         },
       },
     });
   };
+
   useLayoutEffect(() => {
     let text = 'Editar';
     if (state.editting) {
@@ -126,8 +163,8 @@ export default ({ navigation, route }: ScreenProps) => {
 
   // render logic
   const hash: { [key: string]: ProductConfirmation } = {};
-  state.confirmation.forEach((productConfirmation) => {
-    hash[productConfirmation.id] = productConfirmation;
+  state.confirmation.product_confirmations.forEach((pc) => {
+    hash[pc.id] = pc;
   });
 
   return (
@@ -158,7 +195,7 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
       >
         <ProgressBar
-          progress={state.confirmation.length}
+          progress={state.confirmation.product_confirmations.length}
           goal={sale.transaction.shopping_cart.length}
           style={{ marginBottom: 10 }}
         />
@@ -176,13 +213,14 @@ export default ({ navigation, route }: ScreenProps) => {
             <Text
               level={4}
               weight="bold"
-            >{`${state.confirmation.length} de ${sale.transaction.shopping_cart.length}`}</Text>
+            >{`${state.confirmation.product_confirmations.length} de ${sale.transaction.shopping_cart.length}`}</Text>
           </View>
 
           <Button
             title="Continuemos"
             disabled={
-              state.confirmation.length < sale.transaction.shopping_cart.length
+              state.confirmation.product_confirmations.length <
+              sale.transaction.shopping_cart.length
             }
             style={globalStyles.withMainActionAir}
             onPress={pressContinueHandler}
