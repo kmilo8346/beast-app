@@ -21,7 +21,7 @@ import PhoneFilledDotsImage from '../../../components/svgs/icons/phone-filled-do
 import RouteBlueImage from '../../../components/svgs/icons/route-blue';
 
 // local components
-import Steps, { Step, StepStatus } from './components/steps';
+import Steps, { Step, StepStatus } from '../../components/steps';
 import Item from './components/item';
 // libs
 import * as utils from '../../../lib/utils';
