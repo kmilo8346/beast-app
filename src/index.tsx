@@ -1,5 +1,4 @@
 import React from 'react';
-import { AppState, AppStateStatus } from 'react-native';
 import io from 'socket.io-client';
 import Constants from 'expo-constants';
 
@@ -18,13 +17,11 @@ import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manag
 import { Order } from './types';
 
 // instances outside component
+const prefix = '[beast]';
 const auth = firebase.auth();
-const socket = io(Constants.manifest.extra.BEAST_API_URL);
 
 interface State {
   has_error: boolean;
-  user_id?: string;
-  state: AppStateStatus;
 }
 
 class App extends React.Component<{}, State> {
@@ -34,7 +31,6 @@ class App extends React.Component<{}, State> {
     super(props);
     this.state = {
       has_error: false,
-      state: AppState.currentState,
     };
     this.unsubscribe = utils.noop;
   }
@@ -47,34 +43,37 @@ class App extends React.Component<{}, State> {
   componentDidMount() {
     this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
-        this.setState({ user_id: authUser.uid });
+        // this.setState({ user_id: authUser.uid });
         deviceAgent.sync({ user_id: authUser.uid });
-      }
-    });
 
-    AppState.addEventListener('change', this.handleAppStateChange);
-  }
+        const socket = io(Constants.manifest.extra.BEAST_API_URL);
+        socket.on('connect', async () => {
+          console.log(`${prefix} Socket client connected`);
+          const orderInProgressCache = await ordersInProgressCacheManager.get(
+            authUser.uid
+          );
+          console.log(`${prefix} Syncing orders for (inProgressCache)`);
+          await orderInProgressCache.sync();
 
-  async componentDidUpdate(_prevProps: {}, prevState: State) {
-    const { user_id, state } = this.state;
+          console.log(
+            `${prefix} Start listening orders changes for user: ${authUser.uid}`
+          );
+          socket.on(authUser.uid, (order: Order) => {
+            orderInProgressCache.add([order]);
+          });
+        });
 
-    if (user_id !== prevState.user_id || state !== prevState.state) {
-      if (user_id && state === 'active') {
-        const orderInProgressCache = await ordersInProgressCacheManager.get(
-          user_id
-        );
-        await orderInProgressCache.sync();
-
-        socket.on(user_id, (order: Order) => {
-          orderInProgressCache.add([order]);
+        socket.on('disconnect', (reason: string) => {
+          console.log(
+            `${prefix} Socket client disconnected, reason: ${reason}`
+          );
         });
       }
-    }
+    });
   }
 
   componentWillUnmount() {
     this.unsubscribe();
-    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
   componentDidCatch = (error: any, errorInfo: any) => {
@@ -84,10 +83,6 @@ class App extends React.Component<{}, State> {
 
   retryHandler = () => {
     this.setState({ has_error: false });
-  };
-
-  handleAppStateChange = (state: AppStateStatus) => {
-    this.setState({ state });
   };
 
   render() {
