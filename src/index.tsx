@@ -1,6 +1,4 @@
 import React from 'react';
-import io from 'socket.io-client';
-import Constants from 'expo-constants';
 
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 
@@ -13,11 +11,8 @@ import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
 // cache
 import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
-// types
-import { Order } from './types';
 
 // instances outside component
-const prefix = '[beast]';
 const auth = firebase.auth();
 
 interface State {
@@ -43,31 +38,12 @@ class App extends React.Component<{}, State> {
   componentDidMount() {
     this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
-        // this.setState({ user_id: authUser.uid });
         deviceAgent.sync({ user_id: authUser.uid });
 
-        const socket = io(Constants.manifest.extra.BEAST_API_URL);
-        socket.on('connect', async () => {
-          console.log(`${prefix} Socket client connected`);
-          const orderInProgressCache = await ordersInProgressCacheManager.get(
-            authUser.uid
-          );
-          console.log(`${prefix} Syncing orders for (inProgressCache)`);
-          await orderInProgressCache.sync();
-
-          console.log(
-            `${prefix} Start listening orders changes for user: ${authUser.uid}`
-          );
-          socket.on(authUser.uid, (order: Order) => {
-            orderInProgressCache.add([order]);
-          });
-        });
-
-        socket.on('disconnect', (reason: string) => {
-          console.log(
-            `${prefix} Socket client disconnected, reason: ${reason}`
-          );
-        });
+        const orderInProgressCache = await ordersInProgressCacheManager.get(
+          authUser.uid
+        );
+        orderInProgressCache.startListening();
       }
     });
   }

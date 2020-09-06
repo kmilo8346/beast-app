@@ -7,7 +7,8 @@
     "web": "expo start --web",
     "eject": "expo eject",
     "format": "prettier --write ./src/**/*.{ts,tsx}",
-    "lint": "eslint --fix ./src/**/*.{ts,tsx}"
+    "lint": "eslint --fix ./src/**/*.{ts,tsx}",
+    "dev": "npm run start"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "2.4.0",
@@ -40,7 +41,6 @@
     "react-native-screens": "~2.9.0",
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
-    "socket.io-client": "^2.3.0",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
@@ -52,7 +52,6 @@
     "@types/qs": "^6.9.4",
     "@types/react": "~16.9.41",
     "@types/react-native": "~0.62.13",
-    "@types/socket.io-client": "^1.4.33",
     "@types/validate.js": "^0.11.0",
     "babel-preset-expo": "^8.2.3",
     "eslint": "^7.2.0",

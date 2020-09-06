@@ -1,12 +1,19 @@
 /* eslint-disable no-await-in-loop */
+import { AppState, AppStateStatus } from 'react-native';
 import sub from 'date-fns/sub';
+import axios, { CancelTokenSource } from 'axios';
 
 // clients
-import orderClient from '../clients/order-client';
+import longPollingOrderClient from '../clients/long-polling/order-client';
+// libs
+import * as utils from '../lib/utils';
 // cache
 import PersistedCache from './persisted-cache';
 // types
 import { Order, OrderStatus } from '../types';
+
+const prefix = '[orders in progress cache]';
+let fetchRequestSource: CancelTokenSource;
 
 export interface OrdersInProgressCacheData {
   user: string;
@@ -19,42 +26,29 @@ export default class OrdersInProgressCache extends PersistedCache<
 > {
   private user: string;
 
+  private listening: boolean;
+
+  private active: boolean;
+
   constructor(user: string) {
     super(`orders-in-progress-user-${user}`);
     this.user = user;
+    this.listening = false;
+    this.active = AppState.currentState === 'active';
+
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
-  public async sync() {
-    await super.load();
-    if (!this.data) {
-      await this.setData({
-        user: this.user,
-        water_mark: sub(new Date(), { days: 15 }).toISOString(),
-        orders: [],
-      });
+  private handleAppStateChange = (state: AppStateStatus) => {
+    this.active = state === 'active';
+    if (this.active) {
+      this.subscribe();
+    } else if (fetchRequestSource) {
+      fetchRequestSource.cancel();
     }
+  };
 
-    const data = this.data as OrdersInProgressCacheData;
-    let from = 0;
-    let total = 0;
-    do {
-      const orders = await orderClient.search({
-        filters: {
-          water_mark: data.water_mark,
-          should_customer: this.user,
-          should_seller: this.user,
-        },
-        from,
-        size: 10,
-        // source: [],
-      });
-      await this.add(orders.hits);
-      from += orders.hits.length;
-      total = orders.total;
-    } while (from < total);
-  }
-
-  public async add(orders: Order[]) {
+  private async add(orders: Order[]) {
     if (!orders.length) {
       return;
     }
@@ -89,5 +83,71 @@ export default class OrdersInProgressCache extends PersistedCache<
       water_mark: mark,
       orders: newOrders,
     });
+  }
+
+  private async subscribe() {
+    try {
+      if (!this.listening || !this.active) {
+        console.log(
+          `${prefix} Cache cant subscribe, listening: ${this.listening}, active: ${this.active}`
+        );
+        return;
+      }
+      if (fetchRequestSource) {
+        fetchRequestSource.cancel();
+      }
+      fetchRequestSource = axios.CancelToken.source();
+      const data = this.data as OrdersInProgressCacheData;
+      console.log(`${prefix} Subscribing for changes in orders...`);
+      const orders = await longPollingOrderClient.subscribe(
+        {
+          filters: {
+            water_mark: data.water_mark,
+            should_customer: this.user,
+            should_seller: this.user,
+          },
+          from: 0,
+          size: 10,
+        },
+        fetchRequestSource.token
+      );
+      if (orders.length) {
+        console.log(`${prefix} There are changes`);
+      }
+      await this.add(orders);
+      this.subscribe();
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        if (error.response && error.response.status !== 502) {
+          console.log(error);
+
+          await utils.sleep(2000);
+        }
+        this.subscribe();
+      }
+    }
+  }
+
+  public async init() {
+    await super.load();
+    if (!this.data) {
+      await this.setData({
+        user: this.user,
+        water_mark: sub(new Date(), { days: 15 }).toISOString(),
+        orders: [],
+      });
+    }
+  }
+
+  public startListening() {
+    this.listening = true;
+    console.log(`${prefix} Cache listening is started, for user ${this.user}`);
+    this.subscribe();
+  }
+
+  public async stopListening() {
+    this.listening = false;
+    AppState.removeEventListener('change', this.handleAppStateChange);
+    console.log(`${prefix} Cache listening is stopped, for user ${this.user}`);
   }
 }
