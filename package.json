@@ -8,7 +8,8 @@
     "eject": "expo eject",
     "format": "prettier --write ./src/**/*.{ts,tsx}",
     "lint": "eslint --fix ./src/**/*.{ts,tsx}",
-    "dev": "npm run start"
+    "dev": "npm run start",
+    "postinstall": "rm -rf node_modules/expo-auth-session/node_modules/expo-random"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "2.4.0",
@@ -22,7 +23,7 @@
     "date-fns": "^2.15.0",
     "dotenv-safe": "^8.2.0",
     "expo": "^38.0.0",
-    "expo-auth-session": "~1.4.0",
+    "expo-auth-session": "^1.5.0",
     "expo-constants": "~9.1.1",
     "expo-crypto": "~8.2.1",
     "expo-image-picker": "~8.3.0",
@@ -41,7 +42,8 @@
     "react-native-screens": "~2.9.0",
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
-    "validate.js": "^0.13.1"
+    "validate.js": "^0.13.1",
+    "expo-random": "~8.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
