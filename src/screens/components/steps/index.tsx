@@ -2,10 +2,10 @@ import React, { ReactNodeArray, ReactNode } from 'react';
 import { View, TextStyle, StyleProp, ViewStyle } from 'react-native';
 
 // components
-import Text from '../../../../../components/text';
-import Icon from '../../../../../components/icon';
+import Text from '../../../components/text';
+import Icon from '../../../components/icon';
 // styles
-import colors from '../../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 // instances outside component
 const prefix = '[steps component]';

@@ -10,6 +10,7 @@ import {
   StoreScreen,
   CheckoutScreen,
   OrdersScreen,
+  OrderDetailsScreen,
 } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
@@ -42,6 +43,11 @@ export default () => {
         name="Orders"
         component={OrdersScreen}
         options={{ title: 'Pedidos' }}
+      />
+      <HomeStack.Screen
+        name="OrderDetails"
+        component={OrderDetailsScreen}
+        options={{ title: 'Detalle de pedido' }}
       />
       <HomeStack.Screen
         name="SignIn"

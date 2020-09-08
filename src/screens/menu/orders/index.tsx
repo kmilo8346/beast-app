@@ -77,10 +77,9 @@ export default ({ navigation, route }: MyOrdersProps) => {
     dispatch({ type: 'change_view', view });
   };
   const pressInProgressItemHandler = (order: Order) => {
-    // navigation.navigate('OrdersDetails', {
-    //   sale: order,
-    // });
-    // TODO: navigate to Order Details Screen
+    navigation.navigate('OrderDetails', {
+      order,
+    });
   };
   useEffect(() => {
     if (isFocused && reload) {

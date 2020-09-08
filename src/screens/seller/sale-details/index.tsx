@@ -21,7 +21,7 @@ import PhoneFilledDotsImage from '../../../components/svgs/icons/phone-filled-do
 import RouteBlueImage from '../../../components/svgs/icons/route-blue';
 
 // local components
-import Steps, { Step, StepStatus } from './components/steps';
+import Steps, { Step, StepStatus } from '../../components/steps';
 import Item from './components/item';
 // libs
 import * as utils from '../../../lib/utils';
@@ -245,7 +245,9 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (sale.dispatch_provider.status === OwnerDispatchStatus.CANCELLED) {
     statusComponent = (
       <View style={{}}>
-        <Text level={3}>Venta cancellada</Text>
+        <Text level={3} color={colors.blackLight2} weight="bold">
+          Venta cancelada
+        </Text>
         <View
           style={{
             marginLeft: 15,
