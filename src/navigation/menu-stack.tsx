@@ -9,6 +9,7 @@ import {
   MenuScreen,
   UpdateAccountScreen,
   OrdersScreen,
+  OrderDetailsScreen,
   HelpScreen,
 } from '../screens';
 // navigation
@@ -33,6 +34,11 @@ export default () => {
         name="Orders"
         component={OrdersScreen}
         options={{ title: 'Pedidos' }}
+      />
+      <MenuStack.Screen
+        name="OrderDetails"
+        component={OrderDetailsScreen}
+        options={{ title: 'Detalle de pedido' }}
       />
       <MenuStack.Screen
         name="Help"

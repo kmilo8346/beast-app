@@ -45,6 +45,27 @@ class DurationFormatter {
     }
     return `Entre ${rowGte} y ${rowLte}`;
   };
+
+  /**
+   * Calculate the duration to finish
+   * if duration <= threshold return threshold
+   * @param start Date
+   * @param maxDuration number in minutes
+   * @param threshold number in minutes
+   * @returns duration string
+   */
+  humanizeDurationToFinish(
+    start: Date,
+    maxDuration: number,
+    threshold: number
+  ): string {
+    const duration =
+      maxDuration -
+      (new Date().getTime() - new Date(start).getTime()) / 1000 / 60;
+    return duration <= threshold
+      ? `menos de ${this.humanizeDuration(threshold)}`
+      : this.humanizeDuration(duration);
+  }
 }
 
 export default new DurationFormatter();

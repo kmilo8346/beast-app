@@ -10,7 +10,11 @@ import DesertImage from '../../../../../components/svgs/images/desert';
 // local components
 import OrderItem from '../order-item';
 // types
-import { Order, SearchResponse } from '../../../../../types';
+import {
+  Order,
+  SearchResponse,
+  OwnerDispatchStatus,
+} from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
 // clients
@@ -87,7 +91,10 @@ export default ({
       {
         filters: {
           customer: user.id,
-          status: ['delivered'],
+          status: [
+            OwnerDispatchStatus.DELIVERED,
+            OwnerDispatchStatus.CANCELLED,
+          ],
         },
         from,
         size,

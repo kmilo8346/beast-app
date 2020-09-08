@@ -245,7 +245,9 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   if (sale.dispatch_provider.status === OwnerDispatchStatus.CANCELLED) {
     statusComponent = (
       <View style={{}}>
-        <Text level={3}>Venta cancellada</Text>
+        <Text level={3} color={colors.blackLight2} weight="bold">
+          Venta cancelada
+        </Text>
         <View
           style={{
             marginLeft: 15,
