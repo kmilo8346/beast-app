@@ -1,6 +1,5 @@
 export default {
-  blue: '#000000',
-  // blue: '#457AFF',
+  blue: '#457AFF',
   blueLight1: '#C7D7FF',
   blueLight2: '#BBCFFF',
   blueLight3: '#D6E2FF',
