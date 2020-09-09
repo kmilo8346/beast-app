@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.8",
+    "version": "1.0.9",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
