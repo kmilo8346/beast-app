@@ -48,7 +48,7 @@ jobs:
 
       - name: Publishing to development channel
         if: github.ref == 'refs/heads/develop'
-        run: expo publish --release-channel development-v1
+        run: expo publish
 
       - name: Publishing to staging channel
         if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
