@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/firedevs-team/beast-app/compare/v1.0.2...v1.0.3) (2020-09-09)
+
+
+### Bug Fixes
+
+* **app:** npm ci with post install bug ([7c8976e](https://github.com/firedevs-team/beast-app/commit/7c8976e9f6289626b91ca2b64c4a46be6b42ba0b))
+
 ### [1.0.2](https://github.com/firedevs-team/beast-app/compare/v1.0.1...v1.0.2) (2020-09-09)
 
 ### 1.0.1 (2020-09-09)
