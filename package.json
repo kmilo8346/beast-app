@@ -1,4 +1,6 @@
 {
+  "name": "beast",
+  "version": "1.0.13",
   "main": "./src/index.tsx",
   "scripts": {
     "start": "expo start",
@@ -9,6 +11,7 @@
     "format": "prettier --write ./src/**/*.{ts,tsx}",
     "lint": "eslint --fix ./src/**/*.{ts,tsx}",
     "dev": "npm run start",
+    "publish": "npx standard-version --release-as patch",
     "postinstall": "rm -rf node_modules/expo-auth-session/node_modules/expo-random"
   },
   "dependencies": {
@@ -60,6 +63,8 @@
     "eslint": "^7.2.0",
     "eslint-config-airbnb-typescript-prettier": "^2.1.1",
     "prettier": "^2.0.5",
+    "standard-version": "^9.0.0",
+    "standard-version-expo": "^1.0.3",
     "typescript": "~3.9.5"
   },
   "private": true
