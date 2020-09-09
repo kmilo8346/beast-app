@@ -32,7 +32,7 @@ jobs:
           echo "${{ secrets.DEVELOPMENT_ENV_VARS }}" >> .env
 
       - name: Creating .env for staging
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && !contains(github.ref, 'refs/tags/')
         run: |
           echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
 
