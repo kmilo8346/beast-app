@@ -19,6 +19,7 @@ const MonserratNormal = require('../assets/fonts/monserrat/normal.ttf');
 const MonserratLight = require('../assets/fonts/monserrat/light.ttf');
 
 // instances outside component
+const prefix = '[beast]';
 const auth = firebase.auth();
 
 interface State {
@@ -36,8 +37,6 @@ class App extends React.Component<{}, State> {
       has_error: false,
     };
     this.unsubscribe = utils.noop;
-    this.appLoadingStartHandler = this.appLoadingStartHandler.bind(this);
-    this.appLoadingFinishHandler = this.appLoadingFinishHandler.bind(this);
   }
 
   static getDerivedStateFromError = () => {
@@ -45,8 +44,7 @@ class App extends React.Component<{}, State> {
     return { has_error: true };
   };
 
-  componentDidMount() {
-    this.cacheFont();
+  componentDidMount = () => {
     this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
         deviceAgent.sync({ user_id: authUser.uid });
@@ -57,11 +55,11 @@ class App extends React.Component<{}, State> {
         orderInProgressCache.startListening();
       }
     });
-  }
+  };
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     this.unsubscribe();
-  }
+  };
 
   componentDidCatch = (error: any, errorInfo: any) => {
     // You can also log the error to an error reporting service
@@ -72,36 +70,39 @@ class App extends React.Component<{}, State> {
     this.setState({ has_error: false });
   };
 
-  async appLoadingStartHandler() {
+  appLoadingStartHandler = async () => {
+    console.info(`${prefix} Preloading assets`);
     this.setState({ is_ready: false });
-    this.cacheFont();
-  }
+    // tasks
+    await this.cacheFont();
+  };
 
-  async appLoadingErrorHandler(error: Error) {
+  appLoadingErrorHandler = (error: Error) => {
     // TODO: manage errors
     console.log(error);
-  }
+  };
 
-  async appLoadingFinishHandler() {
-    this.setState({ is_ready: false });
-  }
+  appLoadingFinishHandler = () => {
+    this.setState({ is_ready: true });
+    console.info(`${prefix}`);
+  };
 
-  async cacheFont() {
-    try {
-      await Font.loadAsync({
-        MonserratBold,
-        MonserratNormal,
-        MonserratLight,
-      });
-    } catch (error) {
-      // font loading cant crash the app
-      console.log(error);
-    }
-  }
+  cacheFont = async () => {
+    await Font.loadAsync({
+      MonserratBold,
+      MonserratNormal,
+      MonserratLight,
+    });
+  };
 
   render() {
     const { has_error, is_ready } = this.state;
-    if (is_ready) {
+
+    if (has_error) {
+      return <ErrorView onRetry={this.retryHandler} />;
+    }
+
+    if (!is_ready) {
       return (
         <AppLoading
           startAsync={this.appLoadingStartHandler}
@@ -109,9 +110,6 @@ class App extends React.Component<{}, State> {
           onError={this.appLoadingErrorHandler}
         />
       );
-    }
-    if (has_error) {
-      return <ErrorView onRetry={this.retryHandler} />;
     }
 
     return <Navigation />;

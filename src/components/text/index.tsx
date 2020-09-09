@@ -49,12 +49,12 @@ export default ({
     default:
       break;
   }
-  const baseSyle: TextStyle = {
+  const baseStyle: TextStyle = {
     fontSize: getFontSize(level),
     color,
     fontFamily,
   };
-  const containerStyle = [baseSyle, style];
+  const containerStyle = [baseStyle, style];
 
   return (
     <Text style={containerStyle} {...otherProps}>
