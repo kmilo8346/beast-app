@@ -3,7 +3,7 @@
     "entryPoint": "./src/index.js",
     "name": "beast-app",
     "slug": "beast-app",
-    "scheme": "beast",
+    "scheme": "beast.app",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",

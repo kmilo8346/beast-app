@@ -1,36 +1,21 @@
 import React, { useEffect, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import {
-  makeRedirectUri,
-  useAuthRequest,
-  useAutoDiscovery,
-  ResponseType,
-  AuthSessionResult,
-  generateHexStringAsync,
-  Prompt,
-} from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
 
 // components
 import Button from '../../../../components/buttons/button';
 import Text from '../../../../components/text';
-import Google from '../../../../components/svgs/icons/google';
+import GoogleIcon from '../../../../components/svgs/icons/google';
 // libs
 import firebase from '../../../../lib/firebase';
 // styles
 import colors from '../../../../styles/colors';
 
 // instances outside component
+const prefix = '[button google component]';
 WebBrowser.maybeCompleteAuthSession();
-const useProxy = Platform.select({ web: false, default: true });
-function useNonce() {
-  const [nonce, setNonce] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    generateHexStringAsync(16).then((value) => setNonce(value));
-  }, []);
-  return nonce;
-}
 
 export interface ButtonGoogleProps {
   onOK?: (credential: firebase.auth.OAuthCredential) => void;
@@ -46,29 +31,26 @@ export default ({
   onFail = () => null,
 }: ButtonGoogleProps) => {
   // state
-  const nonce = useNonce();
-  const discovery = useAutoDiscovery('https://accounts.google.com');
-  const [request, response, promptAsync] = useAuthRequest(
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
     {
-      responseType: ResponseType.IdToken,
-      clientId: Constants.manifest.extra.GOOGLE_AUTH_CLIENT_ID,
-      redirectUri: makeRedirectUri({
-        // For usage in bare and standalone
-        native: Constants.manifest.extra.GOOGLE_AUTH_NATIVE_REDIRECT,
-        useProxy,
-      }),
-      scopes: ['profile', 'email'],
-      extraParams: {
-        nonce: nonce as string,
-      },
-      usePKCE: false,
-      prompt: Prompt.SelectAccount,
+      expoClientId: Constants.manifest.extra.GOOGLE_AUTH_EXPO_CLIENT_ID,
+      webClientId: Constants.manifest.extra.GOOGLE_AUTH_WEB_CLIENT_ID,
+      iosClientId: Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
+      androidClientId: Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
     },
-    discovery
+    {
+      native: 'beast.app:/oauthredirect',
+      useProxy: Platform.select({
+        web: false,
+        // Use the proxy in the Expo client.
+        default:
+          !!Constants.manifest && Constants?.appOwnership !== 'standalone',
+      }),
+    }
   );
 
   // event handlers
-  const responseHandler = (response: AuthSessionResult) => {
+  const responseHandler = (response: any) => {
     switch (response.type) {
       case 'success':
         onOK(
@@ -79,13 +61,17 @@ export default ({
         onFail();
         break;
       default:
-        // ignore other cases
+        console.warn(
+          `${prefix} Response type not mapped, type: ${response.type}`
+        );
         break;
     }
   };
+
   const pressButtonHandler = () => {
-    promptAsync({ useProxy });
+    promptAsync();
   };
+
   useEffect(() => {
     if (response) {
       responseHandler(response);
@@ -101,8 +87,8 @@ export default ({
   return (
     <Button
       title={titleComponent}
-      icon={<Google />}
-      disabled={!request || !nonce}
+      icon={<GoogleIcon />}
+      disabled={!request}
       onPress={pressButtonHandler}
       style={{
         backgroundColor: colors.blackLight7,
