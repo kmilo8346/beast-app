@@ -33,10 +33,10 @@ jobs:
         run: |
           echo "${{ secrets.DEVELOPMENT_ENV_VARS }}" >> .env
 
-      # - name: Creating .env for staging
-      #   if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
-      #   run: |
-      #     echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
+      - name: Creating .env for staging
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
 
       - name: Creating .env for production
         if: contains(github.ref, 'refs/tags/')
