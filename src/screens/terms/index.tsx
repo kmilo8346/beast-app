@@ -43,7 +43,7 @@ export default ({ navigation }: ScreenProps) => {
       <View style={{ alignItems: 'center', marginTop: '30%' }}>
         <SignedDocumentBlue />
         <View style={{ height: 20 }} />
-        <Text level={5} weight="200" style={{ lineHeight: 30 }}>
+        <Text level={5} weight="light" style={{ lineHeight: 30 }}>
           Al continuar, estás aceptando los
         </Text>
         <Button
