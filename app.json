@@ -1,11 +1,12 @@
 {
   "expo": {
     "entryPoint": "./src/index.js",
-    "name": "beast-app",
-    "slug": "beast-app",
+    "name": "Beast",
+    "slug": "beast",
     "scheme": "beast.app",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
+    "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -18,7 +19,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
       "buildNumber": "1.0.0"
     },
