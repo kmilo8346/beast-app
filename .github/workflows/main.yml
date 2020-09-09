@@ -16,17 +16,17 @@ jobs:
       - name: Cloning code
         uses: actions/checkout@v2
 
-      # - name: Installing node js
-      #   uses: actions/setup-node@v1
-      #   with:
-      #     node-version: 12.x
+      - name: Installing node js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
-      # - name: Installing expo cli
-      #   uses: expo/expo-github-action@v5
-      #   with:
-      #     expo-version: 3.x
-      #     expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
-      #     expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
+      - name: Installing expo cli
+        uses: expo/expo-github-action@v5
+        with:
+          expo-version: 3.x
+          expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+          expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
 
       - name: Creating .env for development
         if: github.ref == 'refs/heads/develop'
@@ -42,12 +42,18 @@ jobs:
         if: contains(github.ref, 'refs/tags/')
         run: |
           echo "${{ secrets.PRODUCTION_ENV_VARS }}" >> .env
-      # if: contains(github.ref, 'refs/tags/') && github.ref == 'refs/heads/master'
-      # - name: Installing dependencies
-      #   run: npm ci
-      # - name: Publishing to development channel
-      #   if: github.ref == 'refs/heads/develop'
-      #   run: expo publish --release-channel development-v1
-      # - name: Publishing to staging channel
-      #   if: github.ref == 'refs/heads/master'
-      #   run: expo publish --release-channel staging-v1
+
+      - name: Installing dependencies
+        run: npm ci
+
+      - name: Publishing to development channel
+        if: github.ref == 'refs/heads/develop'
+        run: expo publish --release-channel development-v1
+
+      - name: Publishing to staging channel
+        if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
+        run: expo publish --release-channel staging-v1
+
+      - name: Publishing to production channel
+        if: contains(github.ref, 'refs/tags/')
+        run: expo publish --release-channel production-alpha-v1
