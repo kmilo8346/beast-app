@@ -26,18 +26,7 @@ const getFontSize = (level: number): number => {
 
 export interface TextProps extends RNTextProps {
   level?: 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1;
-  weight?:
-    | 'normal'
-    | 'bold'
-    | '100'
-    | '200'
-    | '300'
-    | '400'
-    | '500'
-    | '600'
-    | '700'
-    | '800'
-    | '900';
+  weight?: 'bold' | 'normal' | 'light';
   color?: string;
   children: ReactNode;
 }
@@ -49,10 +38,21 @@ export default ({
   color = colors.black,
   ...otherProps
 }: TextProps) => {
+  let fontFamily = 'MonserratNormal';
+  switch (weight) {
+    case 'bold':
+      fontFamily = 'MonserratBold';
+      break;
+    case 'light':
+      fontFamily = 'MonserratLight';
+      break;
+    default:
+      break;
+  }
   const baseSyle: TextStyle = {
     fontSize: getFontSize(level),
-    fontWeight: weight,
     color,
+    fontFamily,
   };
   const containerStyle = [baseSyle, style];
 

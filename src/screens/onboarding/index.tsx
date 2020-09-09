@@ -39,7 +39,7 @@ export default ({ navigation }: ScreenProps) => {
       ]}
     >
       <UsersWithLogo />
-      <Text level={5} weight="200" style={{ marginTop: 30, lineHeight: 23 }}>
+      <Text level={5} weight="light" style={{ marginTop: 30, lineHeight: 23 }}>
         Comprar y vender{' '}
         <Text level={5} weight="bold">
           gratis

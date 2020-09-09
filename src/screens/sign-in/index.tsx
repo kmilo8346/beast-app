@@ -395,7 +395,7 @@ export default ({ navigation, route }: ScreenProps) => {
       <Text level={1} weight="bold" style={{ marginBottom: 15, marginTop: 10 }}>
         !Bienvenido!
       </Text>
-      <Text level={5} weight="200" style={{ marginBottom: 50 }}>
+      <Text level={5} weight="light" style={{ marginBottom: 50 }}>
         Inicia sesión con tus redes sociales
       </Text>
       <View style={{ marginBottom: 25 }} />

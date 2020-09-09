@@ -211,7 +211,7 @@ export default ({ navigation }: ScreenProps) => {
     text = (
       <Text
         level={4}
-        weight="200"
+        weight="light"
         style={{ marginBottom: 40, marginTop: 20, lineHeight: 25 }}
       >
         Para ofrecerte una mejor búsqueda de comercios cerca de ti.
