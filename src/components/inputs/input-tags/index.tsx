@@ -43,7 +43,8 @@ export default ({
     // clear
     setTag('');
   };
-  const deleteTag = (tag: string) => {
+  const deleteTagHandler = (event: GestureResponderEvent, tag: string) => {
+    event.stopPropagation();
     onChange(value.filter((i: string) => i !== tag));
   };
 
@@ -61,9 +62,7 @@ export default ({
           minHeight: 23,
           justifyContent: 'center',
           alignItems: 'center',
-          position: 'relative',
-          top: 12,
-          right: 15,
+          alignSelf: 'flex-end',
         }}
         onPress={addTagHandler}
       >
@@ -73,28 +72,18 @@ export default ({
       </Touchable>
     );
   }
-
   return (
     <View>
-      <View
-        style={{
-          flexDirection: 'row',
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Input
-            label={label}
-            placeholder={placeHolder}
-            value={tag}
-            errors={errors}
-            clearButtonMode="never"
-            suffix={add}
-            style={{ marginBottom: -20 }}
-            // suffixStyle={{ minHeight: 30, minWidth: 65, marginTop: 8 }}
-            onChangeText={changeTagHandler}
-          />
-        </View>
-      </View>
+      <Input
+        label={label}
+        placeholder={placeHolder}
+        value={tag}
+        errors={errors}
+        clearButtonMode="never"
+        suffix={add}
+        containerStyle={{ justifyContent: 'center' }}
+        onChangeText={changeTagHandler}
+      />
       <View
         style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 30 }}
       >
@@ -112,7 +101,8 @@ export default ({
                 borderStyle: 'solid',
                 borderWidth: 1,
                 borderRadius: 4,
-                marginTop: 5,
+                marginTop: -25,
+                maxHeight: 20,
                 marginRight: 5,
               }}
             >
@@ -126,11 +116,7 @@ export default ({
                   padding: 2,
                   marginLeft: 5,
                 }}
-                onPress={(event) => {
-                  event.stopPropagation();
-
-                  deleteTag(tag);
-                }}
+                onPress={(event) => deleteTagHandler(event, tag)}
               />
             </View>
           );

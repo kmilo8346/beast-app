@@ -253,7 +253,10 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
-      <ScrollView style={[globalStyles.withPadding, { flex: 1 }]}>
+      <ScrollView
+        style={[globalStyles.withPadding, { flex: 1 }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View
           style={{
             flexDirection: 'row',
@@ -294,7 +297,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
           path={`beast/stores/${store.reference}/products/${
             product?.reference || state.form.reference
-          }/\${}`}
+            }/\${}`}
           value={state.form.product?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {
