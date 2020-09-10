@@ -324,7 +324,7 @@ export default ({ navigation }: ScreenProps) => {
             justifyContent: 'center',
             alignItems: 'center',
           },
-          globalStyles.withMargin,
+          globalStyles.withPadding,
         ]}
       >
         <ErrorView />
