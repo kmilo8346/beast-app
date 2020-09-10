@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.14](https://github.com/firedevs-team/beast-app/compare/v1.0.13...v1.0.14) (2020-09-10)
+
+
+### Bug Fixes
+
+* **input-tag:** fix click event handling ([71a6e44](https://github.com/firedevs-team/beast-app/commit/71a6e4423be852f0174d02ec34d1854902ef54d0))
+* **input-tag:** fix click event handling ([18c629b](https://github.com/firedevs-team/beast-app/commit/18c629b7af22408ecd42d7a2adc3be36d44a98e0))
+* **screen component:** error ([7f75965](https://github.com/firedevs-team/beast-app/commit/7f7596516f0f68403a7c1896207fa07b4e6391e2))
+
 ### [1.0.13](https://github.com/firedevs-team/beast-app/compare/v1.0.12...v1.0.13) (2020-09-09)
 
 ### [1.0.12](https://github.com/firedevs-team/beast-app/compare/v1.0.11...v1.0.12) (2020-09-09)
