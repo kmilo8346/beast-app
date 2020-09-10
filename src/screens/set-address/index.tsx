@@ -234,9 +234,20 @@ export default ({ navigation }: ScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-        <View style={{ flexDirection: 'row', marginTop: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            marginTop: 20,
+          }}
+        >
           <MapPinShadedBlue />
-          <Text level={1} weight="bold" style={{ marginLeft: 10 }}>
+          <Text
+            level={2}
+            weight="bold"
+            style={{ marginLeft: 10, letterSpacing: -1 }}
+          >
             Agrega tu dirección
           </Text>
         </View>

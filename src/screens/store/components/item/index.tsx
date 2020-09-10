@@ -87,7 +87,10 @@ export default ({ data }: ComponentProps) => {
     numberInput = <NumberInput value={qty} onChange={changeHandler} />;
   }
   return (
-    <Touchable style={{ flexDirection: 'row' }} onPress={pressItemHandler}>
+    <Touchable
+      style={{ flexDirection: 'row', paddingLeft: 6 }}
+      onPress={pressItemHandler}
+    >
       <View style={{ position: 'relative' }}>
         <Image
           source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
