@@ -3,14 +3,13 @@ name: Publish to Expo CDN
 on:
   push:
     branches:
-      - develop
       - master
     tags:
       - '*'
 
 jobs:
-  Publishing:
-    name: Publish
+  Publish:
+    name: Publishing
     runs-on: ubuntu-latest
     steps:
       - name: Cloning code
@@ -28,11 +27,6 @@ jobs:
           expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
           expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
 
-      - name: Creating .env for development
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          echo "${{ secrets.DEVELOPMENT_ENV_VARS }}" >> .env
-
       - name: Creating .env for staging
         if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
         run: |
@@ -46,14 +40,10 @@ jobs:
       - name: Installing dependencies
         run: npm ci
 
-      - name: Publishing to development channel
-        if: github.ref == 'refs/heads/develop'
-        run: expo publish
-
       - name: Publishing to staging channel
         if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
-        run: expo publish --release-channel staging-v1
+        run: expo publish
 
       - name: Publishing to production channel
         if: contains(github.ref, 'refs/tags/')
-        run: expo publish --release-channel production-alpha-v1
+        run: expo publish --release-channel production-internal-v1

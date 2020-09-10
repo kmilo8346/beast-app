@@ -34,7 +34,6 @@ export default ({
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
     {
       expoClientId: Constants.manifest.extra.GOOGLE_AUTH_EXPO_CLIENT_ID,
-      webClientId: Constants.manifest.extra.GOOGLE_AUTH_WEB_CLIENT_ID,
       iosClientId: Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
       androidClientId: Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
     },
