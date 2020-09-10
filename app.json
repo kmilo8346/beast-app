@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.15",
+    "version": "1.0.16",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +31,7 @@
     },
     "android": {
       "package": "com.firedevs.beast",
-      "versionCode": 2,
+      "versionCode": 4,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
