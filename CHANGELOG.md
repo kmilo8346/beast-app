@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.17](https://github.com/firedevs-team/beast-app/compare/v1.0.16...v1.0.17) (2020-09-11)
+
+
+### Bug Fixes
+
+* **menu:** changin fingerprint ([6aefdf4](https://github.com/firedevs-team/beast-app/commit/6aefdf46b05fa9a82904c42844e5ecea7199c98c))
+* **minor fixes badget position/set-address title/onboarding text:** fix ([9dfa0d5](https://github.com/firedevs-team/beast-app/commit/9dfa0d51198684a23abb0fca8ee22c6f265653e1))
+
 ### [1.0.16](https://github.com/firedevs-team/beast-app/compare/v1.0.15...v1.0.16) (2020-09-10)
 
 ### [1.0.15](https://github.com/firedevs-team/beast-app/compare/v1.0.14...v1.0.15) (2020-09-10)
