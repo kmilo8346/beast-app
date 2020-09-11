@@ -4,11 +4,7 @@
     "name": "Beast",
     "slug": "beast",
     "scheme": "beast.app",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.19",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
@@ -31,7 +25,8 @@
     },
     "android": {
       "package": "com.firedevs.beast",
-      "versionCode": 6,
+      "versionCode": 7,
+      "icon": "./assets/icon-android.png",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
