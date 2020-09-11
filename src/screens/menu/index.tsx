@@ -345,8 +345,10 @@ export default ({ navigation }: MenuProps) => {
           <Text
             level={7}
             style={{ marginBottom: 5 }}
+          >{`Usuario ${user.id}`}</Text>
+          <Text
+            level={7}
           >{`Commit ${Constants.manifest.extra.GITHUB_SHA}`}</Text>
-          <Text level={7}>{`Usuario ${user.id}`}</Text>
         </View>
       );
       break;
