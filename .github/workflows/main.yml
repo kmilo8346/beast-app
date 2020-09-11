@@ -53,4 +53,4 @@ jobs:
 
       - name: Publishing to production channel
         if: contains(github.ref, 'refs/tags/')
-        run: expo publish --release-channel production-internal-v1
+        run: expo publish --release-channel production-v1
