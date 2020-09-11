@@ -27,15 +27,25 @@ jobs:
       #     expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
       #     expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
 
-      - name: Creating .env for staging
-        if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
+      # - name: Creating .env for staging
+      #   if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
+      #   run: |
+      #     echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
 
-      - name: Creating .env for production
-        if: contains(github.ref, 'refs/tags/')
+      # - name: Creating .env for production
+      #   if: contains(github.ref, 'refs/tags/')
+      #   run: |
+      #     echo "${{ secrets.PRODUCTION_ENV_VARS }}" >> .env
+
+      - name: Publishing to production channel
+        if: contains(github.ref, 'refs/tags/v')
         run: |
-          echo "${{ secrets.PRODUCTION_ENV_VARS }}" >> .env
+          echo "production channel"
+
+      - name: Publishing new build
+        if: contains(github.ref, 'refs/tags/b')
+        run: |
+          echo "new build"
       # - name: Adding github variables to .env
       #   run: |
       #     echo ""
