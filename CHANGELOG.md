@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.25](https://github.com/firedevs-team/beast-app/compare/b1.0.24...b1.0.25) (2020-09-11)
+
 ### 1.0.24 (2020-09-11)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "beast",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "main": "./src/index.tsx",
   "scripts": {
     "start": "expo start",
@@ -11,7 +11,7 @@
     "format": "prettier --write ./src/**/*.{ts,tsx}",
     "lint": "eslint --fix ./src/**/*.{ts,tsx}",
     "dev": "npm run start",
-    "bump": "npx standard-version -t b --release-as patch && git push --follow-tags origin master",
+    "release": "npx standard-version -t b --release-as patch && git push --follow-tags origin master",
     "postinstall": "rm -rf node_modules/expo-auth-session/node_modules/expo-random"
   },
   "dependencies": {
