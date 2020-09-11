@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../components/text';
@@ -322,6 +323,53 @@ export default ({ navigation }: MenuProps) => {
       />
     );
   }
+  let fingerprint: ReactNode | null = null;
+  console.log();
+  switch (Constants.manifest.extra.BEAST_ENVIRONMENT) {
+    case 'development':
+      fingerprint = (
+        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+          <Text level={7} style={{ marginBottom: 5 }}>
+            Development
+          </Text>
+          <Text level={7}>{`Usuario ${user.id}`}</Text>
+        </View>
+      );
+      break;
+    case 'staging':
+      fingerprint = (
+        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+          <Text level={7} style={{ marginBottom: 5 }}>
+            Staging
+          </Text>
+          <Text
+            level={7}
+            style={{ marginBottom: 5 }}
+          >{`Commit ${Constants.manifest.extra.GITHUB_SHA}`}</Text>
+          <Text level={7}>{`Usuario ${user.id}`}</Text>
+        </View>
+      );
+      break;
+    case 'production':
+      fingerprint = (
+        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+          <Text
+            level={7}
+            style={{ marginBottom: 5 }}
+          >{`Versión ${Constants.nativeAppVersion} (${Constants.nativeBuildVersion})`}</Text>
+          <Text level={7}>
+            Creado con ❤ por{' '}
+            <Text level={7} weight="bold">
+              firedevs
+            </Text>
+          </Text>
+        </View>
+      );
+      break;
+
+    default:
+      break;
+  }
 
   return (
     <View
@@ -354,6 +402,7 @@ export default ({ navigation }: MenuProps) => {
         ]}
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
+        {fingerprint}
         {mainAction}
       </View>
 
