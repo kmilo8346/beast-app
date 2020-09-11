@@ -7,3 +7,8 @@ Android
 IOS
 1-incrementar app.json/ios/buildNumber
 2-ENV_PATH=.env.production expo build:ios -t archive --release-channel production-v1
+
+
+
+TODO: add to CI CD
+Publishing binary to production channel
