@@ -1,0 +1,9 @@
+Build standalone
+
+Android
+1-incrementar app.json/android/versionCode
+2-ENV_PATH=.env.production expo build:android -t apk --release-channel production-v1
+
+IOS
+1-incrementar app.json/ios/buildNumber
+2-ENV_PATH=.env.production expo build:ios -t archive --release-channel production-v1

@@ -4,11 +4,7 @@
     "name": "Beast",
     "slug": "beast",
     "scheme": "beast.app",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.18",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,13 +17,11 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.1"
     },
     "android": {
       "package": "com.firedevs.beast",
