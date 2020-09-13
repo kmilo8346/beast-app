@@ -103,7 +103,7 @@ export default ({ route }: OrderDetailsProps) => {
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
-  const pressCallClientHandler = (event: GestureResponderEvent) => {
+  const pressCallStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_contact', contact: true });
   };
@@ -156,7 +156,7 @@ export default ({ route }: OrderDetailsProps) => {
       if (
         order.dispatch_provider.confirmation &&
         order.dispatch_provider.confirmation.product_confirmations.length >=
-          order.transaction.shopping_cart.length
+        order.transaction.shopping_cart.length
       ) {
         status = 'finish';
       }
@@ -327,7 +327,7 @@ export default ({ route }: OrderDetailsProps) => {
               alignItems: 'center',
               marginTop: 20,
             }}
-            onPress={pressCallClientHandler}
+            onPress={pressCallStoreHandler}
           >
             <PhoneFilledDotsIcon />
             <Text
@@ -430,7 +430,7 @@ export default ({ route }: OrderDetailsProps) => {
       <LoadingOverlay ref={loadingOverlayRef} />
       {state.contact && (
         <ActionSheetContact
-          phone={order.customer.phone}
+          phone={order.transaction.store.phone}
           onRequestClose={contactCloseHandler}
         />
       )}
