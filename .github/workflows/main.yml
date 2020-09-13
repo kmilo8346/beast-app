@@ -12,51 +12,45 @@ jobs:
     name: Publishing
     runs-on: ubuntu-latest
     steps:
-      # - name: Cloning code
-      #   uses: actions/checkout@v2
+      - name: Cloning code
+        uses: actions/checkout@v2
 
-      # - name: Installing node js
-      #   uses: actions/setup-node@v1
-      #   with:
-      #     node-version: 12.x
+      - name: Installing node js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
-      # - name: Installing expo cli
-      #   uses: expo/expo-github-action@v5
-      #   with:
-      #     expo-version: 3.x
-      #     expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
-      #     expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
+      - name: Installing expo cli
+        uses: expo/expo-github-action@v5
+        with:
+          expo-version: 3.x
+          expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+          expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
 
-      # - name: Creating .env for staging
-      #   if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
-      #   run: |
-      #     echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
+      - name: Creating .env for staging
+        if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
 
-      # - name: Creating .env for production
-      #   if: contains(github.ref, 'refs/tags/')
-      #   run: |
-      #     echo "${{ secrets.PRODUCTION_ENV_VARS }}" >> .env
+      - name: Creating .env for production
+        if: contains(github.ref, 'refs/tags/')
+        run: |
+          echo "${{ secrets.PRODUCTION_ENV_VARS }}" >> .env
+
+      - name: Adding github variables to .env
+        run: |
+          echo ""
+          echo "# CI CD"
+          echo "GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER}" >> .env
+          echo "GITHUB_SHA=${GITHUB_SHA}" >> .env
+
+      - name: Installing dependencies
+        run: npm ci
+
+      - name: Publishing to staging channel
+        if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
+        run: expo publish
 
       - name: Publishing to production channel
-        if: contains(github.ref, 'refs/tags/v')
-        run: |
-          echo "production channel"
-
-      - name: Publishing new build
-        if: contains(github.ref, 'refs/tags/b')
-        run: |
-          echo "new build"
-      # - name: Adding github variables to .env
-      #   run: |
-      #     echo ""
-      #     echo "# CI CD"
-      #     echo "GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER}" >> .env
-      #     echo "GITHUB_SHA=${GITHUB_SHA}" >> .env
-      # - name: Installing dependencies
-      #   run: npm ci
-      # - name: Publishing to staging channel
-      #   if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
-      #   run: expo publish
-      # - name: Publishing to production channel
-      #   if: contains(github.ref, 'refs/tags/')
-      #   run: expo publish --release-channel production-v1
+        if: contains(github.ref, 'refs/tags/')
+        run: expo publish --release-channel production-v1
