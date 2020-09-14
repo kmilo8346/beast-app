@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.28](https://github.com/firedevs-team/beast-app/compare/v1.0.27...v1.0.28) (2020-09-14)
+
+
+### Bug Fixes
+
+* **app json:** removing ios facebook redirect schema ([b57b24a](https://github.com/firedevs-team/beast-app/commit/b57b24a7729c75e3802e53ff9ed8f71ab0291354))
+
 ### [1.0.27](https://github.com/firedevs-team/beast-app/compare/v1.0.26...v1.0.27) (2020-09-14)
 
 
