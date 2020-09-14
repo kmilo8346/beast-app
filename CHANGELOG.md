@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.27](https://github.com/firedevs-team/beast-app/compare/v1.0.26...v1.0.27) (2020-09-14)
+
+
+### Bug Fixes
+
+* **button google:** changing label ([7c0d0a8](https://github.com/firedevs-team/beast-app/commit/7c0d0a814e72887ba5fc4e0f84988ce82cd6e0cc))
+
 ### [1.0.26](https://github.com/firedevs-team/beast-app/compare/v1.0.23...v1.0.26) (2020-09-14)
 
 
