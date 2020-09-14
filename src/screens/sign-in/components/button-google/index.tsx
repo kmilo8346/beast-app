@@ -60,7 +60,7 @@ export default ({ onOK = () => null }: ButtonGoogleProps) => {
   // render logic
   const titleComponent: ReactNode = (
     <Text level={5} weight="normal" color={colors.blackLight1}>
-      Ingresar con Google v2
+      Ingresar con Google
     </Text>
   );
   return (
