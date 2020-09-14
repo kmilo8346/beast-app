@@ -11,8 +11,7 @@
     "format": "prettier --write ./src/**/*.{ts,tsx}",
     "lint": "eslint --fix ./src/**/*.{ts,tsx}",
     "dev": "npm run start",
-    "release": "npx standard-version -t v --release-as patch && git push --follow-tags origin master",
-    "postinstall": "rm -rf node_modules/expo-auth-session/node_modules/expo-random"
+    "release": "npx standard-version -t v --release-as patch && git push --follow-tags origin master"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "2.4.0",
@@ -26,11 +25,14 @@
     "date-fns": "^2.15.0",
     "dotenv-safe": "^8.2.0",
     "expo": "^38.0.0",
-    "expo-auth-session": "^1.5.0",
     "expo-constants": "~9.1.1",
     "expo-crypto": "~8.2.1",
+    "expo-facebook": "~8.2.1",
+    "expo-font": "~8.2.1",
+    "expo-google-app-auth": "^8.1.2",
     "expo-image-picker": "~8.3.0",
     "expo-notifications": "~0.3.3",
+    "expo-random": "~8.2.1",
     "expo-web-browser": "~8.3.1",
     "firebase": "7.9.0",
     "form-data": "^3.0.0",
@@ -45,9 +47,7 @@
     "react-native-screens": "~2.9.0",
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
-    "validate.js": "^0.13.1",
-    "expo-font": "~8.2.1",
-    "expo-random": "~8.2.1"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

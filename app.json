@@ -1,14 +1,10 @@
 {
   "expo": {
     "entryPoint": "./src/index.js",
-    "name": "Beast",
+    "name": "Shop Shop",
     "slug": "beast",
-    "scheme": "beast.app",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "scheme": "beast",
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.25",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,17 +17,20 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.2"
+      "buildNumber": "1.0.3",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "525584270888-rjkb70j65davl37cbp36pn71rdjkl9m6.apps.googleusercontent.com"
+        }
+      }
     },
     "android": {
       "package": "com.firedevs.beast",
-      "versionCode": 7,
+      "versionCode": 8,
       "icon": "./assets/icon-android.png",
       "permissions": [
         "CAMERA",
@@ -40,6 +39,8 @@
         "WRITE_EXTERNAL_STORAGE"
       ]
     },
-    "facebookScheme": "fb587498002202284"
+    "facebookScheme": "fb587498002202284",
+    "facebookAppId": "587498002202284",
+    "facebookDisplayName": "Shop Shop"
   }
 }

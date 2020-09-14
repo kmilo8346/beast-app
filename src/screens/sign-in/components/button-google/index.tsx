@@ -1,7 +1,6 @@
-import React, { useEffect, ReactNode } from 'react';
-import { Platform } from 'react-native';
+import React, { ReactNode } from 'react';
+import * as Google from 'expo-google-app-auth';
 import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
 
 // components
@@ -19,76 +18,56 @@ WebBrowser.maybeCompleteAuthSession();
 
 export interface ButtonGoogleProps {
   onOK?: (credential: firebase.auth.OAuthCredential) => void;
-  onFail?: () => void;
 }
 
 /**
  * @site https://github.com/expo/expo/issues/8185
  * @site https://github.com/firebase/FirebaseUI-Android/issues/1180
  */
-export default ({
-  onOK = () => null,
-  onFail = () => null,
-}: ButtonGoogleProps) => {
-  // state
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest(
-    {
-      expoClientId: Constants.manifest.extra.GOOGLE_AUTH_EXPO_CLIENT_ID,
-      iosClientId: Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
-      androidClientId: Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
-    },
-    {
-      native: 'beast.app:/oauthredirect',
-      useProxy: Platform.select({
-        web: false,
-        // Use the proxy in the Expo client.
-        default:
-          !!Constants.manifest && Constants?.appOwnership !== 'standalone',
-      }),
-    }
-  );
+export default ({ onOK = () => null }: ButtonGoogleProps) => {
+  // expoClientId: Constants.manifest.extra.GOOGLE_AUTH_EXPO_CLIENT_ID,
+  // iosClientId: Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
+  // androidClientId: Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
 
   // event handlers
-  const responseHandler = (response: any) => {
-    switch (response.type) {
-      case 'success':
-        onOK(
-          firebase.auth.GoogleAuthProvider.credential(response.params.id_token)
-        );
-        break;
-      case 'error':
-        onFail();
-        break;
-      default:
-        console.warn(
-          `${prefix} Response type not mapped, type: ${response.type}`
-        );
-        break;
+  const login = async () => {
+    try {
+      const result = await Google.logInAsync({
+        androidClientId:
+          Constants.manifest.extra.GOOGLE_AUTH_ANDROID_DEVELOPMENT_CLIENT_ID,
+        iosClientId:
+          Constants.manifest.extra.GOOGLE_AUTH_IOS_DEVELOPMENT_CLIENT_ID,
+        androidStandaloneAppClientId:
+          Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
+        iosStandaloneAppClientId:
+          Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
+        scopes: ['profile', 'email'],
+      });
+
+      if (result.type === 'success') {
+        onOK(firebase.auth.GoogleAuthProvider.credential(result.idToken));
+      }
+    } catch (error) {
+      // TODO: manage error
+      console.log(`${prefix}`, error);
     }
   };
 
-  const pressButtonHandler = () => {
-    promptAsync();
+  const pressHandler = () => {
+    login();
   };
-
-  useEffect(() => {
-    if (response) {
-      responseHandler(response);
-    }
-  }, [response]);
 
   // render logic
   const titleComponent: ReactNode = (
     <Text level={5} weight="normal" color={colors.blackLight1}>
-      Ingresar con Google
+      Ingresar con Google v2
     </Text>
   );
   return (
     <Button
       title={titleComponent}
       icon={<GoogleIcon />}
-      disabled={!request}
-      onPress={pressButtonHandler}
+      onPress={pressHandler}
       style={{
         backgroundColor: colors.blackLight7,
         borderWidth: 0,

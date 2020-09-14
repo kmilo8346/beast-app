@@ -203,7 +203,6 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'show_loading' });
       const prevAuthUser = auth.currentUser;
       const prevUser = userCache.getData();
-
       const result = await auth.signInWithCredential(credential);
       if (!result.user) {
         throw new Error(
@@ -301,10 +300,6 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
-  const signInFailHandler = () => {
-    dispatch({ type: 'show_error' });
-  };
-
   const pressEnterAsGuestHandler = () => {
     navigation.replace('SetAddress');
   };
@@ -334,7 +329,6 @@ export default ({ navigation, route }: ScreenProps) => {
             onOK={(credential) => {
               signInOkHandler(credential, state.linkFormInfo?.credentialToLink);
             }}
-            onFail={signInFailHandler}
           />
         );
         break;
@@ -344,7 +338,6 @@ export default ({ navigation, route }: ScreenProps) => {
             onOK={(credential) => {
               signInOkHandler(credential, state.linkFormInfo?.credentialToLink);
             }}
-            onFail={signInFailHandler}
           />
         );
         break;
@@ -399,9 +392,9 @@ export default ({ navigation, route }: ScreenProps) => {
         Inicia sesión con tus redes sociales
       </Text>
       <View style={{ marginBottom: 25 }} />
-      <ButtonGoogle onOK={signInOkHandler} onFail={signInFailHandler} />
+      <ButtonGoogle onOK={signInOkHandler} />
       <View style={{ marginBottom: 15 }} />
-      <ButtonFacebook onOK={signInOkHandler} onFail={signInFailHandler} />
+      <ButtonFacebook onOK={signInOkHandler} />
       <View style={{ flex: 1 }} />
       {guestButton}
     </View>
