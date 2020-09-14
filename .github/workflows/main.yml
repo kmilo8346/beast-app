@@ -11,6 +11,7 @@ jobs:
   Publish:
     name: Publishing
     runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/tags/') == false && github.ref == 'refs/heads/master'
     steps:
       - name: Cloning code
         uses: actions/checkout@v2
