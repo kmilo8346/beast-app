@@ -420,7 +420,10 @@ export default ({ navigation }: ScreenProps) => {
       />
 
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
+        <Toast
+          ref={toastRef}
+          containerStyle={[{ marginBottom: 10 }, globalStyles.withMargin]}
+        />
         {inProgressComponent}
       </View>
     </View>

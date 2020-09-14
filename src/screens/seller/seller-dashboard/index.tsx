@@ -239,7 +239,7 @@ export default ({ navigation }: ScreenProps) => {
             </View>
           </Touchable>
           <ButtonIcon
-            icon="repeat"
+            icon="list"
             style={{ alignSelf: 'center' }}
             onPress={pressSelectOrCreateStoreHandler}
           />

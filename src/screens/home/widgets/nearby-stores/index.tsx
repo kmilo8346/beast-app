@@ -4,10 +4,14 @@ import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Text from '../../../../components/text';
+import Button from '../../../../components/buttons/button';
+import SleepingCatImage from '../../../../components/svgs/images/sleeping-cat';
 // local components
 import StoreCard from './components/store-card';
 // clients
 import storeClient from '../../../../clients/store-client';
+// libs
+import { navigate } from '../../../../lib/root-navigation';
 // types
 import {
   ComputedWidget,
@@ -114,6 +118,12 @@ export default ({ data }: ComponentProps) => {
     }
   };
 
+  const pressLinkHandler = () => {
+    navigate('SellerStack', {
+      screen: 'SellerBoot',
+    });
+  };
+
   useEffect(() => {
     return () => {
       if (fetchRequestSource) {
@@ -134,6 +144,41 @@ export default ({ data }: ComponentProps) => {
   }, [data]);
 
   // render logic
+
+  // not data
+  if (!state.stores.hits.length) {
+    return (
+      <View style={{ alignItems: 'center', paddingTop: 80 }}>
+        <SleepingCatImage />
+        <Text
+          level={6}
+          weight="bold"
+          style={{
+            marginTop: 20,
+            marginBottom: 20,
+            textAlign: 'center',
+            width: 320,
+          }}
+        >
+          Parece que no hay tiendas disponibles en tu zona en este momento.
+        </Text>
+        <Text
+          level={5}
+          weight="bold"
+          style={{ marginBottom: 40, textAlign: 'center' }}
+        >
+          ¡Intentalo de nuevo mas tarde!
+        </Text>
+        <Button
+          title="¡Tambien puedes vender con nosotros!"
+          type="link"
+          onPress={pressLinkHandler}
+        />
+      </View>
+    );
+  }
+
+  // data
   return (
     <View>
       <Text level={2} weight="bold" style={{ marginBottom: 15 }}>
