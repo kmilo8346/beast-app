@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.26](https://github.com/firedevs-team/beast-app/compare/v1.0.23...v1.0.26) (2020-09-14)
+
+
+### Bug Fixes
+
+* **order-details:** fix store telephone number on ActionSheetContact ([4d81486](https://github.com/firedevs-team/beast-app/commit/4d81486f7cd038d182e5688aa5096064fef7b980))
+
 ### [1.0.25](https://github.com/firedevs-team/beast-app/compare/b1.0.24...b1.0.25) (2020-09-11)
 
 ### 1.0.24 (2020-09-11)
