@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.27",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,18 +17,11 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.3",
-      "config": {
-        "googleSignIn": {
-          "reservedClientId": "525584270888-rjkb70j65davl37cbp36pn71rdjkl9m6.apps.googleusercontent.com"
-        }
-      }
+      "buildNumber": "1.0.3"
     },
     "android": {
       "package": "com.firedevs.beast",
