@@ -99,7 +99,12 @@ class App extends React.Component<{}, State> {
     const { has_error, is_ready } = this.state;
 
     if (has_error) {
-      return <ErrorView onRetry={this.retryHandler} />;
+      return (
+        <View style={{ flex: 1 }}>
+          <StatusBar backgroundColor="white" barStyle="dark-content" />
+          <ErrorView onRetry={this.retryHandler} />
+        </View>
+      );
     }
 
     if (!is_ready) {
