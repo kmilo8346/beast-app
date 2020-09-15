@@ -72,7 +72,8 @@ type State = {
     | 'PREDICTIONS'
     | 'ERROR'
     | 'LOADING_DETAILS'
-    | 'NO_PREDICTIONS';
+    | 'NO_PREDICTIONS'
+    | 'INVALID_SELECTION';
   predictions: PlacesAutocompletePrediction[];
 };
 const reducer = (state: State, action: Action): State => {
@@ -111,7 +112,7 @@ const reducer = (state: State, action: Action): State => {
         };
       }
       // invalid address selected
-      return { ...state, view: 'NO_PREDICTIONS', predictions: [] };
+      return { ...state, view: 'INVALID_SELECTION', predictions: [] };
     default:
       return state;
   }
@@ -283,7 +284,7 @@ export default ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Icon name="info" style={{ marginRight: 10 }} />
             <Text level={6} style={{}}>
-              No encontramos esa dirección
+              Revisa que la dirección este correcta
             </Text>
           </View>
         );
@@ -304,12 +305,28 @@ export default ({
           </View>
         );
         break;
+      case 'INVALID_SELECTION':
+        content = (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Icon name="info" style={{ marginRight: 10 }} />
+            <Text level={6}>
+              Escribe dirección con{' '}
+              <Text level={6} weight="bold">
+                calle y número
+              </Text>
+            </Text>
+          </View>
+        );
+        break;
       default:
         content = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Icon name="info" style={{ marginRight: 10 }} />
             <Text level={6} style={{}}>
-              Busca tu dirección con calle y número
+              Busca tu dirección con{' '}
+              <Text level={6} weight="bold">
+                calle y número
+              </Text>
             </Text>
           </View>
         );
