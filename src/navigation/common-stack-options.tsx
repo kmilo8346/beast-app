@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import {
   StackHeaderTitleProps,
   StackNavigationOptions,
@@ -11,11 +12,36 @@ import Text from '../components/text';
 const commonStackOptions: StackNavigationOptions = {
   headerBackImage: () => <Icon name="chevron-left" />,
   headerLeftContainerStyle: {
-    marginLeft: 18,
+    ...Platform.select({
+      ios: {
+        marginLeft: 18,
+      },
+      android: {
+        marginLeft: 6,
+      },
+    }),
   },
   headerBackTitleVisible: false,
   headerTitle: ({ style, children }: StackHeaderTitleProps) => (
-    <Text level={2} weight="bold" style={[{ marginTop: 5 }, style]}>
+    <Text
+      ellipsizeMode="tail"
+      numberOfLines={1}
+      level={2}
+      weight="bold"
+      style={[
+        {
+          ...Platform.select({
+            ios: {
+              paddingLeft: 5,
+            },
+            android: {
+              paddingLeft: 20,
+            },
+          }),
+        },
+        style,
+      ]}
+    >
       {children}
     </Text>
   ),

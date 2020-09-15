@@ -146,6 +146,8 @@ export default ({ navigation }: ScreenProps) => {
           label="Nombre de tienda"
           value={state.form.name}
           errors={state.form.errors?.name}
+          lengthCounter
+          maxLength={30}
           onChangeText={(text) => {
             changeHandler('name', text);
           }}

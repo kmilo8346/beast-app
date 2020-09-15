@@ -59,9 +59,10 @@ class DurationFormatter {
     maxDuration: number,
     threshold: number
   ): string {
-    const duration =
+    const duration = Math.round(
       maxDuration -
-      (new Date().getTime() - new Date(start).getTime()) / 1000 / 60;
+        (new Date().getTime() - new Date(start).getTime()) / 1000 / 60
+    );
     return duration <= threshold
       ? `menos de ${this.humanizeDuration(threshold)}`
       : this.humanizeDuration(duration);

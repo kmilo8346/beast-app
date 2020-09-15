@@ -4,6 +4,10 @@ export default {
       allowEmpty: false,
       message: '^Es requerido',
     },
+    length: {
+      maximum: 30,
+      tooLong: '^No debe exceder los %{count} caracteres',
+    },
   },
   images: {
     presence: {

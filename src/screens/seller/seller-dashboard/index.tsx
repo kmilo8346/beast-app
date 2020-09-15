@@ -214,7 +214,8 @@ export default ({ navigation }: ScreenProps) => {
             />
             <View
               style={{
-                marginLeft: 15,
+                flex: 1,
+                marginLeft: 10,
               }}
             >
               <View
