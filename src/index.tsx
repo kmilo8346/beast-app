@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { StatusBar, View } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
@@ -112,7 +112,12 @@ class App extends React.Component<{}, State> {
       );
     }
 
-    return <Navigation />;
+    return (
+      <View style={{ flex: 1 }}>
+        <StatusBar backgroundColor="white" barStyle="dark-content" />
+        <Navigation />
+      </View>
+    );
   }
 }
 
