@@ -118,7 +118,7 @@ export default ({ store, snapshot, ...otherProps }: ComponentProps) => {
           ]}
         >
           <Image
-            source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
+            source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
             style={{ width: 50, height: 50, borderRadius: 10 }}
           />
           <View style={{ marginLeft: 15, paddingTop: 5 }}>

@@ -50,7 +50,7 @@ export default memo(({ data }: ComponentProps) => {
       onPress={pressHandler}
     >
       <Image
-        source={{ uri: cloudinary.dynamicUrl(image, 'h_250') }}
+        source={{ uri: cloudinary.dynamicUrl(image, 'h_500') }}
         style={{
           width: '100%',
           height: 250,

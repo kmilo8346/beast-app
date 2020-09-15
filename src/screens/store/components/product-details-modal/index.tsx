@@ -57,7 +57,7 @@ export default ({ product, ...otherProps }: ComponentProps) => {
   // render logic
   const productImages: string[] = [];
   product.images.forEach((image) => {
-    const resizedImage = cloudinary.dynamicUrl(image, 'h_234');
+    const resizedImage = cloudinary.dynamicUrl(image, 'h_468');
     productImages.push(resizedImage);
   });
 

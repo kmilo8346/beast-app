@@ -55,7 +55,7 @@ export default ({ data, progress, onPress = utils.noop }: StoreItemProps) => {
       onPress={pressHandler}
     >
       <Image
-        source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
+        source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
         style={{ width: 50, height: 50, borderRadius: 10 }}
       />
       <View style={{ flex: 1, justifyContent: 'center' }}>

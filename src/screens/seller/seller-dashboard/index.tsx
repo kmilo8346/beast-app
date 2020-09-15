@@ -204,7 +204,7 @@ export default ({ navigation }: ScreenProps) => {
           >
             <Image
               source={{
-                uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale'),
+                uri: cloudinary.dynamicUrl(image, 'w_100'),
               }}
               style={{
                 height: 50,

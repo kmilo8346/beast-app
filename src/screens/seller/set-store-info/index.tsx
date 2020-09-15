@@ -1,5 +1,6 @@
 import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../../components/text';
@@ -153,7 +154,7 @@ export default ({ navigation }: ScreenProps) => {
           size={1}
           label="Imagen"
           tip="Agrega la imagen de tu tienda para que tus clientes te identifiquen."
-          path={`beast/stores/${store.reference}/\${}`}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${store.reference}/\${}`}
           value={state.form.images}
           errors={state.form.errors?.images}
           onChange={(images) => {

@@ -5,6 +5,7 @@ import {
   Vibration,
   GestureResponderEvent,
 } from 'react-native';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../../components/text';
@@ -295,9 +296,9 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         <InputImages
           label="Imágenes"
           tip="Agrega imágenes para mostrar a los clientes detalles y funciones del producto."
-          path={`beast/stores/${store.reference}/products/${
-            product?.reference || state.form.reference
-            }/\${}`}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${
+            store.reference
+          }/products/${product?.reference || state.form.reference}/\${}`}
           value={state.form.product?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {

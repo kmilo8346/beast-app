@@ -156,7 +156,7 @@ export default ({ route }: OrderDetailsProps) => {
       if (
         order.dispatch_provider.confirmation &&
         order.dispatch_provider.confirmation.product_confirmations.length >=
-        order.transaction.shopping_cart.length
+          order.transaction.shopping_cart.length
       ) {
         status = 'finish';
       }
@@ -255,10 +255,7 @@ export default ({ route }: OrderDetailsProps) => {
           <View style={{ flexDirection: 'row', marginTop: 20 }}>
             <Image
               source={{
-                uri: cloudinary.dynamicUrl(
-                  store.images[0],
-                  'w_50,h_50,c_scale'
-                ),
+                uri: cloudinary.dynamicUrl(store.images[0], 'w_100'),
               }}
               style={{
                 height: 50,

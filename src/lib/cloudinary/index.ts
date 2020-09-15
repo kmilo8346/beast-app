@@ -1,6 +1,7 @@
 import FormData from 'form-data';
 import * as Crypto from 'expo-crypto';
 import axios, { CancelToken } from 'axios';
+import Constants from 'expo-constants';
 
 interface Source {
   uri: string;
@@ -58,4 +59,7 @@ class Cloudinary {
   }
 }
 
-export default new Cloudinary('417667514694758', 'kC1oXyVyUregQIH-826rWwpuBgU');
+export default new Cloudinary(
+  Constants.manifest.extra.CLOUDINARY_API_KEY,
+  Constants.manifest.extra.CLOUDINARY_API_SECRET
+);

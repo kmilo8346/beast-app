@@ -1,5 +1,6 @@
 import React, { useReducer, useRef } from 'react';
 import { View, ScrollView, Vibration } from 'react-native';
+import Constants from 'expo-constants';
 
 // components
 import Input from '../../../components/inputs/input';
@@ -170,7 +171,7 @@ export default ({ navigation }: ScreenProps) => {
         <InputImages
           size={1}
           label="Imagen"
-          path={`beast/stores/${store.reference}/\${}`}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${store.reference}/\${}`}
           value={state.store.images}
           errors={state.errors?.images}
           onChange={(images) => {

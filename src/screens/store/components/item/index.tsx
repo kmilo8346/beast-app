@@ -93,7 +93,7 @@ export default ({ data }: ComponentProps) => {
     >
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: cloudinary.dynamicUrl(image, 'w_50,h_50,c_scale') }}
+          source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
           style={{ width: 50, height: 50, borderRadius: 10 }}
         />
         {badge}

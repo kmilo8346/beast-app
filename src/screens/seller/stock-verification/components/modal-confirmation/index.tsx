@@ -78,7 +78,7 @@ export default ({
     <Modal {...otherProps}>
       <View style={globalStyles.withMargin}>
         <Image
-          source={{ uri: cloudinary.dynamicUrl(image, 'w_200,h_200,c_scale') }}
+          source={{ uri: cloudinary.dynamicUrl(image, 'w_400') }}
           style={{
             alignSelf: 'center',
             width: 200,
