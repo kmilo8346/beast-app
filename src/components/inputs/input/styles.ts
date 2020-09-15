@@ -27,7 +27,6 @@ export default StyleSheet.create<Styles>({
     left: 0,
     top: 0,
     bottom: 0,
-    opacity: 0.7,
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -46,6 +45,7 @@ export default StyleSheet.create<Styles>({
     paddingRight: 50,
     fontSize: 14,
     color: colors.black,
+    fontFamily: 'MonserratNormal',
   },
   suffix: {
     position: 'absolute',

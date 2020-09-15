@@ -106,7 +106,7 @@ export default ({ navigation, route }: ScreenProps) => {
       return;
     }
     await userCache.updateData({
-      phone: `+569${state.form.phone}`,
+      phone: `+56${state.form.phone}`,
       phone_verified: false,
     });
     navigation.navigate('VerifyPhone', route.params);
@@ -123,14 +123,28 @@ export default ({ navigation, route }: ScreenProps) => {
           Ingresa tu número de teléfono
         </Text>
         <Input
-          placeholder="Número de teléfono"
+          placeholder="Número de teléfono móvil"
           label=""
           keyboardType="phone-pad"
           returnKeyType="done"
           autoFocus
+          format={(text: string | undefined): string | undefined => {
+            if (!text) return undefined;
+
+            let result = text;
+            // space 1
+            if (result.length > 1)
+              result = [result.slice(0, 1), ' ', result.slice(1)].join('');
+
+            // space 2
+            if (result.length > 6)
+              result = [result.slice(0, 6), ' ', result.slice(6)].join('');
+            return result;
+          }}
+          parse={(text: string): string => text.replace(/ /g, '')}
           prefix={
-            <Text level={6} weight="bold">
-              +569
+            <Text level={6} style={{ color: colors.black, marginLeft: 10 }}>
+              +56
             </Text>
           }
           value={state.form.phone}
