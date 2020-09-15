@@ -1,4 +1,9 @@
-import React, { useReducer, useEffect, useCallback } from 'react';
+import React, {
+  useReducer,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
 import { View, GestureResponderEvent, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect, CommonActions } from '@react-navigation/native';
@@ -152,6 +157,7 @@ export default ({ navigation }: SelectStoreProps) => {
     );
     return stores;
   };
+
   const load = async () => {
     try {
       const stores = await fetch();
@@ -171,6 +177,7 @@ export default ({ navigation }: SelectStoreProps) => {
       }
     }
   };
+
   const fetchMore = async () => {
     // precondition
     if (!state.stores) {
@@ -199,6 +206,7 @@ export default ({ navigation }: SelectStoreProps) => {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
     }
   };
+
   const retryHandler = () => {
     if (!state.stores) {
       load();
@@ -206,6 +214,7 @@ export default ({ navigation }: SelectStoreProps) => {
       fetchMore();
     }
   };
+
   const createStoreHandler = async () => {
     storeCache.replaceData({
       user: state.user.id,
@@ -216,6 +225,7 @@ export default ({ navigation }: SelectStoreProps) => {
     });
     navigation.navigate('SetStoreInfo');
   };
+
   const pressItemHandler = async (store: Store) => {
     // TODO: handler error
     await userClient.update({
@@ -232,6 +242,7 @@ export default ({ navigation }: SelectStoreProps) => {
       })
     );
   };
+
   useEffect(() => {
     load();
   }, []);
@@ -281,6 +292,12 @@ export default ({ navigation }: SelectStoreProps) => {
       };
     }, [state.orders_in_progress_cache])
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: state.stores?.hits.length !== 0,
+    });
+  }, [state.stores?.hits]);
 
   // render logic
   if (state.error) {
