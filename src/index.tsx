@@ -79,12 +79,12 @@ class App extends React.Component<{}, State> {
 
   appLoadingErrorHandler = (error: Error) => {
     // TODO: manage errors
-    console.log(error);
+    console.log(`${prefix} Preloading error: ${error}`);
   };
 
   appLoadingFinishHandler = () => {
     this.setState({ is_ready: true });
-    console.info(`${prefix}`);
+    console.info(`${prefix} Preloading finished`);
   };
 
   cacheFont = async () => {
