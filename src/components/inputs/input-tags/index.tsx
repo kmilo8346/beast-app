@@ -15,6 +15,7 @@ export interface InputTagsProps {
   size?: number;
   tip?: string;
   errors?: string[];
+  maxLength?: number;
   onChange?: (value: string[]) => void;
 }
 
@@ -24,6 +25,7 @@ export default ({
   value = [],
   size = 3,
   errors = [],
+  maxLength = 23,
   onChange = () => null,
 }: InputTagsProps) => {
   // state
@@ -79,13 +81,21 @@ export default ({
         placeholder={placeHolder}
         value={tag}
         errors={errors}
+        autoCorrect={false}
         clearButtonMode="never"
         suffix={add}
         containerStyle={{ justifyContent: 'center' }}
+        maxLength={maxLength}
         onChangeText={changeTagHandler}
       />
       <View
-        style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 30 }}
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          marginBottom: 30,
+          marginTop: -25,
+        }}
       >
         {value.map((tag: string, index: number) => {
           return (
@@ -96,14 +106,15 @@ export default ({
                 alignItems: 'center',
                 paddingLeft: 5,
                 paddingRight: 3,
+                paddingVertical: 5,
                 backgroundColor: colors.blackLight6,
                 borderColor: colors.blackLight5,
                 borderStyle: 'solid',
                 borderWidth: 1,
                 borderRadius: 4,
-                marginTop: -25,
-                maxHeight: 20,
+                maxHeight: 30,
                 marginRight: 5,
+                marginBottom: 5,
               }}
             >
               <Text level={6} weight="bold" color={colors.blackLight3}>
