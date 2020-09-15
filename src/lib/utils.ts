@@ -105,7 +105,7 @@ export const getStats = (items: Item[]) => {
   return items.reduce(
     (stats, product) => ({
       total: stats.total + 1,
-      ammount: stats.ammount + product.price * 1,
+      ammount: stats.ammount + product.price * product.qty,
     }),
     {
       total: 0,
