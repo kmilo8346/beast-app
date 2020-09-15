@@ -254,7 +254,7 @@ export default ({ navigation }: ScreenProps) => {
         {text}
         <InputPlaceAutocomplete
           label="Dirección"
-          placeholder="Jose Pedro Alessandri 927"
+          placeholder="Jose Manuel Rodríguez 927"
           value={state.form.address}
           onChange={(address) => {
             changeHandler('address', address);

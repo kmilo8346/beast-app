@@ -344,7 +344,7 @@ export default ({
         </Text>
         <TextInput
           value={state.address}
-          placeholder="Jose Pedro Alessandri 927"
+          placeholder="Jose Manuel Rodríguez 927"
           autoFocus
           clearButtonMode="while-editing"
           onChangeText={(text) => {
