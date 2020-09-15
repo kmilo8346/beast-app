@@ -118,7 +118,7 @@ export default class OrdersInProgressCache extends PersistedCache<
       this.subscribe();
     } catch (error) {
       if (!axios.isCancel(error)) {
-        if (error.response && error.response.status !== 502) {
+        if (error.response?.status !== 502) {
           console.log(error);
 
           await utils.sleep(2000);

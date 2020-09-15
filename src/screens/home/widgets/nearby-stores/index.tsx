@@ -119,9 +119,7 @@ export default ({ data }: ComponentProps) => {
   };
 
   const pressLinkHandler = () => {
-    navigate('SellerStack', {
-      screen: 'SellerBoot',
-    });
+    navigate('SellerStack');
   };
 
   useEffect(() => {

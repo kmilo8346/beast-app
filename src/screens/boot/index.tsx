@@ -97,7 +97,7 @@ export default ({ navigation }: BootProps) => {
       printUserInfo();
       navigation.replace('MainTab');
     } catch (error) {
-      if (error.response.status === 404) {
+      if (error.response?.status === 404) {
         const cache = userCache.getData();
         if (!cache || cache.id !== authUser.uid) {
           await userCache.replaceData(utils.extract(authUser));
@@ -142,6 +142,7 @@ export default ({ navigation }: BootProps) => {
   };
 
   const boot = async () => {
+    dispatch({ type: 'change_view', view: BootView.LOADING });
     const authUser = auth.currentUser;
     if (!authUser) {
       throw new Error(`${prefix} Auth user must be defined to boot shop shop`);

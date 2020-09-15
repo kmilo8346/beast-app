@@ -225,7 +225,7 @@ export default ({
       <View style={[globalStyle.withMargin]}>
         <InputPlaceAutocomplete
           label="Centro de área"
-          placeholder="Jose Pedro Alessandri 927"
+          placeholder="Jose Manuel Rodríguez 927"
           value={state.form.center}
           onChange={(place) => {
             changeHandler('center', place);
