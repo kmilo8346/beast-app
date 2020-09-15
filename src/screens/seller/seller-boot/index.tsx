@@ -121,7 +121,7 @@ export default ({ navigation, route }: SellerBootProps) => {
         navigation.replace(redirect.name, redirect.params);
       } catch (error) {
         if (!axios.isCancel(error)) {
-          if (error.response.status === 404) {
+          if (error.response?.status === 404) {
             navigation.replace('SelectOrCreateStore');
             return;
           }

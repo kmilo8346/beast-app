@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useCallback,
   useLayoutEffect,
+  useRef,
 } from 'react';
 import { View, GestureResponderEvent, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
@@ -14,6 +15,10 @@ import Loading from '../../../components/loading';
 import Text from '../../../components/text';
 import Button from '../../../components/buttons/button';
 import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
+import LoadingOverlay, {
+  ILoadingOverlay,
+} from '../../../components/loading-overlay';
+import Toast, { IToast } from '../../../components/toast';
 // local components
 import StoreItem from './components/store-item';
 // seller components
@@ -110,6 +115,11 @@ const reducer = (state: State, action: Action): State => {
         error: undefined,
         stores: action.stores,
       };
+    case 'set_error':
+      return {
+        ...state,
+        error: action.error,
+      };
     case 'set_fetching_more':
       return {
         ...state,
@@ -133,6 +143,8 @@ export default ({ navigation }: SelectStoreProps) => {
   if (!state.user) {
     throw new Error(`${prefix} user must be defined`);
   }
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const instanceOrdersInProgressCache = async (user: string) => {
@@ -227,20 +239,33 @@ export default ({ navigation }: SelectStoreProps) => {
   };
 
   const pressItemHandler = async (store: Store) => {
-    // TODO: handler error
-    await userClient.update({
-      pathVars: { id: state.user.id },
-      body: {
-        current_store: store.id,
-      },
-    });
-    storeCache.setData(store);
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [{ name: 'SellerDashboard' }],
-      })
-    );
+    try {
+      loadingOverlayRef.current?.show();
+      await userClient.update({
+        pathVars: { id: state.user.id },
+        body: {
+          current_store: store.id,
+        },
+      });
+      storeCache.setData(store);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'SellerDashboard' }],
+        })
+      );
+    } catch (error) {
+      // TODO: Log error
+      console.log(error);
+
+      toastRef.current?.show({
+        message: 'Ocurrió un error, reintenta por favor',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
   };
 
   useEffect(() => {
@@ -408,6 +433,7 @@ export default ({ navigation }: SelectStoreProps) => {
           globalStyles.withMargin,
         ]}
       >
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Shortcut
           image={<AddCircleBlueIcon />}
           title="Agregar tienda"
@@ -415,6 +441,8 @@ export default ({ navigation }: SelectStoreProps) => {
           style={globalStyles.withMainActionAir}
         />
       </View>
+
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

@@ -188,7 +188,7 @@ export default ({ navigation, route }: ScreenProps) => {
         },
       });
     } catch (error) {
-      if (error.response.status !== 404) {
+      if (error.response?.status !== 404) {
         throw error;
       }
     }
