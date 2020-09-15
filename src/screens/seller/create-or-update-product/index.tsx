@@ -333,6 +333,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           label="Tags"
           placeHolder="desayuno, once"
           size={3}
+          maxLength={23}
           value={state.form.product?.tags}
           onChange={(key: string[]) => {
             changeHandler('tags', key);
