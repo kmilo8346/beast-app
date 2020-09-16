@@ -324,11 +324,16 @@ export default ({ navigation }: MenuProps) => {
     );
   }
   let fingerprint: ReactNode | null = null;
-  console.log();
   switch (Constants.manifest.extra.BEAST_ENVIRONMENT) {
     case 'development':
       fingerprint = (
-        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            marginBottom: 15,
+            backgroundColor: colors.white,
+          }}
+        >
           <Text level={7} style={{ marginBottom: 5 }}>
             Development
           </Text>
@@ -338,7 +343,13 @@ export default ({ navigation }: MenuProps) => {
       break;
     case 'staging':
       fingerprint = (
-        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            marginBottom: 15,
+            backgroundColor: colors.white,
+          }}
+        >
           <Text level={7} style={{ marginBottom: 5 }}>
             Staging
           </Text>
@@ -354,7 +365,13 @@ export default ({ navigation }: MenuProps) => {
       break;
     case 'production':
       fingerprint = (
-        <View style={{ alignItems: 'center', marginBottom: 15 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            marginBottom: 15,
+            backgroundColor: colors.white,
+          }}
+        >
           <Text
             level={7}
             style={{ marginBottom: 5 }}
@@ -398,7 +415,6 @@ export default ({ navigation }: MenuProps) => {
             left: 0,
             right: 0,
             bottom: 0,
-            paddingBottom: insets.bottom,
           },
           globalStyle.withMargin,
         ]}

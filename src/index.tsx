@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { StatusBar, View } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
@@ -99,7 +99,12 @@ class App extends React.Component<{}, State> {
     const { has_error, is_ready } = this.state;
 
     if (has_error) {
-      return <ErrorView onRetry={this.retryHandler} />;
+      return (
+        <View style={{ flex: 1 }}>
+          <StatusBar backgroundColor="white" barStyle="dark-content" />
+          <ErrorView onRetry={this.retryHandler} />
+        </View>
+      );
     }
 
     if (!is_ready) {
@@ -112,7 +117,12 @@ class App extends React.Component<{}, State> {
       );
     }
 
-    return <Navigation />;
+    return (
+      <View style={{ flex: 1 }}>
+        <StatusBar backgroundColor="white" barStyle="dark-content" />
+        <Navigation />
+      </View>
+    );
   }
 }
 
