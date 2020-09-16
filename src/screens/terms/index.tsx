@@ -6,6 +6,7 @@ import * as Linking from 'expo-linking';
 // components
 import Text from '../../components/text';
 import Button from '../../components/buttons/button';
+import Icon from '../../components/icon';
 import SignedDocumentBlue from '../../components/svgs/images/signed-document-blue';
 // styles
 import globalStyles from '../../styles';
@@ -28,7 +29,19 @@ export default ({ navigation }: ScreenProps) => {
   const pressTermHandler = () => {
     Linking.openURL('https://beast-production.web.app/policies/');
   };
-
+  const ButtonGoToTermsTitle = (
+    <>
+      <Text
+        level={5}
+        weight="bold"
+        color={colors.blue}
+        style={{ lineHeight: 30, textAlign: 'center' }}
+      >
+        Términos de servicio y políticas de privacidad.{' '}
+        <Icon name="external-link" size={20} />
+      </Text>
+    </>
+  );
   // render logic
   return (
     <View
@@ -40,18 +53,20 @@ export default ({ navigation }: ScreenProps) => {
         globalStyles.withPadding,
       ]}
     >
-      <View style={{ alignItems: 'center', marginTop: '30%' }}>
+      <View style={{ flex: 1 }} />
+      <View style={{ alignItems: 'center' }}>
         <SignedDocumentBlue />
         <View style={{ height: 20 }} />
         <Text level={5} weight="light" style={{ lineHeight: 30 }}>
           Al continuar, estás aceptando los
         </Text>
         <Button
-          title="Términos de servicio y políticas de privacidad."
+          title={ButtonGoToTermsTitle}
           type="link"
           onPress={pressTermHandler}
         />
       </View>
+      <View style={{ flex: 1 }} />
       <View
         style={[
           {
