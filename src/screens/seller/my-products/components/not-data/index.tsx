@@ -6,6 +6,8 @@ import Text from '../../../../../components/text';
 import AddCircleBlueIcon from '../../../../../components/svgs/icons/add-circle-blue';
 // seller components
 import Shortcut from '../../../components/shortcut';
+// styles
+import globalStyles from '../../../../../styles';
 
 export interface NotDataProps {
   onCallAction?: () => void;
@@ -13,7 +15,7 @@ export interface NotDataProps {
 
 export default ({ onCallAction = () => null }: NotDataProps) => {
   return (
-    <View>
+    <View style={globalStyles.withMargin}>
       <Text
         level={2}
         weight="bold"
