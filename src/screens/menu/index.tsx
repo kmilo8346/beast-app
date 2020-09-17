@@ -82,7 +82,7 @@ export default ({ navigation }: MenuProps) => {
     event.stopPropagation();
     navigation.navigate('SetPhone', {
       redirect: {
-        name: 'Menu',
+        name: 'MenuStack',
       },
     });
   };

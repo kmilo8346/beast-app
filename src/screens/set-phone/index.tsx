@@ -105,11 +105,10 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    await userCache.updateData({
+    navigation.navigate('VerifyPhone', {
+      ...route.params,
       phone: `+56${state.form.phone}`,
-      phone_verified: false,
     });
-    navigation.navigate('VerifyPhone', route.params);
   };
 
   // render logic

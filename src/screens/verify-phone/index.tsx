@@ -71,6 +71,7 @@ interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // params
+  const phone = route.params.phone;
   const redirect = route.params.redirect;
   // state
   const [state, dispatch] = useReducer(reducer, {
@@ -90,7 +91,7 @@ export default ({ navigation, route }: ScreenProps) => {
     try {
       dispatch({ type: 'set_has_verfication_error', error: false });
       const { code: beast_code } = await phoneClient.code({
-        phone: user.phone,
+        phone,
       });
       dispatch({ type: 'add_beast_code', beast_code });
 
@@ -124,6 +125,7 @@ export default ({ navigation, route }: ScreenProps) => {
     }
 
     await userCache.updateData({
+      phone,
       phone_verified: true,
     });
 
@@ -138,7 +140,7 @@ export default ({ navigation, route }: ScreenProps) => {
               id: user.id,
             },
             body: {
-              phone: user.phone,
+              phone,
               phone_verified: user.phone_verified,
             },
           });
@@ -157,6 +159,9 @@ export default ({ navigation, route }: ScreenProps) => {
               routes: [{ name: 'MainTab' }],
             })
           );
+        } else if (redirect.name === 'MenuStack') {
+          navigation.pop();
+          navigation.pop();
         } else {
           navigation.pop();
           navigation.replace(redirect.name, redirect.params);
@@ -181,54 +186,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useEffect(() => {
     sendCode(true);
-  }, [user.phone]);
-
-  // useEffect(() => {
-  //   // phone was verified
-  //   if (user.version === state.submitOpId && user.phoneVerified) {
-  //     // not current address
-  //     if (!user.currentAddress) {
-  //       navigation.replace('SetAddress');
-  //       return;
-  //     }
-  //     // redirect to MainTab
-  //     if (route.params.redirect.name === 'MainTab') {
-  //       navigation.dispatch(
-  //         CommonActions.reset({
-  //           index: 1,
-  //           routes: [{ name: 'MainTab' }],
-  //         })
-  //       );
-  //       return;
-  //     }
-  //     // redirect to SellerDashboard
-  //     if (route.params.redirect.name === 'SellerDashboard') {
-  //       const store = user.store;
-  //       if (!store || !store.name || !store.images) {
-  //         navigation.replace('SetStoreInfo');
-  //         return;
-  //       }
-  //       if (!store.deliveryArea || !store.deliveryTime || !store.openingHours) {
-  //         navigation.replace('SetStoreDeliveryInfo');
-  //         return;
-  //       }
-  //       if (!store.sellerCredentials?.userId) {
-  //         navigation.replace('MercadoPagoSignIn');
-  //         return;
-  //       }
-  //       navigation.dispatch(
-  //         CommonActions.reset({
-  //           index: 1,
-  //           routes: [{ name: 'SellerDashboard' }],
-  //         })
-  //       );
-  //       return;
-  //     }
-
-  //     navigation.pop();
-  //     navigation.replace(route.params.redirect.name);
-  //   }
-  // }, [state.submitOpId, user.phoneVerified]);
+  }, [phone]);
 
   // render logic
   let verficationError = null;
@@ -256,7 +214,7 @@ export default ({ navigation, route }: ScreenProps) => {
               Te enviamos un código de verificación a tu número{' '}
             </Text>
             <Text level={5} weight="bold">
-              {user?.phone}
+              {phone}
             </Text>
           </Text>
           <OTPInputView
