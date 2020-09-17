@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.40](https://github.com/firedevs-team/beast-app/compare/v1.0.39...v1.0.40) (2020-09-17)
+
+
+### Bug Fixes
+
+* **app:** bug loading inifinite ([bfe074e](https://github.com/firedevs-team/beast-app/commit/bfe074eca2f36abfecb515dbb6d426f97aaffa62))
+* **app:** fix get stats ([0693551](https://github.com/firedevs-team/beast-app/commit/0693551ee63ac649157a7a0609249a424f15c469))
+* **my-products:** add margin to my-products view ([6c63ef8](https://github.com/firedevs-team/beast-app/commit/6c63ef86a4c996e91858d77db1e709085787091d))
+* **product:** fix product´s tag component ([e2197cc](https://github.com/firedevs-team/beast-app/commit/e2197ccd0addf6d4548bca0473330f470bd7adc9))
+* **select or create store:** removing header in create store ([2f0ea2a](https://github.com/firedevs-team/beast-app/commit/2f0ea2a676dd6684e4f0d3f2f1a568510124eed4))
+* **store name:** fix stores name on headers ([f81ee12](https://github.com/firedevs-team/beast-app/commit/f81ee12bdef9346a5ac4dee36c464a59e5ac85e9))
+* **terms:** add icon to terms and conditions external link ([171a78f](https://github.com/firedevs-team/beast-app/commit/171a78fd1c18e951192a2c2a613e227c3c7070cc))
+
 ### [1.0.39](https://github.com/firedevs-team/beast-app/compare/v1.0.38...v1.0.39) (2020-09-14)
 
 ### [1.0.38](https://github.com/firedevs-team/beast-app/compare/v1.0.37...v1.0.38) (2020-09-14)

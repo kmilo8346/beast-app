@@ -1,6 +1,6 @@
 {
   "name": "beast",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "main": "./src/index.tsx",
   "scripts": {
     "start": "expo start",
