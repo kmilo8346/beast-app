@@ -153,7 +153,8 @@ export default memo(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 15,
+            marginBottom: 10,
+            marginTop: 5,
             flex: 1,
           }}
         >
