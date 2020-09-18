@@ -12,10 +12,11 @@ export interface InputSetOpeningHoursProps {
   errors?: string[];
   onChange?: (openingHours: OpeningHours) => void;
 }
+
 // instances outside component
 const humanizeOpeningHoursText = (schedule: OpeningHours) => {
   let humanizedText = '';
-  const dayShortNames: string[] = [
+  const daysShortNames: string[] = [
     'Lun',
     'Mar',
     'Mie',
@@ -27,14 +28,13 @@ const humanizeOpeningHoursText = (schedule: OpeningHours) => {
   const openDays: string[] = [];
   schedule.forEach((day) => {
     if (day.open) {
-      openDays.push(dayShortNames[Number(day.day) - 1]);
+      openDays.push(daysShortNames[Number(day.day) - 1]);
       humanizedText =
         humanizedText === ''
-          ? dayShortNames[Number(day.day) - 1]
-          : `${humanizedText}. ${dayShortNames[Number(day.day) - 1]}`;
+          ? daysShortNames[Number(day.day) - 1]
+          : `${humanizedText}. ${daysShortNames[Number(day.day) - 1]}`;
     }
   });
-  humanizedText += '.';
   if (
     openDays[0] === 'Lun' &&
     openDays[1] &&
@@ -49,6 +49,7 @@ const humanizeOpeningHoursText = (schedule: OpeningHours) => {
   if (openDays.length === 7) {
     humanizedText = 'Todos los días';
   }
+  humanizedText += '.';
   return humanizedText;
 };
 
