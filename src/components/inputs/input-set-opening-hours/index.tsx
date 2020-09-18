@@ -12,6 +12,45 @@ export interface InputSetOpeningHoursProps {
   errors?: string[];
   onChange?: (openingHours: OpeningHours) => void;
 }
+// instances outside component
+const humanizeOpeningHoursText = (schedule: OpeningHours) => {
+  let humanizedText = '';
+  const dayShortNames: string[] = [
+    'Lun',
+    'Mar',
+    'Mie',
+    'Jue',
+    'Vie',
+    'Sab',
+    'Dom',
+  ];
+  const openDays: string[] = [];
+  schedule.forEach((day) => {
+    if (day.open) {
+      openDays.push(dayShortNames[Number(day.day) - 1]);
+      humanizedText =
+        humanizedText === ''
+          ? dayShortNames[Number(day.day) - 1]
+          : `${humanizedText}. ${dayShortNames[Number(day.day) - 1]}`;
+    }
+  });
+  humanizedText += '.';
+  if (
+    openDays[0] === 'Lun' &&
+    openDays[1] &&
+    openDays[2] &&
+    openDays[3] &&
+    openDays[4] === 'Vie' &&
+    !openDays[5] &&
+    !openDays[6]
+  ) {
+    humanizedText = 'Entre semana';
+  }
+  if (openDays.length === 7) {
+    humanizedText = 'Todos los días';
+  }
+  return humanizedText;
+};
 
 export default ({
   value,
@@ -36,7 +75,7 @@ export default ({
   // render logic
   let openingHoursText = '';
   if (value) {
-    openingHoursText = `Horario de atención configurado`;
+    openingHoursText = humanizeOpeningHoursText(value);
   }
   return (
     <View>
