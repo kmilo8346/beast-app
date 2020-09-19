@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, GestureResponderEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import Modal from '../../../../components/modals/modal';
@@ -15,6 +16,7 @@ interface ComponentProps {
 }
 
 export default ({ onClose = utils.noop }: ComponentProps) => {
+  const insets = useSafeAreaInsets();
   // event handlers
   const dismissHandler = () => {
     onClose();
@@ -46,7 +48,13 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
 
       <View
         style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingBottom: insets.bottom,
+          },
           globalStyle.withMargin,
         ]}
       >
