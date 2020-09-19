@@ -10,7 +10,6 @@ import {
   UpdateAccountScreen,
   OrdersScreen,
   OrderDetailsScreen,
-  HelpScreen,
 } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
@@ -39,11 +38,6 @@ export default () => {
         name="OrderDetails"
         component={OrderDetailsScreen}
         options={{ title: 'Detalle de pedido' }}
-      />
-      <MenuStack.Screen
-        name="Help"
-        component={HelpScreen}
-        options={{ title: 'Ayuda' }}
       />
       <MenuStack.Screen
         name="SignIn"
