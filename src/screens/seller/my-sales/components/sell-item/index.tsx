@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   View,
   GestureResponderEvent,
@@ -14,6 +14,7 @@ import Icon from '../../../../../components/icon';
 import storeCache from '../../../../../cache/store';
 // libs
 import numberFormatter from '../../../../../lib/formatters/number-formatter';
+import durationFormatter from '../../../../../lib/formatters/duration-formatter';
 import dateFormatter from '../../../../../lib/formatters/date-formatter';
 import * as utils from '../../../../../lib/utils';
 // types
@@ -72,6 +73,35 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
     }
   }
 
+  // estimated delivery time component
+  let estimatedDeliveryTimeComponent: ReactNode | null = null;
+  if (sell.dispatch_provider.status === OwnerDispatchStatus.CONFIRMED) {
+    // estimated delivery time
+    const durationToDeliver = durationFormatter.humanizeDurationToFinish(
+      sell.updated_at,
+      sell.transaction.store.delivery_time.lte,
+      5
+    );
+    estimatedDeliveryTimeComponent = (
+      <View
+        style={{
+          flexDirection: 'row',
+          marginTop: 10,
+          alignItems: 'center',
+        }}
+      >
+        <Icon name="clock" color={colors.blue} />
+        <Text level={6} style={{ marginLeft: 5 }} color={colors.blue}>
+          Entregar en
+          {durationToDeliver !== 'menos de 5 minutos' ? ' menos de' : ''}{' '}
+          <Text level={6} weight="bold" color={colors.blue}>
+            {durationToDeliver}
+          </Text>
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <Touchable
       onPress={pressHandler}
@@ -80,45 +110,51 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
           borderWidth: 1,
           borderColor: colors.blackLight6,
           borderRadius: 13,
-          flexDirection: 'row',
           paddingVertical: 20,
           paddingHorizontal: 15,
         },
         style,
       ]}
     >
-      <View style={{ flex: 1 }}>
-        <Text
-          level={5}
-          weight="bold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginBottom: 5 }}
-        >
-          {fullName}
-        </Text>
-        <Text
-          level={6}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginBottom: 5 }}
-        >
-          <Text level={6} weight="bold">
-            {stats.total}
+      <View
+        style={{
+          flexDirection: 'row',
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text
+            level={5}
+            weight="bold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginBottom: 5 }}
+          >
+            {fullName}
           </Text>
-          {` ${totalLabel}${distanceText}`}
+          <Text
+            level={6}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginBottom: 5 }}
+          >
+            <Text level={6} weight="bold">
+              {stats.total}
+            </Text>
+            {` ${totalLabel}${distanceText}`}
+          </Text>
+          <Text level={7} color={colors.blackLight3}>
+            {dateFormatter.format(
+              new Date(sell.created_at),
+              "dd MMMM, yyyy · HH:mm 'hrs'"
+            )}
+          </Text>
+        </View>
+        <Text level={5} weight="bold" style={{ marginHorizontal: 10 }}>
+          {numberFormatter.toCurrency(stats.ammount)}
         </Text>
-        <Text level={7} color={colors.blackLight3}>
-          {dateFormatter.format(
-            new Date(sell.created_at),
-            "dd MMMM, yyyy · HH:mm 'hrs'"
-          )}
-        </Text>
+        <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
       </View>
-      <Text level={5} weight="bold" style={{ marginHorizontal: 10 }}>
-        {numberFormatter.toCurrency(stats.ammount)}
-      </Text>
-      <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
+      {estimatedDeliveryTimeComponent}
     </Touchable>
   );
 };

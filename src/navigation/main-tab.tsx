@@ -152,6 +152,7 @@ export default () => {
       tabBarOptions={{
         activeTintColor: colors.blue,
         inactiveTintColor: colors.black,
+        style: { paddingTop: 2 },
       }}
       initialRouteName="HomeStack"
     >

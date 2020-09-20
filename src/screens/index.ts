@@ -24,4 +24,3 @@ export { default as StockVerificationScreen } from './seller/stock-verification'
 export { default as MenuScreen } from './menu';
 export { default as UpdateAccountScreen } from './menu/update-account';
 export { default as OrdersScreen } from './menu/orders';
-export { default as HelpScreen } from './menu/help';
