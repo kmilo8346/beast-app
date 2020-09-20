@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from '../../../../components/text';
 import Divider from '../../../../components/divider';
 import Button from '../../../../components/buttons/button';
-// store components
-import FullModal, { FullModalProps } from '../full-modal';
+// screen components
+import FullModal, { FullModalProps } from '../../../components/full-modal';
 // local components
 import NumberInput from './components/number-input';
 import Carousell from './components/carousell';

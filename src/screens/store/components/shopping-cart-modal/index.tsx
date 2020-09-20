@@ -10,8 +10,8 @@ import MapPinShadedBlueIcon from '../../../../components/svgs/icons/map-pin-shad
 import PhoneFilledDotsBlueIcon from '../../../../components/svgs/icons/phone-filled-dots-blue';
 import ActionSheetContact from '../../../../components/modals/action-sheet-contact';
 import Button from '../../../../components/buttons/button';
-// store components
-import FullModal, { FullModalProps } from '../full-modal';
+// screen components
+import FullModal, { FullModalProps } from '../../../components/full-modal';
 // local components
 import Item from './components/item';
 // lib

@@ -3,12 +3,12 @@ import { Modal, GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // components
-import Icon from '../../../../components/icon';
+import Icon from '../../../components/icon';
 // lib
-import * as utils from '../../../../lib/utils';
+import * as utils from '../../../lib/utils';
 // styles
-import colors from '../../../../styles/colors';
-import Touchable from '../../../../components/touchable';
+import colors from '../../../styles/colors';
+import Touchable from '../../../components/touchable';
 
 export interface FullModalProps {
   children: ReactNode;
