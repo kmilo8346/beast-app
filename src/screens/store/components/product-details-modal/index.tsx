@@ -106,7 +106,7 @@ export default ({ product, ...otherProps }: ComponentProps) => {
         ]}
       >
         <Button
-          title={`Agrega ${qty} al carrito. ·${numberFormatter.toCurrency(
+          title={`Agrega ${qty} al carrito · ${numberFormatter.toCurrency(
             qty * product.price
           )}`}
           style={globalStyles.withMainActionAir}

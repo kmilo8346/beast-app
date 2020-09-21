@@ -304,31 +304,18 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             changeHandler('images', images);
           }}
         />
-        <View style={{ flexDirection: 'row' }}>
-          <Input
-            label="Marca"
-            placeholder="Don Pepe"
-            value={state.form.product?.brand}
-            errors={state.form.errors?.brand}
-            onChangeText={(text) => {
-              changeHandler('brand', text);
-            }}
-            containerStyle={{ flex: 1 }}
-          />
-          <View style={{ width: 15 }} />
-          <InputNumeric
-            label="Precio"
-            placeholder="$1000"
-            value={state.form.product?.price}
-            errors={state.form.errors?.price}
-            formatNumber={numberFormatter.toCurrency}
-            parseNumber={stringParser.fromCurrency}
-            onChangeValue={(price) => {
-              changeHandler('price', price);
-            }}
-            containerStyle={{ flex: 1 }}
-          />
-        </View>
+        <InputNumeric
+          label="Precio"
+          placeholder="$1000"
+          value={state.form.product?.price}
+          errors={state.form.errors?.price}
+          formatNumber={numberFormatter.toCurrency}
+          parseNumber={stringParser.fromCurrency}
+          onChangeValue={(price) => {
+            changeHandler('price', price);
+          }}
+          containerStyle={{ flex: 1 }}
+        />
         <InputTags
           label="Tags"
           placeHolder="desayuno, once"
