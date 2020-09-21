@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.41](https://github.com/firedevs-team/beast-app/compare/v1.0.40...v1.0.41) (2020-09-21)
+
+
+### Bug Fixes
+
+* **input-set-opening-hours:** add final dot & refactor variable day ([2f70f13](https://github.com/firedevs-team/beast-app/commit/2f70f13cf55c8e5662e84d90cf052930942ab3a7))
+* **input-set-opening-hours:** humanize the opening hour´s subtext ([0552f48](https://github.com/firedevs-team/beast-app/commit/0552f48fd583337cffdc7c065429632eb8bf8153))
+* **main-tab:** add main-tab padding ([d36b25b](https://github.com/firedevs-team/beast-app/commit/d36b25b91572be6f040e40a9b15400949cddf203))
+* **modal-help:** add paddingBottom to separate button ([a6b55f4](https://github.com/firedevs-team/beast-app/commit/a6b55f4b59c7eb371adbd7934ca8be42b4fa4915))
+* **sell-item:** fix text logic on estimated delivery time ([3a70a08](https://github.com/firedevs-team/beast-app/commit/3a70a0899a52369b634497ab3d7ffa12ece4c325))
+* **stock-verification Item:** fix cutted badget fixing vertical margins ([671953c](https://github.com/firedevs-team/beast-app/commit/671953cbe31a823debe31e3bf5c8039db7de3cce))
+
 ### [1.0.40](https://github.com/firedevs-team/beast-app/compare/v1.0.39...v1.0.40) (2020-09-17)
 
 
