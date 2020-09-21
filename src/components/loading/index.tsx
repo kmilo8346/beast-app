@@ -5,18 +5,39 @@ import LottieView from 'lottie-react-native';
 // assets
 const Loading = require('../../../assets/lotties/carga.json');
 
-const messages = [
-  'Conectando reflectores.',
-  'Enviando la señal.',
-  'Despertando a Batman.',
-  'Poniendole bencina al batimovil.',
-  'Llamando a Robin.',
+// instances outside components
+const client_messages = [
+  'Despachos por siempre gratis',
+  'Las tiendas están muy cercas de ti',
+  'Tu compra sin intermediarios',
+  'Descubre lo que vende tu vecino',
+];
+const seller_messages = [
+  'Shop Shop no gana con tus ventas',
+  'La comisión de Mercado Pago es baja',
+  'No tienes que ser empresa para vender',
 ];
 
-export default () => {
+export enum MessageTypes {
+  CLIENT = 'client',
+  SELLER = 'seller',
+}
+
+interface ComponentProps {
+  message_type?: MessageTypes;
+}
+
+export default ({ message_type = MessageTypes.CLIENT }: ComponentProps) => {
   // state
   const [currentMessage, setCurrentMessage] = useState(0);
-  // message logic
+  const animated = new Animated.Value(0);
+  const translateX = animated.interpolate({
+    inputRange: [0, 1],
+    outputRange: [350, 0],
+  });
+  const transform = [{ translateX }];
+
+  // event handlers
   const resetMessage = () => {
     if (currentMessage === messages.length - 1) {
       setCurrentMessage(0);
@@ -24,10 +45,7 @@ export default () => {
     }
     setCurrentMessage((currentMessage) => currentMessage + 1);
   };
-  const changeMessage = setInterval(resetMessage, 3500);
 
-  // animation logic
-  const animated = new Animated.Value(0);
   const slideIn = () => {
     Animated.timing(animated, {
       useNativeDriver: true,
@@ -35,20 +53,20 @@ export default () => {
       duration: 1400,
     }).start();
   };
-  const translateX = animated.interpolate({
-    inputRange: [0, 1],
-    outputRange: [350, 0],
-  });
-  const transform = [{ translateX }];
-  // event handlers
+
   useEffect(() => {
+    const intervalId = setInterval(resetMessage, 3500);
     slideIn();
+
     return () => {
       // clear interval
-      clearInterval(changeMessage);
+      clearInterval(intervalId);
     };
   });
 
+  // render logic
+  const messages =
+    message_type === MessageTypes.CLIENT ? client_messages : seller_messages;
   return (
     <View
       style={{

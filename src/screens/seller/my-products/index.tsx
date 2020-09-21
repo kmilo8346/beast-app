@@ -9,7 +9,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import Loading from '../../../components/loading';
+import Loading, { MessageTypes } from '../../../components/loading';
 import ErrorView from '../../../components/error-view';
 import NotSearchResult from '../../../components/not-search-result';
 import Button from '../../../components/buttons/button';
@@ -484,7 +484,7 @@ export default ({ navigation }: MyProductsProps) => {
           <View
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
           >
-            <Loading />
+            <Loading message_type={MessageTypes.SELLER} />
           </View>
         </TouchableWithoutFeedback>
       );

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import Loading from '../../../components/loading';
+import Loading, { MessageTypes } from '../../../components/loading';
 import ErrorView from '../../../components/error-view';
 // clients../../../clients/user-client
 import userClient from '../../../clients/user-client';
@@ -172,7 +172,7 @@ export default ({ navigation, route }: SellerBootProps) => {
         alignItems: 'center',
       }}
     >
-      <Loading message="Cargando..." />
+      <Loading message_type={MessageTypes.SELLER} />
     </View>
   );
 };

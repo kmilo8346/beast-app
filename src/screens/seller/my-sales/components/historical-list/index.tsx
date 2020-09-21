@@ -3,7 +3,7 @@ import { View, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 
 // components
-import Loading from '../../../../../components/loading';
+import Loading, { MessageTypes } from '../../../../../components/loading';
 import ErrorView from '../../../../../components/error-view';
 import Text from '../../../../../components/text';
 import DesertImage from '../../../../../components/svgs/images/desert';
@@ -211,7 +211,7 @@ export default ({
   if (!orders) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Loading />
+        <Loading message_type={MessageTypes.SELLER} />
       </View>
     );
   }

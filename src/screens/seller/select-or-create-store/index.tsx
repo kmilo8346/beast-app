@@ -8,10 +8,11 @@ import React, {
 import { View, GestureResponderEvent, FlatList } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect, CommonActions } from '@react-navigation/native';
+import * as WebBrowser from 'expo-web-browser';
 
 // components
 import ErrorView from '../../../components/error-view';
-import Loading from '../../../components/loading';
+import Loading, { MessageTypes } from '../../../components/loading';
 import Text from '../../../components/text';
 import Button from '../../../components/buttons/button';
 import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
@@ -19,6 +20,7 @@ import LoadingOverlay, {
   ILoadingOverlay,
 } from '../../../components/loading-overlay';
 import Toast, { IToast } from '../../../components/toast';
+import Icon from '../../../components/icon';
 // local components
 import StoreItem from './components/store-item';
 // seller components
@@ -268,6 +270,12 @@ export default ({ navigation }: SelectStoreProps) => {
     }
   };
 
+  const pressSeeComisionsHandler = () => {
+    WebBrowser.openBrowserAsync(
+      'https://www.mercadopago.cl/ayuda/costo-recibir-pagos-dinero_220'
+    );
+  };
+
   useEffect(() => {
     load();
   }, []);
@@ -350,7 +358,7 @@ export default ({ navigation }: SelectStoreProps) => {
           alignItems: 'center',
         }}
       >
-        <Loading />
+        <Loading message_type={MessageTypes.SELLER} />
       </View>
     );
   }
@@ -376,8 +384,37 @@ export default ({ navigation }: SelectStoreProps) => {
           >
             !Vende con nosotros¡
           </Text>
-          <Text level={4} style={{ color: colors.white }}>
-            Aquí podrás crear una tienda para ofrecer tus productos y servicios.
+
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            Shop Shop nunca cobrará comisión por tus ventas.
+          </Text>
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            Mercado Pago te cobrará una comisión bien baja.{' '}
+            <Text
+              level={5}
+              weight="bold"
+              style={{
+                color: colors.white,
+                alignItems: 'center',
+              }}
+              onPress={pressSeeComisionsHandler}
+            >
+              Ver comisión{` `}
+              <Icon name="external-link" size={16} color={colors.white} />
+            </Text>
+          </Text>
+          <Text level={5} style={{ color: colors.white }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            No tienes que ser empresa para vender, todos tienen las mismas
+            oportunidades.
           </Text>
         </View>
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
