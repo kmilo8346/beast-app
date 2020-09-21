@@ -40,7 +40,7 @@ import OrdersInProgressCache, {
   OrdersInProgressCacheData,
 } from '../../cache/orders-in-progress-cache';
 // styles
-import globalStyle from '../../styles';
+import globalStyles from '../../styles';
 import colors from '../../styles/colors';
 
 // instances outside component
@@ -223,7 +223,7 @@ export default ({ navigation }: MenuProps) => {
     }
     content = (
       <ScrollView
-        style={[{ flex: 1, paddingTop: 15 }, globalStyle.withPadding]}
+        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
       >
         <View
           style={{
@@ -243,7 +243,7 @@ export default ({ navigation }: MenuProps) => {
             weight="bold"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ marginLeft: 10 }}
+            style={{ marginLeft: 10, flex: 1, flexWrap: 'wrap' }}
           >{`¡Hola ${user.first_name}!`}</Text>
         </View>
 
@@ -265,20 +265,20 @@ export default ({ navigation }: MenuProps) => {
         />
         <Item name="Ayuda" onPress={pressHelpHandler} />
 
-        <View style={globalStyle.withScreenAir} />
+        <View style={globalStyles.withScreenAir} />
       </ScrollView>
     );
     mainAction = (
       <Button
         title="Cerrar sesión"
-        style={globalStyle.withMainActionAir}
+        style={globalStyles.withMainActionAir}
         onPress={pressCloseSessionHandler}
       />
     );
   } else {
     content = (
       <ScrollView
-        style={[{ flex: 1, paddingTop: 15 }, globalStyle.withPadding]}
+        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
       >
         <View
           style={{
@@ -312,13 +312,13 @@ export default ({ navigation }: MenuProps) => {
         />
         <Item name="Ayuda" onPress={pressHelpHandler} />
 
-        <View style={globalStyle.withScreenAir} />
+        <View style={globalStyles.withScreenAir} />
       </ScrollView>
     );
     mainAction = (
       <Button
         title="Iniciar sessión"
-        style={globalStyle.withMainActionAir}
+        style={globalStyles.withMainActionAir}
         onPress={pressStartSessionHandler}
       />
     );
@@ -398,16 +398,15 @@ export default ({ navigation }: MenuProps) => {
         paddingTop: insets.top,
       }}
     >
+      <View style={globalStyles.screenWithoutHeaderSpace} />
       <Text
         level={2}
         weight="bold"
-        style={[{ marginBottom: 5 }, globalStyle.withMargin]}
+        style={[{ marginBottom: 5 }, globalStyles.withMargin]}
       >
         Más opciones
       </Text>
-
       {content}
-
       <View
         style={[
           {
@@ -416,7 +415,7 @@ export default ({ navigation }: MenuProps) => {
             right: 0,
             bottom: 0,
           },
-          globalStyle.withMargin,
+          globalStyles.withMargin,
         ]}
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />

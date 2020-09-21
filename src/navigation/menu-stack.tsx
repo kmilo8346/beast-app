@@ -7,7 +7,6 @@ import {
   SetPhoneScreen,
   VerifyPhoneScreen,
   MenuScreen,
-  UpdateAccountScreen,
   OrdersScreen,
   OrderDetailsScreen,
 } from '../screens';
@@ -23,11 +22,6 @@ export default () => {
         name="Menu"
         component={MenuScreen}
         options={{ headerShown: false }}
-      />
-      <MenuStack.Screen
-        name="UpdateAccount"
-        component={UpdateAccountScreen}
-        options={{ title: 'Cuenta' }}
       />
       <MenuStack.Screen
         name="Orders"

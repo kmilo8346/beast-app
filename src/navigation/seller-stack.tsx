@@ -92,22 +92,22 @@ export default () => {
         <SellerStack.Screen
           name="MyProducts"
           component={MyProductsScreen}
-          options={{ headerTitle: 'Mis productos' }}
+          options={{ title: 'Mis productos' }}
         />
         <SellerStack.Screen
           name="MySales"
           component={MySalesScreen}
-          options={{ headerTitle: 'Ventas' }}
+          options={{ title: 'Ventas' }}
         />
         <SellerStack.Screen
           name="SaleDetails"
           component={SaleDetailsScreen}
-          options={{ headerTitle: 'Detalle de venta' }}
+          options={{ title: 'Detalle de venta' }}
         />
         <SellerStack.Screen
           name="StockVerificaton"
           component={StockVerificationScreen}
-          options={{ headerTitle: 'Verificación de stock' }}
+          options={{ title: 'Verificación de stock' }}
         />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>

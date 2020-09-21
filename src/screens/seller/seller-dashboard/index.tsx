@@ -187,6 +187,7 @@ export default ({ navigation }: ScreenProps) => {
       }}
     >
       <ScrollView style={[globalStyles.withPadding]}>
+        <View style={globalStyles.screenWithoutHeaderSpace} />
         <View
           style={{
             flexDirection: 'row',

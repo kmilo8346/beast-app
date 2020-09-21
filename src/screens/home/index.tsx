@@ -387,7 +387,8 @@ export default ({ navigation }: ScreenProps) => {
       style={{ flex: 1, backgroundColor: colors.white, paddingTop: insets.top }}
     >
       <View style={globalStyles.withMargin}>
-        <Text level={2} weight="bold" style={{ marginBottom: 5 }}>
+        <View style={globalStyles.screenWithoutHeaderSpace} />
+        <Text level={2} weight="bold" numberOfLines={1} ellipsizeMode="tail">
           {message}
         </Text>
         <SelectAddress
