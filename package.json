@@ -11,7 +11,7 @@
     "format": "prettier --write ./src/**/*.{ts,tsx}",
     "lint": "eslint --fix ./src/**/*.{ts,tsx}",
     "dev": "npm run start",
-    "release": "npx standard-version -t v --release-as patch && git push --follow-tags origin master"
+    "commit": "git commit -m \"ci(app)\" --allow-empty"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "2.4.0",
