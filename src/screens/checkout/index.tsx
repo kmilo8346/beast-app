@@ -175,6 +175,7 @@ export default ({ navigation, route }: ScreenProps) => {
     if (!redirectUrl) {
       throw new Error(`${prefix} Redirect url must be defined`);
     }
+
     try {
       dispatch({ type: 'reset' });
       const payment = await createPayment(idempotency, redirectUrl);
@@ -191,21 +192,26 @@ export default ({ navigation, route }: ScreenProps) => {
         payment.provider.checkout.init_point,
         redirectUrl
       );
+
       if (result.type === 'success') {
         const redirectData = Linking.parse(result.url);
-        if (!redirectData?.queryParams?.status) {
+        if (redirectData?.queryParams?.status === 'not_mapped') {
           throw new Error(
-            `${prefix} Success redirect must return redirect data status`
+            `${prefix} Redirect status no mapped, data: ${JSON.stringify(
+              redirectData?.queryParams
+            )}`
           );
         }
-        dispatch({
-          type: 'set_redirect_status',
-          redirect_status: redirectData.queryParams
-            .status as MercadopagoPaymentStatus,
-        });
-      } else {
-        dispatch({ type: 'set_cancelled', cancelled: true });
+        if (redirectData?.queryParams?.status) {
+          dispatch({
+            type: 'set_redirect_status',
+            redirect_status: redirectData.queryParams
+              .status as MercadopagoPaymentStatus,
+          });
+          return;
+        }
       }
+      dispatch({ type: 'set_cancelled', cancelled: true });
     } catch (error) {
       if (!axios.isCancel(error)) {
         // TODO: Log error
