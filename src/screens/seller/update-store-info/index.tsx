@@ -20,6 +20,7 @@ import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
+import { capture } from '../../../lib/sentry';
 // constraints
 import constraints from './constraints';
 // types
@@ -135,8 +136,7 @@ export default ({ navigation }: ScreenProps) => {
       storeCache.setData(state.store);
       navigation.navigate('SellerDashboard');
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Press continue handler error', error);
 
       toastRef.current?.show({
         message: 'Ocurrió un error inesperado',

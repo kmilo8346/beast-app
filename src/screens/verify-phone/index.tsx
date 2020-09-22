@@ -15,6 +15,8 @@ import phoneClient from '../../clients/phone-client';
 import userClient from '../../clients/user-client';
 // cache
 import userCache from '../../cache/user';
+// libs
+import { capture } from '../../lib/sentry';
 // types
 import { LoggedUser } from '../../types';
 // styles
@@ -103,8 +105,7 @@ export default ({ navigation, route }: ScreenProps) => {
         });
       }
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Send code error', error);
 
       toastRef.current?.show({
         type: 'ERROR',
@@ -167,8 +168,7 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace(redirect.name, redirect.params);
         }
       } catch (error) {
-        // TODO: log error
-        console.log(error);
+        capture(prefix, 'Submit handler error', error);
 
         toastRef.current?.show({
           type: 'ERROR',

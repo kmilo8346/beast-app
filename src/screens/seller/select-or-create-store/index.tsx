@@ -31,6 +31,7 @@ import userClient from '../../../clients/user-client';
 // libs
 import { v4 as uuidv4 } from '../../../lib/uuid';
 import * as utils from '../../../lib/utils';
+import { capture } from '../../../lib/sentry';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -184,8 +185,7 @@ export default ({ navigation }: SelectStoreProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Load error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -211,8 +211,7 @@ export default ({ navigation }: SelectStoreProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -257,8 +256,7 @@ export default ({ navigation }: SelectStoreProps) => {
         })
       );
     } catch (error) {
-      // TODO: Log error
-      console.log(error);
+      capture(prefix, 'Press item handler error', error);
 
       toastRef.current?.show({
         message: 'Ocurrió un error, reintenta por favor',

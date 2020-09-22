@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.42",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
@@ -45,6 +39,14 @@
     },
     "facebookScheme": "fb587498002202284",
     "facebookAppId": "587498002202284",
-    "facebookDisplayName": "Shop Shop"
+    "facebookDisplayName": "Shop Shop",
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {}
+        }
+      ]
+    }
   }
 }

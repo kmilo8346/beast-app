@@ -31,6 +31,7 @@ import userClient from '../../clients/user-client';
 // lib
 import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
+import { capture } from '../../lib/sentry';
 // types
 import { LoggedUser, Place } from '../../types';
 // cache
@@ -143,8 +144,7 @@ export default ({ navigation }: MenuProps) => {
         addresses: info.addresses,
       });
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Address info change handler error', error);
 
       Vibration.vibrate(400);
       toastRef.current?.show({

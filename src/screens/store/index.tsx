@@ -42,6 +42,7 @@ import ShoppingCartCache, {
 import numberFormatter from '../../lib/formatters/number-formatter';
 import useDebounce from '../../lib/hooks/use-debounce';
 import * as utils from '../../lib/utils';
+import { capture } from '../../lib/sentry';
 // types
 import { SearchResponse, Product, SearchFilters, Store } from '../../types';
 // styles
@@ -224,8 +225,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Load error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -247,8 +247,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Refresh error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -281,8 +280,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_error', error });
       }

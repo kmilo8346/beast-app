@@ -19,13 +19,13 @@ import HappyManImage from '../../../components/svgs/images/happy-man';
 import CheckImage from '../../../components/svgs/images/check-blue';
 import PhoneFilledDotsImage from '../../../components/svgs/icons/phone-filled-dots-blue';
 import RouteBlueImage from '../../../components/svgs/icons/route-blue';
-
 // local components
 import Steps, { Step, StepStatus } from '../../components/steps';
 import Item from './components/item';
 // libs
 import * as utils from '../../../lib/utils';
 import numberFormatter from '../../../lib/formatters/number-formatter';
+import { capture } from '../../../lib/sentry';
 // clients
 import orderClient from '../../../clients/order-client';
 // containers
@@ -186,8 +186,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       dispatch({ type: 'change_view', view: 'CONFIRMED' });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: log error
-        console.log(error);
+        capture(prefix, 'Confirm error', error);
 
         toastRef.current?.show({
           message: 'Ocurrió un error inesperado, reintente',
@@ -215,8 +214,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       dispatch({ type: 'change_view', view: 'DELIVERED' });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: log error
-        console.log(error);
+        capture(prefix, 'Deliver error', error);
 
         toastRef.current?.show({
           message: 'Ocurrió un error inesperado, reintente',

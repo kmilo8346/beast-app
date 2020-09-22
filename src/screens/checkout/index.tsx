@@ -33,6 +33,7 @@ import ShoppingCartCache, {
 } from '../../cache/shopping-cart';
 // libs
 import { generatePushID } from '../../lib/uuid';
+import { capture } from '../../lib/sentry';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -214,8 +215,7 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_cancelled', cancelled: true });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Open checkout error', error);
 
         dispatch({ type: 'set_error', error });
       }
