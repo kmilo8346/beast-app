@@ -244,6 +244,7 @@ export default ({ navigation }: ScreenProps) => {
         current_address: info.current_address,
         addresses: info.addresses,
       });
+      throw new Error('Booom');
     } catch (error) {
       capture(prefix, 'Change address info handler error', error);
 
