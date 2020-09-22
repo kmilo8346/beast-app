@@ -3,9 +3,10 @@ import Constants from 'expo-constants';
 
 Sentry.init({
   dsn: Constants.manifest.extra.SENTRY_DSN,
-  enableInExpoDevelopment: true,
-  debug: true,
   environment: Constants.manifest.extra.BEAST_ENVIRONMENT,
+  // change to test sentry code in development
+  enableInExpoDevelopment: false,
+  debug: false,
 });
 
 export const capture = (
