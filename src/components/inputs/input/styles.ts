@@ -42,7 +42,7 @@ export default StyleSheet.create<Styles>({
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 4,
-    paddingRight: 50,
+    paddingRight: 0,
     fontSize: 14,
     color: colors.black,
     fontFamily: 'MonserratNormal',

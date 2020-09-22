@@ -35,6 +35,7 @@ export default ({
   return (
     <Input
       {...otherProps}
+      keyboardType="numeric"
       value={formmattedValue}
       onChangeText={changeTextHandler}
     />

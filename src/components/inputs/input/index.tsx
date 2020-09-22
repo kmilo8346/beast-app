@@ -117,6 +117,7 @@ export default forwardRef<Ref, InputProps>(
           </Text>
         </View>
       );
+      finalStyle.push({ paddingRight: 50 });
     }
     finalStyle.push(inputProps.style);
     return (
