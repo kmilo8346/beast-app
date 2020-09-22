@@ -44,11 +44,22 @@ export default ({ navigation }: ScreenProps) => {
         weight="light"
         style={{ marginTop: 30, lineHeight: 23, textAlign: 'center' }}
       >
-        Comprar y vender nunca fue tan sencillo. Descubre lo que venden tus{' '}
         <Text level={5} weight="bold">
-          vecinos y más.
-        </Text>
-        .
+          Comprar y vender{' '}
+        </Text>{' '}
+        nunca fue tan sencillo.{' '}
+        <Text level={5} weight="bold">
+          Descubre{' '}
+        </Text>{' '}
+        lo que{' '}
+        <Text level={5} weight="bold">
+          venden{' '}
+        </Text>{' '}
+        tus{' '}
+        <Text level={5} weight="bold">
+          vecinos{' '}
+        </Text>{' '}
+        y más.
       </Text>
       <View
         style={[
