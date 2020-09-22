@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Animated, Platform } from 'react-native';
+import { View, Animated, Platform, ActivityIndicator } from 'react-native';
 import LottieView from 'lottie-react-native';
+import colors from '../../styles/colors';
 
 // assets
 const Loading = require('../../../assets/lotties/carga.json');
@@ -73,16 +74,18 @@ export default ({ message_type = MessageTypes.CLIENT }: ComponentProps) => {
         alignItems: 'center',
       }}
     >
-      {Platform.OS === 'android' ? null : (
-        <LottieView
-          style={{
-            height: 300,
-            marginBottom: -50,
-          }}
-          autoPlay
-          source={Loading}
-        />
-      )}
+      {Platform.OS === 'android' ? (
+        <ActivityIndicator size="large" color={colors.blue} />
+      ) : (
+          <LottieView
+            style={{
+              height: 300,
+              marginBottom: -50,
+            }}
+            autoPlay
+            source={Loading}
+          />
+        )}
 
       <Animated.Text
         style={[
