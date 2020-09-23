@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../components/text';
@@ -27,7 +28,7 @@ export default ({ navigation }: ScreenProps) => {
     });
   };
   const pressTermHandler = () => {
-    Linking.openURL('https://beast-production.web.app/policies/');
+    Linking.openURL(`${Constants.manifest.extra.BEAST_WEB_URL}/policies`);
   };
   const ButtonGoToTermsTitle = (
     <>
