@@ -26,7 +26,7 @@ import widgetClient from '../../clients/widget-client';
 import userClient from '../../clients/user-client';
 // libs
 import * as utils from '../../lib/utils';
-import Sentry, { capture } from '../../lib/sentry';
+import { capture } from '../../lib/sentry';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
