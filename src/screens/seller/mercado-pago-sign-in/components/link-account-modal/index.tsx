@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
@@ -88,6 +88,11 @@ export default ({
         source={{
           uri: `${Constants.manifest.extra.MERCADO_PAGO_AUTH_URL}?client_id=${Constants.manifest.extra.MERCADO_PAGO_AUTH_CLIENT_ID}&response_type=code&platform_id=mp&redirect_uri=${Constants.manifest.extra.MERCADO_PAGO_AUTH_REDIRECT_URI}`,
         }}
+        userAgent={
+          Platform.OS === 'android'
+            ? 'Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19'
+            : undefined
+        }
         startInLoadingState
         ref={webViewRef}
         renderLoading={() => (
