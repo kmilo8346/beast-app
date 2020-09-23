@@ -128,20 +128,19 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
   // state
   const product: Product | undefined = route.params?.product;
   const onChangeProduct = route.params?.onChangeProduct || noop;
-
+  const user = userCache.getData();
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
   const [state, dispatch] = useReducer(reducer, {
     view: CreateOrUpdateProductView.FORM,
     form: {
-      reference: uuidv4(),
+      reference: `${`${user.id}`.substring(0, 6)}-${uuidv4()}`,
       product,
       // other form states
       submitted: false,
     },
   });
-  const user = userCache.getData();
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be defined`);

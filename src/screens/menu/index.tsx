@@ -231,7 +231,7 @@ https://beast-production.web.app/`,
   let mainAction: ReactNode | null = null;
   if (userCache.isLogged()) {
     const user = userCache.getData() as LoggedUser;
-    let myOrdersText = '';
+    let myOrdersText = 'Pedidos en curso, histórico';
     if (inProgressQty && inProgressQty > 0) {
       myOrdersText = `Tienes ${inProgressQty} pedidos en curso`;
     }
@@ -278,8 +278,8 @@ https://beast-production.web.app/`,
           description={myOrdersText}
         />
         <Item
-          name="Compartir Shop Shop"
-          description="Conecta a tus clientes con tu negocio"
+          name="Compartir app"
+          description="Comparte con amigos y clientes"
           onPress={pressShareHandler}
         />
         <Item name="Ayuda" onPress={pressHelpHandler} />
@@ -349,7 +349,7 @@ https://beast-production.web.app/`,
         <View
           style={{
             alignItems: 'center',
-            marginBottom: 15,
+            paddingBottom: 15,
             backgroundColor: colors.white,
           }}
         >
@@ -365,7 +365,7 @@ https://beast-production.web.app/`,
         <View
           style={{
             alignItems: 'center',
-            marginBottom: 15,
+            paddingBottom: 15,
             backgroundColor: colors.white,
           }}
         >
@@ -387,7 +387,7 @@ https://beast-production.web.app/`,
         <View
           style={{
             alignItems: 'center',
-            marginBottom: 15,
+            paddingBottom: 15,
             backgroundColor: colors.white,
           }}
         >
@@ -433,6 +433,7 @@ https://beast-production.web.app/`,
             left: 0,
             right: 0,
             bottom: 0,
+            backgroundColor: colors.white,
           },
           globalStyles.withMargin,
         ]}

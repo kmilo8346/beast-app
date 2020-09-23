@@ -232,7 +232,7 @@ export default ({ navigation }: SelectStoreProps) => {
     storeCache.replaceData({
       user: state.user.id,
       phone: state.user.phone as string,
-      reference: uuidv4(),
+      reference: `${`${state.user.id}`.substring(0, 6)}-${uuidv4()}`,
       payment_provider: PaymentProvider.MERCADOPAGO,
       dispatch_provider: DispatchProvider.OWNER,
     });
