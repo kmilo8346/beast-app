@@ -11,6 +11,7 @@ import Icon from '../../../../../components/icon';
 import FullModal, { FullModalProps } from '../../../../components/full-modal';
 // libs
 import * as utils from '../../../../../lib/utils';
+import Sentry, { capture } from '../../../../../lib/sentry';
 // styles
 import colors from '../../../../../styles/colors';
 
@@ -45,15 +46,18 @@ export default ({
       webViewRef.current?.stopLoading();
       const parsed = Linking.parse(url);
       if (parsed.queryParams?.code) {
-        console.log('onRedirectOk', parsed.queryParams);
         onRedirectOk(parsed.queryParams?.code);
       } else {
-        // TODO: log error
-        console.log(
-          `${prefix} Redirecting error, details`,
-          url,
-          parsed.queryParams
+        capture(
+          prefix,
+          'Redirecting error',
+          undefined,
+          (scope: Sentry.Scope) => {
+            scope.setExtra('url', url);
+            scope.setExtra('query_params', parsed.queryParams);
+          }
         );
+
         onRedirectFail();
       }
     }

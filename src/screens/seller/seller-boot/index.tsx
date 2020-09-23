@@ -5,11 +5,12 @@ import axios, { CancelTokenSource } from 'axios';
 // components
 import Loading, { MessageTypes } from '../../../components/loading';
 import ErrorView from '../../../components/error-view';
-// clients../../../clients/user-client
 import userClient from '../../../clients/user-client';
 import storeClient from '../../../clients/store-client';
 // types
 import { LoggedUser } from '../../../types';
+// libs
+import { capture } from '../../../lib/sentry';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -126,8 +127,7 @@ export default ({ navigation, route }: SellerBootProps) => {
             return;
           }
 
-          // TODO: log error
-          console.log(error);
+          capture(prefix, 'Boot error', error);
           dispatch({ type: 'change_view', view: SellerBootView.ERROR });
         }
       }

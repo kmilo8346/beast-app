@@ -11,6 +11,7 @@ import ErrorView from './components/error-view';
 import firebase from './lib/firebase';
 import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
+import Sentry, { capture } from './lib/sentry';
 // cache
 import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
 // fonts
@@ -53,6 +54,16 @@ class App extends React.Component<{}, State> {
           authUser.uid
         );
         orderInProgressCache.startListening();
+
+        // indetify user in sentry
+        const user: Sentry.User = {
+          id: authUser.uid,
+        };
+        if (!authUser.isAnonymous) {
+          user.username = authUser.displayName as string;
+          user.email = authUser.email as string;
+        }
+        Sentry.setUser(user);
       }
     });
   };
@@ -61,9 +72,8 @@ class App extends React.Component<{}, State> {
     this.unsubscribe();
   };
 
-  componentDidCatch = (error: any, errorInfo: any) => {
-    // You can also log the error to an error reporting service
-    console.log(`Unexpected error`, error, errorInfo);
+  componentDidCatch = (error: any) => {
+    capture(prefix, 'Unexpected error', error);
   };
 
   retryHandler = () => {
@@ -78,8 +88,7 @@ class App extends React.Component<{}, State> {
   };
 
   appLoadingErrorHandler = (error: Error) => {
-    // TODO: manage errors
-    console.log(`${prefix} Preloading error: ${error}`);
+    capture(prefix, 'Preloading assets error', error);
   };
 
   appLoadingFinishHandler = () => {

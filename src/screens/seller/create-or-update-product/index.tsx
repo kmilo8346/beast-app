@@ -29,6 +29,7 @@ import numberFormatter from '../../../lib/formatters/number-formatter';
 import stringParser from '../../../lib/parsers/string-parser';
 import { noop } from '../../../lib/utils';
 import { v4 as uuidv4 } from '../../../lib/uuid';
+import { capture } from '../../../lib/sentry';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -173,8 +174,8 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
 
       dispatch({ type: 'show_published' });
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Create or update product error', error);
+
       toastRef.current?.show({
         message: 'Ocurrió un error, reintenta por favor',
         type: 'ERROR',

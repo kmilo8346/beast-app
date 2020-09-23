@@ -19,6 +19,8 @@ import mpOauthTokenClient from '../../../clients/mercado-pago/oauth-token-client
 import mpUserClient from '../../../clients/mercado-pago/user-client';
 import storeClient from '../../../clients/store-client';
 import userClient from '../../../clients/user-client';
+// libs
+import { capture } from '../../../lib/sentry';
 // types
 import { SellerCredentials } from '../../../types';
 // cache
@@ -161,8 +163,7 @@ export default ({ navigation }: ScreenProps) => {
         });
       }
     } catch (error) {
-      // TODO: log error
-      console.log(`${prefix}`, error);
+      capture(prefix, 'Set account error', error);
 
       Vibration.vibrate(400);
       toastRef.current?.show({
@@ -215,8 +216,7 @@ export default ({ navigation }: ScreenProps) => {
         })
       );
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Press lets start handler error', error);
 
       Vibration.vibrate(400);
       toastRef.current?.show({

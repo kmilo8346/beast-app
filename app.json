@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.42",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,30 +17,35 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
       "buildNumber": "1.0.42",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta app usa la cámara para tomar imágenes de tiendas y productos",
+        "NSPhotoLibraryUsageDescription": "Esta app usa la biblioteca de fotos para cargar imágenes de tiendas y productos"
       }
     },
     "android": {
       "package": "com.firedevs.beast",
       "versionCode": 380010042,
       "icon": "./assets/icon-android.png",
-      "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "VIBRATE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+      "permissions": ["CAMERA", "VIBRATE"]
     },
     "facebookScheme": "fb587498002202284",
     "facebookAppId": "587498002202284",
-    "facebookDisplayName": "Shop Shop"
+    "facebookDisplayName": "Shop Shop",
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {}
+        }
+      ]
+    }
   }
 }

@@ -44,22 +44,8 @@ export default ({ navigation }: ScreenProps) => {
         weight="light"
         style={{ marginTop: 30, lineHeight: 23, textAlign: 'center' }}
       >
-        <Text level={5} weight="bold">
-          Comprar y vender{' '}
-        </Text>{' '}
-        nunca fue tan sencillo.{' '}
-        <Text level={5} weight="bold">
-          Descubre{' '}
-        </Text>{' '}
-        lo que{' '}
-        <Text level={5} weight="bold">
-          venden{' '}
-        </Text>{' '}
-        tus{' '}
-        <Text level={5} weight="bold">
-          vecinos{' '}
-        </Text>{' '}
-        y más.
+        Comprar y vender nunca fue tan sencillo. Descubre lo que venden tus
+        vecinos y más.
       </Text>
       <View
         style={[

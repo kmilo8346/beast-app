@@ -47,8 +47,9 @@
     "react-native-screens": "~2.9.0",
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
-    "validate.js": "^0.13.1",
-    "react-native-webview": "9.4.0"
+    "react-native-webview": "9.4.0",
+    "sentry-expo": "^2.1.2",
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

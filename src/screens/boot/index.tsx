@@ -12,6 +12,7 @@ import userCache from '../../cache/user';
 // libs
 import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
+import { capture } from '../../lib/sentry';
 // styles
 import colors from '../../styles/colors';
 import { LoggedUser } from '../../types';
@@ -134,8 +135,7 @@ export default ({ navigation }: BootProps) => {
         return;
       }
 
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Fetch user error', error);
 
       dispatch({ type: 'change_view', view: BootView.ERROR });
     }

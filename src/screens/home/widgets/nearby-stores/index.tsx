@@ -12,6 +12,7 @@ import StoreCard from './components/store-card';
 import storeClient from '../../../../clients/store-client';
 // libs
 import { navigate } from '../../../../lib/root-navigation';
+import { capture } from '../../../../lib/sentry';
 // types
 import {
   ComputedWidget,
@@ -21,6 +22,7 @@ import {
 } from '../../../../types';
 
 // instances outside component
+const prefix = '[nearby stores widget component]';
 let fetchRequestSource: CancelTokenSource;
 
 type SetFetchingMoreAction = {
@@ -108,8 +110,7 @@ export default ({ data }: ComponentProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_error', error });
       }

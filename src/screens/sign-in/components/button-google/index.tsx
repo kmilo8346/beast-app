@@ -9,6 +9,7 @@ import Text from '../../../../components/text';
 import GoogleIcon from '../../../../components/svgs/icons/google';
 // libs
 import firebase from '../../../../lib/firebase';
+import { capture } from '../../../../lib/sentry';
 // styles
 import colors from '../../../../styles/colors';
 
@@ -25,10 +26,6 @@ export interface ButtonGoogleProps {
  * @site https://github.com/firebase/FirebaseUI-Android/issues/1180
  */
 export default ({ onOK = () => null }: ButtonGoogleProps) => {
-  // expoClientId: Constants.manifest.extra.GOOGLE_AUTH_EXPO_CLIENT_ID,
-  // iosClientId: Constants.manifest.extra.GOOGLE_AUTH_IOS_CLIENT_ID,
-  // androidClientId: Constants.manifest.extra.GOOGLE_AUTH_ANDROID_CLIENT_ID,
-
   // event handlers
   const login = async () => {
     try {
@@ -48,8 +45,7 @@ export default ({ onOK = () => null }: ButtonGoogleProps) => {
         onOK(firebase.auth.GoogleAuthProvider.credential(result.idToken));
       }
     } catch (error) {
-      // TODO: manage error
-      console.log(`${prefix}`, error);
+      capture(prefix, 'Login error', error);
     }
   };
 

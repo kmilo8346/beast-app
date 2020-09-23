@@ -5,6 +5,10 @@ import { Linking } from 'react-native';
 import ActionSheet from '../action-sheet';
 // libs
 import * as utils from '../../../lib/utils';
+import { capture } from '../../../lib/sentry';
+
+// instances outside component
+const prefix = '[action sheet contact component]';
 
 export interface ActionSheetContactProps {
   phone: string;
@@ -52,8 +56,7 @@ export default ({
               break;
           }
         } catch (error) {
-          // TODO: log error
-          console.log(error);
+          capture(prefix, 'Call action handler error', error);
         } finally {
           onRequestClose();
         }

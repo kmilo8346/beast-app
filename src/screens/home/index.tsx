@@ -26,6 +26,7 @@ import widgetClient from '../../clients/widget-client';
 import userClient from '../../clients/user-client';
 // libs
 import * as utils from '../../lib/utils';
+import Sentry, { capture } from '../../lib/sentry';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
@@ -190,8 +191,7 @@ export default ({ navigation }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Load error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -216,8 +216,7 @@ export default ({ navigation }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Refresh error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -246,8 +245,7 @@ export default ({ navigation }: ScreenProps) => {
         addresses: info.addresses,
       });
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Change address info handler error', error);
 
       toastRef.current?.show({
         message: 'No se pudo actualizar las direcciones, reintente',
@@ -381,6 +379,7 @@ export default ({ navigation }: ScreenProps) => {
       </Touchable>
     );
   }
+
   // data
   return (
     <View

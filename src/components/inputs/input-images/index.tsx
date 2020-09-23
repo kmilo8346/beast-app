@@ -11,6 +11,7 @@ import ButtonIcon from '../../buttons/button-icon';
 import ActionSheet from '../../modals/action-sheet';
 // libs
 import cloudinary from '../../../lib/cloudinary';
+import { capture } from '../../../lib/sentry';
 // styles
 import colors from '../../../styles/colors';
 
@@ -158,8 +159,7 @@ export default ({
       updateImage(newImage.id, { url });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Image picked handler error', error);
 
         onError(error);
       }

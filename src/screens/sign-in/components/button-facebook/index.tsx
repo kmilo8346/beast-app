@@ -9,6 +9,7 @@ import FacebookIcon from '../../../../components/svgs/icons/facebook';
 // libs
 import firebase from '../../../../lib/firebase';
 import colors from '../../../../styles/colors';
+import { capture } from '../../../../lib/sentry';
 
 // instances outside component
 const prefix = '[button facebook component]';
@@ -39,8 +40,7 @@ export default ({ onOK = () => null }: ButtonFacebookProps) => {
         onOK(firebase.auth.FacebookAuthProvider.credential(result.token));
       }
     } catch (error) {
-      // TODO: log error
-      console.log(`${prefix}`, error);
+      capture(prefix, 'Login error', error);
     }
   };
 

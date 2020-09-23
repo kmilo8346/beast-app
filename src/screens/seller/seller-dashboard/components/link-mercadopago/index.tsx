@@ -15,9 +15,6 @@ export default () => {
     try {
       await Linking.openURL('mercadopago://');
     } catch (error) {
-      // TODO: log errors
-      console.log(error);
-
       Linking.openURL('https://mercadopago.com');
     }
   };

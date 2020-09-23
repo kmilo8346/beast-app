@@ -17,6 +17,7 @@ import {
 } from '../../../../../types';
 // libs
 import * as utils from '../../../../../lib/utils';
+import { capture } from '../../../../../lib/sentry';
 // clients
 import orderClient from '../../../../../clients/order-client';
 // cache
@@ -142,8 +143,7 @@ export default ({
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Load error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -169,8 +169,7 @@ export default ({
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_error', error });
       }
@@ -191,8 +190,7 @@ export default ({
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Refresh error', error);
 
         dispatch({ type: 'set_error', error });
       }

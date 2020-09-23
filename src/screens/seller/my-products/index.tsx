@@ -28,6 +28,7 @@ import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import useDebounce from '../../../lib/hooks/use-debounce';
+import { capture } from '../../../lib/sentry';
 // types
 import { Product, SearchResponse } from '../../../types';
 // styles
@@ -218,8 +219,7 @@ export default ({ navigation }: MyProductsProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Load products error', error);
 
         dispatch({ type: 'change_view', view: MyProductsView.ERROR });
       }
@@ -249,8 +249,7 @@ export default ({ navigation }: MyProductsProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        // TODO: Log error
-        console.log(error);
+        capture(prefix, 'Fecth more products error', error);
 
         dispatch({ type: 'change_view', view: MyProductsView.ERROR });
       }
@@ -274,8 +273,7 @@ export default ({ navigation }: MyProductsProps) => {
         expiration: 3,
       });
     } catch (error) {
-      // TODO: Log error
-      console.log(error);
+      capture(prefix, 'Update product error', error);
 
       toastRef.current?.show({
         message: 'Ocurrió un error inesperado',
@@ -299,8 +297,7 @@ export default ({ navigation }: MyProductsProps) => {
         expiration: 3,
       });
     } catch (error) {
-      // TODO: Log error
-      console.log(error);
+      capture(prefix, 'Delete product error', error);
 
       toastRef.current?.show({
         message: 'Ocurrió un error inesperado',

@@ -2,7 +2,11 @@ import { AsyncStorage } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 
+// clients
 import deviceClient from '../clients/device-client';
+// libs
+import { capture } from '../lib/sentry';
+// types
 import { CreateDevice, Device } from '../types';
 
 const prefix = '[device agent]';
@@ -80,10 +84,7 @@ class DeviceAgent {
 
       await this.save(device as Device);
     } catch (error) {
-      // TODO: log error
-      console.log(error);
-
-      // sync dont crash the app
+      capture(prefix, 'Sync error', error);
     }
   }
 }
