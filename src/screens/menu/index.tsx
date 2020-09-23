@@ -128,7 +128,7 @@ export default ({ navigation }: MenuProps) => {
       const user = userCache.getData() as LoggedUser;
       await Share.share({
         message: `${user.first_name} quiere que instales Shop Shop para que compres y vendas sin límites. Aquí puedes descargar la App:
-https://beast-production.web.app/`,
+https://shopshopapp.cl/`,
       });
     } catch (error) {
       // TODO: log error
