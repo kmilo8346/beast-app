@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.43](https://github.com/firedevs-team/beast-app/compare/v1.0.42...v1.0.43) (2020-09-23)
+
+
+### Bug Fixes
+
+* **app json:** text ([9d89d59](https://github.com/firedevs-team/beast-app/commit/9d89d59615c2195509df9ec92b069eefd610bb2d))
+* **home:** removing test code ([ef1ceaf](https://github.com/firedevs-team/beast-app/commit/ef1ceaf0be575e5845dbb4f6fd21d1b034caa33e))
+* **home screen:** removing unused import ([5efdf75](https://github.com/firedevs-team/beast-app/commit/5efdf7507c335aa13588cc21fa2e56440ee4d050))
+* **onboarding:** removing a lot of bold ([3fd385d](https://github.com/firedevs-team/beast-app/commit/3fd385d686556856d418bb80bba52781a55a3b9f))
+* **share:** change link ([3967a37](https://github.com/firedevs-team/beast-app/commit/3967a379f781b405e00ccf33f87945c69a5366bd))
+
 ### [1.0.42](https://github.com/firedevs-team/beast-app/compare/v1.0.41...v1.0.42) (2020-09-21)
 
 ### [1.0.41](https://github.com/firedevs-team/beast-app/compare/v1.0.40...v1.0.41) (2020-09-21)
