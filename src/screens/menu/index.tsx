@@ -11,6 +11,7 @@ import {
   Image,
   GestureResponderEvent,
   Vibration,
+  Share,
 } from 'react-native';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -119,6 +120,19 @@ export default ({ navigation }: MenuProps) => {
       },
       dont_allow_guest: true,
     });
+  };
+
+  const pressShareHandler = async () => {
+    try {
+      const user = userCache.getData() as LoggedUser;
+      await Share.share({
+        message: `${user.first_name} quiere que instales Shop Shop para que compres y vendas sin límites. Aquí puedes descargar la App:
+https://beast-production.web.app/`,
+      });
+    } catch (error) {
+      // TODO: log error
+      console.log(error);
+    }
   };
 
   const addressInfoChangeHandler = async (info: {
@@ -262,6 +276,11 @@ export default ({ navigation }: MenuProps) => {
           name="Mis pedidos"
           onPress={pressMyOrdersHandler}
           description={myOrdersText}
+        />
+        <Item
+          name="Compartir Shop Shop"
+          description="Conecta a tus clientes con tu negocio"
+          onPress={pressShareHandler}
         />
         <Item name="Ayuda" onPress={pressHelpHandler} />
 
