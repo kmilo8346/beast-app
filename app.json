@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.45",
+    "version": "1.0.46",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,7 +27,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.45",
+      "buildNumber": "1.0.46",
       "config": {
         "usesNonExemptEncryption": false
       },
@@ -38,8 +38,13 @@
     },
     "android": {
       "package": "com.firedevs.beast",
-      "versionCode": 380010045,
+      "versionCode": 380010046,
       "icon": "./assets/icon-android.png",
+      "permissions": [
+        "CAMERA",
+        "VIBRATE"
+      ],
+      "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true
     },
     "facebookScheme": "fb587498002202284",

@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "525584270888",
+    "firebase_url": "https://beast-production.firebaseio.com",
+    "project_id": "beast-production",
+    "storage_bucket": "beast-production.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:525584270888:android:d7f2e6910d73e692a6971d",
+        "android_client_info": {
+          "package_name": "com.firedevs.beast"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKO_5MvZ1OXH2DcHaxhZpyTYwD4Q6eMDU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "525584270888-rjkb70j65davl37cbp36pn71rdjkl9m6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.firedevs.beast"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
