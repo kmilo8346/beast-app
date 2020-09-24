@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.45](https://github.com/firedevs-team/beast-app/compare/v1.0.44...v1.0.45) (2020-09-24)
+
+
+### Bug Fixes
+
+* **app json:** adding useNextNotificationsApi ([d5cfff6](https://github.com/firedevs-team/beast-app/commit/d5cfff66febaa9aecec13cb47a9fe4f7eb46eace))
+
 ### [1.0.44](https://github.com/firedevs-team/beast-app/compare/v1.0.43...v1.0.44) (2020-09-24)
 
 
