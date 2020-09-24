@@ -2,6 +2,8 @@ import React, { ReactNode, useReducer, useRef } from 'react';
 import { Vibration, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { CommonActions } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../../components/text';
@@ -12,8 +14,6 @@ import LoadingOverlay, {
 } from '../../../components/loading-overlay';
 import Toast, { IToast } from '../../../components/toast';
 import MercadopagoImage from '../../../components/svgs/images/mercadopago-logo';
-// local components
-import LinkAccountModal from './components/link-account-modal';
 // clients
 import mpOauthTokenClient from '../../../clients/mercado-pago/oauth-token-client';
 import mpUserClient from '../../../clients/mercado-pago/user-client';
@@ -176,6 +176,43 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
+  const openLinkAccount = async () => {
+    const redirect = Linking.makeUrl();
+    if (!redirect) {
+      throw new Error(`${prefix} Redirect must be defined`);
+    }
+    try {
+      const result = await WebBrowser.openAuthSessionAsync(
+        `${
+          Constants.manifest.extra.MERCADO_PAGO_CLOSE_SESSION_URL
+        }${encodeURIComponent(
+          `${Constants.manifest.extra.MERCADO_PAGO_AUTH_URL}?client_id=${Constants.manifest.extra.MERCADO_PAGO_AUTH_CLIENT_ID}&response_type=code&platform_id=mp&state=${redirect}&redirect_uri=${Constants.manifest.extra.MERCADO_PAGO_AUTH_REDIRECT_URI}`
+        )}`,
+        redirect
+      );
+      if (result.type === 'success') {
+        const redirectData = Linking.parse(result.url);
+        if (
+          redirectData.queryParams?.status !== 'ok' ||
+          !redirectData.queryParams?.code
+        ) {
+          throw new Error('');
+        }
+
+        setAccount(redirectData.queryParams.code);
+      }
+    } catch (error) {
+      capture(prefix, 'Open link account error', error);
+
+      Vibration.vibrate(400);
+      toastRef.current?.show({
+        message: 'Ocurrió un error, reintenta por favor',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    }
+  };
+
   const openMercadoLibreGlobal = () => {
     WebBrowser.openBrowserAsync(
       mercado_libre_cancel_urls[state.mp_user.site_id] ||
@@ -184,7 +221,15 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const pressLinkMercadoPagoAccountHandler = () => {
-    dispatch({ type: 'set_link_modal', link_modal: true });
+    openLinkAccount();
+  };
+
+  const pressLinkAgainHandler = () => {
+    openLinkAccount();
+  };
+
+  const pressCancelAccountHandler = () => {
+    openMercadoLibreGlobal();
   };
 
   const pressLetsStartHandler = async () => {
@@ -227,33 +272,6 @@ export default ({ navigation }: ScreenProps) => {
     } finally {
       loadingOverlayRef.current?.hide();
     }
-  };
-
-  const closeLinkModalHandler = () => {
-    dispatch({ type: 'set_link_modal', link_modal: false });
-  };
-
-  const linkRedirectOkHandler = (code: string) => {
-    dispatch({ type: 'set_link_modal', link_modal: false });
-    setAccount(code);
-  };
-
-  const linkRedirectFailHandler = () => {
-    dispatch({ type: 'set_link_modal', link_modal: false });
-    Vibration.vibrate(400);
-    toastRef.current?.show({
-      message: 'Ocurrió un error, reintenta por favor',
-      type: 'ERROR',
-      expiration: 3,
-    });
-  };
-
-  const pressLinkAgainHandler = () => {
-    dispatch({ type: 'set_link_modal', link_modal: true });
-  };
-
-  const pressCancelAccountHandler = () => {
-    openMercadoLibreGlobal();
   };
 
   // render logic
@@ -449,13 +467,6 @@ export default ({ navigation }: ScreenProps) => {
       ]}
     >
       {content}
-      {state.link_modal && (
-        <LinkAccountModal
-          onClose={closeLinkModalHandler}
-          onRedirectOk={linkRedirectOkHandler}
-          onRedirectFail={linkRedirectFailHandler}
-        />
-      )}
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
