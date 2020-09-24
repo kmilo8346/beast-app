@@ -8,6 +8,7 @@ import ButtonIcon from '../../buttons/button-icon';
 import Icon from '../../icon';
 import Text from '../../text';
 import Touchable from '../../touchable';
+import PoweredByGoogle from '../../svgs/images/powered-by-Google-logo';
 // clients
 import placesClient from '../../../clients/google/places-client';
 // types
@@ -68,12 +69,12 @@ type State = {
   address: string;
   place?: Place;
   view:
-    | 'SEARCH_TIPS'
-    | 'PREDICTIONS'
-    | 'ERROR'
-    | 'LOADING_DETAILS'
-    | 'NO_PREDICTIONS'
-    | 'INVALID_SELECTION';
+  | 'SEARCH_TIPS'
+  | 'PREDICTIONS'
+  | 'ERROR'
+  | 'LOADING_DETAILS'
+  | 'NO_PREDICTIONS'
+  | 'INVALID_SELECTION';
   predictions: PlacesAutocompletePrediction[];
 };
 const reducer = (state: State, action: Action): State => {
@@ -276,6 +277,11 @@ export default ({
                 </Touchable>
               );
             })}
+            <View
+              style={{ alignSelf: 'flex-end', marginRight: 12, marginTop: 5 }}
+            >
+              <PoweredByGoogle />
+            </View>
           </>
         );
         break;
