@@ -69,12 +69,12 @@ type State = {
   address: string;
   place?: Place;
   view:
-  | 'SEARCH_TIPS'
-  | 'PREDICTIONS'
-  | 'ERROR'
-  | 'LOADING_DETAILS'
-  | 'NO_PREDICTIONS'
-  | 'INVALID_SELECTION';
+    | 'SEARCH_TIPS'
+    | 'PREDICTIONS'
+    | 'ERROR'
+    | 'LOADING_DETAILS'
+    | 'NO_PREDICTIONS'
+    | 'INVALID_SELECTION';
   predictions: PlacesAutocompletePrediction[];
 };
 const reducer = (state: State, action: Action): State => {
@@ -247,7 +247,17 @@ export default ({
     switch (state.view) {
       case 'PREDICTIONS':
         content = (
-          <>
+          <View
+            style={{
+              height: '100%',
+              position: 'relative',
+            }}
+          >
+            <View
+              style={{ alignSelf: 'flex-end', position: 'relative', top: -7 }}
+            >
+              <PoweredByGoogle />
+            </View>
             {state.predictions.map((prediction, index) => {
               return (
                 <Touchable
@@ -277,12 +287,18 @@ export default ({
                 </Touchable>
               );
             })}
-            <View
-              style={{ alignSelf: 'flex-end', marginRight: 12, marginTop: 5 }}
+            {/* <View
+              style={{
+                position: 'absolute',
+                bottom: 2,
+                right: 6,
+                backgroundColor: colors.white,
+                paddingLeft: 10,
+              }}
             >
-              <PoweredByGoogle />
-            </View>
-          </>
+              
+            </View> */}
+          </View>
         );
         break;
       case 'NO_PREDICTIONS':
