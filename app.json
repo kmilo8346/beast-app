@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.48",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
@@ -40,12 +34,9 @@
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
       "versionCode": 380010048,
-      "permissions": [
-        "CAMERA",
-        "VIBRATE"
-      ],
+      "permissions": ["CAMERA", "VIBRATE"],
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": false
+      "useNextNotificationsApi": true
     },
     "facebookScheme": "fb587498002202284",
     "facebookAppId": "587498002202284",
