@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.44](https://github.com/firedevs-team/beast-app/compare/v1.0.43...v1.0.44) (2020-09-24)
+
+
+### Bug Fixes
+
+* **happy-man.tsx:** fix android transparency ([6ca79e4](https://github.com/firedevs-team/beast-app/commit/6ca79e4881377aa5ea38d7c0f30486f9dea2de1d))
+* **input-place-autocomplete:** add powered by Google logo to search results list ([53b6832](https://github.com/firedevs-team/beast-app/commit/53b683257247806a7c3d45afd3cfcb56b849c93a))
+* **main tab:** bottom tab label beside ([ec83444](https://github.com/firedevs-team/beast-app/commit/ec83444d1430054829eac7d4ae635e337e8779b4))
+
 ### [1.0.43](https://github.com/firedevs-team/beast-app/compare/v1.0.42...v1.0.43) (2020-09-23)
 
 
