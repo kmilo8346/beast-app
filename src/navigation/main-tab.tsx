@@ -21,6 +21,7 @@ import * as utils from '../lib/utils';
 import { User } from '../types';
 // styles
 import colors from '../styles/colors';
+import { TextStyle } from 'react-native';
 
 type SetUserAction = {
   type: 'set_user';
@@ -132,7 +133,7 @@ export default () => {
             }
             return <Icon name={name} size={size} color={color} />;
           },
-          tabBarLabel: () => {
+          tabBarLabel: ({ position }) => {
             let text;
             switch (route.name) {
               case 'SellerStack':
@@ -145,7 +146,17 @@ export default () => {
                 text = 'Inicio';
                 break;
             }
-            return <Text level={8}>{text}</Text>;
+
+            let style: TextStyle = {};
+            if (position === 'beside-icon') {
+              style = { marginLeft: 20, marginTop: 3 };
+            }
+
+            return (
+              <Text level={8} style={style}>
+                {text}
+              </Text>
+            );
           },
         };
       }}
