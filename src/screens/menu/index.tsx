@@ -356,7 +356,11 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
           <Text level={7} style={{ marginBottom: 5 }}>
             Development
           </Text>
-          <Text level={7}>{`Usuario ${user.id}`}</Text>
+          <Text
+            level={7}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >{`Usuario ${user.id}`}</Text>
         </View>
       );
       break;
@@ -374,10 +378,14 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
           </Text>
           <Text
             level={7}
+            numberOfLines={1}
+            ellipsizeMode="tail"
             style={{ marginBottom: 5 }}
           >{`Usuario ${user.id}`}</Text>
           <Text
             level={7}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >{`Commit ${Constants.manifest.extra.GITHUB_SHA}`}</Text>
         </View>
       );
