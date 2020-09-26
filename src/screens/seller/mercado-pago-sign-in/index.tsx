@@ -183,11 +183,7 @@ export default ({ navigation }: ScreenProps) => {
     }
     try {
       const result = await WebBrowser.openAuthSessionAsync(
-        `${
-          Constants.manifest.extra.MERCADO_PAGO_CLOSE_SESSION_URL
-        }${encodeURIComponent(
-          `${Constants.manifest.extra.MERCADO_PAGO_AUTH_URL}?client_id=${Constants.manifest.extra.MERCADO_PAGO_AUTH_CLIENT_ID}&response_type=code&platform_id=mp&state=${redirect}&redirect_uri=${Constants.manifest.extra.MERCADO_PAGO_AUTH_REDIRECT_URI}`
-        )}`,
+        `${Constants.manifest.extra.BEAST_API_URL}/mercadopago/authorization?redirect=${redirect}`,
         redirect
       );
       if (result.type === 'success') {
