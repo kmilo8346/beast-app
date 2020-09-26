@@ -1,3 +1,5 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
+
 import { Item, CreateUser } from '../types';
 
 export const noop = () => {
@@ -114,37 +116,56 @@ export const getStats = (items: Item[]) => {
   );
 };
 
-export const extract = (
-  authUser: firebase.User,
-  profile?: { [key: string]: any }
-): Partial<CreateUser> => {
-  if (authUser.isAnonymous) {
+export const extract = (info: {
+  authUser: firebase.User;
+  profile?: { [key: string]: any };
+  appleCredential?: AppleAuthentication.AppleAuthenticationCredential;
+}): Partial<CreateUser> => {
+  if (info.authUser.isAnonymous) {
     return {
-      id: authUser.uid,
+      id: info.authUser.uid,
     };
   }
 
-  let first_name = authUser.displayName as string;
+  const email = info.authUser.email as string;
+  let first_name = info.authUser.displayName as string;
   let last_name = '';
-  if (profile) {
-    if (profile.first_name) {
-      first_name = profile.first_name;
-    } else if (profile.given_name) {
-      first_name = profile.given_name;
+  let photo_url = info.authUser.photoURL as string;
+  // try to find from profile
+  if (info.profile) {
+    if (info.profile.first_name) {
+      first_name = info.profile.first_name;
+    } else if (info.profile.given_name) {
+      first_name = info.profile.given_name;
     }
 
-    if (profile.last_name) {
-      last_name = profile.last_name;
-    } else if (profile.family_name) {
-      last_name = profile.family_name;
+    if (info.profile.last_name) {
+      last_name = info.profile.last_name;
+    } else if (info.profile.family_name) {
+      last_name = info.profile.family_name;
     }
   }
 
+  // try to find from appleCredential
+  if (!first_name && info.appleCredential) {
+    first_name = info.appleCredential.fullName?.givenName as string;
+    last_name = info.appleCredential.fullName?.familyName as string;
+  }
+  // fallback from email
+  if (!first_name) {
+    first_name = email.substring(0, email.indexOf('@'));
+  }
+
+  if (!photo_url) {
+    photo_url =
+      'https://res.cloudinary.com/firedevs/image/upload/v1601140373/beast/assets/blue-user-logo_wk53b4.png';
+  }
+
   return {
-    id: authUser.uid,
-    email: authUser.email as string,
+    id: info.authUser.uid,
+    email,
     first_name,
     last_name,
-    photo_url: authUser.photoURL as string,
+    photo_url,
   };
 };

@@ -19,7 +19,7 @@ const prefix = '[button google component]';
 WebBrowser.maybeCompleteAuthSession();
 
 export interface ButtonGoogleProps {
-  onOK?: (credential: firebase.auth.OAuthCredential) => void;
+  onOK?: (info: { credential: firebase.auth.OAuthCredential }) => void;
 }
 
 /**
@@ -47,7 +47,11 @@ export default ({ onOK = () => null }: ButtonGoogleProps) => {
 
       if (result.type === 'success') {
         setImmediate(() => {
-          onOK(firebase.auth.GoogleAuthProvider.credential(result.idToken));
+          onOK({
+            credential: firebase.auth.GoogleAuthProvider.credential(
+              result.idToken
+            ),
+          });
         });
       }
     } catch (error) {

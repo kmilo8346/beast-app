@@ -101,7 +101,7 @@ export default ({ navigation }: BootProps) => {
       if (error.response?.status === 404) {
         const cache = userCache.getData();
         if (!cache || cache.id !== authUser.uid) {
-          await userCache.replaceData(utils.extract(authUser));
+          await userCache.replaceData(utils.extract({ authUser }));
         }
         printUserInfo();
         if (userCache.isLogged()) {

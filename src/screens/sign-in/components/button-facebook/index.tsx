@@ -16,7 +16,7 @@ import { capture } from '../../../../lib/sentry';
 const prefix = '[button facebook component]';
 
 export interface ButtonFacebookProps {
-  onOK?: (credential: firebase.auth.OAuthCredential) => void;
+  onOK?: (info: { credential: firebase.auth.OAuthCredential }) => void;
 }
 
 /**
@@ -42,7 +42,11 @@ export default ({ onOK = () => null }: ButtonFacebookProps) => {
       const result = await Facebook.logInWithReadPermissionsAsync();
       if (result.type === 'success') {
         setImmediate(() => {
-          onOK(firebase.auth.FacebookAuthProvider.credential(result.token));
+          onOK({
+            credential: firebase.auth.FacebookAuthProvider.credential(
+              result.token
+            ),
+          });
         });
       }
     } catch (error) {

@@ -2,6 +2,7 @@ import React, { useReducer, ReactNode } from 'react';
 import { View } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 // components
 import Loading from '../../components/loading';
@@ -11,6 +12,7 @@ import BagLogoBackgroundBlue from '../../components/svgs/images/bag-logo-backgro
 // local components
 import ButtonGoogle from './components/button-google';
 import ButtonFacebook from './components/button-facebook';
+import ButtonApple from './components/button-apple';
 // clients
 import userClient from '../../clients/user-client';
 // libs
@@ -26,6 +28,7 @@ import userCache from '../../cache/user';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
+import { capture } from '../../lib/sentry';
 
 // instances outside component
 const prefix = '[sign in screen]';
@@ -195,15 +198,16 @@ export default ({ navigation, route }: ScreenProps) => {
     return user;
   };
 
-  const signInOkHandler = async (
-    credential: firebase.auth.OAuthCredential,
-    credentialToLink?: firebase.auth.OAuthCredential
-  ) => {
+  const signInOkHandler = async (info: {
+    credential: firebase.auth.OAuthCredential;
+    appleCredential?: AppleAuthentication.AppleAuthenticationCredential;
+    credentialToLink?: firebase.auth.OAuthCredential;
+  }) => {
     try {
       dispatch({ type: 'show_loading' });
       const prevAuthUser = auth.currentUser;
       const prevUser = userCache.getData();
-      const result = await auth.signInWithCredential(credential);
+      const result = await auth.signInWithCredential(info.credential);
       if (!result.user) {
         throw new Error(
           `${prefix} Auth user must be defined after a successful signin`
@@ -212,12 +216,10 @@ export default ({ navigation, route }: ScreenProps) => {
 
       // removing anonymously user
       removeAnonymously(prevAuthUser);
-
       // linking current auth user with credential to link
-      if (credentialToLink) {
-        await result.user.linkWithCredential(credentialToLink);
+      if (info.credentialToLink) {
+        await result.user.linkWithCredential(info.credentialToLink);
       }
-
       // init user
       const user = await fetchUser(result.user.uid);
       if (user) {
@@ -260,10 +262,11 @@ export default ({ navigation, route }: ScreenProps) => {
           navigation.replace(redirect.name, redirect.params);
         }
       } else {
-        const newUser = utils.extract(
-          result.user,
-          result.additionalUserInfo?.profile || undefined
-        );
+        const newUser = utils.extract({
+          authUser: result.user,
+          profile: result.additionalUserInfo?.profile || undefined,
+          appleCredential: info.appleCredential,
+        });
         await userCache.replaceData(newUser);
         // set address info
         if (prevUser?.current_address && prevUser.addresses.length) {
@@ -296,6 +299,7 @@ export default ({ navigation, route }: ScreenProps) => {
         }
         return;
       }
+      capture(prefix, 'Sign in ok handler error', error);
       dispatch({ type: 'show_error' });
     }
   };
@@ -323,20 +327,14 @@ export default ({ navigation, route }: ScreenProps) => {
   let linkButton = null;
   if (state.view === 'LINK_FORM') {
     switch (state.linkFormInfo?.singInMethod) {
-      case 'facebook.com':
-        linkButton = (
-          <ButtonFacebook
-            onOK={(credential) => {
-              signInOkHandler(credential, state.linkFormInfo?.credentialToLink);
-            }}
-          />
-        );
-        break;
       default:
         linkButton = (
           <ButtonGoogle
-            onOK={(credential) => {
-              signInOkHandler(credential, state.linkFormInfo?.credentialToLink);
+            onOK={({ credential }) => {
+              signInOkHandler({
+                credential,
+                credentialToLink: state.linkFormInfo?.credentialToLink,
+              });
             }}
           />
         );
@@ -354,7 +352,8 @@ export default ({ navigation, route }: ScreenProps) => {
           Vinculación de cuentas
         </Text>
         <Text level={6} numberOfLines={2} style={{ paddingBottom: 20 }}>
-          {`Ya habías creado una cuenta anteriormente. Entra con ${state.linkFormInfo?.singInMethod} para una correcta vinculación`}
+          Ya habías creado una cuenta anteriormente. Entra con Google para una
+          correcta vinculación
         </Text>
         {linkButton}
       </View>
@@ -395,6 +394,8 @@ export default ({ navigation, route }: ScreenProps) => {
       <ButtonGoogle onOK={signInOkHandler} />
       <View style={{ marginBottom: 15 }} />
       <ButtonFacebook onOK={signInOkHandler} />
+      <View style={{ marginBottom: 15 }} />
+      <ButtonApple onOK={signInOkHandler} />
       <View style={{ flex: 1 }} />
       {guestButton}
     </View>
