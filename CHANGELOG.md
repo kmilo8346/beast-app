@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.50](https://github.com/firedevs-team/beast-app/compare/v1.0.49...v1.0.50) (2020-09-26)
+
+
+### Bug Fixes
+
+* **menu:** fingerprint ([8110511](https://github.com/firedevs-team/beast-app/commit/81105112e29db118220c77d18f557ad40cd6f999))
+* **sign-in / store-item:** add loading indicator and disable buttons when signing in / fix touchable area of the item ([69a6244](https://github.com/firedevs-team/beast-app/commit/69a624404ce5c6b5fda5b769c3d049da0bcf4fe2))
+
 ### [1.0.49](https://github.com/firedevs-team/beast-app/compare/v1.0.48...v1.0.49) (2020-09-24)
 
 ### [1.0.48](https://github.com/firedevs-team/beast-app/compare/v1.0.47...v1.0.48) (2020-09-24)
