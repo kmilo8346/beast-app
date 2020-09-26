@@ -14,6 +14,7 @@ export interface ButtonProps extends Partial<TouchableProps> {
   icon?: string | ReactNode;
   loading?: boolean;
   disabled?: boolean;
+  loadingComponent?: ReactNode;
   type?: 'primary' | 'secondary' | 'link';
   children?: ReactNode;
 }
@@ -23,6 +24,7 @@ export default ({
   icon,
   loading,
   disabled,
+  loadingComponent = <ActivityIndicator color={colors.white} />,
   type = 'primary',
   ...otherProps
 }: ButtonProps) => {
@@ -77,9 +79,7 @@ export default ({
     <Touchable disabled={disabled} {...otherProps} style={containerStyle}>
       <View style={styles.iconContainer}>{iconComponent}</View>
       {titleComponent}
-      <View style={styles.loadingContainer}>
-        {loading && <ActivityIndicator color={colors.white} />}
-      </View>
+      <View style={styles.loadingContainer}>{loading && loadingComponent}</View>
     </Touchable>
   );
 };

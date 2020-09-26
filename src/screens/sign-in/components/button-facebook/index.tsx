@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
 import Constants from 'expo-constants';
 import * as Facebook from 'expo-facebook';
 
@@ -29,18 +30,25 @@ export interface ButtonFacebookProps {
  *
  */
 export default ({ onOK = () => null }: ButtonFacebookProps) => {
+  // state
+  const [processing, setProcessing] = useState(false);
   // event handlers
   const login = async () => {
     try {
+      setProcessing(true);
       await Facebook.initializeAsync(
         Constants.manifest.extra.FACEBOOK_AUTH_CLIENT_ID
       );
       const result = await Facebook.logInWithReadPermissionsAsync();
       if (result.type === 'success') {
-        onOK(firebase.auth.FacebookAuthProvider.credential(result.token));
+        setImmediate(() => {
+          onOK(firebase.auth.FacebookAuthProvider.credential(result.token));
+        });
       }
     } catch (error) {
       capture(prefix, 'Login error', error);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -58,6 +66,9 @@ export default ({ onOK = () => null }: ButtonFacebookProps) => {
     <Button
       title={titleComponent}
       icon={<FacebookIcon />}
+      disabled={processing}
+      loading={processing}
+      loadingComponent={<ActivityIndicator color={colors.black} />}
       onPress={pressHandler}
       style={{
         backgroundColor: colors.blackLight7,

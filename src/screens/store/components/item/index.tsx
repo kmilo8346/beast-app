@@ -87,40 +87,48 @@ export default ({ data }: ComponentProps) => {
     numberInput = <NumberInput value={qty} onChange={changeHandler} />;
   }
   return (
-    <Touchable
-      style={{ flexDirection: 'row', paddingLeft: 6 }}
-      onPress={pressItemHandler}
-    >
-      <View style={{ position: 'relative' }}>
-        <Image
-          source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
-          style={{ width: 50, height: 50, borderRadius: 10 }}
-        />
-        {badge}
-      </View>
+    <View style={{ flexDirection: 'row', paddingLeft: 5 }}>
+      <Touchable
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+        onPress={pressItemHandler}
+      >
+        <View style={{ position: 'relative' }}>
+          <Image
+            source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
+            style={{ width: 50, height: 50, borderRadius: 10 }}
+          />
+          {badge}
+        </View>
 
-      <View style={{ flex: 1, marginLeft: 15 }}>
-        <Text level={6} weight="bold" numberOfLines={1} ellipsizeMode="tail">
-          {data.name}
-        </Text>
-        <Text
-          level={7}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginBottom: 2 }}
-        >
-          {data.description}
-        </Text>
-        <Text level={6} weight="bold">
-          {numberFormatter.toCurrency(data.price)}
-        </Text>
+        <View style={{ flex: 1, marginLeft: 15 }}>
+          <Text level={6} weight="bold" numberOfLines={1} ellipsizeMode="tail">
+            {data.name}
+          </Text>
+          <Text
+            level={7}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginBottom: 2 }}
+          >
+            {data.description}
+          </Text>
+          <Text level={6} weight="bold">
+            {numberFormatter.toCurrency(data.price)}
+          </Text>
+        </View>
+      </Touchable>
+      <View
+        style={{
+          justifyContent: 'flex-end',
+          paddingLeft: 15,
+        }}
+      >
+        {numberInput}
       </View>
-
-      <View style={{ marginLeft: 5, paddingTop: 15 }}>{numberInput}</View>
 
       {modal && (
         <ProductDetailsModal product={data} onClose={closeModalHandler} />
       )}
-    </Touchable>
+    </View>
   );
 };

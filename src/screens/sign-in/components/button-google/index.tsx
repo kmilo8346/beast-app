@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
 import * as Google from 'expo-google-app-auth';
 import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
@@ -26,9 +27,12 @@ export interface ButtonGoogleProps {
  * @site https://github.com/firebase/FirebaseUI-Android/issues/1180
  */
 export default ({ onOK = () => null }: ButtonGoogleProps) => {
+  // state
+  const [processing, setProcessing] = useState(false);
   // event handlers
   const login = async () => {
     try {
+      setProcessing(true);
       const result = await Google.logInAsync({
         androidClientId:
           Constants.manifest.extra.GOOGLE_AUTH_ANDROID_DEVELOPMENT_CLIENT_ID,
@@ -42,10 +46,19 @@ export default ({ onOK = () => null }: ButtonGoogleProps) => {
       });
 
       if (result.type === 'success') {
-        onOK(firebase.auth.GoogleAuthProvider.credential(result.idToken));
+        setImmediate(() => {
+          onOK(firebase.auth.GoogleAuthProvider.credential(result.idToken));
+        });
       }
     } catch (error) {
-      capture(prefix, 'Login error', error);
+      if (error.code === '-3') {
+        // Bug Report: https://github.com/expo/expo/issues/8658
+        console.warn(`${prefix}: User cancelled on iOS`);
+      } else {
+        capture(prefix, 'Login error', error);
+      }
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -63,6 +76,9 @@ export default ({ onOK = () => null }: ButtonGoogleProps) => {
     <Button
       title={titleComponent}
       icon={<GoogleIcon />}
+      disabled={processing}
+      loading={processing}
+      loadingComponent={<ActivityIndicator color={colors.black} />}
       onPress={pressHandler}
       style={{
         backgroundColor: colors.blackLight7,
