@@ -230,7 +230,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           weight="bold"
           style={{ textAlign: 'center', marginTop: 20 }}
         >
-          ¡Producto publicado con exito!
+          ¡Producto publicado con éxito!
         </Text>
         <View
           style={[
@@ -333,7 +333,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
         />
         <InputTags
           label="Tags"
-          placeHolder="desayuno, once"
+          placeHolder="Agrega palabras claves. Ej: colación"
           size={3}
           maxLength={23}
           value={state.form.product?.tags}

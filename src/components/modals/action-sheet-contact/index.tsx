@@ -34,7 +34,7 @@ export default ({
         },
         {
           key: 'message_whatsapp',
-          text: 'Mensaje al vendedor',
+          text: 'WhatsApp al vendedor',
           icon: 'whatsapp',
         },
         { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
