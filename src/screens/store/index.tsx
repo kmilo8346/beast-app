@@ -518,11 +518,7 @@ export default ({ navigation, route }: ScreenProps) => {
         {orderButton}
       </View>
       {state.shopping_cart_modal && (
-        <ShoppingCartModal
-          store={store}
-          snapshot={state.shopping_cart_snapshot as ShoppingCartSnapshot}
-          onClose={closeShoppingCartHandler}
-        />
+        <ShoppingCartModal store={store} onClose={closeShoppingCartHandler} />
       )}
     </View>
   );

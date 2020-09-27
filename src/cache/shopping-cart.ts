@@ -43,7 +43,7 @@ export default class ShoppingCartCache extends PersistedCache<{
     );
   }
 
-  set(product: Product, qty: number) {
+  set(product: Product | Item, qty: number) {
     const data = this.data || {};
 
     if (qty > 0) {
@@ -59,7 +59,7 @@ export default class ShoppingCartCache extends PersistedCache<{
     this.notifyItemChange(product.id, data[product.id]);
   }
 
-  add(product: Product, qty: number) {
+  add(product: Product | Item, qty: number) {
     const data = this.data || {};
     const item = data[product.id] || {};
     data[product.id] = { ...product, qty: (item.qty || 0) + qty };

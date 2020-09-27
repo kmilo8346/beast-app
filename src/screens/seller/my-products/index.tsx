@@ -16,6 +16,7 @@ import Button from '../../../components/buttons/button';
 import Toast, { IToast } from '../../../components/toast';
 import Search from '../../../components/inputs/search';
 import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
+import Text from '../../../components/text';
 // seller components
 import Shortcut from '../components/shortcut';
 // local components
@@ -373,13 +374,17 @@ export default ({ navigation }: MyProductsProps) => {
   }, [debouncedQuery]);
 
   useLayoutEffect(() => {
-    let text = 'Editar';
-    if (state.editting) {
-      text = 'Listo';
-    }
     navigation.setOptions({
       headerRight: () => (
-        <Button title={text} type="link" onPress={pressHeaderLink} />
+        <Button
+          title={
+            <Text level={6} weight="bold" color={colors.blue}>
+              {state.editting ? 'Listo' : 'Editar'}
+            </Text>
+          }
+          type="link"
+          onPress={pressHeaderLink}
+        />
       ),
     });
   }, [state.editting]);
