@@ -71,7 +71,10 @@ export default class ShoppingCartCache extends PersistedCache<{
   }
 
   clear() {
-    this.setData({});
+    const data = this.data || {};
+    Object.keys(data).forEach((id) => {
+      this.set(data[id], 0);
+    });
   }
 
   onChangeItem(id: string, callback: (data: Item | undefined) => void) {

@@ -289,7 +289,7 @@ export default ({ navigation, route }: ScreenProps) => {
           case MercadopagoPaymentStatus.APPROVED:
           case MercadopagoPaymentStatus.IN_PROCESS:
           case MercadopagoPaymentStatus.PENDING:
-            // state.shopping_cart_cache.clear();
+            state.shopping_cart_cache.clear();
             break;
           default:
             break;
