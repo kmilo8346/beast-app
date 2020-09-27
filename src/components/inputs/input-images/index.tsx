@@ -370,7 +370,7 @@ export default ({
             },
             {
               key: 'select_from_roll',
-              text: 'Seleccionar foto de la galería',
+              text: 'Selecciona de galería',
             },
 
             { key: 'cancel', text: 'Cancelar', type: 'cancel' },

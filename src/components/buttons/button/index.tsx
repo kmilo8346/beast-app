@@ -57,7 +57,13 @@ export default ({
   }
   containerStyle.push(otherProps.style as ViewStyle);
   let titleComponent: ReactNode = (
-    <Text level={5} weight="bold" style={titleStyle}>
+    <Text
+      level={5}
+      weight="bold"
+      numberOfLines={1}
+      ellipsizeMode="tail"
+      style={titleStyle}
+    >
       {title}
     </Text>
   );

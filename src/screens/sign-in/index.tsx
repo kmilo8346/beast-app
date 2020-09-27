@@ -385,7 +385,7 @@ export default ({ navigation, route }: ScreenProps) => {
       <View style={{ flexDirection: 'row', marginBottom: 20 }} />
       <BagLogoBackgroundBlue />
       <Text level={1} weight="bold" style={{ marginBottom: 15, marginTop: 10 }}>
-        !Bienvenido!
+        ¡Bienvenido!
       </Text>
       <Text level={5} weight="light" style={{ marginBottom: 50 }}>
         Inicia sesión con tus redes sociales

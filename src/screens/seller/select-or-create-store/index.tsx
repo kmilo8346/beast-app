@@ -380,7 +380,7 @@ export default ({ navigation }: SelectStoreProps) => {
             weight="bold"
             style={{ color: colors.white, marginBottom: 25 }}
           >
-            !Vende con nosotros¡
+            ¡Vende con nosotros!
           </Text>
 
           <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>

@@ -64,7 +64,7 @@ export default ({ navigation }: ScreenProps) => {
           weight="bold"
           style={{ color: colors.white, marginBottom: 25 }}
         >
-          !Vende con nosotros¡
+          ¡Vende con nosotros!
         </Text>
         <Text level={4} style={{ color: colors.white }}>
           Aquí podrás crear una tienda para ofrecer tus productos y servicios.
