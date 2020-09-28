@@ -336,7 +336,7 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
     );
     mainAction = (
       <Button
-        title="Iniciar sessión"
+        title="Iniciar sesión"
         style={globalStyles.withMainActionAir}
         onPress={pressStartSessionHandler}
       />
