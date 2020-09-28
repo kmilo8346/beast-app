@@ -28,6 +28,8 @@ export interface ButtonFacebookProps {
  * Is necesary build a custom expo client with firedevs credentials
  * https://docs.expo.io/guides/adhoc-builds/
  *
+ * @see https://stackoverflow.com/questions/39051517/login-error-there-is-an-error-in-logging-you-into-this-application-please-try/56952547#56952547
+ *
  */
 export default ({ onOK = () => null }: ButtonFacebookProps) => {
   // state
