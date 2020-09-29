@@ -211,7 +211,7 @@ export default ({ navigation }: ScreenProps) => {
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
-          title="Continuar"
+          title="Guardar"
           onPress={pressContinueHandler}
           style={globalStyles.withMainActionAir}
         />
