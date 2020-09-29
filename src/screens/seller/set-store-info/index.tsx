@@ -139,7 +139,7 @@ export default ({ navigation }: ScreenProps) => {
           Información de tienda
         </Text>
         <Text level={5} style={{ marginBottom: 30, lineHeight: 23 }}>
-          Te pediremos algúnos datos necesarios para crear tu tienda
+          Te pediremos algunos datos necesarios para crear tu tienda
         </Text>
         <Input
           placeholder="Minimarket Don Juan"
