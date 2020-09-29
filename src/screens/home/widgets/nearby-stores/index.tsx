@@ -166,10 +166,10 @@ export default ({ data }: ComponentProps) => {
           weight="bold"
           style={{ marginBottom: 40, textAlign: 'center' }}
         >
-          ¡Intentalo de nuevo mas tarde!
+          ¡Inténtalo de nuevo mas tarde!
         </Text>
         <Button
-          title="¡Tambien puedes vender con nosotros!"
+          title="¡También puedes vender con nosotros!"
           type="link"
           onPress={pressLinkHandler}
         />

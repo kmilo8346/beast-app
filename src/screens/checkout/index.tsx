@@ -402,7 +402,7 @@ export default ({ navigation, route }: ScreenProps) => {
                 <Text level={5} weight="bold">
                   {store.name}
                 </Text>{' '}
-                confirme y este en camino.
+                confirme y esté en camino.
               </Text>
             </View>
 
