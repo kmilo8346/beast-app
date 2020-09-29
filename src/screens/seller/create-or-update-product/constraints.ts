@@ -17,7 +17,8 @@ export default {
       message: '^Es requerido',
     },
     numericality: {
-      greaterThan: 0,
+      greaterThan: 1000,
+      lessThanOrEqualTo: 3000000,
       message: '^Precio inválido',
     },
   },
