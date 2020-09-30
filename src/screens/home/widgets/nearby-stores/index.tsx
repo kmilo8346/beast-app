@@ -165,8 +165,12 @@ export default ({ data }: ComponentProps) => {
           </Text>{' '}
           en tu zona.
         </Text>
-        <Text level={4} style={{ marginBottom: 40, textAlign: 'center' }}>
-          ¡Inténtalo de nuevo mas tarde!
+        <Text
+          level={5}
+          weight="bold"
+          style={{ marginBottom: 40, textAlign: 'center' }}
+        >
+          ¡Inténtalo de nuevo más tarde!
         </Text>
         <Button
           title="¡O, crea tu tienda hoy!"
