@@ -4,6 +4,7 @@ import { View, GestureResponderEvent, Vibration } from 'react-native';
 // components
 import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
+import Text from '../../text';
 import InputSelectOptions from '../../inputs/input-select-options';
 import InputPlaceAutocomplete from '../../inputs/input-place-autocomplete';
 // types
@@ -223,6 +224,15 @@ export default ({
   return (
     <Modal {...otherProps} title="Área de despacho">
       <View style={[globalStyle.withMargin]}>
+        <View style={{ marginBottom: 20 }}>
+          <Text level={5}>
+            Crea un área de{' '}
+            <Text level={5} weight="bold">
+              despacho gratis{' '}
+            </Text>
+            y haz feliz a tus vecinos.
+          </Text>
+        </View>
         <InputPlaceAutocomplete
           label="Centro de área"
           placeholder="Jose Manuel Rodríguez 927"
