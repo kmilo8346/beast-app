@@ -18,7 +18,11 @@ import durationFormatter from '../../../../../lib/formatters/duration-formatter'
 import dateFormatter from '../../../../../lib/formatters/date-formatter';
 import * as utils from '../../../../../lib/utils';
 // types
-import { Order, OwnerDispatchStatus } from '../../../../../types';
+import {
+  DispatchProvider,
+  Order,
+  OwnerDispatchStatus,
+} from '../../../../../types';
 // styles
 import colors from '../../../../../styles/colors';
 
@@ -47,17 +51,25 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
   };
 
   // render logic
-  let fullName = sell.customer.first_name;
-  if (sell.customer.last_name) {
-    fullName = `${fullName} ${sell.customer.last_name}`;
+
+  let fullName = 'Usuario x red social';
+  if (sell.dispatch_provider_id === DispatchProvider.OWNER) {
+    fullName = sell.customer.first_name;
+    if (sell.customer.last_name) {
+      fullName = `${fullName} ${sell.customer.last_name}`;
+    }
   }
+
   let totalLabel = 'producto';
   if (stats.total > 1) {
     totalLabel = `${totalLabel}s`;
   }
 
   let distanceText = '';
-  if (sell.dispatch_provider.status !== OwnerDispatchStatus.DELIVERED) {
+  if (
+    sell.dispatch_provider_id === DispatchProvider.OWNER &&
+    sell.dispatch_provider.status !== OwnerDispatchStatus.DELIVERED
+  ) {
     const distance = utils.distance(
       store.delivery_area?.center.geometry.location.lat,
       store.delivery_area.center.geometry.location.lng,

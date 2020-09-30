@@ -24,6 +24,8 @@ import {
   MercadopagoPaymentStatus,
   LoggedUser,
   PaymentProvider,
+  DispatchProvider,
+  CreatePayment,
 } from '../../types';
 // cache
 import userCache from '../../cache/user';
@@ -163,7 +165,9 @@ export default ({ navigation, route }: ScreenProps) => {
             store,
           },
           redirect_url: redirectUrl,
-        },
+          payment_provider_id: PaymentProvider.MERCADOPAGO,
+          dispatch_provider_id: DispatchProvider.OWNER,
+        } as CreatePayment,
         idempotency,
         source: ['id', 'provider'],
       },

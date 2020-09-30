@@ -16,7 +16,7 @@ import Badge from '../../../components/badge';
 import InProgressList from './components/in-progress-list';
 import HistoricalList from './components/historical-list';
 // types
-import { SearchResponse, Order } from '../../../types';
+import { SearchResponse, Order, DispatchProvider } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
 
@@ -76,11 +76,19 @@ export default ({ navigation, route }: MySalesProps) => {
   const pressTabHandler = (view: MySalesView) => {
     dispatch({ type: 'change_view', view });
   };
-  const pressInProgressItemHandler = (order: Order) => {
-    navigation.navigate('SaleDetails', {
-      sale: order,
-    });
+
+  const pressItemHandler = (order: Order) => {
+    if (order.dispatch_provider_id === DispatchProvider.OWNER) {
+      navigation.navigate('OwnerSaleDetails', {
+        sale: order,
+      });
+    } else {
+      navigation.navigate('OwnerRRSSSaleDetails', {
+        sale: order,
+      });
+    }
   };
+
   useEffect(() => {
     if (isFocused && reload) {
       dispatch({ type: 'set_in_progress_orders', inProgressOrders: undefined });
@@ -98,7 +106,7 @@ export default ({ navigation, route }: MySalesProps) => {
           historicalOrders,
         });
       }}
-      onPressItem={pressInProgressItemHandler}
+      onPressItem={pressItemHandler}
     />
   );
   if (state.view === 'IN_PROGRESS') {
@@ -111,7 +119,7 @@ export default ({ navigation, route }: MySalesProps) => {
             inProgressOrders,
           });
         }}
-        onPressItem={pressInProgressItemHandler}
+        onPressItem={pressItemHandler}
       />
     );
   }

@@ -35,13 +35,14 @@ import {
   Order,
   ProductConfirmation,
   OwnerDispatchStatus,
+  DispatchProvider,
 } from '../../../types';
 // styles
 import colors from '../../../styles/colors';
 import globalStyles from '../../../styles';
 
 // instaces outside component
-const prefix = '[sale details screen]';
+const prefix = '[owner sale details screen]';
 let fetchRequestSource: CancelTokenSource;
 const steps: Step[] = [
   {
@@ -104,6 +105,11 @@ export default ({ navigation, route }: SaleDetailsProps) => {
   const sale: Order = route.params.sale;
   if (!sale) {
     throw new Error(`${prefix} Sale must be defined`);
+  }
+  if (sale.dispatch_provider_id !== DispatchProvider.OWNER) {
+    throw new Error(
+      `${prefix} Invalid dispatch provider, dispatch provider: ${sale.dispatch_provider_id}`
+    );
   }
   const store = storeCache.getData();
   if (!store) {

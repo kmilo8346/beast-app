@@ -19,5 +19,6 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 0,
     'consistent-return': 0,
     'react/require-default-props': 0,
+    'jsx-a11y/accessible-emoji': 0,
   },
 };

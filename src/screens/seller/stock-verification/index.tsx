@@ -138,7 +138,7 @@ export default ({ navigation, route }: ScreenProps) => {
       ...state.confirmation,
       status,
     };
-    navigation.navigate('SaleDetails', {
+    navigation.navigate('OwnerSaleDetails', {
       sale: {
         ...sale,
         dispatch_provider: {

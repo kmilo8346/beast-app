@@ -12,7 +12,7 @@ import ButtonIcon from '../../../components/buttons/button-icon';
 import TagImage from '../../../components/svgs/images/tag-blue';
 import MoneyHandlingImage from '../../../components/svgs/images/handling-money';
 import AddCircleBlueIcon from '../../../components/svgs/icons/add-circle-blue';
-import StopwatchIcon from '../../../components/svgs/icons/stopwatch';
+import HandShakeIcon from '../../../components/svgs/icons/hand-shake';
 // seller components
 import DashboardShorcut from '../components/shortcut';
 // local components
@@ -98,15 +98,6 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'set_orders_in_progress_cache', cache });
   };
 
-  const pressAddProductHandler = () => {
-    navigation.navigate('CreateOrUpdateProduct');
-  };
-
-  const pressSelectOrCreateStoreHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('SelectOrCreateStore');
-  };
-
   const requestNotificationPermisions = async () => {
     if (Constants.isDevice) {
       const { status: existingStatus } = await Permissions.getAsync(
@@ -124,6 +115,27 @@ export default ({ navigation }: ScreenProps) => {
         );
       }
     }
+  };
+
+  const pressMySalesHandler = () => {
+    if (state.in_progress_qty && state.in_progress_qty > 0) {
+      navigation.navigate('MySales', { view: 'IN_PROGRESS' });
+    } else {
+      navigation.navigate('MySales', { view: 'HISTORICAL' });
+    }
+  };
+
+  const pressAddProductHandler = () => {
+    navigation.navigate('CreateOrUpdateProduct');
+  };
+
+  const pressSelectOrCreateStoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('SelectOrCreateStore');
+  };
+
+  const pressChargeThroughRSS = () => {
+    navigation.navigate('ChargeThroughRRSS');
   };
 
   useFocusEffect(
@@ -259,9 +271,8 @@ export default ({ navigation }: ScreenProps) => {
         <DashboardLink
           image={<MoneyHandlingImage />}
           title="Mis ventas"
-          onPress={() => {
-            navigation.navigate('MySales', { view: 'HISTORICAL' });
-          }}
+          counter={state.in_progress_qty}
+          onPress={pressMySalesHandler}
         />
       </ScrollView>
       <View
@@ -271,21 +282,16 @@ export default ({ navigation }: ScreenProps) => {
         ]}
       >
         <DashboardShorcut
-          // image={addProductOrServiceImage}
           image={<AddCircleBlueIcon />}
           title="Agregar producto"
           onPress={pressAddProductHandler}
           style={{ marginBottom: 12 }}
         />
         <DashboardShorcut
-          // image={salesInProgressImage}
-          image={<StopwatchIcon />}
-          title="Ventas en curso"
-          counter={state.in_progress_qty}
+          image={<HandShakeIcon />}
+          title="Cobrar x redes sociales"
+          onPress={pressChargeThroughRSS}
           style={{ marginBottom: 12 }}
-          onPress={() => {
-            navigation.navigate('MySales', { view: 'IN_PROGRESS' });
-          }}
         />
       </View>
     </View>

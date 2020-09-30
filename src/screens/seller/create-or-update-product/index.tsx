@@ -306,6 +306,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
             </Text>
             <InputNumeric
               placeholder="$1000"
+              maxLength={15}
               value={state.form.product?.price}
               errors={state.form.errors?.price}
               formatNumber={numberFormatter.toCurrency}

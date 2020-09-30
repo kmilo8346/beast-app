@@ -1,16 +1,4 @@
 export default {
-  name: {
-    presence: {
-      allowEmpty: false,
-      message: '^Es requerido',
-    },
-  },
-  description: {
-    presence: {
-      allowEmpty: false,
-      message: '^Es requerido',
-    },
-  },
   price: {
     presence: {
       allowEmpty: false,
@@ -23,13 +11,10 @@ export default {
       notLessThanOrEqualTo: '^Debe ser menor o igual que 3 000 000',
     },
   },
-  images: {
+  name: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
-    },
-    arrayWithValues: {
-      message: '^Imágenes se están subiendo',
     },
   },
 } as { [key: string]: any };

@@ -20,8 +20,11 @@ import {
   CreateOrUpdateProductScreen,
   MyProductsScreen,
   MySalesScreen,
-  SaleDetailsScreen,
+  OwnerSaleDetailsScreen,
+  OwnerRRSSSaleDetailsScreen,
   StockVerificationScreen,
+  ChargeThroughRRSSScreen,
+  RRSSLinkCreatedScreen,
 } from '../screens';
 
 const SellerStack = createStackNavigator();
@@ -100,14 +103,29 @@ export default () => {
           options={{ title: 'Ventas' }}
         />
         <SellerStack.Screen
-          name="SaleDetails"
-          component={SaleDetailsScreen}
+          name="OwnerSaleDetails"
+          component={OwnerSaleDetailsScreen}
           options={{ title: 'Detalle de venta' }}
         />
         <SellerStack.Screen
           name="StockVerificaton"
           component={StockVerificationScreen}
           options={{ title: 'Verificación de stock' }}
+        />
+        <SellerStack.Screen
+          name="OwnerRRSSSaleDetails"
+          component={OwnerRRSSSaleDetailsScreen}
+          options={{ title: 'Detalle de venta' }}
+        />
+        <SellerStack.Screen
+          name="ChargeThroughRRSS"
+          component={ChargeThroughRRSSScreen}
+          options={{ title: '' }}
+        />
+        <SellerStack.Screen
+          name="RRSSLinkCreated"
+          component={RRSSLinkCreatedScreen}
+          options={{ title: '' }}
         />
       </SellerStack.Navigator>
     </KeyboardAvoidingView>

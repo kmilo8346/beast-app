@@ -131,8 +131,7 @@ export default ({ navigation }: MenuProps) => {
 ${Constants.manifest.extra.BEAST_WEB_URL}`,
       });
     } catch (error) {
-      // TODO: log error
-      console.log(error);
+      capture(prefix, 'Press share handler error', error);
     }
   };
 
