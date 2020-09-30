@@ -387,13 +387,45 @@ export default ({ navigation }: SelectStoreProps) => {
             <Text level={5} weight="bold" color={colors.white}>
               *{` `}
             </Text>
-            Shop Shop nunca cobrará comisión por tus ventas.
+            Shop Shop nunca cobrará por tus ventas.
           </Text>
           <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
             <Text level={5} weight="bold" color={colors.white}>
               *{` `}
             </Text>
-            Mercado Pago te cobrará una comisión bien baja.{' '}
+            Despacha{' '}
+            <Text level={5} weight="bold" color={colors.white}>
+              gratis
+            </Text>{' '}
+            a tus vecinos.
+          </Text>
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            Crea{' '}
+            <Text level={5} weight="bold" color={colors.white}>
+              links de pago
+            </Text>{' '}
+            y vende en tus redes sociales.
+          </Text>
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            Llega a más clientes con multiples medios de pago.
+          </Text>
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            No tienes que ser empresa para vender.
+          </Text>
+          <Text level={5} style={{ color: colors.white }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
+            Mercado Pago te cobrará una{' '}
             <Text
               level={5}
               weight="bold"
@@ -403,16 +435,9 @@ export default ({ navigation }: SelectStoreProps) => {
               }}
               onPress={pressSeeComisionsHandler}
             >
-              Ver comisión{` `}
+              comisión bien baja.{` `}
               <Icon name="external-link" size={16} color={colors.white} />
             </Text>
-          </Text>
-          <Text level={5} style={{ color: colors.white }}>
-            <Text level={5} weight="bold" color={colors.white}>
-              *{` `}
-            </Text>
-            No tienes que ser empresa para vender, todos tienen las mismas
-            oportunidades.
           </Text>
         </View>
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>

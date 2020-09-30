@@ -151,7 +151,6 @@ export default ({ data }: ComponentProps) => {
         <SleepingCatImage />
         <Text
           level={6}
-          weight="bold"
           style={{
             marginTop: 20,
             marginBottom: 20,
@@ -159,17 +158,18 @@ export default ({ data }: ComponentProps) => {
             width: 320,
           }}
         >
-          Parece que no hay tiendas disponibles en tu zona en este momento.
+          En este momento no hay tiendas{' '}
+          <Text level={6} weight="bold">
+            {' '}
+            abiertas
+          </Text>{' '}
+          en tu zona.
         </Text>
-        <Text
-          level={5}
-          weight="bold"
-          style={{ marginBottom: 40, textAlign: 'center' }}
-        >
+        <Text level={4} style={{ marginBottom: 40, textAlign: 'center' }}>
           ¡Inténtalo de nuevo mas tarde!
         </Text>
         <Button
-          title="¡También puedes vender con nosotros!"
+          title="¡O, crea tu tienda hoy!"
           type="link"
           onPress={pressLinkHandler}
         />
