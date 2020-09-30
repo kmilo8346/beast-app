@@ -403,6 +403,16 @@ export default ({ navigation }: SelectStoreProps) => {
             <Text level={5} weight="bold" color={colors.white}>
               *{` `}
             </Text>
+            Crea{' '}
+            <Text level={5} weight="bold" color={colors.white}>
+              links de pago
+            </Text>{' '}
+            y vende en tus redes sociales.
+          </Text>
+          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
+            <Text level={5} weight="bold" color={colors.white}>
+              *{` `}
+            </Text>
             Llega a más clientes con multiples medios de pago.
           </Text>
           <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
