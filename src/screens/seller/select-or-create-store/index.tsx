@@ -393,16 +393,6 @@ export default ({ navigation }: SelectStoreProps) => {
             <Text level={5} weight="bold" color={colors.white}>
               *{` `}
             </Text>
-            Despacha{' '}
-            <Text level={5} weight="bold" color={colors.white}>
-              gratis
-            </Text>{' '}
-            a tus vecinos.
-          </Text>
-          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
-            <Text level={5} weight="bold" color={colors.white}>
-              *{` `}
-            </Text>
             Crea{' '}
             <Text level={5} weight="bold" color={colors.white}>
               links de pago
@@ -413,13 +403,7 @@ export default ({ navigation }: SelectStoreProps) => {
             <Text level={5} weight="bold" color={colors.white}>
               *{` `}
             </Text>
-            Llega a más clientes con multiples medios de pago.
-          </Text>
-          <Text level={5} style={{ color: colors.white, marginBottom: 15 }}>
-            <Text level={5} weight="bold" color={colors.white}>
-              *{` `}
-            </Text>
-            No tienes que ser empresa para vender.
+            Llega a más clientes con múltiples medios de pago.
           </Text>
           <Text level={5} style={{ color: colors.white }}>
             <Text level={5} weight="bold" color={colors.white}>
