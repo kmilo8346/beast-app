@@ -383,6 +383,7 @@ export default ({ navigation }: MyProductsProps) => {
             </Text>
           }
           type="link"
+          style={{ paddingLeft: 0 }}
           onPress={pressHeaderLink}
         />
       ),

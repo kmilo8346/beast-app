@@ -156,7 +156,12 @@ export default ({ navigation, route }: ScreenProps) => {
     }
     navigation.setOptions({
       headerRight: () => (
-        <Button title={text} type="link" onPress={pressEditHandler} />
+        <Button
+          title={text}
+          type="link"
+          style={{ paddingLeft: 0 }}
+          onPress={pressEditHandler}
+        />
       ),
     });
   }, [state.editting]);
