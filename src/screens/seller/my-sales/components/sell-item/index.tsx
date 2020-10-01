@@ -52,7 +52,7 @@ export default ({ sell, onPress = () => null, style }: SellItemProps) => {
 
   // render logic
 
-  let fullName = 'Usuario x red social';
+  let fullName = 'Usuario de red social';
   if (sell.dispatch_provider_id === DispatchProvider.OWNER) {
     fullName = sell.customer.first_name;
     if (sell.customer.last_name) {

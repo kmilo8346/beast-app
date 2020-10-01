@@ -289,7 +289,7 @@ export default ({ navigation }: ScreenProps) => {
         />
         <DashboardShorcut
           image={<HandShakeIcon />}
-          title="Cobrar x redes sociales"
+          title="Cobrar en redes sociales"
           onPress={pressChargeThroughRSS}
           style={{ marginBottom: 12 }}
         />

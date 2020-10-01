@@ -105,7 +105,7 @@ export default ({ route }: SaleDetailsProps) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                Usuario x red social
+                Usuario de red social
               </Text>
             </View>
           </View>
