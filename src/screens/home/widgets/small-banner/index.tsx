@@ -4,7 +4,7 @@ import { Image } from 'react-native';
 // components
 import Touchable from '../../../../components/touchable';
 // types
-import { ComputedWidget, BannerContent } from '../../../../types';
+import { ComputedWidget, SmallBannerContent } from '../../../../types';
 
 interface ComponentProps {
   data: ComputedWidget;
@@ -12,7 +12,8 @@ interface ComponentProps {
 
 export default ({ data }: ComponentProps) => {
   // computed vars
-  const content = data.content as BannerContent;
+  const content = data.content as SmallBannerContent;
+
   // render logic
   return (
     <Touchable>
@@ -20,8 +21,8 @@ export default ({ data }: ComponentProps) => {
         source={{ uri: content.image }}
         style={{
           width: '100%',
-          height: 200,
-          borderRadius: 20,
+          height: 67,
+          borderRadius: 8,
         }}
       />
     </Touchable>

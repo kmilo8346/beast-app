@@ -1,7 +1,7 @@
 import React from 'react';
 
 // widgets
-import Banner from '../banner';
+import Banner from '../small-banner';
 import NearbyStores from '../nearby-stores';
 // types
 import { ComputedWidget, WidgetType } from '../../../../types';
@@ -12,7 +12,7 @@ interface ComponentProps {
 
 export default ({ data }: ComponentProps) => {
   // banner
-  if (data.type === WidgetType.BANNER) {
+  if (data.type === WidgetType.SMALL_BANNER) {
     return <Banner data={data} />;
   }
 

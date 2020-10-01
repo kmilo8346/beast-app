@@ -147,7 +147,7 @@ export default ({ data }: ComponentProps) => {
   // not data
   if (!state.stores.hits.length) {
     return (
-      <View style={{ alignItems: 'center', paddingTop: 80 }}>
+      <View style={{ alignItems: 'center', paddingTop: 50 }}>
         <SleepingCatImage />
         <Text
           level={6}

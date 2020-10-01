@@ -287,7 +287,7 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
           value={state.form.product?.description}
           errors={state.form.errors?.description}
           lengthCounter
-          maxLength={100}
+          maxLength={200}
           multiline
           onChangeText={(text) => {
             changeHandler('description', text);

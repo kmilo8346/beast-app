@@ -416,7 +416,7 @@ export default ({ navigation }: ScreenProps) => {
         }}
         ListFooterComponent={<View style={globalStyles.withScreenAir} />}
         onRefresh={refresh}
-        style={[{ flex: 1, marginTop: 20 }, globalStyles.withPadding]}
+        style={[{ flex: 1, marginTop: 15 }, globalStyles.withPadding]}
       />
 
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>

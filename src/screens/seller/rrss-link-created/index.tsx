@@ -56,6 +56,12 @@ ${store.name} quiere cobrarte ${numberFormatter.toCurrency(
         ammount
       )} por ${concept}. 
 Pagar aqui: ${link}`);
+
+      toastRef.current?.show({
+        type: 'SUCCESS',
+        message: `¡Vínculo copiado correctamente!`,
+        expiration: 2,
+      });
     } catch (error) {
       capture(prefix, 'Press copy handler error', error);
     }
