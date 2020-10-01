@@ -1,5 +1,5 @@
 import React, { useReducer, useRef } from 'react';
-import { Vibration, View } from 'react-native';
+import { ScrollView, Vibration, View } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import Constants from 'expo-constants';
 
@@ -202,55 +202,44 @@ export default ({ navigation }: MySalesProps) => {
 
   // render logic
   return (
-    <View
-      style={[
-        { flex: 1, backgroundColor: colors.white },
-        globalStyles.withPadding,
-      ]}
-    >
-      <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
-        Crear vínculo
-      </Text>
-      <Text level={5} style={{ marginBottom: 30, lineHeight: 23 }}>
-        Cobrar en redes sociales nunca fue tan fácil. 🤩
-      </Text>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
+      <ScrollView style={[globalStyles.withPadding, { flex: 1 }]}>
+        <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
+          Crear vínculo
+        </Text>
+        <Text level={5} style={{ marginBottom: 30, lineHeight: 23 }}>
+          Cobrar en redes sociales nunca fue tan fácil.
+        </Text>
 
-      <InputNumeric
-        label="Monto"
-        maxLength={15}
-        placeholder="$1000"
-        value={state.form.price}
-        errors={state.form.errors?.price}
-        formatNumber={numberFormatter.toCurrency}
-        parseNumber={stringParser.fromCurrency}
-        clearButtonMode="never"
-        onChangeValue={(price) => {
-          changeHandler('price', price);
-        }}
-      />
-      <Input
-        label="Concepto"
-        placeholder="Torta tres leches"
-        value={state.form.name}
-        errors={state.form.errors?.name}
-        lengthCounter
-        maxLength={30}
-        onChangeText={(text) => {
-          changeHandler('name', text);
-        }}
-      />
-      <View
-        style={[
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: colors.white,
-          },
-          globalStyles.withMargin,
-        ]}
-      >
+        <InputNumeric
+          label="Monto"
+          maxLength={15}
+          placeholder="$1000"
+          value={state.form.price}
+          errors={state.form.errors?.price}
+          formatNumber={numberFormatter.toCurrency}
+          parseNumber={stringParser.fromCurrency}
+          clearButtonMode="never"
+          onChangeValue={(price) => {
+            changeHandler('price', price);
+          }}
+        />
+        <Input
+          label="Concepto"
+          placeholder="Torta tres leches"
+          value={state.form.name}
+          errors={state.form.errors?.name}
+          lengthCounter
+          maxLength={30}
+          onChangeText={(text) => {
+            changeHandler('name', text);
+          }}
+        />
+
+        <View style={globalStyles.withScreenAir} />
+      </ScrollView>
+
+      <View style={[globalStyles.withMargin]}>
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"
