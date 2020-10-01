@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.54](https://github.com/firedevs-team/beast-app/compare/v1.0.53...v1.0.54) (2020-10-01)
+
+
+### Bug Fixes
+
+* **app:** header right part ([c5e188c](https://github.com/firedevs-team/beast-app/commit/c5e188ccf03e92d55bf3d333cdea5f4a69a1ae77))
+* **app:** header title ([18db8db](https://github.com/firedevs-team/beast-app/commit/18db8dba40eba76d00d41a22f1445e814f9fcc31))
+* **charge through rrss:** adding scroll to the view ([dce6cb3](https://github.com/firedevs-team/beast-app/commit/dce6cb3ecab9d3bcc52b025d338df2496637c933))
+* **create-or-update-product constrains:** limit price range ([fc9cc1b](https://github.com/firedevs-team/beast-app/commit/fc9cc1b43edc3c61fc558f064a47b4d074614fa6))
+* **create-or-update-store:** fix messages and texts to the seller ([55599dd](https://github.com/firedevs-team/beast-app/commit/55599dd47a543c4e6e5a1135f05e17f85c8904ca))
+* **nearby stores component:** changing text ([3cfb46e](https://github.com/firedevs-team/beast-app/commit/3cfb46e113b935d0ef3420a3285747175fcb9702))
+* **select or create store:** texts ([982318c](https://github.com/firedevs-team/beast-app/commit/982318cbdabea4d1a2a1876df157c0d49ca6a23e))
+* **select-or-create-store:** add messages to seller ([23593da](https://github.com/firedevs-team/beast-app/commit/23593da79dcf86d1ab9eb296252dd9fba736771e))
+* **seller-dashboard-link:** refactor counter component styles ([2326fb5](https://github.com/firedevs-team/beast-app/commit/2326fb5560c12bde6e2c428308013f59fd5be7de))
+* **set-store-info:** fix text ([8118a71](https://github.com/firedevs-team/beast-app/commit/8118a719071f8ce229039ab5450d14d3f9d942a3))
+* **svgs:** delete unused image ([88d2f23](https://github.com/firedevs-team/beast-app/commit/88d2f233857f3560d1b5966f775240fa94154082))
+* **text:** fix button "Iniciar sessión" text ([2a165c6](https://github.com/firedevs-team/beast-app/commit/2a165c66b487114df1ef79be7d1176c66c17321f))
+* **texts:** fix texts ([313b197](https://github.com/firedevs-team/beast-app/commit/313b197166df438aa210bf65e879c2381a3a7022))
+
 ### [1.0.53](https://github.com/firedevs-team/beast-app/compare/v1.0.52...v1.0.53) (2020-09-27)
 
 ### [1.0.52](https://github.com/firedevs-team/beast-app/compare/v1.0.51...v1.0.52) (2020-09-27)
