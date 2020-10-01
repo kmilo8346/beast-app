@@ -22,18 +22,18 @@ export default ({ image, title, counter, onPress = () => null }: LinkProps) => {
     counterComponent = (
       <View
         style={{
-          backgroundColor: colors.white,
-          borderWidth: 2,
-          borderColor: colors.blueLight2,
-          borderRadius: 100,
-          paddingVertical: 3,
-          paddingHorizontal: 9,
-          minHeight: 29,
-          minWidth: 29,
+          backgroundColor: colors.red,
+          borderRadius: 20,
+          height: 35,
+          minWidth: 35,
           marginRight: 10,
+          paddingHorizontal: 2,
+          paddingVertical: 2,
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <Text level={3} weight="bold" color={colors.blue}>
+        <Text level={3} weight="bold" color={colors.white}>
           {counter}
         </Text>
       </View>
