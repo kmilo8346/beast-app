@@ -15,7 +15,7 @@ export interface InputSetOpeningHoursProps {
 
 // instances outside component
 const humanizeOpeningHoursText = (schedule: OpeningHours) => {
-  let humanizedText = '';
+  let humanizedText = 'Tienda cerrada';
   const daysShortNames: string[] = [
     'Lun',
     'Mar',
@@ -30,7 +30,7 @@ const humanizeOpeningHoursText = (schedule: OpeningHours) => {
     if (day.open) {
       openDays.push(daysShortNames[Number(day.day) - 1]);
       humanizedText =
-        humanizedText === ''
+        humanizedText === 'Tienda cerrada'
           ? daysShortNames[Number(day.day) - 1]
           : `${humanizedText}. ${daysShortNames[Number(day.day) - 1]}`;
     }
