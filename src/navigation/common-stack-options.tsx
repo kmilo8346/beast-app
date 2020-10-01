@@ -30,14 +30,8 @@ const commonStackOptions: StackNavigationOptions = {
       weight="bold"
       style={[
         {
-          ...Platform.select({
-            ios: {
-              paddingLeft: 5,
-            },
-            android: {
-              paddingLeft: 20,
-            },
-          }),
+          marginLeft: 15,
+          marginRight: 5,
         },
         style,
       ]}

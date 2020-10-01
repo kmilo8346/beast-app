@@ -1,6 +1,7 @@
 import React, { useCallback, useReducer, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
+import { TextStyle } from 'react-native';
 
 // navigation
 import HomeStackScreen from './home-stack';
@@ -21,7 +22,6 @@ import * as utils from '../lib/utils';
 import { User } from '../types';
 // styles
 import colors from '../styles/colors';
-import { TextStyle } from 'react-native';
 
 type SetUserAction = {
   type: 'set_user';
