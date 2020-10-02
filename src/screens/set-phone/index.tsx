@@ -118,8 +118,8 @@ export default ({ navigation, route }: ScreenProps) => {
         <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
           Teléfono móvil
         </Text>
-        <Text level={5} style={{ marginBottom: 60 }}>
-          Ingresa tu número de teléfono
+        <Text level={5} style={{ marginBottom: 60, lineHeight: 23 }}>
+          Usaremos tu teléfono para comunicarnos en tu compra o venta.
         </Text>
         <Input
           placeholder="Número de teléfono móvil"

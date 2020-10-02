@@ -150,6 +150,7 @@ export default ({ navigation, route }: ScreenProps) => {
   // params
   const redirect = route.params?.redirect || { name: 'MainTab' };
   const dont_allow_guest = route.params.dont_allow_guest;
+  const skip_set_phone_redirect = route.params.skip_set_phone_redirect || false;
   // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'SIGN_IN_FORM',
@@ -275,7 +276,12 @@ export default ({ navigation, route }: ScreenProps) => {
             current_address: prevUser.current_address,
           });
         }
-        navigation.replace('SetPhone', { redirect });
+        console.log('skip_set_phone_redirect', skip_set_phone_redirect);
+        if (skip_set_phone_redirect) {
+          navigation.replace('SetAddress');
+        } else {
+          navigation.replace('SetPhone', { redirect });
+        }
       }
     } catch (error) {
       if (

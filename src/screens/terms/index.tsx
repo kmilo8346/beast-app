@@ -22,6 +22,7 @@ export default ({ navigation }: ScreenProps) => {
   // event handlers
   const pressMainActionHandler = () => {
     navigation.navigate('SignIn', {
+      skip_set_phone_redirect: true,
       redirect: {
         name: 'MainTab',
       },
