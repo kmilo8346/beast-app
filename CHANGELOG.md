@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.55](https://github.com/firedevs-team/beast-app/compare/v1.0.54...v1.0.55) (2020-10-02)
+
+
+### Bug Fixes
+
+* **app:** removing facebook auth for ios ([86742d1](https://github.com/firedevs-team/beast-app/commit/86742d18851c191666223c8d9ffe07435f74ede0))
+* **set-openning-hours:** add clodes store label ([c5f40af](https://github.com/firedevs-team/beast-app/commit/c5f40af95b9635ad96ec2c6b2350ffdaef0b6664))
+
 ### [1.0.54](https://github.com/firedevs-team/beast-app/compare/v1.0.53...v1.0.54) (2020-10-01)
 
 
