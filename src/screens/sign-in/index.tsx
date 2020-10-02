@@ -1,5 +1,5 @@
 import React, { useReducer, ReactNode } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -393,8 +393,12 @@ export default ({ navigation, route }: ScreenProps) => {
       <View style={{ marginBottom: 25 }} />
       <ButtonGoogle onOK={signInOkHandler} />
       <View style={{ marginBottom: 15 }} />
-      <ButtonFacebook onOK={signInOkHandler} />
-      <View style={{ marginBottom: 15 }} />
+      {Platform.OS !== 'ios' && (
+        <>
+          <ButtonFacebook onOK={signInOkHandler} />
+          <View style={{ marginBottom: 15 }} />
+        </>
+      )}
       <ButtonApple onOK={signInOkHandler} />
       <View style={{ flex: 1 }} />
       {guestButton}
