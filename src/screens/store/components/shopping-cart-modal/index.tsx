@@ -85,6 +85,7 @@ export default ({ store, ...otherProps }: ComponentProps) => {
               shopping_cart: snapshot,
             },
           },
+          reason: 'to_buy',
         });
       } else {
         navigate('Checkout', {
@@ -102,6 +103,7 @@ export default ({ store, ...otherProps }: ComponentProps) => {
           },
         },
         dont_allow_guest: true,
+        reason: 'to_buy',
       });
     }
     otherProps.onClose && otherProps.onClose();

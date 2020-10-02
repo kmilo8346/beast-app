@@ -89,6 +89,7 @@ export default ({ navigation, route }: SellerBootProps) => {
           params: route.params,
         },
         dont_allow_guest: true,
+        reason: 'to_sell',
       });
       return;
     }
@@ -98,6 +99,7 @@ export default ({ navigation, route }: SellerBootProps) => {
           name: 'SellerBoot',
           params: route.params,
         },
+        reason: 'to_sell',
       });
       return;
     }

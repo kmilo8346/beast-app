@@ -151,6 +151,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const redirect = route.params?.redirect || { name: 'MainTab' };
   const dont_allow_guest = route.params.dont_allow_guest;
   const skip_set_phone_redirect = route.params.skip_set_phone_redirect || false;
+  const reason = route.params.reason;
   // state
   const [state, dispatch] = useReducer(reducer, {
     view: 'SIGN_IN_FORM',
@@ -276,11 +277,10 @@ export default ({ navigation, route }: ScreenProps) => {
             current_address: prevUser.current_address,
           });
         }
-        console.log('skip_set_phone_redirect', skip_set_phone_redirect);
         if (skip_set_phone_redirect) {
           navigation.replace('SetAddress');
         } else {
-          navigation.replace('SetPhone', { redirect });
+          navigation.replace('SetPhone', { redirect, reason });
         }
       }
     } catch (error) {
@@ -377,6 +377,15 @@ export default ({ navigation, route }: ScreenProps) => {
   if (dont_allow_guest) {
     guestButton = null;
   }
+  let title = '¡Bienvenido!';
+  let subtitle = 'Inicia sesión con tus redes sociales';
+  if (reason === 'to_buy') {
+    title = '¡Hola!';
+    subtitle = 'Crea una cuenta para comprar y ser parte de nuestra comunidad.';
+  } else if (reason === 'to_sell') {
+    title = '¡Hola!';
+    subtitle = 'Crea una cuenta para vender y ser parte de nuestra comunidad.';
+  }
   return (
     <View
       style={[
@@ -391,10 +400,14 @@ export default ({ navigation, route }: ScreenProps) => {
       <View style={{ flexDirection: 'row', marginBottom: 20 }} />
       <BagLogoBackgroundBlue />
       <Text level={1} weight="bold" style={{ marginBottom: 15, marginTop: 10 }}>
-        ¡Bienvenido!
+        {title}
       </Text>
-      <Text level={5} weight="light" style={{ marginBottom: 50 }}>
-        Inicia sesión con tus redes sociales
+      <Text
+        level={5}
+        weight="light"
+        style={{ marginBottom: 50, lineHeight: 23 }}
+      >
+        {subtitle}
       </Text>
       <View style={{ marginBottom: 25 }} />
       <ButtonGoogle onOK={signInOkHandler} />

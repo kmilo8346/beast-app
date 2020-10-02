@@ -89,6 +89,7 @@ export default ({ navigation, route }: ScreenProps) => {
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const reason = route.params.reason;
 
   // event handlers
   const changePhoneHandler = (phone: string) => {
@@ -112,6 +113,14 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   // render logic
+  let subtitle = 'Usaremos tu teléfono para comunicarnos en tu compra o venta.';
+  if (reason === 'to_buy') {
+    subtitle =
+      'Usaremos tu teléfono para que el vendedor se contacte de ser necesario.';
+  } else if (reason === 'to_sell') {
+    subtitle =
+      'Usaremos tu teléfono para que el cliente se contacte de ser necesario.';
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
@@ -119,14 +128,13 @@ export default ({ navigation, route }: ScreenProps) => {
           Teléfono móvil
         </Text>
         <Text level={5} style={{ marginBottom: 60, lineHeight: 23 }}>
-          Usaremos tu teléfono para comunicarnos en tu compra o venta.
+          {subtitle}
         </Text>
         <Input
           placeholder="Número de teléfono móvil"
           label=""
           keyboardType="phone-pad"
           returnKeyType="done"
-          autoFocus
           format={(text: string | undefined): string | undefined => {
             if (!text) return undefined;
 
