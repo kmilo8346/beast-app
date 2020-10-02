@@ -124,8 +124,14 @@ export default ({ navigation, route }: ScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
-        <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
-          Teléfono móvil
+        <Text
+          level={2}
+          weight="bold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ marginBottom: 10 }}
+        >
+          Agrega teléfono móvil
         </Text>
         <Text level={5} style={{ marginBottom: 60, lineHeight: 23 }}>
           {subtitle}

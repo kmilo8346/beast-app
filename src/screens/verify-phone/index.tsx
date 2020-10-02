@@ -161,8 +161,12 @@ export default ({ navigation, route }: ScreenProps) => {
             })
           );
         } else if (redirect.name === 'MenuStack') {
-          navigation.pop();
-          navigation.pop();
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 1,
+              routes: [{ name: 'MenuStack' }],
+            })
+          );
         } else {
           navigation.pop();
           navigation.replace(redirect.name, redirect.params);
