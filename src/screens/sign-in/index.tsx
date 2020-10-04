@@ -9,6 +9,7 @@ import Loading from '../../components/loading';
 import Text from '../../components/text';
 import Button from '../../components/buttons/button';
 import BagLogoBackgroundBlue from '../../components/svgs/images/bag-logo-background-blue';
+import ErrorView from '../../components/error-view';
 // local components
 import ButtonGoogle from './components/button-google';
 import ButtonFacebook from './components/button-facebook';
@@ -18,9 +19,6 @@ import userClient from '../../clients/user-client';
 // libs
 import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
-import validate from '../../lib/validate';
-// constraints
-import constraints from './constraints';
 // types
 import { User, Place, LoggedUser, AnonymouslyUser } from '../../types';
 // cache
@@ -34,26 +32,15 @@ import { capture } from '../../lib/sentry';
 const prefix = '[sign in screen]';
 const auth = firebase.auth();
 
-type ChangeEmailAction = {
-  type: 'change_email';
-  email: string;
-};
-type ValidateEmailAction = {
-  type: 'validate_email';
-  email: string;
-};
-type SetFormSubmittedAction = {
-  type: 'set_form_submitted';
-};
-type SetFormErrorsAction = {
-  type: 'set_form_errors';
-  errors: { [key: string]: string[] };
-};
-type ShowLoadingAction = {
-  type: 'show_loading';
-};
-type ShowErrorAction = {
-  type: 'show_error';
+enum SignInView {
+  LOADING = 'loading',
+  ERROR = 'error',
+  SIGN_IN_FORM = 'sign_in_form',
+  LINK_FORM = 'link_form',
+}
+type ChangeViewAction = {
+  type: 'change_view';
+  view: SignInView;
 };
 type ShowLinkFormAction = {
   type: 'set_link_form';
@@ -62,32 +49,10 @@ type ShowLinkFormAction = {
     credentialToLink: firebase.auth.OAuthCredential;
   };
 };
-type SetSubmitOpIdAction = {
-  type: 'set_submit_op_id';
-  opId: number;
-};
-type Action =
-  | ChangeEmailAction
-  | ValidateEmailAction
-  | SetFormSubmittedAction
-  | SetFormErrorsAction
-  | ShowLoadingAction
-  | ShowErrorAction
-  | ShowLinkFormAction
-  | SetSubmitOpIdAction;
+type Action = ChangeViewAction | ShowLinkFormAction;
 
-type ViewState = 'LOADING' | 'SIGN_IN_FORM' | 'LINK_FORM';
 type State = {
-  view: ViewState;
-  form: {
-    // fields
-    email: string;
-    // other states
-    submitted: boolean;
-    // identify the submit
-    submitOpId?: number;
-    errors?: { [key: string]: string[] };
-  };
+  view: SignInView;
   linkFormInfo: {
     singInMethod: string;
     credentialToLink: firebase.auth.OAuthCredential;
@@ -96,45 +61,16 @@ type State = {
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'change_email':
+    case 'change_view':
       return {
         ...state,
-        form: { ...state.form, email: action.email },
-      };
-    case 'validate_email':
-      if (!state.form.submitted) return state;
-
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          errors: validate.single(state.form.email, constraints.email),
-        },
-      };
-    case 'set_form_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
-    case 'set_form_errors':
-      return { ...state, form: { ...state.form, errors: action.errors } };
-    case 'show_loading':
-      return {
-        ...state,
-        view: 'LOADING',
-      };
-    case 'show_error':
-      return {
-        ...state,
-        view: 'SIGN_IN_FORM',
+        view: action.view,
       };
     case 'set_link_form':
       return {
         ...state,
-        view: 'LINK_FORM',
+        view: SignInView.LINK_FORM,
         linkFormInfo: action.info,
-      };
-    case 'set_submit_op_id':
-      return {
-        ...state,
-        form: { ...state.form, submitOpId: action.opId },
       };
     default:
       return state;
@@ -153,11 +89,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const reason = route.params.reason;
   // state
   const [state, dispatch] = useReducer(reducer, {
-    view: 'SIGN_IN_FORM',
-    form: {
-      email: '',
-      submitted: false,
-    },
+    view: SignInView.SIGN_IN_FORM,
     linkFormInfo: null,
   });
   const insets = useSafeAreaInsets();
@@ -202,7 +134,7 @@ export default ({ navigation, route }: ScreenProps) => {
     credentialToLink?: firebase.auth.OAuthCredential;
   }) => {
     try {
-      dispatch({ type: 'show_loading' });
+      dispatch({ type: 'change_view', view: SignInView.LOADING });
       const prevAuthUser = auth.currentUser;
       const prevUser = userCache.getData();
       const result = await auth.signInWithCredential(info.credential);
@@ -309,13 +241,13 @@ export default ({ navigation, route }: ScreenProps) => {
         return;
       }
       capture(prefix, 'Sign in ok handler error', error);
-      dispatch({ type: 'show_error' });
+      dispatch({ type: 'change_view', view: SignInView.ERROR });
     }
   };
 
   const pressEnterAsGuestHandler = async () => {
     try {
-      dispatch({ type: 'show_loading' });
+      dispatch({ type: 'change_view', view: SignInView.LOADING });
       const newUser = utils.extract({
         authUser: auth.currentUser as firebase.User,
       });
@@ -331,11 +263,31 @@ export default ({ navigation, route }: ScreenProps) => {
       );
     } catch (error) {
       capture(prefix, 'Press enter as guest handler error', error);
+      dispatch({ type: 'change_view', view: SignInView.ERROR });
     }
   };
 
+  const retryHandler = () => {
+    dispatch({ type: 'change_view', view: SignInView.SIGN_IN_FORM });
+  };
+
   // render logic
-  if (state.view === 'LOADING') {
+  if (state.view === SignInView.ERROR) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.white,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ErrorView onRetry={retryHandler} />
+      </View>
+    );
+  }
+
+  if (state.view === SignInView.LOADING) {
     return (
       <View
         style={{
@@ -351,7 +303,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }
 
   let linkButton = null;
-  if (state.view === 'LINK_FORM') {
+  if (state.view === SignInView.LINK_FORM) {
     switch (state.linkFormInfo?.singInMethod) {
       default:
         linkButton = (
