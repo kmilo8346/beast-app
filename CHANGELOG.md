@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.57](https://github.com/firedevs-team/beast-app/compare/v1.0.56...v1.0.57) (2020-10-04)
+
+
+### Bug Fixes
+
+* **checkout:** bug in android ([0618739](https://github.com/firedevs-team/beast-app/commit/06187394a0ec26266a45b017219884b1001694ba))
+
 ### [1.0.56](https://github.com/firedevs-team/beast-app/compare/v1.0.55...v1.0.56) (2020-10-02)
 
 ### [1.0.55](https://github.com/firedevs-team/beast-app/compare/v1.0.54...v1.0.55) (2020-10-02)
