@@ -5,7 +5,7 @@ import Constants from 'expo-constants';
 // clients
 import deviceClient from '../clients/device-client';
 // libs
-import { capture } from '../lib/sentry';
+import { capture } from './sentry';
 // types
 import { CreateDevice, Device } from '../types';
 

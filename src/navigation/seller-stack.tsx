@@ -9,7 +9,6 @@ import commonStackOptions from './common-stack-options';
 import {
   SignInScreen,
   SetPhoneScreen,
-  VerifyPhoneScreen,
   SellerBootScreen,
   SelectOrCreateStoreScreen,
   SetStoreInfoScreen,

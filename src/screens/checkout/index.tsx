@@ -195,9 +195,9 @@ export default ({ navigation, route }: ScreenProps) => {
       // open checkout
       const result = await WebBrowser.openAuthSessionAsync(
         payment.provider.checkout.init_point,
-        redirectUrl
+        redirectUrl,
+        { showInRecents: true }
       );
-
       if (result.type === 'success') {
         const redirectData = Linking.parse(result.url);
         if (redirectData?.queryParams?.status === 'not_mapped') {
@@ -348,7 +348,8 @@ export default ({ navigation, route }: ScreenProps) => {
               marginHorizontal: 20,
             }}
           >
-            Al parecer haz cancelado, si el pago se realizó te notificaremos.
+            Al parecer haz cancelado, si el pago se realizó tu pedido estará en
+            curso.
           </Text>
           <Button
             type="link"

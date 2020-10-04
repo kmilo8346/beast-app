@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import {
   SignInScreen,
   SetPhoneScreen,
-  VerifyPhoneScreen,
   HomeScreen,
   StoreScreen,
   CheckoutScreen,
