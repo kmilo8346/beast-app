@@ -43,11 +43,6 @@ export default () => {
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <MenuStack.Screen
-        name="VerifyPhone"
-        component={VerifyPhoneScreen}
-        options={{ title: '' }}
-      />
     </MenuStack.Navigator>
   );
 };

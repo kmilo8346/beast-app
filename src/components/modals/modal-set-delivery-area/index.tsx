@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { ReactNode, useReducer } from 'react';
 import { View, GestureResponderEvent, Vibration } from 'react-native';
 
 // components
@@ -197,9 +197,19 @@ export default ({
   };
 
   // render logic
-  let content = null;
+  let subtitle: ReactNode | null = null;
+  let others: ReactNode | null = null;
   if (state.view === 'FORM') {
-    content = (
+    subtitle = (
+      <Text
+        level={5}
+        weight="light"
+        style={{ lineHeight: 20, marginBottom: 30 }}
+      >
+        Crea un área de despacho que se acomode a tu negocio.
+      </Text>
+    );
+    others = (
       <>
         <InputSelectOptions
           label="Radio de entrega"
@@ -224,15 +234,7 @@ export default ({
   return (
     <Modal {...otherProps} title="Área de despacho">
       <View style={[globalStyle.withMargin]}>
-        <View style={{ marginBottom: 20 }}>
-          <Text level={5}>
-            Crea un área de{' '}
-            <Text level={5} weight="bold">
-              despacho gratis{' '}
-            </Text>
-            y haz feliz a tus vecinos.
-          </Text>
-        </View>
+        {subtitle}
         <InputPlaceAutocomplete
           label="Centro de área"
           placeholder="Jose Manuel Rodríguez 927"
@@ -244,7 +246,7 @@ export default ({
           onClose={closeAutomcompleteHandler}
           errors={state.form.errors?.center}
         />
-        {content}
+        {others}
       </View>
     </Modal>
   );

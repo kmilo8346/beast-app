@@ -11,6 +11,7 @@ import * as utils from '../lib/utils';
 import PersistedCache from './persisted-cache';
 // types
 import { Order, OrderStatus } from '../types';
+import { capture } from '../lib/sentry';
 
 const prefix = '[orders in progress cache]';
 let fetchRequestSource: CancelTokenSource;
@@ -88,9 +89,6 @@ export default class OrdersInProgressCache extends PersistedCache<
   private async subscribe() {
     try {
       if (!this.listening || !this.active) {
-        console.log(
-          `${prefix} Cache cant subscribe, listening: ${this.listening}, active: ${this.active}`
-        );
         return;
       }
       if (fetchRequestSource) {
@@ -98,7 +96,6 @@ export default class OrdersInProgressCache extends PersistedCache<
       }
       fetchRequestSource = axios.CancelToken.source();
       const data = this.data as OrdersInProgressCacheData;
-      console.log(`${prefix} Subscribing for changes in orders...`);
       const orders = await longPollingOrderClient.subscribe(
         {
           filters: {
@@ -111,15 +108,12 @@ export default class OrdersInProgressCache extends PersistedCache<
         },
         fetchRequestSource.token
       );
-      if (orders.length) {
-        console.log(`${prefix} There are changes`);
-      }
       await this.add(orders);
       this.subscribe();
     } catch (error) {
       if (!axios.isCancel(error)) {
         if (error.response?.status !== 502) {
-          console.log(error);
+          capture(prefix, 'Subscribe error', error);
 
           await utils.sleep(2000);
         }
@@ -141,13 +135,11 @@ export default class OrdersInProgressCache extends PersistedCache<
 
   public startListening() {
     this.listening = true;
-    console.log(`${prefix} Cache listening is started, for user ${this.user}`);
     this.subscribe();
   }
 
   public async stopListening() {
     this.listening = false;
     AppState.removeEventListener('change', this.handleAppStateChange);
-    console.log(`${prefix} Cache listening is stopped, for user ${this.user}`);
   }
 }

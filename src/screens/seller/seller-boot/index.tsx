@@ -93,16 +93,6 @@ export default ({ navigation, route }: SellerBootProps) => {
       });
       return;
     }
-    if (!user.phone || !user.phone_verified) {
-      navigation.replace('SetPhone', {
-        redirect: {
-          name: 'SellerBoot',
-          params: route.params,
-        },
-        reason: 'to_sell',
-      });
-      return;
-    }
 
     if (store_id) {
       try {

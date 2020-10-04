@@ -142,7 +142,11 @@ export default ({
   return (
     <Modal {...otherProps} title="Tiempo de entrega">
       <View style={[globalStyle.withMargin]}>
-        <Text level={5} style={{ marginBottom: 20, lineHeight: 23 }}>
+        <Text
+          level={5}
+          weight="light"
+          style={{ marginBottom: 30, lineHeight: 23 }}
+        >
           Agrega el rango de tiempo en{' '}
           <Text level={5} weight="bold">
             minutos

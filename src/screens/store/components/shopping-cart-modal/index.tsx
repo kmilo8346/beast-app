@@ -1,13 +1,17 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   ScrollView,
   View,
   Image,
   GestureResponderEvent,
   ActivityIndicator,
+  Vibration,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
+// constraints
+import constraints from './constraints';
 // components
 import Text from '../../../../components/text';
 import Divider from '../../../../components/divider';
@@ -17,15 +21,23 @@ import PhoneFilledDotsBlueIcon from '../../../../components/svgs/icons/phone-fil
 import ActionSheetContact from '../../../../components/modals/action-sheet-contact';
 import Button from '../../../../components/buttons/button';
 import BasketCatImage from '../../../../components/svgs/images/basket-cat';
+import Icon from '../../../../components/icon';
 // screen components
 import FullModal, { FullModalProps } from '../../../components/full-modal';
 // local components
 import ItemComponent from './components/item';
+import ModalSetPhone from './components/modal-set-phone';
 // lib
 import durationFormatter from '../../../../lib/formatters/duration-formatter';
 import { navigate } from '../../../../lib/root-navigation';
 import cloudinary from '../../../../lib/cloudinary';
 import * as utils from '../../../../lib/utils';
+import validate from '../../../../lib/validate';
+import { capture } from '../../../../lib/sentry';
+import numberFormatter from '../../../../lib/formatters/number-formatter';
+import stringFormatter from '../../../../lib/formatters/string-formatter';
+// clients
+import userClient from '../../../../clients/user-client';
 // cache
 import userCache from '../../../../cache/user';
 import shoppingCartsCache from '../../../../cache/shopping-carts';
@@ -33,11 +45,10 @@ import ShoppingCartCache, {
   ShoppingCartSnapshot,
 } from '../../../../cache/shopping-cart';
 // types
-import { Store, LoggedUser, Item } from '../../../../types';
+import { Store, Item, User } from '../../../../types';
 // styles
 import globalStyles from '../../../../styles';
 import colors from '../../../../styles/colors';
-import numberFormatter from '../../../../lib/formatters/number-formatter';
 
 // instances outside component
 const prefix = '[shopping cart modal]';
@@ -52,15 +63,40 @@ export default ({ store, ...otherProps }: ComponentProps) => {
     shoppingCartCache,
     setShoppingCartCache,
   ] = useState<ShoppingCartCache | null>(null);
+  const [user, setUser] = useState<User>(userCache.getData() as User);
   const [snapshot, setSnapshot] = useState<ShoppingCartSnapshot | null>(null);
   const [contact, setContact] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [errors, setErrors] = useState<string[] | undefined>();
+  const [submited, setSubmited] = useState(false);
+  const [modalPhone, setModalPhone] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const insets = useSafeAreaInsets();
 
   // event handler
   const instanceCache = async () => {
     const cache = await shoppingCartsCache.get(store.id);
     setShoppingCartCache(cache);
+  };
+
+  const updateUser = async (phone: string) => {
+    try {
+      setUpdating(true);
+      await userClient.update({
+        pathVars: {
+          id: user.id,
+        },
+        body: {
+          phone,
+          phone_verified: false,
+        },
+      });
+      userCache.updateData({ phone, phone_verified: false });
+    } catch (error) {
+      capture(prefix, 'Update user error', error);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const pressContactSellerHandler = (event: GestureResponderEvent) => {
@@ -74,25 +110,20 @@ export default ({ store, ...otherProps }: ComponentProps) => {
 
   const goToPayHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
+    setSubmited(true);
+    // validate
+    const errors = validate.single(user.phone, constraints.phone);
+    if (errors) {
+      Vibration.vibrate(400);
+      setErrors(errors);
+      return;
+    }
+
     if (userCache.isLogged()) {
-      const logged = userCache.getData() as LoggedUser;
-      if (!logged.phone || !logged.phone_verified) {
-        navigate('SetPhone', {
-          redirect: {
-            name: 'Checkout',
-            params: {
-              store,
-              shopping_cart: snapshot,
-            },
-          },
-          reason: 'to_buy',
-        });
-      } else {
-        navigate('Checkout', {
-          store,
-          shopping_cart: snapshot,
-        });
-      }
+      navigate('Checkout', {
+        store,
+        shopping_cart: snapshot,
+      });
     } else {
       navigate('SignIn', {
         redirect: {
@@ -116,6 +147,34 @@ export default ({ store, ...otherProps }: ComponentProps) => {
   const changeItemQtyHandler = (item: Item, qty: number) => {
     shoppingCartCache?.set(item, qty);
   };
+
+  const pressSetPhoneHandler = () => {
+    setModalPhone(true);
+  };
+
+  const changePhoneHandler = (phone: string) => {
+    setModalPhone(false);
+    if (submited) {
+      setErrors(validate.single(phone, constraints.phone));
+    }
+
+    updateUser(phone);
+  };
+
+  const closeModalPhoneHandler = () => {
+    setModalPhone(false);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        setUser(user as User);
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
 
   useEffect(() => {
     instanceCache();
@@ -156,6 +215,11 @@ export default ({ store, ...otherProps }: ComponentProps) => {
   if (address.apartment) {
     addressText = `${addressText} · ${address.apartment}`;
   }
+  let phoneText = 'Agrega teléfono de contacto';
+  if (user.phone) {
+    phoneText = stringFormatter.toPhone(user.phone, { prefix: true }) as string;
+  }
+
   let content: ReactNode | null = null;
   if (!snapshot) {
     content = null;
@@ -189,52 +253,29 @@ export default ({ store, ...otherProps }: ComponentProps) => {
         </Text>
 
         <ScrollView style={{ flex: 1, paddingTop: 10 }}>
-          <View
-            style={[
-              { flexDirection: 'row', marginBottom: 15 },
-              globalStyles.withMargin,
-            ]}
-          >
-            <Image
-              source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
-              style={{ width: 50, height: 50, borderRadius: 10 }}
-            />
-            <View style={{ marginLeft: 15, paddingTop: 5 }}>
-              <Text
-                level={4}
-                weight="bold"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{ marginBottom: 2 }}
-              >
-                {store.name}
-              </Text>
-              <Text level={6} numberOfLines={1} ellipsizeMode="tail">
-                {timeText}
-              </Text>
+          <View style={[{ marginBottom: 15 }, globalStyles.withMargin]}>
+            <View style={{ flexDirection: 'row', marginBottom: 15 }}>
+              <Image
+                source={{ uri: cloudinary.dynamicUrl(image, 'w_100') }}
+                style={{ width: 50, height: 50, borderRadius: 10 }}
+              />
+              <View style={{ marginLeft: 15, paddingTop: 5 }}>
+                <Text
+                  level={4}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 2 }}
+                >
+                  {store.name}
+                </Text>
+                <Text level={6} numberOfLines={1} ellipsizeMode="tail">
+                  {timeText}
+                </Text>
+              </View>
             </View>
-          </View>
-
-          <Divider type="thick" style={{ marginBottom: 20 }} />
-
-          <View
-            style={[
-              { flexDirection: 'row', marginBottom: 20 },
-              globalStyles.withMargin,
-            ]}
-          >
-            <MapPinShadedBlueIcon />
-            <View style={{ marginLeft: 15 }}>
-              <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
-                Dirección de entrega
-              </Text>
-              <Text level={6}>{addressText}</Text>
-            </View>
-          </View>
-
-          <Touchable
-            style={[
-              {
+            <Touchable
+              style={{
                 backgroundColor: colors.blueLight3,
                 borderWidth: 1,
                 borderColor: colors.blueLight5,
@@ -243,22 +284,67 @@ export default ({ store, ...otherProps }: ComponentProps) => {
                 paddingVertical: 12,
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginBottom: 20,
-              },
-              globalStyles.withMargin,
-            ]}
-            onPress={pressContactSellerHandler}
-          >
-            <PhoneFilledDotsBlueIcon />
-            <Text
-              level={5}
-              weight="bold"
-              color={colors.blue}
-              style={{ marginLeft: 15 }}
+              }}
+              onPress={pressContactSellerHandler}
             >
-              Contactar al vendedor
-            </Text>
-          </Touchable>
+              <PhoneFilledDotsBlueIcon />
+              <Text
+                level={5}
+                weight="bold"
+                color={colors.blue}
+                style={{ marginLeft: 15 }}
+              >
+                Contactar al vendedor
+              </Text>
+            </Touchable>
+          </View>
+
+          <Divider type="thick" style={{ marginBottom: 20 }} />
+
+          <View style={[{ marginBottom: 20 }, globalStyles.withMargin]}>
+            <View style={[{ flexDirection: 'row', marginBottom: 20 }]}>
+              <MapPinShadedBlueIcon />
+              <View style={{ marginLeft: 15 }}>
+                <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
+                  Dirección de entrega
+                </Text>
+                <Text level={6}>{addressText}</Text>
+              </View>
+            </View>
+            <Touchable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingLeft: 5,
+              }}
+              onPress={pressSetPhoneHandler}
+            >
+              <View style={{ flex: 1 }}>
+                <Text
+                  level={6}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ marginBottom: 2 }}
+                >
+                  Número de teléfono
+                </Text>
+                <Text level={6} numberOfLines={1} ellipsizeMode="tail">
+                  {phoneText}
+                </Text>
+              </View>
+              {updating ? <ActivityIndicator /> : <Icon name="chevron-right" />}
+            </Touchable>
+            {errors && errors.length ? (
+              <Text
+                level={8}
+                color={colors.red}
+                style={{ marginTop: 5, marginLeft: 7 }}
+              >
+                {errors[0]}
+              </Text>
+            ) : null}
+          </View>
 
           <Divider type="thick" style={{ marginBottom: 20 }} />
 
@@ -346,5 +432,16 @@ export default ({ store, ...otherProps }: ComponentProps) => {
     );
   }
 
-  return <FullModal {...otherProps}>{content}</FullModal>;
+  return (
+    <FullModal {...otherProps}>
+      {content}
+      {modalPhone && (
+        <ModalSetPhone
+          value={user.phone}
+          onChange={changePhoneHandler}
+          onClose={closeModalPhoneHandler}
+        />
+      )}
+    </FullModal>
+  );
 };

@@ -11,38 +11,46 @@ import * as utils from '../../../lib/utils';
 // types
 import { Place, AddressInfo } from '../../../types';
 // styles
-import globalStyle from '../../../styles';
+import globalStyles from '../../../styles';
 
 interface ComponentProps {
-  value: AddressInfo;
-  onChange: (value: AddressInfo) => void;
+  value?: AddressInfo;
+  onChange: (value?: AddressInfo) => void;
 }
 
 export default ({ value, onChange }: ComponentProps) => {
   // state
-  const [info, setInfo] = useState<AddressInfo>(value);
+  const [info, setInfo] = useState<AddressInfo | undefined>(value);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
   // event handlers
   const addHandler = (place: Place) => {
-    setInfo((prevInfo) => ({
-      ...prevInfo,
-      addresses: utils.replaceOrAdd(
-        prevInfo.addresses,
+    setInfo((prevInfo) => {
+      const current_address = prevInfo?.current_address || place.id;
+      const addresses = utils.replaceOrAdd(
+        prevInfo?.addresses || [],
         place,
         (i1, i2) => i1.id === i2.id
-      ),
-    }));
+      );
+      return {
+        ...prevInfo,
+        current_address,
+        addresses,
+      };
+    });
     setIsFormVisible(false);
   };
 
   const selectHandler = (key: string) => {
-    setInfo((prevInfo) => ({ ...prevInfo, current_address: key }));
+    setInfo((prevInfo) => ({
+      ...(prevInfo as AddressInfo),
+      current_address: key,
+    }));
   };
 
   const deleteHandler = (key: string) => {
     setInfo((prevInfo) => {
-      const addresses = prevInfo.addresses.filter(
+      const addresses = (prevInfo as AddressInfo).addresses.filter(
         (address) => address.id !== key
       );
       return {
@@ -63,7 +71,7 @@ export default ({ value, onChange }: ComponentProps) => {
   let title = 'Agregar dirección';
   let content = <AddAddressForm onAdd={addHandler} />;
 
-  if (!isFormVisible && info.addresses.length && info.current_address) {
+  if (!isFormVisible && info?.addresses.length && info.current_address) {
     title = 'Selecciona una dirección';
     const options = info.addresses.map(
       (address: Place, _index: number, array: Place[]) => ({
@@ -92,7 +100,8 @@ export default ({ value, onChange }: ComponentProps) => {
 
   return (
     <Modal onRequestClose={requestCloseHandler} title={title}>
-      <View style={[globalStyle.withMargin]}>{content}</View>
+      <View style={globalStyles.modalSubtitleSpace} />
+      <View style={[globalStyles.withMargin]}>{content}</View>
     </Modal>
   );
 };

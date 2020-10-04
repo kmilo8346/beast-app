@@ -2,6 +2,7 @@ import { AsyncStorage } from 'react-native';
 import Constants from 'expo-constants';
 
 import Cache from './cache';
+import { capture } from '../lib/sentry';
 
 const prefix = '[persisted cache]';
 
@@ -22,10 +23,7 @@ export default class PersistedCache<T> extends Cache<T> {
         this.data = JSON.parse(raw);
       }
     } catch (error) {
-      console.log(
-        `${prefix} Unexpected error loading data from @cache/${this.path}`,
-        error
-      );
+      capture(prefix, 'Load error', error);
     }
   }
 
@@ -36,10 +34,7 @@ export default class PersistedCache<T> extends Cache<T> {
         JSON.stringify(this.data)
       );
     } catch (error) {
-      console.log(
-        `${prefix} Unexpected error persisting data in @cache/${this.path}`,
-        error
-      );
+      capture(prefix, 'Persist error', error);
     }
   }
 

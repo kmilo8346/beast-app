@@ -20,9 +20,12 @@ import {
 } from '../../../types';
 // libs
 import { v4 as uuidv4 } from '../../../lib/uuid';
+import { capture } from '../../../lib/sentry';
+// styles
 import colors from '../../../styles/colors';
 
 // instances outside component
+const prefix = '[Input Place Autocomplet Component]';
 const toAddress = (place?: Place): string => {
   if (!place) return '';
   return `${place.route.short_name} ${place.street_number.short_name}, ${place.locality.short_name}, ${place.administrative_area_level_1.short_name}`;
@@ -174,6 +177,7 @@ export default ({
       dispatch({ type: 'set_autocomplete_response', response });
     } catch (error) {
       if (!axios.isCancel(error)) {
+        capture(prefix, 'Fetch predictions error', error);
         dispatch({ type: 'show_autocomplete_error' });
       }
     }
@@ -201,6 +205,7 @@ export default ({
       dispatch({ type: 'set_details_response', response });
     } catch (error) {
       if (!axios.isCancel(error)) {
+        capture(prefix, 'Fetch detail error', error);
         dispatch({ type: 'show_autocomplete_error' });
       }
     }

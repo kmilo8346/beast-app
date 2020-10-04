@@ -1,12 +1,12 @@
 export default {
-  address: {
+  phone: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
-    fieldsPresence: {
-      fields: ['address'],
-      message: '^Seleccion una dirección válida',
+    format: {
+      pattern: /^\+569\d{8}$/,
+      message: '^Número de teléfono inválido',
     },
   },
 } as { [key: string]: any };

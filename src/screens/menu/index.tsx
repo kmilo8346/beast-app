@@ -34,7 +34,7 @@ import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
 // types
-import { LoggedUser, Place } from '../../types';
+import { DispatchProvider, LoggedUser, AddressInfo } from '../../types';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
@@ -68,6 +68,13 @@ export default ({ navigation }: MenuProps) => {
   }
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
+  let addressInfo;
+  if (user.current_address && user.addresses?.length) {
+    addressInfo = {
+      current_address: user.current_address,
+      addresses: user.addresses,
+    };
+  }
 
   // event handlers
   const instanceOrdersInProgressCache = async (user: string) => {
@@ -82,11 +89,7 @@ export default ({ navigation }: MenuProps) => {
 
   const pressPhoneNumberHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('SetPhone', {
-      redirect: {
-        name: 'MenuStack',
-      },
-    });
+    navigation.navigate('SetPhone');
   };
 
   const pressMyOrdersHandler = (event: GestureResponderEvent) => {
@@ -135,12 +138,11 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
     }
   };
 
-  const addressInfoChangeHandler = async (info: {
-    current_address: string;
-    addresses: Place[];
-  }) => {
+  const addressInfoChangeHandler = async (info?: AddressInfo) => {
     setModalManageAddress(false);
-
+    if (!info) {
+      return;
+    }
     try {
       setUpdatingAddressInfo(true);
       await userClient.update({
@@ -200,7 +202,10 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
             if (data) {
               setInProgressQty(
                 data.orders.reduce((qty, order) => {
-                  if (order.customer.id === data.user) {
+                  if (
+                    order.dispatch_provider_id === DispatchProvider.OWNER &&
+                    order.customer.id === data.user
+                  ) {
                     return qty + 1;
                   }
                   return qty;
@@ -218,18 +223,22 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
 
   // render logic
   const address = userCache.getAddress();
-  if (!address) {
-    throw new Error(`${prefix} User address mut be defined`);
-  }
-  let addressText = `${address.route.short_name} ${address.street_number.short_name}`;
-  if (address.apartment) {
-    addressText = `${addressText} · ${address.apartment}`;
+  let addressText = 'Administra tus direcciones';
+  if (address) {
+    addressText = `${address.route.short_name} ${address.street_number.short_name}`;
+    if (address.apartment) {
+      addressText = `${addressText} · ${address.apartment}`;
+    }
   }
 
   let content: ReactNode | null = null;
   let mainAction: ReactNode | null = null;
   if (userCache.isLogged()) {
     const user = userCache.getData() as LoggedUser;
+    let phoneText = 'Agrega tu teléfono móvil';
+    if (user.phone) {
+      phoneText = user.phone;
+    }
     let myOrdersText = 'Pedidos en curso, histórico';
     if (inProgressQty && inProgressQty > 0) {
       myOrdersText = `Tienes ${inProgressQty} pedidos en curso`;
@@ -268,7 +277,7 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
         />
         <Item
           name="Número de teléfono"
-          description={user.phone}
+          description={phoneText}
           onPress={pressPhoneNumberHandler}
         />
         <Item
@@ -452,10 +461,7 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
 
       {modalManageAddress && (
         <ModalManageAddress
-          value={{
-            current_address: user.current_address,
-            addresses: user.addresses,
-          }}
+          value={addressInfo}
           onChange={addressInfoChangeHandler}
         />
       )}

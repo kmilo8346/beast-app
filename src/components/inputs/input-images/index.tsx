@@ -191,6 +191,7 @@ export default ({
 
       imagePickedHandler(result);
     } catch (error) {
+      capture(prefix, 'Pick image from image library', error);
       onError(error);
     }
   };
@@ -221,6 +222,7 @@ export default ({
 
       imagePickedHandler(result);
     } catch (error) {
+      capture(prefix, 'Take photo using camera error', error);
       onError(error);
     }
   };
@@ -295,11 +297,11 @@ export default ({
         <View
           style={{
             marginLeft: 10,
-            height: 107,
-            width: 107,
+            height: 80,
+            width: 80,
             borderRadius: 100,
             borderWidth: 1,
-            borderColor: colors.blueLight2,
+            borderColor: colors.blueLight3,
             justifyContent: 'center',
             alignItems: 'center',
           }}

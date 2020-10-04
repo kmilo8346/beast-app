@@ -17,6 +17,10 @@ import ErrorView from '../../components/error-view';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import BagWhiteIcon from '../../components/svgs/icons/bag-white';
+import Button from '../../components/buttons/button';
+import BasketCatImage from '../../components/svgs/images/basket-cat';
+// screen components
+import ModalManageAddress from '../components/modal-manage-address';
 // local components
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
@@ -40,8 +44,10 @@ import {
   ComputeFilters,
   ComputeContext,
   ComputeResponse,
-  Place,
   ComputedWidget,
+  AddressInfo,
+  Place,
+  DispatchProvider,
 } from '../../types';
 // styles
 import colors from '../../styles/colors';
@@ -83,6 +89,10 @@ type SetInProgressQtyAction = {
   type: 'set_in_progress_qty';
   qty: number;
 };
+type SetAddressModalAction = {
+  type: 'set_address_modal';
+  address_modal: boolean;
+};
 type Action =
   | SetUserAction
   | SetUpdatingAction
@@ -91,7 +101,8 @@ type Action =
   | SetErrorAction
   | SetRefreshingAction
   | SetOrdersInProgressCacheAction
-  | SetInProgressQtyAction;
+  | SetInProgressQtyAction
+  | SetAddressModalAction;
 type State = {
   user: User;
   updating: boolean;
@@ -100,6 +111,7 @@ type State = {
   refreshing: boolean;
   orders_in_progress_cache?: OrdersInProgressCache;
   in_progress_qty?: number;
+  address_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -119,6 +131,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, orders_in_progress_cache: action.cache };
     case 'set_in_progress_qty':
       return { ...state, in_progress_qty: action.qty };
+    case 'set_address_modal':
+      return { ...state, address_modal: action.address_modal };
     default:
       return state;
   }
@@ -134,16 +148,21 @@ export default ({ navigation }: ScreenProps) => {
     user: userCache.getData() as User,
     updating: false,
     refreshing: false,
+    address_modal: false,
   });
   if (!state.user) {
     throw new Error(`${prefix} User must be defined`);
   }
   const address = userCache.getAddress();
-  if (!address) {
-    throw new Error(`${prefix} User address info must be defined`);
-  }
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
+  let addressInfo;
+  if (state.user.current_address && state.user.addresses?.length) {
+    addressInfo = {
+      current_address: state.user.current_address,
+      addresses: state.user.addresses,
+    };
+  }
 
   // event handlers
   const instanceOrdersInProgressCache = async (user: string) => {
@@ -179,7 +198,7 @@ export default ({ navigation }: ScreenProps) => {
       const response = await fetch(
         { tag: 'default' },
         {
-          location: address.geometry.location,
+          location: (address as Place).geometry.location,
         }
       );
       dispatch({
@@ -204,7 +223,7 @@ export default ({ navigation }: ScreenProps) => {
       const response = await fetch(
         { tag: 'default' },
         {
-          location: address.geometry.location,
+          location: (address as Place).geometry.location,
         }
       );
       dispatch({
@@ -225,10 +244,7 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const changeAddressInfoHandler = async (info: {
-    current_address: string;
-    addresses: Place[];
-  }) => {
+  const changeAddressInfoHandler = async (info: AddressInfo) => {
     try {
       dispatch({ type: 'set_updating', updating: true });
       await userClient.update({
@@ -248,7 +264,7 @@ export default ({ navigation }: ScreenProps) => {
       capture(prefix, 'Change address info handler error', error);
 
       toastRef.current?.show({
-        message: 'No se pudo actualizar las direcciones, reintente',
+        message: 'Ocurrió un error, reintente por favor',
         type: 'ERROR',
         expiration: 3,
       });
@@ -260,6 +276,19 @@ export default ({ navigation }: ScreenProps) => {
   const pressInProgressButtonHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('Orders', { view: 'IN_PROGRESS' });
+  };
+
+  const pressAddAddressHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_address_modal', address_modal: true });
+  };
+
+  const addressModalChangeHandler = (info?: AddressInfo) => {
+    if (info) {
+      changeAddressInfoHandler(info);
+    }
+
+    dispatch({ type: 'set_address_modal', address_modal: false });
   };
 
   useFocusEffect(
@@ -274,8 +303,10 @@ export default ({ navigation }: ScreenProps) => {
   );
 
   useEffect(() => {
-    load();
-  }, [state.user.current_address]);
+    if (state.user.current_address && state.user.addresses?.length) {
+      load();
+    }
+  }, [state.user.current_address, state.user.addresses]);
 
   useEffect(() => {
     if (state.user.id) {
@@ -293,7 +324,10 @@ export default ({ navigation }: ScreenProps) => {
               dispatch({
                 type: 'set_in_progress_qty',
                 qty: data.orders.reduce((qty, order) => {
-                  if (order.customer.id === data.user) {
+                  if (
+                    order.dispatch_provider_id === DispatchProvider.OWNER &&
+                    order.customer.id === data.user
+                  ) {
                     return qty + 1;
                   }
                   return qty;
@@ -310,6 +344,11 @@ export default ({ navigation }: ScreenProps) => {
   );
 
   // render logic
+  let message = '¡Hola!';
+  if (userCache.isLogged()) {
+    const logged = state.user as LoggedUser;
+    message = `¡Hola ${logged.first_name}!`;
+  }
 
   // error
   if (state.error) {
@@ -326,6 +365,79 @@ export default ({ navigation }: ScreenProps) => {
         ]}
       >
         <ErrorView />
+      </View>
+    );
+  }
+
+  // not current address
+  if (!address) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.white,
+          paddingTop: insets.top,
+        }}
+      >
+        <View style={[globalStyles.withMargin, { marginBottom: 10 }]}>
+          <View style={globalStyles.screenWithoutHeaderSpace} />
+          <Text level={2} weight="bold" numberOfLines={1} ellipsizeMode="tail">
+            {message}
+          </Text>
+        </View>
+
+        <Divider type="thick" />
+
+        <View
+          style={[
+            {
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}
+        >
+          <BasketCatImage />
+          <Text
+            level={4}
+            weight="bold"
+            style={{ marginTop: 25, marginBottom: 10 }}
+          >
+            ¿Donde quieres recibir tu pedido?
+          </Text>
+          <Text
+            level={5}
+            weight="light"
+            style={{
+              lineHeight: 23,
+              textAlign: 'center',
+              marginHorizontal: 20,
+              marginBottom: 40,
+            }}
+          >
+            Para comenzar, agrega una dirección donde quieres recibir tus
+            pedidos.
+          </Text>
+          <Button
+            title="Elegir dirección"
+            type="link"
+            loading={state.updating}
+            onPress={pressAddAddressHandler}
+          />
+        </View>
+
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+          <Toast
+            ref={toastRef}
+            containerStyle={[{ marginBottom: 10 }, globalStyles.withMargin]}
+          />
+        </View>
+        {state.address_modal && (
+          <ModalManageAddress
+            value={address}
+            onChange={addressModalChangeHandler}
+          />
+        )}
       </View>
     );
   }
@@ -348,14 +460,8 @@ export default ({ navigation }: ScreenProps) => {
   // not data
   if (!state.widgets?.hits.length) {
     throw new Error(`${prefix} Not widgets returned`);
-    // TODO: try to resolve this problem
   }
 
-  let message = '¡Hola!';
-  if (userCache.isLogged()) {
-    const logged = state.user as LoggedUser;
-    message = `¡Hola ${logged.first_name}!`;
-  }
   let inProgressComponent: ReactNode | null = null;
   if (state.in_progress_qty && state.in_progress_qty > 0) {
     inProgressComponent = (
@@ -391,10 +497,7 @@ export default ({ navigation }: ScreenProps) => {
           {message}
         </Text>
         <SelectAddress
-          value={{
-            current_address: state.user.current_address,
-            addresses: state.user.addresses,
-          }}
+          value={addressInfo as AddressInfo}
           processing={state.updating}
           style={{ marginBottom: 5 }}
           onChange={changeAddressInfoHandler}

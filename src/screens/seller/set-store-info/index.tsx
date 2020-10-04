@@ -13,11 +13,14 @@ import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
+import stringFormatter from '../../../lib/formatters/string-formatter';
+import stringParser from '../../../lib/parsers/string-parser';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../../styles';
 import colors from '../../../styles/colors';
+import { LoggedUser } from '../../../types';
 
 // instances outside component
 const prefix = '[set store info screen]';
@@ -48,6 +51,7 @@ type State = {
   form: {
     // fields
     name?: string;
+    phone?: string;
     images?: string[];
     // other form states
     submitted: boolean;
@@ -92,6 +96,10 @@ export interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
+  const user = userCache.getData() as LoggedUser;
+  if (!user) {
+    throw new Error(`${prefix} User must be defined`);
+  }
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // other form states
@@ -99,10 +107,6 @@ export default ({ navigation }: ScreenProps) => {
     },
   });
   const toastRef = useRef<IToast>(null);
-  const user = userCache.getData();
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const store = storeCache.getData();
   if (!store) {
     throw new Error(`${prefix} Store must be in cache`);
@@ -126,6 +130,7 @@ export default ({ navigation }: ScreenProps) => {
     // update store cache
     storeCache.updateData({
       name: state.form.name,
+      phone: state.form.phone,
       images: state.form.images,
     });
     navigation.navigate('SetStoreDeliveryInfo');
@@ -138,18 +143,40 @@ export default ({ navigation }: ScreenProps) => {
         <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
           Información de tienda
         </Text>
-        <Text level={5} style={{ marginBottom: 30, lineHeight: 23 }}>
-          Te pediremos algunos datos necesarios para crear tu tienda
+        <Text
+          level={5}
+          weight="light"
+          style={{ marginBottom: 30, lineHeight: 23 }}
+        >
+          Te pediremos algunos datos necesarios para crear tu tienda.
         </Text>
         <Input
-          placeholder="Minimarket Don Juan"
-          label="Nombre de tienda"
+          autoFocus
+          label="Nombre"
+          placeholder="Colaciones express"
           value={state.form.name}
           errors={state.form.errors?.name}
           lengthCounter
           maxLength={30}
           onChangeText={(text) => {
             changeHandler('name', text);
+          }}
+        />
+        <Input
+          label="Teléfono"
+          keyboardType="phone-pad"
+          placeholder="Teléfono móvil"
+          format={stringFormatter.toPhone}
+          parse={stringParser.fromPhone}
+          prefix={
+            <Text level={6} style={{ color: colors.black, marginLeft: 10 }}>
+              +56
+            </Text>
+          }
+          value={state.form.phone}
+          errors={state.form.errors?.phone}
+          onChangeText={(text) => {
+            changeHandler('phone', text);
           }}
         />
         <InputImages
@@ -163,13 +190,9 @@ export default ({ navigation }: ScreenProps) => {
             changeHandler('images', images);
           }}
         />
+        <View style={globalStyles.withScreenAir} />
       </ScrollView>
-      <View
-        style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0 },
-          globalStyles.withMargin,
-        ]}
-      >
+      <View style={globalStyles.withMargin}>
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"

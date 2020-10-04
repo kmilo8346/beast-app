@@ -9,7 +9,7 @@ class UserCache extends PersistedCache<User> {
   }
 
   getAddress(): Place | undefined {
-    return this.data?.addresses.find(
+    return (this.data?.addresses || []).find(
       (address) => address.id === this.data?.current_address
     );
   }

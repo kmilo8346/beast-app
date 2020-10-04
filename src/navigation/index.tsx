@@ -10,9 +10,6 @@ import {
   OnboardingScreen,
   TermsScreen,
   SignInScreen,
-  SetPhoneScreen,
-  VerifyPhoneScreen,
-  SetAddressScreen,
 } from '../screens';
 // navigation
 import MainTabScreen from './main-tab';
@@ -63,31 +60,6 @@ export default () => {
                 name: 'MainTab',
               },
             }}
-          />
-          <RootStack.Screen
-            name="SetPhone"
-            component={SetPhoneScreen}
-            options={{ title: '' }}
-            initialParams={{
-              redirect: {
-                name: 'MainTab',
-              },
-            }}
-          />
-          <RootStack.Screen
-            name="VerifyPhone"
-            component={VerifyPhoneScreen}
-            options={{ title: '' }}
-            initialParams={{
-              redirect: {
-                name: 'MainTab',
-              },
-            }}
-          />
-          <RootStack.Screen
-            name="SetAddress"
-            component={SetAddressScreen}
-            options={{ title: '' }}
           />
           <RootStack.Screen
             name="MainTab"

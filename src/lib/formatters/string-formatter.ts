@@ -82,6 +82,29 @@ class StringFormatter {
 
     return `${formattedHour}:${formattedMinute}`;
   }
+
+  toPhone(
+    text: string | undefined,
+    options = { prefix: false }
+  ): string | undefined {
+    if (!text) return undefined;
+
+    let result = text;
+    result = result.replace(/^\+56/, '');
+
+    // space 1
+    if (result.length > 1)
+      result = [result.slice(0, 1), ' ', result.slice(1)].join('');
+
+    // space 2
+    if (result.length > 6)
+      result = [result.slice(0, 6), ' ', result.slice(6)].join('');
+
+    if (options && options.prefix) {
+      result = `+56 ${result}`;
+    }
+    return result;
+  }
 }
 
 export default new StringFormatter();

@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useRef } from 'react';
 import { View, Vibration, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -6,8 +6,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from '../../components/text';
 import Input from '../../components/inputs/input';
 import Button from '../../components/buttons/button';
+import Toast, { IToast } from '../../components/toast';
+import LoadingOverlay, {
+  ILoadingOverlay,
+} from '../../components/loading-overlay';
+// clients
+import userClient from '../../clients/user-client';
 // libs
 import validate from '../../lib/validate';
+import { capture } from '../../lib/sentry';
+import stringFormatter from '../../lib/formatters/string-formatter';
+import stringParser from '../../lib/parsers/string-parser';
 // cache
 import userCache from '../../cache/user';
 // constraints
@@ -15,6 +24,7 @@ import constraints from './constraints';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
+import { LoggedUser } from '../../types';
 
 // instances outside component
 const prefix = '[set phone screen]';
@@ -39,7 +49,7 @@ type Action =
 type State = {
   form: {
     // fields
-    phone: string;
+    phone?: string;
     // other states
     submitted: boolean;
     errors?: { [key: string]: string[] };
@@ -73,23 +83,24 @@ const reducer = (state: State, action: Action): State => {
 
 interface ScreenProps {
   navigation: any;
-  route: any;
 }
 
-export default ({ navigation, route }: ScreenProps) => {
+export default ({ navigation }: ScreenProps) => {
   const insets = useSafeAreaInsets();
   // state
-  const [state, dispatch] = useReducer(reducer, {
-    form: {
-      phone: '',
-      submitted: false,
-    },
-  });
-  const user = userCache.getData();
+  const user = userCache.getData() as LoggedUser;
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const reason = route.params.reason;
+  const [state, dispatch] = useReducer(reducer, {
+    form: {
+      phone: user.phone,
+      submitted: false,
+    },
+  });
+
+  const toastRef = useRef<IToast>(null);
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
   const changePhoneHandler = (phone: string) => {
@@ -106,20 +117,37 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
-    navigation.navigate('VerifyPhone', {
-      ...route.params,
-      phone: `+56${state.form.phone}`,
-    });
+    try {
+      loadingOverlayRef.current?.show();
+      const update = {
+        phone: state.form.phone,
+        phone_verified: false,
+      };
+      await userClient.update({
+        pathVars: {
+          id: user.id,
+        },
+        body: update,
+      });
+      await userCache.updateData(update);
+      navigation.goBack();
+    } catch (error) {
+      capture(prefix, 'Submit handler error', error);
+
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: 'Error inesperado, reintente por favor',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
   };
 
   // render logic
-  let subtitle = 'Usaremos tu teléfono para comunicarnos en tu compra o venta.';
-  if (reason === 'to_buy') {
-    subtitle =
-      'Usaremos tu teléfono para que el vendedor se contacte de ser necesario.';
-  } else if (reason === 'to_sell') {
-    subtitle =
-      'Usaremos tu teléfono para que el cliente se contacte de ser necesario.';
+  let title = 'Agrega teléfono móvil';
+  if (user.phone) {
+    title = 'Actualiza teléfono móvil';
   }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
@@ -131,30 +159,22 @@ export default ({ navigation, route }: ScreenProps) => {
           ellipsizeMode="tail"
           style={{ marginBottom: 10 }}
         >
-          Agrega teléfono móvil
+          {title}
         </Text>
-        <Text level={5} style={{ marginBottom: 60, lineHeight: 23 }}>
-          {subtitle}
+        <Text
+          level={5}
+          weight="light"
+          style={{ marginBottom: 60, lineHeight: 23 }}
+        >
+          Usaremos tu teléfono para comunicarnos de ser necesario.
         </Text>
         <Input
-          placeholder="Número de teléfono móvil"
-          label=""
-          keyboardType="phone-pad"
+          autoFocus
           returnKeyType="done"
-          format={(text: string | undefined): string | undefined => {
-            if (!text) return undefined;
-
-            let result = text;
-            // space 1
-            if (result.length > 1)
-              result = [result.slice(0, 1), ' ', result.slice(1)].join('');
-
-            // space 2
-            if (result.length > 6)
-              result = [result.slice(0, 6), ' ', result.slice(6)].join('');
-            return result;
-          }}
-          parse={(text: string): string => text.replace(/ /g, '')}
+          keyboardType="phone-pad"
+          placeholder="Número de teléfono móvil"
+          format={stringFormatter.toPhone}
+          parse={stringParser.fromPhone}
           prefix={
             <Text level={6} style={{ color: colors.black, marginLeft: 10 }}>
               +56
@@ -174,12 +194,14 @@ export default ({ navigation, route }: ScreenProps) => {
           { paddingBottom: insets.bottom },
         ]}
       >
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         <Button
           title="Continuar"
           style={globalStyles.withMainActionAir}
           onPress={submitHandler}
         />
       </View>
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

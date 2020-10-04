@@ -7,6 +7,7 @@ interface Styles {
   withScreenAir: ViewStyle;
   withCartSpace: ViewStyle;
   screenWithoutHeaderSpace: ViewStyle;
+  modalSubtitleSpace: ViewStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -27,5 +28,8 @@ export default StyleSheet.create<Styles>({
   },
   screenWithoutHeaderSpace: {
     marginBottom: 10,
+  },
+  modalSubtitleSpace: {
+    marginBottom: 20,
   },
 });

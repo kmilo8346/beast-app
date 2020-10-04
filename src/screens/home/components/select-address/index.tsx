@@ -51,7 +51,12 @@ export default ({
     setIsVisible(true);
   };
 
-  const modalChangeHandler = (value: AddressInfo) => {
+  const modalChangeHandler = (value?: AddressInfo) => {
+    if (!value) {
+      throw new Error(
+        `${prefix} Modal manage address return an undefined address info`
+      );
+    }
     setIsVisible(false);
     onChange(value);
   };

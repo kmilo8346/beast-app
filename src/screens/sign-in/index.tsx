@@ -22,7 +22,7 @@ import validate from '../../lib/validate';
 // constraints
 import constraints from './constraints';
 // types
-import { User, Place } from '../../types';
+import { User, Place, LoggedUser, AnonymouslyUser } from '../../types';
 // cache
 import userCache from '../../cache/user';
 // styles
@@ -150,7 +150,6 @@ export default ({ navigation, route }: ScreenProps) => {
   // params
   const redirect = route.params?.redirect || { name: 'MainTab' };
   const dont_allow_guest = route.params.dont_allow_guest;
-  const skip_set_phone_redirect = route.params.skip_set_phone_redirect || false;
   const reason = route.params.reason;
   // state
   const [state, dispatch] = useReducer(reducer, {
@@ -177,10 +176,7 @@ export default ({ navigation, route }: ScreenProps) => {
         ]);
       }
     } catch (error) {
-      // dont crash app for that
-      console.log(
-        `${prefix} Unexpected error deleting anonymously user, id: ${anonymously?.uid}`
-      );
+      capture(prefix, 'Remove anonymously uers error', error);
     }
   };
 
@@ -225,63 +221,70 @@ export default ({ navigation, route }: ScreenProps) => {
       // init user
       const user = await fetchUser(result.user.uid);
       if (user) {
-        await userCache.setData(user);
-
-        // merge
-        if (prevUser?.current_address && prevUser.addresses.length) {
+        let update: any = null;
+        // merge address info
+        if (prevUser?.current_address && prevUser.addresses?.length) {
           const addressIds = prevUser.addresses.map(
             (address: Place) => address.id
           );
           const addresses = Array.prototype.concat(
             prevUser.addresses,
-            user.addresses.filter(
+            (user.addresses || []).filter(
               (address: Place) => addressIds.indexOf(address.id) === -1
             )
           );
           const current_address =
             prevUser.current_address || user.current_address;
-          await userClient.update({
-            pathVars: { id: user.id },
-            body: {
-              addresses,
-              current_address,
-            },
-          });
-          await userCache.updateData({
-            addresses,
-            current_address,
-          });
+
+          update = update || {};
+          update.current_address = current_address;
+          update.addresses = addresses;
+        }
+        // merge phone
+        if (prevUser?.phone) {
+          update = update || {};
+          update.phone = prevUser.phone;
+          update.phone_verified = false;
         }
 
-        if (redirect.name === 'MainTab') {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [{ name: 'MainTab' }],
-            })
-          );
-        } else {
-          navigation.replace(redirect.name, redirect.params);
+        if (update) {
+          await userClient.update({
+            pathVars: { id: user.id },
+            body: update,
+          });
         }
+        await userCache.setData({ ...user, ...update });
       } else {
         const newUser = utils.extract({
           authUser: result.user,
           profile: result.additionalUserInfo?.profile || undefined,
           appleCredential: info.appleCredential,
         });
-        await userCache.replaceData(newUser);
-        // set address info
-        if (prevUser?.current_address && prevUser.addresses.length) {
-          await userCache.updateData({
-            addresses: prevUser.addresses,
-            current_address: prevUser.current_address,
-          });
+        // set address info from the prev user
+        if (prevUser?.current_address && prevUser.addresses?.length) {
+          newUser.current_address = prevUser.current_address;
+          newUser.addresses = prevUser.addresses;
         }
-        if (skip_set_phone_redirect) {
-          navigation.replace('SetAddress');
-        } else {
-          navigation.replace('SetPhone', { redirect, reason });
+        // set phone from the prev user
+        if (prevUser?.phone) {
+          newUser.phone = prevUser?.phone;
+          newUser.phone_verified = false;
         }
+        // create user in beast api
+        const created = await userClient.create({
+          body: newUser as LoggedUser,
+        });
+        await userCache.setData(created);
+      }
+      if (redirect.name === 'MainTab') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'MainTab' }],
+          })
+        );
+      } else {
+        navigation.replace(redirect.name, redirect.params);
       }
     } catch (error) {
       if (
@@ -310,8 +313,25 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
-  const pressEnterAsGuestHandler = () => {
-    navigation.replace('SetAddress');
+  const pressEnterAsGuestHandler = async () => {
+    try {
+      dispatch({ type: 'show_loading' });
+      const newUser = utils.extract({
+        authUser: auth.currentUser as firebase.User,
+      });
+      const created = await userClient.create({
+        body: newUser as AnonymouslyUser,
+      });
+      await userCache.setData(created);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'MainTab' }],
+        })
+      );
+    } catch (error) {
+      capture(prefix, 'Press enter as guest handler error', error);
+    }
   };
 
   // render logic

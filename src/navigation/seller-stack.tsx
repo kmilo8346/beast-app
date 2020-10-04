@@ -53,11 +53,6 @@ export default () => {
           options={{ title: '' }}
         />
         <SellerStack.Screen
-          name="VerifyPhone"
-          component={VerifyPhoneScreen}
-          options={{ title: '' }}
-        />
-        <SellerStack.Screen
           name="SelectOrCreateStore"
           component={SelectOrCreateStoreScreen}
           options={{ title: 'Mis tiendas' }}

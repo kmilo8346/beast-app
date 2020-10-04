@@ -143,12 +143,12 @@ export default ({ navigation }: ScreenProps) => {
       <Text level={2} weight="bold" style={{ marginBottom: 10 }}>
         Información de despacho
       </Text>
-      <Text level={5} style={{ marginBottom: 10 }}>
-        En Shop Shop el despacho es{' '}
-        <Text level={5} weight="bold">
-          gratis
-        </Text>{' '}
-        para crear una experiencia única.
+      <Text
+        level={5}
+        weight="light"
+        style={{ marginBottom: 10, lineHeight: 23 }}
+      >
+        Elige despachar gratis a tus vecinos para crear una experiencia única.
       </Text>
       <View style={{ marginTop: 20 }}>
         <InputSetDeliveryArea

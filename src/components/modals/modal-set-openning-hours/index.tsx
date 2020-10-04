@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import Modal, { ModalProps } from '../modal';
@@ -260,6 +261,7 @@ export default ({
     },
     pickerInfo: null,
   });
+  const insets = useSafeAreaInsets();
 
   // event handlers
   const changeTimeHandler = (day: string, moment: Moment, date: Date) => {
@@ -297,6 +299,7 @@ export default ({
           { height: Dimensions.get('window').height * 0.65 },
         ]}
       >
+        <View style={globalStyles.modalSubtitleSpace} />
         <TouchableOpacity>
           <TouchableWithoutFeedback>
             <View>
@@ -449,6 +452,7 @@ export default ({
             right: 0,
             bottom: 0,
             backgroundColor: colors.white,
+            marginBottom: insets.bottom,
           },
           globalStyles.withMargin,
         ]}

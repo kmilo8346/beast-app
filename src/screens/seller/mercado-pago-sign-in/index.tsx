@@ -422,10 +422,7 @@ export default ({ navigation }: ScreenProps) => {
           </Text>
 
           <View
-            style={[
-              { position: 'absolute', bottom: 0, left: 0, right: 0 },
-              globalStyles.withMargin,
-            ]}
+            style={[{ position: 'absolute', bottom: 0, left: 0, right: 0 }]}
           >
             <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
             <View style={{ flexDirection: 'row', marginBottom: 25 }}>

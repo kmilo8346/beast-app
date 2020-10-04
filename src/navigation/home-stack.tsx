@@ -59,11 +59,6 @@ export default () => {
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-      <HomeStack.Screen
-        name="VerifyPhone"
-        component={VerifyPhoneScreen}
-        options={{ title: '' }}
-      />
     </HomeStack.Navigator>
   );
 };

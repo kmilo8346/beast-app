@@ -60,8 +60,6 @@ class DeviceAgent {
         });
       } else {
         try {
-          console.log(`${prefix} Updating device`);
-
           await deviceClient.update({
             pathVars: { id: device.id },
             body: device,
@@ -70,8 +68,6 @@ class DeviceAgent {
           if (error.response?.status !== 404) {
             throw error;
           }
-
-          console.log(`${prefix} Creating device because update throw 404`);
 
           created = await deviceClient.create({
             body: device as CreateDevice,

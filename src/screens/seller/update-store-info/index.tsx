@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 
 // components
 import Input from '../../../components/inputs/input';
+import Text from '../../../components/text';
 import InputImages from '../../../components/inputs/input-images';
 import Button from '../../../components/buttons/button';
 import InputSetDeliveryArea from '../../../components/inputs/input-set-delivery-area';
@@ -21,6 +22,8 @@ import storeCache from '../../../cache/store';
 // libs
 import validate from '../../../lib/validate';
 import { capture } from '../../../lib/sentry';
+import stringFormatter from '../../../lib/formatters/string-formatter';
+import stringParser from '../../../lib/parsers/string-parser';
 // constraints
 import constraints from './constraints';
 // types
@@ -134,7 +137,9 @@ export default ({ navigation }: ScreenProps) => {
       });
       // set updated store in cache
       storeCache.setData(state.store);
-      navigation.navigate('SellerDashboard');
+      setTimeout(() => {
+        navigation.navigate('SellerDashboard');
+      }, 300);
     } catch (error) {
       capture(prefix, 'Press continue handler error', error);
 
@@ -160,14 +165,31 @@ export default ({ navigation }: ScreenProps) => {
         style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
       >
         <Input
-          placeholder="Minimarket Don Juan"
-          label="Nombre de tienda"
+          placeholder="Colaciones express"
+          label="Nombre"
           value={state.store.name}
           errors={state.errors?.name}
           lengthCounter
           maxLength={30}
           onChangeText={(text) => {
             changeHandler('name', text);
+          }}
+        />
+        <Input
+          label="Teléfono"
+          keyboardType="phone-pad"
+          placeholder="Teléfono móvil"
+          format={stringFormatter.toPhone}
+          parse={stringParser.fromPhone}
+          prefix={
+            <Text level={6} style={{ color: colors.black, marginLeft: 10 }}>
+              +56
+            </Text>
+          }
+          value={state.store.phone}
+          errors={state.errors?.phone}
+          onChangeText={(text) => {
+            changeHandler('phone', text);
           }}
         />
         <InputImages
