@@ -105,7 +105,7 @@ export default () => {
         <SellerStack.Screen
           name="StockVerificaton"
           component={StockVerificationScreen}
-          options={{ title: 'Verificación de stock' }}
+          options={{ title: 'Stock' }}
         />
         <SellerStack.Screen
           name="OwnerRRSSSaleDetails"
