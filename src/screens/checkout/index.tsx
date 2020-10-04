@@ -348,8 +348,8 @@ export default ({ navigation, route }: ScreenProps) => {
               marginHorizontal: 20,
             }}
           >
-            Al parecer haz cancelado, si el pago se realizó tu pedido estará en
-            curso.
+            Al parecer cerraste la ventana de pago, si el cobro se realizó tu
+            pedido estará en curso.
           </Text>
           <Button
             type="link"
