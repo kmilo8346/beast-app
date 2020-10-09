@@ -3,10 +3,10 @@ import { Animated, View, Image, Dimensions, ScrollView } from 'react-native';
 
 // styles
 import styles from './styles';
-import colors from '../../../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 const deviceWidth = Dimensions.get('window').width;
-const FIXED_BAR_WIDTH = 200;
+const FIXED_BAR_WIDTH = 130;
 const BAR_SPACE = 10;
 
 export interface CarousellProps {

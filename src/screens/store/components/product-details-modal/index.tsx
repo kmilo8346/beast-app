@@ -10,7 +10,7 @@ import Button from '../../../../components/buttons/button';
 import FullModal, { FullModalProps } from '../../../components/full-modal';
 // local components
 import NumberInput from './components/number-input';
-import Carousell from './components/carousell';
+import Carousell from '../../../components/carousell';
 // cache
 import shoppingCartsCache from '../../../../cache/shopping-carts';
 import ShoppingCartCache from '../../../../cache/shopping-cart';

@@ -13,42 +13,42 @@ import { useFocusEffect } from '@react-navigation/native';
 // constraints
 import constraints from './constraints';
 // components
-import Text from '../../../../components/text';
-import Divider from '../../../../components/divider';
-import Touchable from '../../../../components/touchable';
-import MapPinShadedBlueIcon from '../../../../components/svgs/icons/map-pin-shaded-blue';
-import PhoneFilledDotsBlueIcon from '../../../../components/svgs/icons/phone-filled-dots-blue';
-import ActionSheetContact from '../../../../components/modals/action-sheet-contact';
-import Button from '../../../../components/buttons/button';
-import BasketCatImage from '../../../../components/svgs/images/basket-cat';
-import Icon from '../../../../components/icon';
+import Text from '../../../components/text';
+import Divider from '../../../components/divider';
+import Touchable from '../../../components/touchable';
+import MapPinShadedBlueIcon from '../../../components/svgs/icons/map-pin-shaded-blue';
+import PhoneFilledDotsBlueIcon from '../../../components/svgs/icons/phone-filled-dots-blue';
+import ActionSheetContact from '../../../components/modals/action-sheet-contact';
+import Button from '../../../components/buttons/button';
+import BasketCatImage from '../../../components/svgs/images/basket-cat';
+import Icon from '../../../components/icon';
 // screen components
-import FullModal, { FullModalProps } from '../../../components/full-modal';
+import FullModal, { FullModalProps } from '../full-modal';
 // local components
 import ItemComponent from './components/item';
 import ModalSetPhone from './components/modal-set-phone';
 // lib
-import durationFormatter from '../../../../lib/formatters/duration-formatter';
-import { navigate } from '../../../../lib/root-navigation';
-import cloudinary from '../../../../lib/cloudinary';
-import * as utils from '../../../../lib/utils';
-import validate from '../../../../lib/validate';
-import { capture } from '../../../../lib/sentry';
-import numberFormatter from '../../../../lib/formatters/number-formatter';
-import stringFormatter from '../../../../lib/formatters/string-formatter';
+import durationFormatter from '../../../lib/formatters/duration-formatter';
+import { navigate } from '../../../lib/root-navigation';
+import cloudinary from '../../../lib/cloudinary';
+import * as utils from '../../../lib/utils';
+import validate from '../../../lib/validate';
+import { capture } from '../../../lib/sentry';
+import numberFormatter from '../../../lib/formatters/number-formatter';
+import stringFormatter from '../../../lib/formatters/string-formatter';
 // clients
-import userClient from '../../../../clients/user-client';
+import userClient from '../../../clients/user-client';
 // cache
-import userCache from '../../../../cache/user';
-import shoppingCartsCache from '../../../../cache/shopping-carts';
+import userCache from '../../../cache/user';
+import shoppingCartsCache from '../../../cache/shopping-carts';
 import ShoppingCartCache, {
   ShoppingCartSnapshot,
-} from '../../../../cache/shopping-cart';
+} from '../../../cache/shopping-cart';
 // types
-import { Store, Item, User } from '../../../../types';
+import { Store, Item, User } from '../../../types';
 // styles
-import globalStyles from '../../../../styles';
-import colors from '../../../../styles/colors';
+import globalStyles from '../../../styles';
+import colors from '../../../styles/colors';
 
 // instances outside component
 const prefix = '[shopping cart modal]';

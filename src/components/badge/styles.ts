@@ -10,11 +10,11 @@ export default StyleSheet.create<Styles>({
   container: {
     borderRadius: 22,
     backgroundColor: colors.blue,
-    height: 22,
-    minWidth: 22,
     alignSelf: 'flex-start',
     justifyContent: 'center',
     alignItems: 'center',
+    minHeight: 24,
+    minWidth: 24,
     paddingHorizontal: 5,
     borderWidth: 1,
     borderColor: colors.white,

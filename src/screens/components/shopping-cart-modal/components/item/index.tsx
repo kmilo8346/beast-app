@@ -2,16 +2,16 @@ import React, { ReactNode } from 'react';
 import { View } from 'react-native';
 
 // components
-import Text from '../../../../../../components/text';
+import Text from '../../../../../components/text';
 // shopping cart modal components
 import NumberInput from '../number-input';
 // libs
-import * as utils from '../../../../../../lib/utils';
+import * as utils from '../../../../../lib/utils';
 // types
-import { Item } from '../../../../../../types';
+import { Item } from '../../../../../types';
 // styles
-import colors from '../../../../../../styles/colors';
-import numberFormatter from '../../../../../../lib/formatters/number-formatter';
+import colors from '../../../../../styles/colors';
+import numberFormatter from '../../../../../lib/formatters/number-formatter';
 
 interface ComponentProps {
   data: Item;

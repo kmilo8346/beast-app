@@ -26,10 +26,11 @@ import NotSearchResult from '../../components/not-search-result';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import ErrorView from '../../components/error-view';
+// screen components
+import ShoppingCartModal from '../components/shopping-cart-modal';
 // local components
 import Skeletton from './components/skeleton';
 import Item from './components/item';
-import ShoppingCartModal from './components/shopping-cart-modal';
 import NotData from './components/not-data';
 // clients
 import productClient from '../../clients/product-client';

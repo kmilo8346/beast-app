@@ -4,17 +4,17 @@ import { Vibration, View } from 'react-native';
 // constraints
 import constraints from './constraints';
 // components
-import Modal from '../../../../../../components/modals/modal';
-import Text from '../../../../../../components/text';
-import Input from '../../../../../../components/inputs/input';
-import Button from '../../../../../../components/buttons/button';
+import Modal from '../../../../../components/modals/modal';
+import Text from '../../../../../components/text';
+import Input from '../../../../../components/inputs/input';
+import Button from '../../../../../components/buttons/button';
 // libs
-import stringFormatter from '../../../../../../lib/formatters/string-formatter';
-import stringParser from '../../../../../../lib/parsers/string-parser';
-import validate from '../../../../../../lib/validate';
+import stringFormatter from '../../../../../lib/formatters/string-formatter';
+import stringParser from '../../../../../lib/parsers/string-parser';
+import validate from '../../../../../lib/validate';
 // types
-import colors from '../../../../../../styles/colors';
-import globalStyles from '../../../../../../styles';
+import colors from '../../../../../styles/colors';
+import globalStyles from '../../../../../styles';
 
 interface ComponentProps {
   value?: string;

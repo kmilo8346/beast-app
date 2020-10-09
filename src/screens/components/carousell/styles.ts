@@ -1,5 +1,5 @@
 import { StyleSheet, ViewStyle, ImageStyle } from 'react-native';
-import colors from '../../../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 interface Styles {
   container: ViewStyle;
@@ -14,7 +14,7 @@ export default StyleSheet.create<Styles>({
     alignItems: 'center',
     justifyContent: 'center',
     height: 300,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   barContainer: {
     zIndex: 2,

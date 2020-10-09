@@ -7,12 +7,12 @@ import {
 } from 'react-native';
 
 // components
-import Touchable from '../../../../../../components/touchable';
-import Icon from '../../../../../../components/icon';
+import Touchable from '../../../../../components/touchable';
+import Icon from '../../../../../components/icon';
 // libs
-import * as utils from '../../../../../../lib/utils';
+import * as utils from '../../../../../lib/utils';
 // styles
-import colors from '../../../../../../styles/colors';
+import colors from '../../../../../styles/colors';
 
 export interface InputNumberProps {
   value: number;

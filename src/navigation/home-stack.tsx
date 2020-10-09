@@ -6,6 +6,9 @@ import {
   SignInScreen,
   SetPhoneScreen,
   HomeScreen,
+  ProductScreen,
+  StoresScreen,
+  StoreV2Screen,
   StoreScreen,
   CheckoutScreen,
   OrdersScreen,
@@ -23,6 +26,21 @@ export default () => {
         name="Home"
         component={HomeScreen}
         options={{ headerShown: false }}
+      />
+      <HomeStack.Screen
+        name="Product"
+        component={ProductScreen}
+        options={{ title: '' }}
+      />
+      <HomeStack.Screen
+        name="Stores"
+        component={StoresScreen}
+        options={{ title: 'Tiendas' }}
+      />
+      <HomeStack.Screen
+        name="StoreV2"
+        component={StoreV2Screen}
+        options={{ title: '' }}
       />
       <HomeStack.Screen
         name="Store"
