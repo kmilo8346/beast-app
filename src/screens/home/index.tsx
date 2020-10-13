@@ -5,13 +5,7 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import {
-  View,
-  FlatList,
-  GestureResponderEvent,
-  Image,
-  Dimensions,
-} from 'react-native';
+import { View, FlatList, GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
@@ -33,14 +27,13 @@ import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // local components
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
+import ProductCard from './components/product-card';
 // clients
 import userClient from '../../clients/user-client';
 import productClient from '../../clients/product-client';
 // libs
 import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
-import cloudinary from '../../lib/cloudinary';
-import numberFormatter from '../../lib/formatters/number-formatter';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
@@ -362,10 +355,6 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('SellerStack');
   };
 
-  const pressItemHandler = (product: Product) => {
-    navigation.navigate('Product', { product });
-  };
-
   const pressSeeStoresHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('Stores');
@@ -393,6 +382,10 @@ export default ({ navigation }: ScreenProps) => {
       type: 'set_pending_address_info',
       pending_address_info: undefined,
     });
+  };
+
+  const pressProductCardHandler = (product: Product) => {
+    navigation.navigate('Product', { product });
   };
 
   useFocusEffect(
@@ -631,46 +624,13 @@ export default ({ navigation }: ScreenProps) => {
         }
         keyExtractor={(item: Product) => item.id}
         renderItem={({ item, index }) => {
-          const image = cloudinary.dynamicUrl(item.images[0], 'h_500');
-          const imageWidth = (Dimensions.get('window').width / 2 - 20) * 0.95;
           return (
-            <Touchable
-              style={{ width: '50%' }}
-              onPress={() => {
-                pressItemHandler(item);
-              }}
-            >
-              <Image
-                source={{ uri: image }}
-                style={[
-                  {
-                    borderRadius: 8,
-                    width: imageWidth,
-                    height: imageWidth,
-                    alignSelf: index % 2 !== 0 ? 'flex-end' : 'flex-start',
-                  },
-                ]}
-              />
-              <View
-                style={{
-                  width: imageWidth,
-                  alignSelf: index % 2 !== 0 ? 'flex-end' : 'flex-start',
-                  paddingTop: 5,
-                }}
-              >
-                <Text
-                  level={7}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                  style={{ marginLeft: 5 }}
-                >
-                  {item.name}
-                </Text>
-                <Text level={7} weight="bold" style={{ marginLeft: 5 }}>
-                  {numberFormatter.toCurrency(item.price)}
-                </Text>
-              </View>
-            </Touchable>
+            <ProductCard
+              key={`${item.id}`}
+              product={item}
+              align={index % 2 === 0 ? 'left' : 'right'}
+              onPress={pressProductCardHandler}
+            />
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
