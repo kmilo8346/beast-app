@@ -4,9 +4,9 @@ import Svg, { Defs, Rect, Path, G, Mask, Use } from 'react-native-svg';
 
 function SvgComponent() {
   return (
-    <Svg width={335} height={68} viewBox="0 0 335 68">
+    <Svg width="100%" height={68}>
       <Defs>
-        <Rect id="prefix__a" x={0} y={0.833} width={335} height={67} rx={10} />
+        <Rect id="prefix__a" x={0} y={0.833} width="100%" height={67} rx={10} />
         <Path id="prefix__c" d="M0 42.867h218.357V0H0z" />
       </Defs>
       <G fill="none" fillRule="evenodd">
