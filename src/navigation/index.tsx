@@ -12,7 +12,7 @@ import {
   SignInScreen,
 } from '../screens';
 // navigation
-import MainTabScreen from './main-tab';
+import MainRootStackScreen from './main-root-stack';
 import commonStackOptions from './common-stack-options';
 // libs
 import { navigationRef, onReady } from '../lib/root-navigation';
@@ -57,13 +57,13 @@ export default () => {
             options={{ title: '' }}
             initialParams={{
               redirect: {
-                name: 'MainTab',
+                name: 'MainRootStack',
               },
             }}
           />
           <RootStack.Screen
-            name="MainTab"
-            component={MainTabScreen}
+            name="MainRootStack"
+            component={MainRootStackScreen}
             options={{ headerShown: false }}
           />
         </RootStack.Navigator>

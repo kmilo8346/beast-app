@@ -84,7 +84,7 @@ export interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // params
-  const redirect = route.params?.redirect || { name: 'MainTab' };
+  const redirect = route.params?.redirect || { name: 'MainRootStack' };
   const dont_allow_guest = route.params.dont_allow_guest;
   const reason = route.params.reason;
   // state
@@ -208,11 +208,11 @@ export default ({ navigation, route }: ScreenProps) => {
         });
         await userCache.setData(created);
       }
-      if (redirect.name === 'MainTab') {
+      if (redirect.name === 'MainRootStack') {
         navigation.dispatch(
           CommonActions.reset({
             index: 1,
-            routes: [{ name: 'MainTab' }],
+            routes: [{ name: 'MainRootStack' }],
           })
         );
       } else {
@@ -258,7 +258,7 @@ export default ({ navigation, route }: ScreenProps) => {
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
-          routes: [{ name: 'MainTab' }],
+          routes: [{ name: 'MainRootStack' }],
         })
       );
     } catch (error) {

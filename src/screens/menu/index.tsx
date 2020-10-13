@@ -24,6 +24,7 @@ import BagHeadImage from '../../components/svgs/images/bag-head';
 import Toast, { IToast } from '../../components/toast';
 // screen components
 import ModalManageAddress from '../components/modal-manage-address';
+import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // local components
 import Item from './components/item';
 import ModalHelp from './components/modal-help';
@@ -41,6 +42,7 @@ import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-m
 import OrdersInProgressCache, {
   OrdersInProgressCacheData,
 } from '../../cache/orders-in-progress-cache';
+import shoppingCartCache from '../../cache/shopping-cartv2';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -48,11 +50,11 @@ import colors from '../../styles/colors';
 // instances outside component
 const prefix = '[menu screen]';
 
-export interface MenuProps {
+interface ScreenProps {
   navigation: any;
 }
 
-export default ({ navigation }: MenuProps) => {
+export default ({ navigation }: ScreenProps) => {
   // state
   const [user, setUser] = useState(userCache.getData());
   const [
@@ -63,6 +65,9 @@ export default ({ navigation }: MenuProps) => {
   const [modalManageAddress, setModalManageAddress] = useState(false);
   const [updatingAddressInfo, setUpdatingAddressInfo] = useState(false);
   const [modalHelp, setModalHelp] = useState(false);
+  const [pendingAddressInfo, setPendingAddressInfo] = useState<
+    AddressInfo | undefined
+  >();
   if (!user) {
     throw new Error(`${prefix} User must be defined`);
   }
@@ -80,6 +85,43 @@ export default ({ navigation }: MenuProps) => {
   const instanceOrdersInProgressCache = async (user: string) => {
     const cache = await ordersInProgressCacheManager.get(user);
     setOrdersInProgressCache(cache);
+  };
+
+  const updateAddressInfo = async (info: AddressInfo) => {
+    try {
+      setUpdatingAddressInfo(true);
+      await userClient.update({
+        pathVars: {
+          id: user.id,
+        },
+        body: {
+          current_address: info.current_address,
+          addresses: info.addresses,
+        },
+      });
+      await userCache.updateData({
+        current_address: info.current_address,
+        addresses: info.addresses,
+      });
+      shoppingCartCache.clear();
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'MainRootStack' }],
+        })
+      );
+    } catch (error) {
+      capture(prefix, 'Update address info error', error);
+
+      Vibration.vibrate(400);
+      toastRef.current?.show({
+        message: 'No se pudo actualizar las direcciones, reintente',
+        type: 'ERROR',
+        expiration: 3,
+      });
+    } finally {
+      setUpdatingAddressInfo(false);
+    }
   };
 
   const pressMyAddressesHandler = (event: GestureResponderEvent) => {
@@ -120,7 +162,7 @@ export default ({ navigation }: MenuProps) => {
   const pressStartSessionHandler = () => {
     navigation.navigate('SignIn', {
       redirect: {
-        name: 'MainTab',
+        name: 'MainRootStack',
       },
       dont_allow_guest: true,
     });
@@ -138,42 +180,33 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
     }
   };
 
-  const addressInfoChangeHandler = async (info?: AddressInfo) => {
+  const addressInfoChangeHandler = (info?: AddressInfo) => {
     setModalManageAddress(false);
     if (!info) {
       return;
     }
-    try {
-      setUpdatingAddressInfo(true);
-      await userClient.update({
-        pathVars: {
-          id: user.id,
-        },
-        body: {
-          current_address: info.current_address,
-          addresses: info.addresses,
-        },
-      });
-      await userCache.updateData({
-        current_address: info.current_address,
-        addresses: info.addresses,
-      });
-    } catch (error) {
-      capture(prefix, 'Address info change handler error', error);
-
-      Vibration.vibrate(400);
-      toastRef.current?.show({
-        message: 'No se pudo actualizar las direcciones, reintente',
-        type: 'ERROR',
-        expiration: 3,
-      });
-    } finally {
-      setUpdatingAddressInfo(false);
+    if (
+      userCache.getData()?.current_address !== info.current_address &&
+      !shoppingCartCache.isEmpty()
+    ) {
+      setPendingAddressInfo(info);
+    } else {
+      updateAddressInfo(info);
     }
   };
 
   const closeModalHelpHandler = () => {
     setModalHelp(false);
+  };
+
+  const confirmDialogOkHandler = () => {
+    const info = { ...(pendingAddressInfo as AddressInfo) };
+    setPendingAddressInfo(undefined);
+    updateAddressInfo(info);
+  };
+
+  const confirmDialogCancelHandler = () => {
+    setPendingAddressInfo(undefined);
   };
 
   useFocusEffect(
@@ -467,6 +500,15 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
       )}
 
       {modalHelp && <ModalHelp onClose={closeModalHelpHandler} />}
+      {pendingAddressInfo && (
+        <ConfirmDialog
+          title="¿Seguro que quieres cambiar dirección?"
+          message="Tienes artículos en tu carrito que se perderán al cambiar la dirección de entrega."
+          okText="Si, cambiar"
+          onOk={confirmDialogOkHandler}
+          onCancel={confirmDialogCancelHandler}
+        />
+      )}
     </View>
   );
 };

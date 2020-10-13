@@ -14,6 +14,7 @@ import deviceAgent from './lib/device-agent';
 import Sentry, { capture } from './lib/sentry';
 // cache
 import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
+import shoppingCartCache from './cache/shopping-cartv2';
 // fonts
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
 const MonserratNormal = require('../assets/fonts/monserrat/normal.ttf');
@@ -81,10 +82,9 @@ class App extends React.Component<{}, State> {
   };
 
   appLoadingStartHandler = async () => {
-    console.info(`${prefix} Preloading assets`);
     this.setState({ is_ready: false });
     // tasks
-    await this.cacheFont();
+    await Promise.all([this.cacheFont(), shoppingCartCache.load()]);
   };
 
   appLoadingErrorHandler = (error: Error) => {

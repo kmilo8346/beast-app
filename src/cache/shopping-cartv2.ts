@@ -9,12 +9,18 @@ export const getSnapshot = (data?: ShoppingCart): ShoppingCartSnapshot => {
 
   return Object.keys(shoppingCart).reduce((snapshot, storeId) => {
     const storeShoppingCart = shoppingCart[storeId];
+    if (!storeShoppingCart) {
+      return snapshot;
+    }
     return [
       ...snapshot,
       Object.keys(storeShoppingCart.items).reduce(
         (storeSnapshot, productId) => {
           const result = { ...storeSnapshot };
           const product = storeShoppingCart.items[productId];
+          if (!product) {
+            return result;
+          }
           result.items.push(product);
           result.stats.total += product.qty;
           result.stats.amount += product.qty * product.price;
@@ -83,6 +89,10 @@ class ShoppingCartCacheV2 extends PersistedCache<ShoppingCart> {
     [key: string]: ((data?: Item) => void)[];
   } = {};
 
+  isEmpty() {
+    return !Object.keys(this.data || {}).length;
+  }
+
   set(store: Store, product: Product, qty: number) {
     const data = this.data || {};
     data[store.id] = data[store.id] || {};
@@ -109,7 +119,14 @@ class ShoppingCartCacheV2 extends PersistedCache<ShoppingCart> {
     );
   }
 
-  clear(store: string) {
+  clear() {
+    const shoppingCart = this.data || {};
+    Object.keys(shoppingCart).forEach((storeId) => {
+      this.clearStore(storeId);
+    });
+  }
+
+  clearStore(store: string) {
     const shoppingCart = this.data || {};
     const storeShoppingCart = shoppingCart[store];
     if (!storeShoppingCart) {
@@ -144,9 +161,7 @@ class ShoppingCartCacheV2 extends PersistedCache<ShoppingCart> {
   ) {
     // initialize
     const shoppingCart = this.data || {};
-    shoppingCart[store] = shoppingCart[store] || {};
-    shoppingCart[store].items = shoppingCart[store].items || {};
-    callback(shoppingCart[store].items[product]);
+    callback(shoppingCart[store]?.items[product]);
 
     // add to subscribers
     const id = `${store}|${product}`;

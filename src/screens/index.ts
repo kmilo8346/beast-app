@@ -8,6 +8,7 @@ export { default as ProductScreen } from './product';
 export { default as StoresScreen } from './stores';
 export { default as StoreV2Screen } from './storev2';
 export { default as StoreScreen } from './store';
+export { default as ShoppingCartScreen } from './shopping-cart';
 export { default as CheckoutScreen } from './checkout';
 export { default as SellerBootScreen } from './seller/seller-boot';
 export { default as SelectOrCreateStoreScreen } from './seller/select-or-create-store';

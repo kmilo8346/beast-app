@@ -24,7 +24,6 @@ import Icon from '../../components/icon';
 import Button from '../../components/buttons/button';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';
-import ShoppingCartModal from '../components/shopping-cart-modal';
 import ProductCard from '../components/product-card';
 // local components
 import ProductDetailsCard from './components/product-details-card';
@@ -73,25 +72,19 @@ type SetAmountAction = {
   type: 'set_amount';
   amount: number;
 };
-type SetModalAction = {
-  type: 'set_modal';
-  modal: boolean;
-};
 type Action =
   | ResetAction
   | SetStoreAction
   | SetProductsAction
   | SetErrorAction
   | SetRefreshingAction
-  | SetAmountAction
-  | SetModalAction;
+  | SetAmountAction;
 type State = {
   store?: Store;
   products?: SearchResponse<Product>;
   error?: Error;
   refreshing: boolean;
   amount?: number;
-  modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -112,8 +105,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, refreshing: action.refreshing };
     case 'set_amount':
       return { ...state, amount: action.amount };
-    case 'set_modal':
-      return { ...state, modal: action.modal };
     default:
       return state;
   }
@@ -132,7 +123,6 @@ export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     refreshing: false,
-    modal: false,
   });
 
   // event handlers
@@ -215,11 +205,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressMyOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_modal', modal: true });
-  };
-
-  const closeShoppingCartHandler = () => {
-    dispatch({ type: 'set_modal', modal: false });
+    navigation.navigate('ShoppingCartStack');
   };
 
   useEffect(() => {
@@ -453,7 +439,6 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
-      {state.modal && <ShoppingCartModal onClose={closeShoppingCartHandler} />}
     </View>
   );
 };

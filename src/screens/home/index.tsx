@@ -15,7 +15,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
-import Constants from 'expo-constants';
 
 // components
 import Text from '../../components/text';
@@ -26,24 +25,29 @@ import BagWhiteIcon from '../../components/svgs/icons/bag-white';
 import Button from '../../components/buttons/button';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
+import FreeDeliveryImage from '../../components/svgs/images/free-delivery';
 // screen components
 import ModalManageAddress from '../components/modal-manage-address';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
+import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // local components
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
 // clients
 import userClient from '../../clients/user-client';
+import productClient from '../../clients/product-client';
 // libs
 import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
+import numberFormatter from '../../lib/formatters/number-formatter';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
 import OrdersInProgressCache, {
   OrdersInProgressCacheData,
 } from '../../cache/orders-in-progress-cache';
+import shoppingCartCache from '../../cache/shopping-cartv2';
 // types
 import {
   LoggedUser,
@@ -57,8 +61,6 @@ import {
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
-import productClient from '../../clients/product-client';
-import numberFormatter from '../../lib/formatters/number-formatter';
 
 // instances outside component
 const prefix = '[home screen]';
@@ -104,6 +106,10 @@ type SetAddressModalAction = {
   type: 'set_address_modal';
   address_modal: boolean;
 };
+type SetPendingAddressInfoAction = {
+  type: 'set_pending_address_info';
+  pending_address_info?: AddressInfo;
+};
 type Action =
   | SetUserAction
   | SetUpdatingAction
@@ -114,7 +120,8 @@ type Action =
   | SetFetchingMoreAction
   | SetOrdersInProgressCacheAction
   | SetInProgressQtyAction
-  | SetAddressModalAction;
+  | SetAddressModalAction
+  | SetPendingAddressInfoAction;
 type State = {
   user: User;
   updating: boolean;
@@ -125,6 +132,7 @@ type State = {
   orders_in_progress_cache?: OrdersInProgressCache;
   in_progress_qty?: number;
   address_modal: boolean;
+  pending_address_info?: AddressInfo;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -146,6 +154,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, in_progress_qty: action.qty };
     case 'set_address_modal':
       return { ...state, address_modal: action.address_modal };
+    case 'set_pending_address_info':
+      return { ...state, pending_address_info: action.pending_address_info };
     default:
       return state;
   }
@@ -211,6 +221,7 @@ export default ({ navigation }: ScreenProps) => {
     try {
       dispatch({ type: 'reset' });
       const response = await fetch({
+        enabled: true,
         location: (address as Place).geometry.location,
       });
       dispatch({
@@ -233,6 +244,7 @@ export default ({ navigation }: ScreenProps) => {
     try {
       dispatch({ type: 'set_refreshing', refreshing: true });
       const response = await fetch({
+        enabled: true,
         location: (address as Place).geometry.location,
       });
       dispatch({
@@ -283,7 +295,7 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const changeAddressInfoHandler = async (info: AddressInfo) => {
+  const updateAddressInfo = async (info: AddressInfo) => {
     try {
       dispatch({ type: 'set_updating', updating: true });
       await userClient.update({
@@ -299,6 +311,7 @@ export default ({ navigation }: ScreenProps) => {
         current_address: info.current_address,
         addresses: info.addresses,
       });
+      shoppingCartCache.clear();
     } catch (error) {
       capture(prefix, 'Change address info handler error', error);
 
@@ -309,6 +322,20 @@ export default ({ navigation }: ScreenProps) => {
       });
     } finally {
       dispatch({ type: 'set_updating', updating: false });
+    }
+  };
+
+  const changeAddressInfoHandler = async (info: AddressInfo) => {
+    if (
+      state.user.current_address !== info.current_address &&
+      !shoppingCartCache.isEmpty()
+    ) {
+      dispatch({
+        type: 'set_pending_address_info',
+        pending_address_info: info,
+      });
+    } else {
+      updateAddressInfo(info);
     }
   };
 
@@ -350,6 +377,22 @@ export default ({ navigation }: ScreenProps) => {
     } else {
       fetchMore();
     }
+  };
+
+  const confirmDialogOkHandler = () => {
+    const info = { ...(state.pending_address_info as AddressInfo) };
+    dispatch({
+      type: 'set_pending_address_info',
+      pending_address_info: undefined,
+    });
+    updateAddressInfo(info);
+  };
+
+  const confirmDialogCancelHandler = () => {
+    dispatch({
+      type: 'set_pending_address_info',
+      pending_address_info: undefined,
+    });
   };
 
   useFocusEffect(
@@ -555,21 +598,12 @@ export default ({ navigation }: ScreenProps) => {
         refreshing={state.refreshing}
         ListHeaderComponent={
           <View>
-            <Image
-              source={{
-                uri: Constants.manifest.extra.ASSET_BANNER,
-              }}
-              style={{
-                width: '100%',
-                height: 67,
-                borderRadius: 8,
-                marginBottom: 15,
-              }}
-            />
+            <FreeDeliveryImage />
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                marginTop: 15,
                 marginBottom: 15,
               }}
             >
@@ -689,6 +723,15 @@ export default ({ navigation }: ScreenProps) => {
         <ModalManageAddress
           value={addressInfo}
           onChange={addressModalChangeHandler}
+        />
+      )}
+      {state.pending_address_info && (
+        <ConfirmDialog
+          title="¿Seguro que quieres cambiar dirección?"
+          message="Tienes artículos en tu carrito que se perderán al cambiar la dirección de entrega."
+          okText="Si, cambiar"
+          onOk={confirmDialogOkHandler}
+          onCancel={confirmDialogCancelHandler}
         />
       )}
     </View>

@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
-import Constants from 'expo-constants';
 
 // components
 import Text from '../../components/text';
@@ -21,6 +20,7 @@ import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 import Bone from '../../components/bone';
+import FreeDeliveryImage from '../../components/svgs/images/free-delivery';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 // clients
@@ -111,13 +111,6 @@ export default ({ navigation }: ScreenProps) => {
     throw new Error(`${prefix} User must be defined`);
   }
   const address = userCache.getAddress();
-  let addressInfo;
-  if (state.user.current_address && state.user.addresses?.length) {
-    addressInfo = {
-      current_address: state.user.current_address,
-      addresses: state.user.addresses,
-    };
-  }
 
   // event handlers
   const fetch = async (
@@ -351,17 +344,9 @@ export default ({ navigation }: ScreenProps) => {
       data={state.stores.hits}
       refreshing={state.refreshing}
       ListHeaderComponent={
-        <Image
-          source={{
-            uri: Constants.manifest.extra.ASSET_BANNER,
-          }}
-          style={{
-            width: '100%',
-            height: 67,
-            borderRadius: 8,
-            marginBottom: 15,
-          }}
-        />
+        <View style={{ marginBottom: 15 }}>
+          <FreeDeliveryImage />
+        </View>
       }
       keyExtractor={(item: Store) => item.id}
       renderItem={({ item }) => {

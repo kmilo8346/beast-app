@@ -26,7 +26,6 @@ import PhoneFilledDotsBlueIcon from '../../components/svgs/icons/phone-filled-do
 import ActionSheetContact from '../../components/modals/action-sheet-contact';
 import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
 // screen components
-import ShoppingCartModal from '../components/shopping-cart-modal';
 import ProductCard from '../components/product-card';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 // local components
@@ -97,10 +96,6 @@ type SetAmountAction = {
   type: 'set_amount';
   amount: number;
 };
-type SetShoppingCartModalAction = {
-  type: 'set_shopping_cart_modal';
-  shopping_cart_modal: boolean;
-};
 type SetOpeningHoursModalAction = {
   type: 'set_opening_hours_modal';
   opening_hours_modal: boolean;
@@ -114,7 +109,6 @@ type Action =
   | SetRefreshingAction
   | SetRefreshingAction
   | SetAmountAction
-  | SetShoppingCartModalAction
   | SetOpeningHoursModalAction;
 type State = {
   products?: SearchResponse<Product>;
@@ -123,7 +117,6 @@ type State = {
   fetching_more: boolean;
   refreshing: boolean;
   amount?: number;
-  shopping_cart_modal: boolean;
   opening_hours_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
@@ -146,8 +139,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, refreshing: action.refreshing };
     case 'set_amount':
       return { ...state, amount: action.amount };
-    case 'set_shopping_cart_modal':
-      return { ...state, shopping_cart_modal: action.shopping_cart_modal };
     case 'set_opening_hours_modal':
       return { ...state, opening_hours_modal: action.opening_hours_modal };
     default:
@@ -170,7 +161,6 @@ export default ({ navigation, route }: ScreenProps) => {
     contact: false,
     fetching_more: false,
     refreshing: false,
-    shopping_cart_modal: false,
     opening_hours_modal: false,
   });
 
@@ -295,11 +285,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressMyOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_shopping_cart_modal', shopping_cart_modal: true });
-  };
-
-  const closeShoppingCartHandler = () => {
-    dispatch({ type: 'set_shopping_cart_modal', shopping_cart_modal: false });
+    navigation.navigate('ShoppingCartStack');
   };
 
   const pressOpeningHourHandler = (event: GestureResponderEvent) => {
@@ -460,7 +446,7 @@ export default ({ navigation, route }: ScreenProps) => {
                     marginBottom: 10,
                   }}
                 >
-                  <Icon name="shopping-bag" size={18} />
+                  <Icon name="clock" size={18} />
                   <Text
                     level={7}
                     numberOfLines={1}
@@ -481,7 +467,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   }}
                   onPress={pressOpeningHourHandler}
                 >
-                  <Icon name="clock" size={18} />
+                  <Icon name="calendar" size={18} />
                   <View
                     style={{
                       marginLeft: 10,
@@ -566,9 +552,6 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
-      {state.shopping_cart_modal && (
-        <ShoppingCartModal onClose={closeShoppingCartHandler} />
-      )}
       {state.contact && (
         <ActionSheetContact
           phone={store.phone}

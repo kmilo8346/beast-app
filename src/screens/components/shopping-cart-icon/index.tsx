@@ -11,10 +11,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import Touchable from '../../../components/touchable';
 import Icon from '../../../components/icon';
 import Badge from '../../../components/badge';
-// screen components
-import ShoppingCartModal from '../shopping-cart-modal';
 // cache
 import shoppingCartCache, { getTotal } from '../../../cache/shopping-cartv2';
+// lib
+import { navigate } from '../../../lib/root-navigation';
 
 interface ComponentProps {
   style?: StyleProp<ViewStyle>;
@@ -23,15 +23,11 @@ interface ComponentProps {
 export default ({ style }: ComponentProps) => {
   // state
   const [total, setTotal] = useState<number | undefined>();
-  const [modal, setModal] = useState(false);
 
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-  };
-
-  const closeShoppingCartHandler = () => {
-    setModal(false);
+    navigate('ShoppingCartStack');
   };
 
   useFocusEffect(
@@ -79,7 +75,6 @@ export default ({ style }: ComponentProps) => {
         />
       </View>
       <Icon name="shopping-cart" size={20} />
-      {modal && <ShoppingCartModal onClose={closeShoppingCartHandler} />}
     </Touchable>
   );
 };

@@ -10,7 +10,6 @@ import {
   StoresScreen,
   StoreV2Screen,
   StoreScreen,
-  CheckoutScreen,
   OrdersScreen,
   OrderDetailsScreen,
 } from '../screens';
@@ -45,13 +44,6 @@ export default () => {
       <HomeStack.Screen
         name="Store"
         component={StoreScreen}
-        options={{
-          title: '',
-        }}
-      />
-      <HomeStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
         options={{
           title: '',
         }}

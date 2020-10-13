@@ -24,7 +24,7 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('SignIn', {
       skip_set_phone_redirect: true,
       redirect: {
-        name: 'MainTab',
+        name: 'MainRootStack',
       },
     });
   };

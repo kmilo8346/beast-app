@@ -1,10 +1,9 @@
-import React, { useReducer, useEffect } from 'react';
-import { View, GestureResponderEvent } from 'react-native';
+import React, { useReducer, useEffect, ReactNode } from 'react';
+import { View, GestureResponderEvent, ActivityIndicator } from 'react-native';
 import Constants from 'expo-constants';
 import axios, { CancelTokenSource } from 'axios';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import { CommonActions } from '@react-navigation/native';
 import * as Permissions from 'expo-permissions';
 
 // components
@@ -16,23 +15,26 @@ import RapidCashImage from '../../components/svgs/images/rapid-cash';
 import BrokenCardImage from '../../components/svgs/images/broken-card';
 import MercadoPagoImage from '../../components/svgs/images/mercadopago-logo';
 import Button from '../../components/buttons/button';
+// screen components
+import InfoDialog from '../components/dialogs/info-dialog';
+// local components
+import UnavailableProductsDialog from './components/unavailable-products-dialog';
 // clients
 import paymentClient from '../../clients/payment-client';
 // types
 import {
-  Store,
   MercadopagoPaymentStatus,
   LoggedUser,
   PaymentProvider,
   DispatchProvider,
   CreatePayment,
+  Product,
 } from '../../types';
 // cache
 import userCache from '../../cache/user';
-import shoppingCartsCache from '../../cache/shopping-carts';
-import ShoppingCartCache, {
-  ShoppingCartSnapshot,
-} from '../../cache/shopping-cart';
+import shoppingCartCache, {
+  StoreShoppingCartSnapshot,
+} from '../../cache/shopping-cartv2';
 // libs
 import { generatePushID } from '../../lib/uuid';
 import { capture } from '../../lib/sentry';
@@ -49,10 +51,6 @@ type SetIdempotencyAction = {
   type: 'set_idempotency';
   idempotency: string;
 };
-type SetShoppingCartCacheAction = {
-  type: 'set_shopping_cart_cache';
-  shopping_cart_cache: ShoppingCartCache;
-};
 type ResetAction = {
   type: 'reset';
 };
@@ -68,26 +66,39 @@ type SetErrorAction = {
   type: 'set_error';
   error?: Error;
 };
+type SetClosedStoreDialogAction = {
+  type: 'set_closed_store_dialog';
+  closed_store_dialog: boolean;
+};
+type ShowUnavailableProductsDialogAction = {
+  type: 'show_unavailable_products_dialog';
+  unavailable_products: Product[];
+};
+type HideUnavailableProductsDialogAction = {
+  type: 'hide_unavailable_products_dialog';
+};
 type Action =
   | SetIdempotencyAction
-  | SetShoppingCartCacheAction
   | ResetAction
   | SetCancelledAction
   | SetRedirectStatusAction
-  | SetErrorAction;
+  | SetErrorAction
+  | SetClosedStoreDialogAction
+  | ShowUnavailableProductsDialogAction
+  | HideUnavailableProductsDialogAction;
 type State = {
   idempotency?: string;
-  shopping_cart_cache?: ShoppingCartCache;
   cancelled: boolean;
   redirect_status?: MercadopagoPaymentStatus;
   error?: Error;
+  closed_store_dialog: boolean;
+  unavailable_products_dialog: boolean;
+  unavailable_products: Product[];
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_idempotency':
       return { ...state, idempotency: action.idempotency };
-    case 'set_shopping_cart_cache':
-      return { ...state, shopping_cart_cache: action.shopping_cart_cache };
     case 'reset':
       return {
         ...state,
@@ -101,6 +112,16 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, redirect_status: action.redirect_status };
     case 'set_error':
       return { ...state, error: action.error };
+    case 'set_closed_store_dialog':
+      return { ...state, closed_store_dialog: action.closed_store_dialog };
+    case 'show_unavailable_products_dialog':
+      return {
+        ...state,
+        unavailable_products_dialog: true,
+        unavailable_products: action.unavailable_products,
+      };
+    case 'hide_unavailable_products_dialog':
+      return { ...state, unavailable_products_dialog: false };
     default:
       return state;
   }
@@ -113,17 +134,17 @@ interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // params
-  const store = route.params?.store as Store;
-  if (!store) {
-    throw new Error(`${prefix} Store param must be defined`);
-  }
-  const shopping_cart = route.params?.shopping_cart as ShoppingCartSnapshot;
-  if (!shopping_cart) {
-    throw new Error(`${prefix} Shopping cart param must be defined`);
+  const store_snapshot = route.params
+    ?.store_snapshot as StoreShoppingCartSnapshot;
+  if (!store_snapshot) {
+    throw new Error(`${prefix} Store snapshot param must be defined`);
   }
   // state
   const [state, dispatch] = useReducer(reducer, {
     cancelled: false,
+    closed_store_dialog: false,
+    unavailable_products_dialog: false,
+    unavailable_products: [],
   });
   const user = userCache.getData() as LoggedUser;
   if (!user) {
@@ -135,11 +156,6 @@ export default ({ navigation, route }: ScreenProps) => {
   }
 
   // event handlers
-  const instanceCache = async () => {
-    const cache = await shoppingCartsCache.get(store.id);
-    dispatch({ type: 'set_shopping_cart_cache', shopping_cart_cache: cache });
-  };
-
   const createPayment = async (idempotency: string, redirectUrl: string) => {
     if (fetchRequestSource) {
       fetchRequestSource.cancel();
@@ -161,8 +177,8 @@ export default ({ navigation, route }: ScreenProps) => {
             currency: Constants.manifest.extra.BEAST_CURRENCY,
             language: Constants.manifest.extra.BEAST_LANGUAGE,
             delivery_address: address,
-            shopping_cart: shopping_cart.items,
-            store,
+            shopping_cart: store_snapshot.items,
+            store: store_snapshot.store,
           },
           redirect_url: redirectUrl,
           payment_provider_id: PaymentProvider.MERCADOPAGO,
@@ -221,6 +237,22 @@ export default ({ navigation, route }: ScreenProps) => {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Open checkout error', error);
 
+        if (error.response?.status === 400 && error.response.data.reason) {
+          if (error.response.data.reason === 'SHOP_CLOSED') {
+            dispatch({
+              type: 'set_closed_store_dialog',
+              closed_store_dialog: true,
+            });
+            return;
+          }
+          if (error.response.data.reason === 'PRODUCTS_NOT_AVAILABLE') {
+            dispatch({
+              type: 'show_unavailable_products_dialog',
+              unavailable_products: error.response.data.meta_data.products,
+            });
+            return;
+          }
+        }
         dispatch({ type: 'set_error', error });
       }
     }
@@ -236,12 +268,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressContinueHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [{ name: 'MainTab' }],
-      })
-    );
+    navigation.navigate('Home');
   };
 
   const requestNotificationPermisions = async () => {
@@ -257,27 +284,39 @@ export default ({ navigation, route }: ScreenProps) => {
         const { status: existingStatus } = await Permissions.getAsync(
           Permissions.NOTIFICATIONS
         );
-        console.log(
-          `${prefix} Notification permision current status, status ${existingStatus}`
-        );
+
         if (existingStatus !== 'granted') {
-          const { status } = await Permissions.askAsync(
-            Permissions.NOTIFICATIONS
-          );
-          console.log(
-            `${prefix} Notification permision status after request the user, status ${status}`
-          );
+          await Permissions.askAsync(Permissions.NOTIFICATIONS);
         }
       }
     }
   };
 
-  useEffect(() => {
-    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
-  }, []);
+  const closedStoreDialogOkHandler = () => {
+    dispatch({ type: 'set_closed_store_dialog', closed_store_dialog: false });
+    navigation.goBack();
+  };
+
+  const unavailableProductsDialogOkHandler = () => {
+    // delete unavailables from shopping cart
+    state.unavailable_products.forEach((product) => {
+      shoppingCartCache.set(store_snapshot.store, product, 0);
+    });
+    dispatch({ type: 'hide_unavailable_products_dialog' });
+    setImmediate(() => {
+      navigation.goBack();
+    });
+  };
+
+  const unavailableProductsDialogCancelHandler = () => {
+    dispatch({ type: 'hide_unavailable_products_dialog' });
+    setImmediate(() => {
+      navigation.goBack();
+    });
+  };
 
   useEffect(() => {
-    instanceCache();
+    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
   }, []);
 
   useEffect(() => {
@@ -287,32 +326,34 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.idempotency]);
 
   useEffect(() => {
-    if (state.redirect_status && state.shopping_cart_cache) {
-      if (store.payment_provider === PaymentProvider.MERCADOPAGO) {
+    if (state.redirect_status) {
+      if (
+        store_snapshot.store.payment_provider === PaymentProvider.MERCADOPAGO
+      ) {
         switch (state.redirect_status) {
           case MercadopagoPaymentStatus.APPROVED:
           case MercadopagoPaymentStatus.IN_PROCESS:
           case MercadopagoPaymentStatus.PENDING:
-            state.shopping_cart_cache.clear();
+            shoppingCartCache.clearStore(store_snapshot.store.id);
             break;
           default:
             break;
         }
       }
     }
-  }, [state.redirect_status, state.shopping_cart_cache]);
+  }, [state.redirect_status]);
 
   useEffect(() => {
     requestNotificationPermisions();
   }, [state.redirect_status]);
 
   // render logic
+  let content: ReactNode = null;
   if (state.error) {
-    return (
+    content = (
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.white,
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -320,44 +361,40 @@ export default ({ navigation, route }: ScreenProps) => {
         <ErrorView onRetry={retryHandler} />
       </View>
     );
-  }
-
-  if (state.cancelled) {
-    return (
+  } else if (state.cancelled) {
+    content = (
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.white,
           justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <View style={{ alignItems: 'center' }}>
-          <BrokenCardImage />
-          <Text
-            level={1}
-            weight="bold"
-            style={{ marginTop: 25, marginBottom: 10 }}
-          >
-            ¡Ups!
-          </Text>
-          <Text
-            level={5}
-            style={{
-              lineHeight: 23,
-              textAlign: 'center',
-              marginHorizontal: 20,
-            }}
-          >
-            Al parecer cerraste la ventana de pago, si el cobro se realizó tu
-            pedido estará en curso.
-          </Text>
-          <Button
-            type="link"
-            title="Reintentar"
-            style={{ marginTop: 50 }}
-            onPress={retryNewPaymentHandler}
-          />
-        </View>
+        <BrokenCardImage />
+        <Text
+          level={1}
+          weight="bold"
+          style={{ marginTop: 25, marginBottom: 10 }}
+        >
+          ¡Ups!
+        </Text>
+        <Text
+          level={5}
+          style={{
+            lineHeight: 23,
+            textAlign: 'center',
+            marginHorizontal: 20,
+          }}
+        >
+          Al parecer cerraste la ventana de pago, si el cobro se realizó tu
+          pedido estará en curso.
+        </Text>
+        <Button
+          type="link"
+          title="Reintentar"
+          style={{ marginTop: 50 }}
+          onPress={retryNewPaymentHandler}
+        />
 
         <View
           style={[
@@ -373,43 +410,41 @@ export default ({ navigation, route }: ScreenProps) => {
         </View>
       </View>
     );
-  }
-
-  if (store.payment_provider === PaymentProvider.MERCADOPAGO) {
+  } else if (
+    store_snapshot.store.payment_provider === PaymentProvider.MERCADOPAGO
+  ) {
     switch (state.redirect_status) {
       case MercadopagoPaymentStatus.APPROVED:
-        return (
+        content = (
           <View
             style={{
               flex: 1,
-              backgroundColor: colors.white,
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View style={{ alignItems: 'center' }}>
-              <CheckBlueThinImage />
-              <Text
-                level={1}
-                weight="bold"
-                style={{ marginTop: 25, marginBottom: 10 }}
-              >
-                ¡Listo!
-              </Text>
-              <Text
-                level={5}
-                style={{
-                  lineHeight: 23,
-                  textAlign: 'center',
-                  marginHorizontal: 20,
-                }}
-              >
-                Te notificaremos cuando{' '}
-                <Text level={5} weight="bold">
-                  {store.name}
-                </Text>{' '}
-                confirme y esté en camino.
-              </Text>
-            </View>
+            <CheckBlueThinImage />
+            <Text
+              level={1}
+              weight="bold"
+              style={{ marginTop: 25, marginBottom: 10 }}
+            >
+              ¡Listo!
+            </Text>
+            <Text
+              level={5}
+              style={{
+                lineHeight: 23,
+                textAlign: 'center',
+                marginHorizontal: 20,
+              }}
+            >
+              Te notificaremos cuando{' '}
+              <Text level={5} weight="bold">
+                {store_snapshot.store.name}
+              </Text>{' '}
+              confirme y esté en camino.
+            </Text>
 
             <View
               style={[
@@ -425,38 +460,37 @@ export default ({ navigation, route }: ScreenProps) => {
             </View>
           </View>
         );
+        break;
       case MercadopagoPaymentStatus.IN_PROCESS:
-        return (
+        content = (
           <View
             style={{
               flex: 1,
-              backgroundColor: colors.white,
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View style={{ alignItems: 'center' }}>
-              <SearchingCardImage />
-              <Text
-                level={1}
-                weight="bold"
-                style={{
-                  marginTop: 25,
-                  marginBottom: 10,
-                }}
-              >
-                ¡Casi listo!
-              </Text>
-              <Text
-                level={5}
-                style={{
-                  lineHeight: 23,
-                  textAlign: 'center',
-                  marginHorizontal: 20,
-                }}
-              >
-                El pago está en proceso, te notificaremos cuando este listo.
-              </Text>
-            </View>
+            <SearchingCardImage />
+            <Text
+              level={1}
+              weight="bold"
+              style={{
+                marginTop: 25,
+                marginBottom: 10,
+              }}
+            >
+              ¡Casi listo!
+            </Text>
+            <Text
+              level={5}
+              style={{
+                lineHeight: 23,
+                textAlign: 'center',
+                marginHorizontal: 20,
+              }}
+            >
+              El pago está en proceso, te notificaremos cuando este listo.
+            </Text>
 
             <View
               style={[
@@ -472,35 +506,34 @@ export default ({ navigation, route }: ScreenProps) => {
             </View>
           </View>
         );
+        break;
       case MercadopagoPaymentStatus.PENDING:
-        return (
+        content = (
           <View
             style={{
               flex: 1,
-              backgroundColor: colors.white,
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View style={{ alignItems: 'center' }}>
-              <RapidCashImage />
-              <Text
-                level={1}
-                weight="bold"
-                style={{ marginTop: 25, marginBottom: 10 }}
-              >
-                ¡Solo falta un paso!
-              </Text>
-              <Text
-                level={5}
-                style={{
-                  lineHeight: 23,
-                  textAlign: 'center',
-                  marginHorizontal: 20,
-                }}
-              >
-                Revisa las instrucciones en tu correo para finalizar el pago.
-              </Text>
-            </View>
+            <RapidCashImage />
+            <Text
+              level={1}
+              weight="bold"
+              style={{ marginTop: 25, marginBottom: 10 }}
+            >
+              ¡Solo falta un paso!
+            </Text>
+            <Text
+              level={5}
+              style={{
+                lineHeight: 23,
+                textAlign: 'center',
+                marginHorizontal: 20,
+              }}
+            >
+              Revisa las instrucciones en tu correo para finalizar el pago.
+            </Text>
 
             <View
               style={[
@@ -516,83 +549,102 @@ export default ({ navigation, route }: ScreenProps) => {
             </View>
           </View>
         );
+        break;
       case MercadopagoPaymentStatus.REJECTED:
-        return (
+        content = (
           <View
             style={{
               flex: 1,
-              backgroundColor: colors.white,
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View style={{ alignItems: 'center' }}>
-              <BrokenCardImage />
-              <Text
-                level={1}
-                weight="bold"
-                style={{ marginTop: 25, marginBottom: 10 }}
-              >
-                ¡Ups!
-              </Text>
-              <Text
-                level={5}
-                style={{
-                  lineHeight: 23,
-                  textAlign: 'center',
-                  marginHorizontal: 20,
-                }}
-              >
-                Parece que ocurrió un problema con el pago.
-              </Text>
-              <Button
-                type="link"
-                title="Reintentar"
-                style={{ marginTop: 50 }}
-                onPress={retryNewPaymentHandler}
-              />
-            </View>
+            <BrokenCardImage />
+            <Text
+              level={1}
+              weight="bold"
+              style={{ marginTop: 25, marginBottom: 10 }}
+            >
+              ¡Ups!
+            </Text>
+            <Text
+              level={5}
+              style={{
+                lineHeight: 23,
+                textAlign: 'center',
+                marginHorizontal: 20,
+              }}
+            >
+              Parece que ocurrió un problema con el pago.
+            </Text>
+            <Button
+              type="link"
+              title="Reintentar"
+              style={{ marginTop: 50 }}
+              onPress={retryNewPaymentHandler}
+            />
           </View>
         );
+        break;
       default:
-        return (
+        content = (
           <View
             style={{
               flex: 1,
-              backgroundColor: colors.white,
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <View style={{ alignItems: 'center' }}>
-              <Text
-                level={2}
-                style={{ marginBottom: 15, width: 226, textAlign: 'center' }}
-              >
-                Conectando con{' '}
-                <Text level={2} weight="bold">
-                  MercadoPago
-                </Text>
+            <Text
+              level={2}
+              style={{ marginBottom: 15, width: 226, textAlign: 'center' }}
+            >
+              Conectando con{' '}
+              <Text level={2} weight="bold">
+                MercadoPago
               </Text>
-              <MercadoPagoImage />
-
-              <Text
-                level={5}
-                style={{
-                  marginTop: 15,
-                  lineHeight: 23,
-                  textAlign: 'center',
-                  marginHorizontal: 20,
-                  width: 270,
-                }}
-              >
-                Allá podrás seleccionar el medio de pago que prefieras.
-              </Text>
-            </View>
+            </Text>
+            <MercadoPagoImage />
+            <ActivityIndicator />
+            <Text
+              level={5}
+              style={{
+                marginTop: 15,
+                lineHeight: 23,
+                textAlign: 'center',
+                marginHorizontal: 20,
+                width: 270,
+              }}
+            >
+              Allá podrás seleccionar el medio de pago que prefieras.
+            </Text>
           </View>
         );
     }
   }
 
-  throw new Error(
-    `${prefix} Payment provider not supported, provider: ${store.payment_provider}`
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.white,
+      }}
+    >
+      {content}
+      {state.closed_store_dialog && (
+        <InfoDialog
+          title="Tienda cerrada momentáneamente"
+          message={`${store_snapshot.store.name} ya no está aceptando pedidos. Revisa su horario e intenta más tarde.`}
+          onOk={closedStoreDialogOkHandler}
+        />
+      )}
+      {state.unavailable_products_dialog && (
+        <UnavailableProductsDialog
+          products={state.unavailable_products}
+          onOk={unavailableProductsDialogOkHandler}
+          onCancel={unavailableProductsDialogCancelHandler}
+        />
+      )}
+    </View>
   );
 };

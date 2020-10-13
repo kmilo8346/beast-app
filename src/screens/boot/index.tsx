@@ -102,7 +102,7 @@ export default ({ navigation }: BootProps) => {
       });
       await userCache.setData(user);
       printUserInfo();
-      navigation.replace('MainTab');
+      navigation.replace('MainRootStack');
     } catch (error) {
       if (error.response?.status === 404) {
         navigation.replace('Onboarding');
