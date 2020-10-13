@@ -37,6 +37,7 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
+import * as utils from '../../lib/utils';
 // types
 import { Product, SearchResponse, Store } from '../../types';
 // styles
@@ -251,6 +252,7 @@ export default ({ navigation, route }: ScreenProps) => {
     />
   );
   if (state.store) {
+    const openInfo = utils.humanizeOpenInfo(state.store.opening_hours);
     storeComponent = (
       <>
         <Touchable
@@ -279,15 +281,50 @@ export default ({ navigation, route }: ScreenProps) => {
               weight="bold"
               numberOfLines={1}
               ellipsizeMode="tail"
+              style={{ marginBottom: 5 }}
             >
               {state.store.name}
             </Text>
-            <Text level={6}>
-              {durationFormatter.humanizeDurationRange(
-                state.store.delivery_time.gte,
-                state.store.delivery_time.lte
-              )}
-            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 3,
+              }}
+            >
+              <Icon name="clock" size={16} />
+              <Text
+                level={7}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ flex: 1, marginLeft: 5 }}
+              >
+                {durationFormatter.humanizeDurationRange(
+                  state.store.delivery_time.gte,
+                  state.store.delivery_time.lte
+                )}
+              </Text>
+            </View>
+            {!openInfo.open && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 0,
+                }}
+              >
+                <Icon name="calendar" size={16} />
+                <Text
+                  level={7}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  color={openInfo.open ? colors.black : colors.red}
+                  style={{ flex: 1, marginLeft: 5 }}
+                >
+                  {openInfo.message}
+                </Text>
+              </View>
+            )}
           </View>
           <Icon name="chevron-right" />
         </Touchable>
@@ -308,7 +345,6 @@ export default ({ navigation, route }: ScreenProps) => {
                     alignItems: 'center',
                     marginTop: 30,
                   },
-                  globalStyles.withMargin,
                 ]}
                 onPress={(event: GestureResponderEvent) => {
                   event.stopPropagation();

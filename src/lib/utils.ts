@@ -1,6 +1,9 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 
-import { Item, CreateUser } from '../types';
+import { Item, CreateUser, OpeningHours } from '../types';
+import numberFormatter from './formatters/number-formatter';
+
+const prefix = '[utils]';
 
 export const noop = () => {
   return null;
@@ -167,5 +170,119 @@ export const extract = (info: {
     first_name,
     last_name,
     photo_url,
+  };
+};
+
+const formatDay = (day: string): string => {
+  switch (day) {
+    case '1':
+      return 'lunes';
+    case '2':
+      return 'martes';
+    case '3':
+      return 'miércoles';
+    case '4':
+      return 'jueves';
+    case '5':
+      return 'viernes';
+    case '6':
+      return 'sábado';
+    case '7':
+      return 'domingo';
+    default:
+      throw new Error(`${prefix} Invalid day ${day}`);
+  }
+};
+
+export const humanizeOpenInfo = (
+  openingHours: OpeningHours
+): { open: boolean; message: string } => {
+  const currentDate = new Date();
+  let currentDay = `${currentDate.getDay()}`;
+  if (currentDay === '0') {
+    currentDay = '7';
+  }
+  const currentMinutes = currentDate.getMinutes();
+  const currentTime = parseInt(
+    `${currentDate.getHours()}${
+      currentMinutes < 10 ? `0${currentMinutes}` : currentMinutes
+    }`,
+    10
+  );
+  const match = openingHours.find((i) => i.day === currentDay);
+  if (!match) {
+    console.warn(`${prefix} Today dont match in opening hours`);
+    return { open: false, message: 'Cerrado' };
+  }
+
+  if (currentTime >= match.open && currentTime < match.close) {
+    return {
+      open: true,
+      message: `Hoy de ${numberFormatter.humanizeTime(
+        match.open
+      )} a ${numberFormatter.humanizeTime(match.close)}`,
+    };
+  }
+  const nextOpenDay = (() => {
+    for (let i = 0; i < openingHours.length; i++) {
+      const dayOpeningHours = openingHours[i];
+      if (
+        parseInt(dayOpeningHours.day, 10) >= parseInt(currentDay, 10) &&
+        !(dayOpeningHours.open === 0 && dayOpeningHours.close === 0)
+      ) {
+        if (dayOpeningHours.day === currentDay) {
+          if (currentTime < dayOpeningHours.open) {
+            return {
+              today: true,
+              tomorrow: false,
+              dayOpeningHours,
+            };
+          }
+        } else if (
+          parseInt(currentDay, 10) + 1 ===
+          parseInt(dayOpeningHours.day, 10)
+        ) {
+          return {
+            today: false,
+            tomorrow: true,
+            dayOpeningHours,
+          };
+        } else {
+          return {
+            today: false,
+            tomorrow: false,
+            dayOpeningHours,
+          };
+        }
+      }
+    }
+  })();
+  if (!nextOpenDay) {
+    return {
+      open: false,
+      message: `Cerrado`,
+    };
+  }
+  if (nextOpenDay.today) {
+    return {
+      open: false,
+      message: `Cerrado · abre hoy ${numberFormatter.humanizeTime(
+        nextOpenDay.dayOpeningHours.open
+      )}`,
+    };
+  }
+  if (nextOpenDay.tomorrow) {
+    return {
+      open: false,
+      message: `Cerrado · abre mañana ${numberFormatter.humanizeTime(
+        nextOpenDay.dayOpeningHours.open
+      )}`,
+    };
+  }
+  return {
+    open: false,
+    message: `Cerrado · abre ${formatDay(
+      nextOpenDay.dayOpeningHours.day
+    )} ${numberFormatter.humanizeTime(nextOpenDay.dayOpeningHours.open)}`,
   };
 };

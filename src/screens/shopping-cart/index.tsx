@@ -45,6 +45,7 @@ import stringFormatter from '../../lib/formatters/string-formatter';
 import cloudinary from '../../lib/cloudinary';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
+import * as utils from '../../lib/utils';
 // types
 import { User, Place, Product, Store } from '../../types';
 // styles
@@ -556,14 +557,11 @@ export default ({ navigation }: ScreenProps) => {
 
         {state.shopping_cart_snapshot.map((storeSnapshot, index, array) => {
           const store = storeSnapshot.store;
-          const timeText = durationFormatter.humanizeDurationRange(
-            store.delivery_time.gte,
-            store.delivery_time.lte
-          );
           const storeState = state.state_stores[store.id];
           const items = storeState.expanded
             ? storeSnapshot.items
             : storeSnapshot.items.slice(0, 3);
+          const openInfo = utils.humanizeOpenInfo(store.opening_hours);
           return (
             <View key={`${storeSnapshot.store.id}`} style={{ marginTop: 20 }}>
               <View style={globalStyles.withMargin}>
@@ -630,13 +628,50 @@ export default ({ navigation }: ScreenProps) => {
                         weight="bold"
                         numberOfLines={1}
                         ellipsizeMode="tail"
-                        style={{ marginBottom: 2 }}
+                        style={{ marginBottom: 5 }}
                       >
                         {store.name}
                       </Text>
-                      <Text level={6} numberOfLines={1} ellipsizeMode="tail">
-                        {timeText}
-                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginBottom: 2,
+                        }}
+                      >
+                        <Icon name="clock" size={16} />
+                        <Text
+                          level={7}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          style={{ flex: 1, marginLeft: 5 }}
+                        >
+                          {durationFormatter.humanizeDurationRange(
+                            store.delivery_time.gte,
+                            store.delivery_time.lte
+                          )}
+                        </Text>
+                      </View>
+                      {!openInfo.open && (
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: 0,
+                          }}
+                        >
+                          <Icon name="calendar" size={16} />
+                          <Text
+                            level={7}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                            color={openInfo.open ? colors.black : colors.red}
+                            style={{ flex: 1, marginLeft: 5 }}
+                          >
+                            {openInfo.message}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   </Touchable>
                   <Touchable

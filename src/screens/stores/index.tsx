@@ -21,6 +21,7 @@ import Button from '../../components/buttons/button';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 import Bone from '../../components/bone';
 import FreeDeliveryImage from '../../components/svgs/images/free-delivery';
+import Icon from '../../components/icon';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 // clients
@@ -29,6 +30,7 @@ import storeClient from '../../clients/store-client';
 import { capture } from '../../lib/sentry';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import cloudinary from '../../lib/cloudinary';
+import * as utils from '../../lib/utils';
 // cache
 import userCache from '../../cache/user';
 // types
@@ -352,10 +354,8 @@ export default ({ navigation }: ScreenProps) => {
       renderItem={({ item }) => {
         const image = item.images[0];
         const imageSize = Dimensions.get('window').width - 40;
-        const timeText = durationFormatter.humanizeDurationRange(
-          item.delivery_time.gte,
-          item.delivery_time.lte
-        );
+        const openInfo = utils.humanizeOpenInfo(item.opening_hours);
+
         return (
           <Touchable
             style={{
@@ -387,7 +387,7 @@ export default ({ navigation }: ScreenProps) => {
             <View
               style={{
                 paddingLeft: 15,
-                paddingTop: 15,
+                paddingTop: 10,
                 paddingBottom: 15,
                 paddingRight: 15,
               }}
@@ -397,18 +397,48 @@ export default ({ navigation }: ScreenProps) => {
                 weight="bold"
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={{ flex: 1, marginBottom: 2 }}
+                style={{ flex: 1, marginBottom: 10 }}
               >
                 {item.name}
               </Text>
-              <Text
-                level={6}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{ flex: 1, marginBottom: 2 }}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 5,
+                }}
               >
-                {timeText}
-              </Text>
+                <Icon name="clock" size={18} />
+                <Text
+                  level={7}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ flex: 1, marginLeft: 10 }}
+                >
+                  {durationFormatter.humanizeDurationRange(
+                    item.delivery_time.gte,
+                    item.delivery_time.lte
+                  )}
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 0,
+                }}
+              >
+                <Icon name="calendar" size={18} />
+                <Text
+                  level={7}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  color={openInfo.open ? colors.black : colors.red}
+                  style={{ flex: 1, marginLeft: 10 }}
+                >
+                  {openInfo.message}
+                </Text>
+              </View>
             </View>
           </Touchable>
         );

@@ -39,8 +39,9 @@ import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
+import * as utils from '../../lib/utils';
 // types
-import { OpeningHours, Product, SearchResponse, Store } from '../../types';
+import { Product, SearchResponse, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -49,25 +50,6 @@ import globalStyles from '../../styles';
 const prefix = '[store screen]';
 let fetchRequestSource: CancelTokenSource;
 const defaultSize = 10;
-
-const humanizeToday = (openingHours: OpeningHours) => {
-  let today = `${new Date().getDay()}`;
-  if (today === '0') {
-    today = '7';
-  }
-  const match = openingHours.find((i) => i.day === today);
-  if (!match) {
-    console.warn(`${prefix} Today dont match in opening hours`);
-    return '';
-  }
-
-  if (match.open === 0 && match.close === 0) {
-    return 'Cerrado';
-  }
-  return `Hoy de ${numberFormatter.humanizeTime(
-    match.open
-  )} a ${numberFormatter.humanizeTime(match.close)}`;
-};
 
 type ResetAction = {
   type: 'reset';
@@ -400,6 +382,7 @@ export default ({ navigation, route }: ScreenProps) => {
       />
     );
   }
+  const openInfo = utils.humanizeOpenInfo(store.opening_hours);
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <FlatList
@@ -480,9 +463,10 @@ export default ({ navigation, route }: ScreenProps) => {
                       level={7}
                       numberOfLines={1}
                       ellipsizeMode="tail"
+                      color={openInfo.open ? colors.black : colors.red}
                       style={{ flex: 1 }}
                     >
-                      {humanizeToday(store.opening_hours)}
+                      {openInfo.message}
                     </Text>
                     {state.opening_hours_modal ? (
                       <Icon name="chevron-up" />
