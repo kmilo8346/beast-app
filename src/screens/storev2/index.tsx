@@ -426,7 +426,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginBottom: 10,
+                    marginBottom: 3,
                   }}
                 >
                   <Icon name="clock" size={18} />

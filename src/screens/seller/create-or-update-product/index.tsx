@@ -204,6 +204,11 @@ export default ({ navigation, route }: CreateOrUpdateProps) => {
       enabled: true,
       reference: state.form.reference,
       ...state.form.product,
+      store_info: {
+        id: store.id,
+        delivery_area: store.delivery_area.geometry,
+        opening_hours: store.opening_hours,
+      },
     } as Product);
   };
   const pressContinueHandler = (event: GestureResponderEvent) => {
