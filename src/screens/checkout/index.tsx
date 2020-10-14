@@ -34,7 +34,7 @@ import {
 import userCache from '../../cache/user';
 import shoppingCartCache, {
   StoreShoppingCartSnapshot,
-} from '../../cache/shopping-cartv2';
+} from '../../cache/shopping-cart';
 // libs
 import { generatePushID } from '../../lib/uuid';
 import { capture } from '../../lib/sentry';

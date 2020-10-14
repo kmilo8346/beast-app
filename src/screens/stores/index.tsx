@@ -217,7 +217,7 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const pressItemHandler = (store: Store) => {
-    navigation.navigate('StoreV2', { store });
+    navigation.navigate('Store', { store });
   };
 
   const retryHandler = () => {

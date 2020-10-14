@@ -31,7 +31,7 @@ import ProductDetailsCard from './components/product-details-card';
 import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
 // cache
-import shoppingCartCache, { getAmount } from '../../cache/shopping-cartv2';
+import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
 // libs
 import numberFormatter from '../../lib/formatters/number-formatter';
 import durationFormatter from '../../lib/formatters/duration-formatter';
@@ -197,7 +197,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, []);
 
   const pressSeeStoreHandler = (store: Store) => {
-    navigation.push('StoreV2', { store });
+    navigation.push('Store', { store });
   };
 
   const retryHandler = () => {

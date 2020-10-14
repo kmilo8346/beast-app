@@ -42,7 +42,7 @@ import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-m
 import OrdersInProgressCache, {
   OrdersInProgressCacheData,
 } from '../../cache/orders-in-progress-cache';
-import shoppingCartCache from '../../cache/shopping-cartv2';
+import shoppingCartCache from '../../cache/shopping-cart';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';

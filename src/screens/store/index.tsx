@@ -1,51 +1,47 @@
 import React, {
-  useReducer,
   ReactNode,
+  useCallback,
   useEffect,
   useLayoutEffect,
-  useCallback,
+  useReducer,
 } from 'react';
 import {
   View,
-  FlatList,
-  TouchableWithoutFeedback,
-  Keyboard,
+  Image,
+  ActivityIndicator,
+  Dimensions,
   GestureResponderEvent,
+  FlatList,
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
-import Button from '../../components/buttons/button';
 import Text from '../../components/text';
-import Icon from '../../components/icon';
-import Badge from '../../components/badge';
-import Search from '../../components/inputs/search';
-import NotSearchResult from '../../components/not-search-result';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
-import ErrorView from '../../components/error-view';
+import Icon from '../../components/icon';
+import Button from '../../components/buttons/button';
+import PhoneFilledDotsBlueIcon from '../../components/svgs/icons/phone-filled-dots-blue';
+import ActionSheetContact from '../../components/modals/action-sheet-contact';
+import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
 // screen components
-import ShoppingCartModal from '../components/shopping-cart-modal';
+import ProductCard from '../components/product-card';
+import ShoppingCartIcon from '../components/shopping-cart-icon';
 // local components
-import Skeletton from './components/skeleton';
-import Item from './components/item';
-import NotData from './components/not-data';
+import ViewOpeningHoursModal from './components/view-opening-hours-modal';
 // clients
 import productClient from '../../clients/product-client';
 // cache
-import shoppingCartsCache from '../../cache/shopping-carts';
-import ShoppingCartCache, {
-  ShoppingCartSnapshot,
-} from '../../cache/shopping-cart';
+import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
 // libs
+import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
-import useDebounce from '../../lib/hooks/use-debounce';
-import * as utils from '../../lib/utils';
+import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
+import * as utils from '../../lib/utils';
 // types
-import { SearchResponse, Product, SearchFilters, Store } from '../../types';
+import { Product, SearchResponse, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -55,22 +51,6 @@ const prefix = '[store screen]';
 let fetchRequestSource: CancelTokenSource;
 const defaultSize = 10;
 
-type SetHeaderAction = {
-  type: 'set_header';
-  header: boolean;
-};
-type SetQueryAction = {
-  type: 'set_query';
-  query: string;
-};
-type SetShoppingCartCacheAction = {
-  type: 'set_shopping_cart_cache';
-  shopping_cart_cache: ShoppingCartCache;
-};
-type SetShoppingCartSnapshotAction = {
-  type: 'set_shopping_cart_snapshot';
-  shopping_cart_snapshot: ShoppingCartSnapshot;
-};
 type ResetAction = {
   type: 'reset';
 };
@@ -80,115 +60,95 @@ type SetProductsAction = {
 };
 type SetErrorAction = {
   type: 'set_error';
-  error: Error | undefined;
+  error: Error;
 };
-type SetRefreshingAction = {
-  type: 'set_refreshing';
-  refreshing: boolean;
+type SetContactAction = {
+  type: 'set_contact';
+  contact: boolean;
 };
 type SetFetchingMoreAction = {
   type: 'set_fetching_more';
   fetching_more: boolean;
 };
-type SetShoppingCartModalAction = {
-  type: 'set_shopping_cart_modal';
-  shopping_cart_modal: boolean;
+type SetRefreshingAction = {
+  type: 'set_refreshing';
+  refreshing: boolean;
+};
+type SetAmountAction = {
+  type: 'set_amount';
+  amount: number;
+};
+type SetOpeningHoursModalAction = {
+  type: 'set_opening_hours_modal';
+  opening_hours_modal: boolean;
 };
 type Action =
-  | SetHeaderAction
-  | SetQueryAction
-  | SetShoppingCartCacheAction
-  | SetShoppingCartSnapshotAction
   | ResetAction
   | SetProductsAction
   | SetErrorAction
-  | SetRefreshingAction
+  | SetContactAction
   | SetFetchingMoreAction
-  | SetShoppingCartModalAction;
+  | SetRefreshingAction
+  | SetRefreshingAction
+  | SetAmountAction
+  | SetOpeningHoursModalAction;
 type State = {
-  header: boolean;
-  query: string;
-  shopping_cart_cache?: ShoppingCartCache;
-  shopping_cart_snapshot?: ShoppingCartSnapshot;
   products?: SearchResponse<Product>;
   error?: Error;
-  refreshing: boolean;
+  contact: boolean;
   fetching_more: boolean;
-  shopping_cart_modal: boolean;
+  refreshing: boolean;
+  amount?: number;
+  opening_hours_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'set_header':
-      return { ...state, header: action.header };
-    case 'set_query':
-      return { ...state, query: action.query };
-    case 'set_shopping_cart_cache':
-      return { ...state, shopping_cart_cache: action.shopping_cart_cache };
-    case 'set_shopping_cart_snapshot':
+    case 'reset':
       return {
         ...state,
-        shopping_cart_snapshot: action.shopping_cart_snapshot,
+        products: undefined,
+        error: undefined,
       };
-    case 'reset':
-      return { ...state, products: undefined, error: undefined };
     case 'set_products':
       return { ...state, products: action.products };
     case 'set_error':
       return { ...state, error: action.error };
-    case 'set_refreshing':
-      return { ...state, refreshing: action.refreshing };
+    case 'set_contact':
+      return { ...state, contact: action.contact };
     case 'set_fetching_more':
       return { ...state, fetching_more: action.fetching_more };
-    case 'set_shopping_cart_modal':
-      return { ...state, shopping_cart_modal: action.shopping_cart_modal };
+    case 'set_refreshing':
+      return { ...state, refreshing: action.refreshing };
+    case 'set_amount':
+      return { ...state, amount: action.amount };
+    case 'set_opening_hours_modal':
+      return { ...state, opening_hours_modal: action.opening_hours_modal };
     default:
       return state;
   }
 };
 
-export interface ScreenProps {
+interface ScreenProps {
   navigation: any;
   route: any;
 }
 
 export default ({ navigation, route }: ScreenProps) => {
-  // params
-  const store = route.params.store as Store;
+  const store: Store = route.params.store;
   if (!store) {
-    throw new Error(`${prefix} Store param must be defined`);
+    throw new Error(`${prefix} Store param is required`);
   }
   // state
   const [state, dispatch] = useReducer(reducer, {
-    header: true,
-    query: '',
-    refreshing: false,
+    contact: false,
     fetching_more: false,
-    shopping_cart_modal: false,
+    refreshing: false,
+    opening_hours_modal: false,
   });
-  const debouncedQuery = useDebounce(state.query, 500);
-  const insets = useSafeAreaInsets();
 
   // event handlers
-  const instanceCache = async () => {
-    const cache = await shoppingCartsCache.get(store.id);
-    dispatch({ type: 'set_shopping_cart_cache', shopping_cart_cache: cache });
-  };
-
-  const searchActivatedHandler = () => {
-    dispatch({ type: 'set_header', header: false });
-  };
-
-  const searchDeactivatedHandler = () => {
-    dispatch({ type: 'set_header', header: true });
-  };
-
-  const changeQuery = (query: string) => {
-    dispatch({ type: 'set_query', query });
-  };
-
   const fetch = async (
-    query: string,
-    filters: SearchFilters,
+    filters?: { [key: string]: any },
     from = 0,
     size = defaultSize
   ) => {
@@ -196,27 +156,24 @@ export default ({ navigation, route }: ScreenProps) => {
       fetchRequestSource.cancel();
     }
     fetchRequestSource = axios.CancelToken.source();
-    const response = await productClient.search(
+    const products = await productClient.search(
       {
         pathVars: {
           storeId: store.id,
         },
-        query,
         filters,
         from,
         size,
       },
       fetchRequestSource.token
     );
-    return response;
+    return products;
   };
 
-  const load = async (query: string) => {
+  const load = async () => {
     try {
       dispatch({ type: 'reset' });
-      const response = await fetch(query, {
-        enabled: true,
-      });
+      const response = await fetch({ enabled: true });
       dispatch({
         type: 'set_products',
         products: {
@@ -236,7 +193,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const refresh = async () => {
     try {
       dispatch({ type: 'set_refreshing', refreshing: true });
-      const response = await fetch(state.query, {
+      const response = await fetch({
         enabled: true,
       });
       dispatch({
@@ -259,15 +216,12 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const fetchMore = async () => {
     if (!state.products) {
-      throw new Error(`${prefix} Products must be defined to fetch more`);
+      throw new Error(`${prefix} To fetch more must be state products`);
     }
     try {
       dispatch({ type: 'set_fetching_more', fetching_more: true });
       const products = await fetch(
-        state.query,
-        {
-          enabled: true,
-        },
+        state.products.filters,
         state.products.from,
         state.products.size
       );
@@ -290,189 +244,126 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
+  const pressContactStoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_contact', contact: true });
+  };
+
+  const contactStoreCloseHandler = () => {
+    dispatch({ type: 'set_contact', contact: false });
+  };
+
   const retryHandler = () => {
-    dispatch({ type: 'set_error', error: undefined });
     if (!state.products) {
-      load(state.query);
+      load();
     } else {
       fetchMore();
     }
   };
 
+  const pressProductHandler = useCallback((product: Product) => {
+    navigation.push('Product', { product });
+  }, []);
+
   const pressMyOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_shopping_cart_modal', shopping_cart_modal: true });
+    navigation.navigate('ShoppingCartStack');
   };
 
-  const pressShoppingCartHandler = (event: GestureResponderEvent) => {
+  const pressOpeningHourHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_shopping_cart_modal', shopping_cart_modal: true });
+    dispatch({ type: 'set_opening_hours_modal', opening_hours_modal: true });
   };
 
-  const closeShoppingCartHandler = () => {
-    dispatch({ type: 'set_shopping_cart_modal', shopping_cart_modal: false });
+  const closeOpeningHoursModal = () => {
+    dispatch({ type: 'set_opening_hours_modal', opening_hours_modal: false });
   };
 
   useEffect(() => {
-    instanceCache();
+    load();
+  }, [store]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ShoppingCartIcon style={{ marginRight: 20 }} />,
+    });
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe: any = utils.noop;
-      if (state.shopping_cart_cache) {
-        unsubscribe = state.shopping_cart_cache.onChange(() => {
-          const snapshopt = (state.shopping_cart_cache as ShoppingCartCache).getSnapshot();
-          dispatch({
-            type: 'set_shopping_cart_snapshot',
-            shopping_cart_snapshot: snapshopt,
-          });
-        });
-      }
+      const unsubscribe = shoppingCartCache.onChangeStore(store.id, (data) => {
+        dispatch({ type: 'set_amount', amount: getAmount(data) });
+      });
       return () => {
         unsubscribe();
       };
-    }, [state.shopping_cart_cache])
+    }, [])
   );
 
-  useEffect(() => {
-    load(debouncedQuery);
-  }, [debouncedQuery]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: store.name,
-      headerRight: () => {
-        let cartButton: ReactNode | null = null;
-        if (
-          state.shopping_cart_snapshot &&
-          state.shopping_cart_snapshot.stats.total > 0
-        ) {
-          cartButton = (
-            <Touchable
-              style={{
-                position: 'relative',
-                paddingHorizontal: 2,
-                paddingVertical: 2,
-                marginRight: 10,
-              }}
-              onPress={pressShoppingCartHandler}
-            >
-              <View
-                style={{
-                  position: 'absolute',
-                  top: -8,
-                  left: -5,
-                  zIndex: 100,
-                  minWidth: 50,
-                }}
-              >
-                <Badge count={state.shopping_cart_snapshot.stats.total} />
-              </View>
-              <Icon name="shopping-cart" />
-            </Touchable>
-          );
-        }
-        return cartButton;
-      },
-    });
-  }, [state.shopping_cart_snapshot?.stats.total]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: state.header,
-    });
-  }, [state.header]);
-
   // render logic
-  let content: ReactNode;
+  let content: ReactNode = (
+    <ActivityIndicator
+      size="small"
+      color={colors.black}
+      style={{ alignSelf: 'center', marginTop: 40 }}
+    />
+  );
   if (state.error) {
     content = (
       <View
-        style={[
-          {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
-          globalStyles.withPadding,
-        ]}
-      >
-        <ErrorView onRetry={retryHandler} />
-      </View>
-    );
-  } else if (!state.products) {
-    content = <Skeletton />;
-  } else if (!debouncedQuery && !state.products.hits.length) {
-    content = (
-      <View
-        style={[
-          {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
-          globalStyles.withPadding,
-        ]}
-      >
-        <NotData />
-      </View>
-    );
-  } else if (debouncedQuery && !state.products.hits.length) {
-    content = (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View
-          style={[
-            {
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            },
-            globalStyles.withMargin,
-          ]}
-        >
-          <NotSearchResult />
-        </View>
-      </TouchableWithoutFeedback>
-    );
-  } else {
-    content = (
-      <FlatList
-        initialNumToRender={defaultSize}
-        refreshing={state.refreshing}
-        data={state.products.hits}
-        style={[{ flex: 1, paddingTop: 20 }, globalStyles.withPadding]}
-        keyExtractor={(product) => product.id}
-        renderItem={({ item, index }) => {
-          let divider: ReactNode | null = <Divider />;
-          const products = state.products as SearchResponse<Product>;
-          if (index === products.hits.length - 1) {
-            divider = null;
-          }
-          return (
-            <View style={{ marginTop: 15 }}>
-              <Item data={item} />
-              <View style={{ height: 20 }} />
-              {divider}
-            </View>
-          );
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: 40,
         }}
-        ListFooterComponent={<View style={globalStyles.withScreenAir} />}
-        onRefresh={refresh}
-        onEndReached={() => {
-          if (state.products && state.products.from < state.products.total) {
-            fetchMore();
-          }
-        }}
-      />
+      >
+        <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
+          Ocurrió un error inesperado
+        </Text>
+        <Text level={6} style={{ marginBottom: 10 }}>
+          El error fue registrado para su solución
+        </Text>
+        <Button title="Reintentar" type="link" onPress={retryHandler} />
+      </View>
     );
   }
-
-  let orderButton: ReactNode | null = null;
-  if (
-    state.shopping_cart_snapshot &&
-    state.shopping_cart_snapshot.items.length
-  ) {
+  if (state.products) {
+    if (!state.products.hits.length) {
+      content = (
+        <View style={{ alignItems: 'center' }}>
+          <Text
+            level={6}
+            weight="bold"
+            style={{ marginTop: 40, marginBottom: 15 }}
+          >
+            Muy pronto
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text level={6} style={{ marginRight: 5 }}>
+              Agregaremos productos.
+            </Text>
+            <HeartBlueIcon />
+          </View>
+        </View>
+      );
+    } else {
+      content = (
+        <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
+          <Text
+            level={4}
+            weight="bold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginBottom: 15 }}
+          >
+            Productos de esta tienda
+          </Text>
+        </View>
+      );
+    }
+  }
+  let orderButton: ReactNode = null;
+  if (state.amount && state.amount > 0) {
     orderButton = (
       <Button
         title={
@@ -482,9 +373,7 @@ export default ({ navigation, route }: ScreenProps) => {
             </Text>
             <View style={{ flex: 1 }} />
             <Text level={5} weight="bold" color={colors.white}>
-              {numberFormatter.toCurrency(
-                state.shopping_cart_snapshot.stats.ammount
-              )}
+              {numberFormatter.toCurrency(state.amount)}
             </Text>
           </View>
         }
@@ -493,23 +382,152 @@ export default ({ navigation, route }: ScreenProps) => {
       />
     );
   }
+  const openInfo = utils.humanizeOpenInfo(store.opening_hours);
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.white,
-        paddingTop: state.header ? 0 : insets.top,
-      }}
-    >
-      <Search
-        value={state.query}
-        placeholder="Buscar productos"
-        containerStyle={globalStyles.withMargin}
-        onChangeText={changeQuery}
-        onActivated={searchActivatedHandler}
-        onDeactivated={searchDeactivatedHandler}
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
+      <FlatList
+        data={state.products?.hits || []}
+        numColumns={2}
+        refreshing={false}
+        ListHeaderComponent={
+          <View style={{ flex: 1, backgroundColor: colors.white }}>
+            <View
+              style={[
+                {
+                  borderRadius: 20,
+                  paddingTop: 7,
+                },
+                globalStyles.withMargin,
+              ]}
+            >
+              <Image
+                source={{
+                  uri: cloudinary.dynamicUrl(store.images[0], 'h_500'),
+                }}
+                style={{
+                  width: Dimensions.get('window').width - 40,
+                  height: 200,
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                }}
+              />
+              <View style={{ padding: 15 }}>
+                <Text
+                  level={4}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ flex: 1, marginBottom: 15 }}
+                >
+                  {store.name}
+                </Text>
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 3,
+                  }}
+                >
+                  <Icon name="clock" size={18} />
+                  <Text
+                    level={7}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ flex: 1, marginLeft: 10 }}
+                  >
+                    {durationFormatter.humanizeDurationRange(
+                      store.delivery_time.gte,
+                      store.delivery_time.lte
+                    )}
+                  </Text>
+                </View>
+                <Touchable
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 15,
+                  }}
+                  onPress={pressOpeningHourHandler}
+                >
+                  <Icon name="calendar" size={18} />
+                  <View
+                    style={{
+                      marginLeft: 10,
+                      flex: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text
+                      level={7}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      color={openInfo.open ? colors.black : colors.red}
+                      style={{ flex: 1 }}
+                    >
+                      {openInfo.message}
+                    </Text>
+                    {state.opening_hours_modal ? (
+                      <Icon name="chevron-up" />
+                    ) : (
+                      <Icon name="chevron-down" />
+                    )}
+                  </View>
+                </Touchable>
+
+                <Touchable
+                  style={{
+                    backgroundColor: colors.blueLight3,
+                    borderWidth: 1,
+                    borderColor: colors.blueLight5,
+                    borderRadius: 13,
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                  onPress={pressContactStoreHandler}
+                >
+                  <PhoneFilledDotsBlueIcon />
+                  <Text
+                    level={5}
+                    weight="bold"
+                    color={colors.blue}
+                    style={{ marginLeft: 15 }}
+                  >
+                    Contactar al vendedor
+                  </Text>
+                </Touchable>
+              </View>
+            </View>
+            <Divider type="thick" />
+            {content}
+          </View>
+        }
+        keyExtractor={(item: Product) => item.id}
+        renderItem={({ item, index }) => {
+          return (
+            <ProductCard
+              key={`${item.id}`}
+              store={store}
+              product={item}
+              align={index % 2 === 0 ? 'left' : 'right'}
+              onPress={pressProductHandler}
+            />
+          );
+        }}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListFooterComponent={<View style={globalStyles.withScreenAir} />}
+        onRefresh={refresh}
+        onEndReached={() => {
+          if (state.products && state.products.from < state.products.total) {
+            fetchMore();
+          }
+        }}
+        style={[{ flex: 1 }]}
+        columnWrapperStyle={globalStyles.withPadding}
       />
-      {content}
       <View
         style={[
           { position: 'absolute', left: 0, right: 0, bottom: 0 },
@@ -518,8 +536,17 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
-      {state.shopping_cart_modal && (
-        <ShoppingCartModal store={store} onClose={closeShoppingCartHandler} />
+      {state.contact && (
+        <ActionSheetContact
+          phone={store.phone}
+          onRequestClose={contactStoreCloseHandler}
+        />
+      )}
+      {state.opening_hours_modal && (
+        <ViewOpeningHoursModal
+          value={store.opening_hours}
+          onClose={closeOpeningHoursModal}
+        />
       )}
     </View>
   );

@@ -39,7 +39,7 @@ import userCache from '../../cache/user';
 import shoppingCartCache, {
   ShoppingCartSnapshot,
   getSnapshot,
-} from '../../cache/shopping-cartv2';
+} from '../../cache/shopping-cart';
 // lib
 import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
@@ -387,7 +387,7 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const pressSeeStoreHandler = (store: Store) => {
-    navigation.navigate('StoreV2', { store });
+    navigation.navigate('Store', { store });
   };
 
   const pressDeleteHandler = (event: GestureResponderEvent) => {

@@ -11,7 +11,7 @@ import InputNumber from './components/input-number';
 import cloudinary from '../../../lib/cloudinary';
 import numberFormatter from '../../../lib/formatters/number-formatter';
 // cache
-import shoppingCartCache from '../../../cache/shopping-cartv2';
+import shoppingCartCache from '../../../cache/shopping-cart';
 // types
 import { Product, Store } from '../../../types';
 

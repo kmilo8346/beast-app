@@ -12,7 +12,7 @@ import Touchable from '../../../components/touchable';
 import Icon from '../../../components/icon';
 import Badge from '../../../components/badge';
 // cache
-import shoppingCartCache, { getTotal } from '../../../cache/shopping-cartv2';
+import shoppingCartCache, { getTotal } from '../../../cache/shopping-cart';
 // lib
 import { navigate } from '../../../lib/root-navigation';
 

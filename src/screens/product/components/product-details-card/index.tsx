@@ -20,7 +20,7 @@ import cloudinary from '../../../../lib/cloudinary';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import * as utils from '../../../../lib/utils';
 // cache
-import shoppingCartCache from '../../../../cache/shopping-cartv2';
+import shoppingCartCache from '../../../../cache/shopping-cart';
 
 interface ComponentProps {
   store?: Store;

@@ -14,7 +14,7 @@ import deviceAgent from './lib/device-agent';
 import Sentry, { capture } from './lib/sentry';
 // cache
 import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
-import shoppingCartCache from './cache/shopping-cartv2';
+import shoppingCartCache from './cache/shopping-cart';
 // fonts
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
 const MonserratNormal = require('../assets/fonts/monserrat/normal.ttf');

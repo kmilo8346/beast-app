@@ -4,11 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 // screens
 import {
   SignInScreen,
-  SetPhoneScreen,
   HomeScreen,
   ProductScreen,
   StoresScreen,
-  StoreV2Screen,
   StoreScreen,
   OrdersScreen,
   OrderDetailsScreen,
@@ -37,16 +35,9 @@ export default () => {
         options={{ title: 'Tiendas' }}
       />
       <HomeStack.Screen
-        name="StoreV2"
-        component={StoreV2Screen}
-        options={{ title: '' }}
-      />
-      <HomeStack.Screen
         name="Store"
         component={StoreScreen}
-        options={{
-          title: '',
-        }}
+        options={{ title: '' }}
       />
       <HomeStack.Screen
         name="Orders"
@@ -61,11 +52,6 @@ export default () => {
       <HomeStack.Screen
         name="SignIn"
         component={SignInScreen}
-        options={{ title: '' }}
-      />
-      <HomeStack.Screen
-        name="SetPhone"
-        component={SetPhoneScreen}
         options={{ title: '' }}
       />
     </HomeStack.Navigator>
