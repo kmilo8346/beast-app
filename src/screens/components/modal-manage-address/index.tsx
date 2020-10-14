@@ -89,6 +89,7 @@ export default ({ value, onChange }: ComponentProps) => {
           value={info.current_address}
           options={options}
           addMessage="Agrega una nueva dirección"
+          addDisabled={options.length >= 5}
           onSelect={selectHandler}
           onDelete={deleteHandler}
           onAdd={addOptionHandler}

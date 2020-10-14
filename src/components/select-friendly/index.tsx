@@ -18,6 +18,7 @@ export interface SelectProps {
   value?: string;
   options: Option[];
   addMessage: string;
+  addDisabled?: boolean;
   style?: StyleProp<ViewStyle>;
   onSelect: (key: string) => void;
   onDelete: (key: string) => void;
@@ -28,6 +29,7 @@ export default ({
   value,
   options,
   addMessage,
+  addDisabled = false,
   style = {},
   onSelect,
   onDelete,
@@ -95,8 +97,13 @@ export default ({
       })}
       {!!options.length && (
         <Touchable
+          disabled={addDisabled}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            opacity: addDisabled ? 0.3 : 1,
+          }}
           onPress={onAdd}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
         >
           <Icon name="plus" />
           <Text level={6} style={{ marginLeft: 18 }}>
