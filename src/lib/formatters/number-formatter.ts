@@ -1,3 +1,7 @@
+import { capture } from '../sentry';
+
+const prefix = '[number formatter]';
+
 class NumberFormatter {
   toCurrency(value: number | undefined): string {
     if (!value) {
@@ -20,15 +24,24 @@ class NumberFormatter {
   }
 
   humanizeTime = (time: number): string => {
-    const t = `${time}`.slice(0, 4);
-    const hour = t.length > 3 ? t.slice(0, 2) : t.slice(0, 1);
-    const minutes = t.slice(-2);
-    const newHour = `${
-      Number(hour) > 12 ? Number(hour) - 12 : hour
-    }:${minutes}`;
-    const timeOfTheDay = Number(hour) >= 12 ? 'pm' : 'am';
+    if (time < 0 || time >= 2400) {
+      throw new Error(`${prefix} Invalid argument, time: ${time}`);
+    }
+    let s_time = `${time}`;
+    s_time = s_time.padStart(4, '0');
+    let hours = s_time.slice(0, 2);
+    const minutes = s_time.slice(2, 4);
 
-    return `${newHour} ${timeOfTheDay}`;
+    let meridiem_time = 'am';
+    if (parseInt(hours, 10) >= 12) {
+      hours = `${parseInt(hours, 10) - 12}`;
+      meridiem_time = 'pm';
+    }
+    if (parseInt(hours, 10) === 0) {
+      hours = '12';
+    }
+
+    return `${hours}:${minutes} ${meridiem_time}`;
   };
 }
 

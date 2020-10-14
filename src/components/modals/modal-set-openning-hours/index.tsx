@@ -21,6 +21,7 @@ import Switch from '../../switch';
 import { OpeningHours } from '../../../types';
 // libs
 import validate from '../../../lib/validate';
+import numberFormatter from '../../../lib/formatters/number-formatter';
 // constraints
 import constraints from './constraints';
 // styles
@@ -84,14 +85,6 @@ const fromIntegerTime = (time: number): Date => {
   date.setHours(parseInt(sTime.substring(0, 2), 10));
   date.setMinutes(parseInt(sTime.substring(2, 4), 10));
   return date;
-};
-const formatIntegerTime = (time: number): string => {
-  let sTime = `${time}`;
-  if (sTime.length < 1 || sTime.length > 4) {
-    throw new Error(`${prefix} Invalid integer time`);
-  }
-  sTime = sTime.padStart(4, '0');
-  return `${sTime.substring(0, 2)}:${sTime.substring(2, 4)} hrs.`;
 };
 const formatDay = (day: string): string => {
   switch (day) {
@@ -376,7 +369,7 @@ export default ({
                               color: openActive ? colors.blue : colors.black,
                             }}
                           >
-                            {formatIntegerTime(dayHours.open)}
+                            {numberFormatter.humanizeTime(dayHours.open)}
                           </Text>
                         </View>
                       </Touchable>
@@ -408,7 +401,7 @@ export default ({
                               color: closeActive ? colors.blue : colors.black,
                             }}
                           >
-                            {formatIntegerTime(dayHours.close)}
+                            {numberFormatter.humanizeTime(dayHours.close)}
                           </Text>
                         </View>
                       </Touchable>
