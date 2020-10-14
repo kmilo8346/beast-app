@@ -81,7 +81,7 @@ export default ({
           level={7}
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={{ marginHorizontal: 5 }}
+          style={{ marginHorizontal: 5, flex: 1 }}
         >
           {text}
         </Text>
