@@ -40,6 +40,7 @@ export default ({ message_type = MessageTypes.CLIENT }: ComponentProps) => {
 
   // event handlers
   const resetMessage = () => {
+    slideIn();
     if (currentMessage === messages.length - 1) {
       setCurrentMessage(0);
       return;
@@ -77,15 +78,15 @@ export default ({ message_type = MessageTypes.CLIENT }: ComponentProps) => {
       {Platform.OS === 'android' ? (
         <ActivityIndicator size="large" color={colors.blue} />
       ) : (
-          <LottieView
-            style={{
-              height: 300,
-              marginBottom: -50,
-            }}
-            autoPlay
-            source={Loading}
-          />
-        )}
+        <LottieView
+          style={{
+            height: 300,
+            marginBottom: -50,
+          }}
+          autoPlay
+          source={Loading}
+        />
+      )}
 
       <Animated.Text
         style={[
