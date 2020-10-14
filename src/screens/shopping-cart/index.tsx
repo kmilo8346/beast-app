@@ -543,11 +543,13 @@ export default ({ navigation }: ScreenProps) => {
         >
           <View style={[{ flexDirection: 'row', marginBottom: 20 }]}>
             <MapPinShadedBlueIcon />
-            <View style={{ marginLeft: 15 }}>
+            <View style={{ marginLeft: 15, flex: 1 }}>
               <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
                 Dirección de entrega
               </Text>
-              <Text level={6}>{addressText}</Text>
+              <Text level={6} numberOfLines={2} ellipsizeMode="tail">
+                {addressText}
+              </Text>
             </View>
           </View>
           <Touchable
