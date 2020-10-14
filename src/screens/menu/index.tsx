@@ -89,6 +89,7 @@ export default ({ navigation }: ScreenProps) => {
 
   const updateAddressInfo = async (info: AddressInfo) => {
     try {
+      const prev_current_address = userCache.getData()?.current_address;
       setUpdatingAddressInfo(true);
       await userClient.update({
         pathVars: {
@@ -103,13 +104,15 @@ export default ({ navigation }: ScreenProps) => {
         current_address: info.current_address,
         addresses: info.addresses,
       });
-      shoppingCartCache.clear();
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [{ name: 'MainRootStack' }],
-        })
-      );
+      if (prev_current_address !== info.current_address) {
+        shoppingCartCache.clear();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: 'MainRootStack' }],
+          })
+        );
+      }
     } catch (error) {
       capture(prefix, 'Update address info error', error);
 
