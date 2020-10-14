@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.57",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
@@ -35,16 +29,14 @@
         "NSCameraUsageDescription": "Esta app usa la cámara para tomar imágenes de tiendas y productos",
         "NSPhotoLibraryUsageDescription": "Esta app usa la biblioteca de fotos para cargar imágenes de tiendas y productos"
       },
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
       "versionCode": 380010057,
-      "permissions": [
-        "CAMERA",
-        "VIBRATE"
-      ],
+      "permissions": ["CAMERA", "VIBRATE"],
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true
     },
