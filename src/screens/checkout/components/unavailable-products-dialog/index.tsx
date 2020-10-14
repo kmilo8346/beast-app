@@ -71,7 +71,7 @@ export default ({
         {products.map((item) => (
           <ItemComponent key={item.id} data={item} />
         ))}
-        <View style={globalStyle.withScreenAir} />
+        <View style={{ marginBottom: 10 }} />
       </ScrollView>
 
       <View style={globalStyle.withMargin}>
