@@ -15,7 +15,7 @@ import colors from '../../../../styles/colors';
 
 interface ComponentProps {
   title: string;
-  message: string;
+  message?: string;
   okText?: string;
   cancelText?: string;
   onOk?: () => void;
@@ -57,17 +57,21 @@ export default ({
         <Text
           level={5}
           weight="bold"
-          style={{ textAlign: 'center', lineHeight: 23 }}
+          style={{ textAlign: 'center', lineHeight: 23, marginBottom: 5 }}
         >
           {title}
         </Text>
-        <Text
-          level={6}
-          weight="light"
-          style={{ marginBottom: 20, marginTop: 5, textAlign: 'center' }}
-        >
-          {message}
-        </Text>
+        {message ? (
+          <Text
+            level={6}
+            weight="light"
+            style={{ marginBottom: 20, textAlign: 'center' }}
+          >
+            {message}
+          </Text>
+        ) : (
+          <View style={{ marginBottom: 10 }} />
+        )}
 
         <Divider />
         <View

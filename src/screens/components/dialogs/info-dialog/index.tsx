@@ -61,7 +61,7 @@ export default ({
         <Button
           title={okText}
           type="link"
-          style={{ marginVertical: 15 }}
+          style={{ paddingVertical: 15 }}
           onPress={okPressHandler}
         />
       </View>

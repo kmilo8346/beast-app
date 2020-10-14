@@ -27,6 +27,8 @@ import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import MapPinShadedBlueIcon from '../../components/svgs/icons/map-pin-shaded-blue';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
+// screen components
+import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // local components
 import SetPhoneModal from './components/set-phone-modal';
 import ItemComponent from './components/item';
@@ -116,6 +118,10 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
+type SetPendingRemovalAction = {
+  type: 'set_pending_removal';
+  pending_removal?: string;
+};
 type Action =
   | SetViewAction
   | SetAddressAction
@@ -128,7 +134,8 @@ type Action =
   | ChangeFormValueAction
   | ValidateFormValuesAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction;
+  | SetFormErrorsAction
+  | SetPendingRemovalAction;
 type State = {
   view: ShoppingCartView;
   address: Place;
@@ -143,6 +150,7 @@ type State = {
     submitted: boolean;
     errors?: { [key: string]: string[] };
   };
+  pending_removal?: string;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -237,6 +245,11 @@ const reducer = (state: State, action: Action): State => {
           ...state.form,
           errors: action.errors,
         },
+      };
+    case 'set_pending_removal':
+      return {
+        ...state,
+        pending_removal: action.pending_removal,
       };
     default:
       return state;
@@ -380,9 +393,34 @@ export default ({ navigation }: ScreenProps) => {
   const pressDeleteHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
 
-    if (state.selected_store) {
-      shoppingCartCache.clearStore(state.selected_store);
+    if (!state.selected_store) {
+      capture(
+        prefix,
+        'Press delete handler error: cant delete store if not selected store'
+      );
+      return;
     }
+    dispatch({
+      type: 'set_pending_removal',
+      pending_removal: state.selected_store,
+    });
+  };
+
+  const confirmDialogOkHandler = () => {
+    const pending = state.pending_removal;
+    dispatch({ type: 'set_pending_removal', pending_removal: undefined });
+    if (!pending) {
+      capture(
+        prefix,
+        'Confirm dialog ok handler error: cant delete store if not pending removal'
+      );
+      return;
+    }
+    shoppingCartCache.clearStore(pending);
+  };
+
+  const confirmDialogCancelHandler = () => {
+    dispatch({ type: 'set_pending_removal', pending_removal: undefined });
   };
 
   useFocusEffect(
@@ -783,6 +821,14 @@ export default ({ navigation }: ScreenProps) => {
           value={state.form.phone}
           onChange={changePhoneHandler}
           onClose={closeModalPhoneHandler}
+        />
+      )}
+      {state.pending_removal && (
+        <ConfirmDialog
+          title="¿Seguro que quieres eliminar la tienda seleccionada?"
+          okText="Eliminar"
+          onOk={confirmDialogOkHandler}
+          onCancel={confirmDialogCancelHandler}
         />
       )}
     </View>

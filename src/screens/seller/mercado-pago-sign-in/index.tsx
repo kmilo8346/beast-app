@@ -192,7 +192,7 @@ export default ({ navigation }: ScreenProps) => {
           redirectData.queryParams?.status !== 'ok' ||
           !redirectData.queryParams?.code
         ) {
-          throw new Error('');
+          throw new Error(`${prefix} Invalid redirect state`);
         }
 
         setAccount(redirectData.queryParams.code);
