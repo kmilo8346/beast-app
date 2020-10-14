@@ -49,7 +49,7 @@ export default ({
             {
               backgroundColor: colors.white,
               borderRadius: 10,
-              minWidth: 320,
+              minWidth: 290,
               maxWidth: 400,
               width: '80%',
             },
