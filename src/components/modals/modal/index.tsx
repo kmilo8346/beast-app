@@ -8,9 +8,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// components
 import ScreenView from '../../container';
 import Text from '../../text';
 import ButtonIcon from '../../buttons/button-icon';
+import Icon from '../../icon';
+import Touchable from '../../touchable';
+// styles
 import styles from './styles';
 
 export interface ModalProps {
@@ -72,11 +76,22 @@ export default ({
               >
                 <View style={[styles.modal, styles.modal_auto, modalStyle]}>
                   {draggable && (
-                    <TouchableWithoutFeedback onPress={onRequestClose}>
-                      <View style={styles.containerDrag}>
-                        <View style={styles.dragIndicator} />
-                      </View>
-                    </TouchableWithoutFeedback>
+                    <>
+                      <View style={{ marginBottom: 30 }} />
+                      <Touchable
+                        style={{
+                          position: 'absolute',
+                          top: 3,
+                          right: 5,
+                          padding: 10,
+                          // borderWidth: 1,
+                          alignSelf: 'flex-end',
+                        }}
+                        onPress={onRequestClose}
+                      >
+                        <Icon name="x" size={18} />
+                      </Touchable>
+                    </>
                   )}
                   <SafeAreaView style={styles.bodyContainer}>
                     {!!title && (
