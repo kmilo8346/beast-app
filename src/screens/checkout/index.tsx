@@ -5,6 +5,7 @@ import axios, { CancelTokenSource } from 'axios';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import * as Permissions from 'expo-permissions';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import ErrorView from '../../components/error-view';
@@ -154,6 +155,7 @@ export default ({ navigation, route }: ScreenProps) => {
   if (!address) {
     throw new Error(`${prefix} User address must be defined`);
   }
+  const insets = useSafeAreaInsets();
 
   // event handlers
   const createPayment = async (idempotency: string, redirectUrl: string) => {
@@ -398,7 +400,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
         <View
           style={[
-            { position: 'absolute', left: 0, right: 0, bottom: 0 },
+            {
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              paddingBottom: insets.bottom,
+            },
             globalStyles.withMargin,
           ]}
         >
@@ -448,7 +456,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
             <View
               style={[
-                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                {
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  paddingBottom: insets.bottom,
+                },
                 globalStyles.withMargin,
               ]}
             >
@@ -494,7 +508,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
             <View
               style={[
-                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                {
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  paddingBottom: insets.bottom,
+                },
                 globalStyles.withMargin,
               ]}
             >
@@ -537,7 +557,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
             <View
               style={[
-                { position: 'absolute', left: 0, right: 0, bottom: 0 },
+                {
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  paddingBottom: insets.bottom,
+                },
                 globalStyles.withMargin,
               ]}
             >
