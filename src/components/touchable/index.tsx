@@ -6,5 +6,9 @@ export interface TouchableProps extends TouchableOpacityProps {
 }
 
 export default ({ children, ...otherProps }: TouchableProps) => {
-  return <TouchableOpacity {...otherProps}>{children}</TouchableOpacity>;
+  return (
+    <TouchableOpacity activeOpacity={0.7} {...otherProps}>
+      {children}
+    </TouchableOpacity>
+  );
 };
