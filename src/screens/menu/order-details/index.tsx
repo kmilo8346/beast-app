@@ -156,7 +156,7 @@ export default ({ route }: OrderDetailsProps) => {
       if (
         order.dispatch_provider.confirmation &&
         order.dispatch_provider.confirmation.product_confirmations.length >=
-          order.transaction.shopping_cart.length
+        order.transaction.shopping_cart.length
       ) {
         status = 'finish';
       }
@@ -427,6 +427,7 @@ export default ({ route }: OrderDetailsProps) => {
       <LoadingOverlay ref={loadingOverlayRef} />
       {state.contact && (
         <ActionSheetContact
+          whatsapp_introduction="Hola!👋. Escribo desde *Shop Shop* para consultarle algo 😃"
           phone={order.transaction.store.phone}
           onRequestClose={contactCloseHandler}
         />

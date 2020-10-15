@@ -276,7 +276,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       if (
         sale.dispatch_provider.confirmation &&
         sale.dispatch_provider.confirmation.product_confirmations.length >=
-          sale.transaction.shopping_cart.length
+        sale.transaction.shopping_cart.length
       ) {
         status = 'finish';
       }
@@ -418,7 +418,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
     sale.dispatch_provider.status === OwnerDispatchStatus.CREATED &&
     sale.dispatch_provider.confirmation &&
     sale.dispatch_provider.confirmation.product_confirmations.length >=
-      sale.transaction.shopping_cart.length
+    sale.transaction.shopping_cart.length
   ) {
     mainAction = (
       <Button
@@ -700,6 +700,7 @@ export default ({ navigation, route }: SaleDetailsProps) => {
       <LoadingOverlay ref={loadingOverlayRef} />
       {state.contact && (
         <ActionSheetContact
+          whatsapp_introduction="Hola!👋. Escribo desde *Shop Shop*. Gracias por su compra 😊"
           phone={sale.customer.phone}
           onRequestClose={contactCloseHandler}
         />

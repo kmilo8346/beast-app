@@ -11,11 +11,13 @@ import { capture } from '../../../lib/sentry';
 const prefix = '[action sheet contact component]';
 
 export interface ActionSheetContactProps {
+  whatsapp_introduction?: string;
   phone: string;
   onRequestClose?: () => void;
 }
 
 export default ({
+  whatsapp_introduction = 'Hola!👋. Escribo desde *Shop Shop* 😃',
   phone,
   onRequestClose = utils.noop,
 }: ActionSheetContactProps) => {
@@ -50,7 +52,9 @@ export default ({
               await Linking.openURL(`sms: ${phone}`);
               break;
             case 'message_whatsapp':
-              await Linking.openURL(`https://wa.me/${phone}`);
+              await Linking.openURL(
+                `whatsapp://send?text=${whatsapp_introduction}&phone=${phone}`
+              );
               break;
             default:
               break;

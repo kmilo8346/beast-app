@@ -471,8 +471,8 @@ export default ({ navigation, route }: ScreenProps) => {
                     {state.opening_hours_modal ? (
                       <Icon name="chevron-up" />
                     ) : (
-                      <Icon name="chevron-down" />
-                    )}
+                        <Icon name="chevron-down" />
+                      )}
                   </View>
                 </Touchable>
 
@@ -538,6 +538,7 @@ export default ({ navigation, route }: ScreenProps) => {
       </View>
       {state.contact && (
         <ActionSheetContact
+          whatsapp_introduction="Hola!👋. Escribo desde *Shop Shop* para consultarle algo 😃"
           phone={store.phone}
           onRequestClose={contactStoreCloseHandler}
         />
