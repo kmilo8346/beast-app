@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>525584270888-s568uo6h25c5klpk1eim3pktk3rscbv0.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.525584270888-s568uo6h25c5klpk1eim3pktk3rscbv0</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>525584270888-2lpl70unih1prdosjslvs33vlbo9jibg.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDy5zi7hKm_ftV5C9R0pkzZqMg5B64nVwI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>525584270888</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.firedevs.beast</string>
+	<key>PROJECT_ID</key>
+	<string>beast-production</string>
+	<key>STORAGE_BUCKET</key>
+	<string>beast-production.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:525584270888:ios:36c7db8bf3409bfaa6971d</string>
+	<key>DATABASE_URL</key>
+	<string>https://beast-production.firebaseio.com</string>
+</dict>
+</plist>

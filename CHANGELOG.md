@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.58](https://github.com/firedevs-team/beast-app/compare/v1.0.57...v1.0.58) (2020-10-14)
+
+
+### Bug Fixes
+
+* **app:** bug change address ([1befffe](https://github.com/firedevs-team/beast-app/commit/1befffe7414a0af85eac1df643f0695f73d5e994))
+* **checkout:** space for main checkout ([1b4da1b](https://github.com/firedevs-team/beast-app/commit/1b4da1bb42f966b4fa9ea43352c8a953a90f408c))
+* **dialog modal:** changing size ([b02356a](https://github.com/firedevs-team/beast-app/commit/b02356a3b02171bafb566379d2c79fa987b3502c))
+* **input select address:** bug text overload ([e898968](https://github.com/firedevs-team/beast-app/commit/e89896819e8291d7f22d859a21a49a6d963da822))
+* **loading:** bug in transition ([ce915cd](https://github.com/firedevs-team/beast-app/commit/ce915cdc0b62f278a81769ebfe3e56f827f41a77))
+* **shopping cart:** text overload ([4d14ba5](https://github.com/firedevs-team/beast-app/commit/4d14ba5ab70f9f847437fb53e223d62f4bbaa21a))
+* **unavailable products:** changing style ([ba77d06](https://github.com/firedevs-team/beast-app/commit/ba77d062fc025e8b5cc98be73d2c1ea96ed6c4dd))
+* **utils:** humanize time ([1473735](https://github.com/firedevs-team/beast-app/commit/14737358ac407047b272d3447a3935b52d3b2048))
+
 ### [1.0.57](https://github.com/firedevs-team/beast-app/compare/v1.0.56...v1.0.57) (2020-10-04)
 
 
