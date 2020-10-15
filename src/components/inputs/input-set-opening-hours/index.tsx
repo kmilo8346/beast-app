@@ -27,7 +27,7 @@ const humanizeOpeningHoursText = (schedule: OpeningHours) => {
   ];
   const openDays: string[] = [];
   schedule.forEach((day) => {
-    if (day.open) {
+    if (day.open || day.close) {
       openDays.push(daysShortNames[Number(day.day) - 1]);
       humanizedText =
         humanizedText === 'Tienda cerrada'
