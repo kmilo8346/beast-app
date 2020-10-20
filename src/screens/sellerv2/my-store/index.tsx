@@ -23,7 +23,6 @@ import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
 // libs
 import { capture } from '../../../lib/sentry';
-import * as utils from '../../../lib/utils';
 // types
 import { LoggedUser, Product, SearchResponse, Store } from '../../../types';
 // styles
@@ -226,7 +225,6 @@ export default ({ navigation, route }: ScreenProps) => {
   const load = async () => {
     try {
       dispatch({ type: 'reset' });
-      await utils.sleep(5000);
       const response = await fetch();
       dispatch({
         type: 'set_products',

@@ -1,6 +1,7 @@
-import React, { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import React, { useLayoutEffect, useReducer, useRef } from 'react';
 import {
   GestureResponderEvent,
+  Keyboard,
   ScrollView,
   Vibration,
   View,
@@ -214,6 +215,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressSaveHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
+    Keyboard.dismiss();
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form.store, constraints);
