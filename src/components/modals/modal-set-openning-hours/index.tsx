@@ -32,7 +32,7 @@ import colors from '../../../styles/colors';
 const prefix = '[modal set opening hours]';
 const defaultOpen = 900;
 const defaultClose = 1730;
-const defaultOpeningHours: OpeningHours = [
+export const defaultOpeningHours: OpeningHours = [
   {
     day: '1',
     open: defaultOpen,

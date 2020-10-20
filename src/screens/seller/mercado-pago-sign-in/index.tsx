@@ -22,7 +22,7 @@ import userClient from '../../../clients/user-client';
 // libs
 import { capture } from '../../../lib/sentry';
 // types
-import { SellerCredentials } from '../../../types';
+import { MercadoPagoCredentials } from '../../../types';
 // cache
 import userCache from '../../../cache/user';
 import storeCache from '../../../cache/store';
@@ -53,13 +53,13 @@ type SetLinkModalAction = {
 type SetValidAccountAction = {
   type: 'set_valid_account';
   mp_code: string;
-  mp_credentials: SellerCredentials;
+  mp_credentials: MercadoPagoCredentials;
   mp_user: any;
 };
 type SetInValidAccountAction = {
   type: 'set_invalid_account';
   mp_code: string;
-  mp_credentials: SellerCredentials;
+  mp_credentials: MercadoPagoCredentials;
   mp_user: any;
 };
 type Action =
@@ -71,7 +71,7 @@ type State = {
   view: MercadoPagoSignInView;
   link_modal: boolean;
   mp_code?: string;
-  mp_credentials?: SellerCredentials;
+  mp_credentials?: MercadoPagoCredentials;
   mp_user?: any;
 };
 const reducer = (state: State, action: Action): State => {
@@ -128,7 +128,7 @@ export default ({ navigation }: ScreenProps) => {
   // event handlers
   const createCredentials = async (
     code: string
-  ): Promise<SellerCredentials> => {
+  ): Promise<MercadoPagoCredentials> => {
     return mpOauthTokenClient.create({ body: { code } });
   };
 
@@ -235,7 +235,7 @@ export default ({ navigation }: ScreenProps) => {
       const created = await storeClient.create({
         body: {
           ...store,
-          seller_credentials: state.mp_credentials as SellerCredentials,
+          seller_credentials: state.mp_credentials as MercadoPagoCredentials,
         },
       });
       // set current store

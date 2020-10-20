@@ -17,6 +17,7 @@ import styles from './styles';
 
 export interface InputProps extends TextInputProps {
   label?: string;
+  required?: boolean;
   labelStyles?: TextStyle;
   errors?: string[];
   lengthCounter?: boolean;
@@ -35,6 +36,7 @@ export default forwardRef<Ref, InputProps>(
   (
     {
       label = '',
+      required = false,
       labelStyles = {},
       value,
       errors = [],
@@ -125,6 +127,7 @@ export default forwardRef<Ref, InputProps>(
         {!!label && (
           <Text level={6} style={[styles.label, labelStyles]}>
             {label}
+            {required && <Text level={6} color={colors.red}>{` *`}</Text>}
           </Text>
         )}
         <View style={styles.inputWrapper}>

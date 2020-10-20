@@ -4,7 +4,6 @@ import axios, { CancelTokenSource } from 'axios';
 
 // components
 import Input from '../input';
-import ButtonIcon from '../../buttons/button-icon';
 import Icon from '../../icon';
 import Text from '../../text';
 import Touchable from '../../touchable';
@@ -154,12 +153,11 @@ export default ({
   const changeHandler = (attribute: string, value: string) => {
     dispatch({ type: 'change_value', attribute, value });
   };
+
   const inputFocusHandler = () => {
     dispatch({ type: 'open' });
   };
-  const pressCloseAutocompleteHandler = () => {
-    dispatch({ type: 'close' });
-  };
+
   const fetchPredictions = async (input: string) => {
     try {
       if (autocompleteRequestSource) {
@@ -182,6 +180,7 @@ export default ({
       }
     }
   };
+
   const fetchDetail = async (placeId: string) => {
     try {
       if (detailsRequestSource) {
@@ -210,6 +209,7 @@ export default ({
       }
     }
   };
+
   // generate session token when component mount
   useEffect(() => {
     sessiontoken = uuidv4();
@@ -361,11 +361,6 @@ export default ({
     }
     return (
       <View style={{ position: 'relative' }}>
-        <ButtonIcon
-          icon="x"
-          onPress={pressCloseAutocompleteHandler}
-          style={{ position: 'absolute', top: -5, right: -5 }}
-        />
         <Text level={6} style={{ marginLeft: 4, top: 30 }}>
           {label}
         </Text>

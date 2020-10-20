@@ -59,6 +59,7 @@ const getAvailableId = (images: InputImage[], size: number): string | null => {
 
 export interface InputImagesProps {
   label?: string;
+  required?: boolean;
   tip?: string;
   value?: string[];
   size?: number;
@@ -71,6 +72,7 @@ export interface InputImagesProps {
 
 export default ({
   label,
+  required = false,
   tip,
   value,
   size = 3,
@@ -182,7 +184,6 @@ export default ({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 4],
         quality: 1,
       });
       if (result.cancelled) {
@@ -198,11 +199,6 @@ export default ({
 
   const takePhotoUsingCamera = async () => {
     try {
-      const cameraRollPermisionResponse = await ImagePicker.requestCameraRollPermissionsAsync();
-      if (cameraRollPermisionResponse.status !== 'granted') {
-        onPermisionNotGranted();
-        return;
-      }
       const cameraPermisionResponse = await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermisionResponse.status !== 'granted') {
         onPermisionNotGranted();
@@ -213,7 +209,6 @@ export default ({
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 4],
         quality: 1,
       });
       if (result.cancelled) {
@@ -274,6 +269,7 @@ export default ({
     labelComponent = (
       <Text level={6} style={{ marginLeft: 4, marginBottom: 10 }}>
         {label}
+        {required && <Text level={6} color={colors.red}>{` *`}</Text>}
       </Text>
     );
   }
@@ -297,8 +293,8 @@ export default ({
         <View
           style={{
             marginLeft: 10,
-            height: 80,
-            width: 80,
+            height: 60,
+            width: 60,
             borderRadius: 100,
             borderWidth: 1,
             borderColor: colors.blueLight3,
@@ -313,7 +309,7 @@ export default ({
   }
   const error = Array.isArray(errors) && errors.length ? errors[0] : null;
   return (
-    <View style={{ marginBottom: 5 }}>
+    <View style={{ marginBottom: 12 }}>
       {labelComponent}
       {tipComponent}
       <View style={{ flexDirection: 'row' }}>
@@ -348,9 +344,11 @@ export default ({
                   borderRadius: 10,
                 }}
               />
-              <Text level={8} style={{ marginTop: 10, textAlign: 'center' }}>
-                {image.uploading ? `Subiendo...` : ''}
-              </Text>
+              {image.uploading && (
+                <Text level={8} style={{ marginTop: 10, textAlign: 'center' }}>
+                  Subiendo...
+                </Text>
+              )}
             </View>
           );
         })}

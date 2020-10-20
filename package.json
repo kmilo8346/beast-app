@@ -25,6 +25,7 @@
     "date-fns": "^2.15.0",
     "dotenv-safe": "^8.2.0",
     "expo": "^38.0.0",
+    "expo-apple-authentication": "~2.2.1",
     "expo-constants": "~9.1.1",
     "expo-crypto": "~8.2.1",
     "expo-facebook": "~8.2.1",
@@ -33,6 +34,7 @@
     "expo-image-picker": "~8.3.0",
     "expo-notifications": "~0.3.3",
     "expo-random": "~8.2.1",
+    "expo-secure-store": "~9.0.1",
     "expo-web-browser": "~8.3.1",
     "firebase": "7.9.0",
     "form-data": "^3.0.0",
@@ -48,9 +50,7 @@
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
     "sentry-expo": "^2.1.2",
-    "validate.js": "^0.13.1",
-    "expo-apple-authentication": "~2.2.1",
-    "expo-secure-store": "~9.0.1"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",

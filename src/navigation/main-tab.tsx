@@ -5,7 +5,7 @@ import { TextStyle } from 'react-native';
 
 // navigation
 import HomeStackScreen from './home-stack';
-import SellerStackScreen from './seller-stack';
+import SellerStackScreen from './seller-stackv2';
 import MenuStackScreen from './menu-stack';
 // components
 import Icon from '../components/icon';

@@ -121,7 +121,7 @@ export type OpeningHours = {
   close: number;
 }[];
 
-export interface SellerCredentials {
+export interface MercadoPagoCredentials {
   access_token: string;
   expires_in: number;
   live_mode: boolean;
@@ -147,18 +147,22 @@ export enum DispatchProvider {
   OWNER_RRSS = 'owner_rrss',
 }
 
+export interface PaymentProviderV2 {
+  credentials: MercadoPagoCredentials;
+}
+
 export interface CreateStore {
   user: string;
   name: string;
   phone: string;
   images: string[];
+  enabled: boolean;
   reference: string;
+  description?: string;
   delivery_time: IntegerRange;
   delivery_area: DeliveryArea;
   opening_hours: OpeningHours;
-  seller_credentials: SellerCredentials;
-  payment_provider: PaymentProvider;
-  dispatch_provider: DispatchProvider;
+  payment_provider?: PaymentProviderV2;
 }
 
 export interface Store extends CreateStore {
@@ -177,6 +181,7 @@ export interface CreateProduct {
   description: string;
   store_info: {
     id: string;
+    enabled: boolean;
     delivery_area: Circle;
     opening_hours: OpeningHours;
   };
