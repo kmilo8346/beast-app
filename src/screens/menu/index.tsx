@@ -35,7 +35,7 @@ import firebase from '../../lib/firebase';
 import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
 // types
-import { DispatchProvider, LoggedUser, AddressInfo } from '../../types';
+import { LoggedUser, AddressInfo } from '../../types';
 // cache
 import userCache from '../../cache/user';
 import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
@@ -154,6 +154,7 @@ export default ({ navigation }: ScreenProps) => {
   const pressCloseSessionHandler = async (event: GestureResponderEvent) => {
     event.stopPropagation();
     await firebase.auth().signOut();
+    shoppingCartCache.clear();
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
@@ -231,29 +232,29 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
 
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe: () => void = utils.noop;
-      if (ordersInProgressCache) {
-        unsubscribe = ordersInProgressCache.onChange(
-          (data: OrdersInProgressCacheData | undefined) => {
-            if (data) {
-              setInProgressQty(
-                data.orders.reduce((qty, order) => {
-                  if (
-                    order.dispatch_provider_id === DispatchProvider.OWNER &&
-                    order.customer.id === data.user
-                  ) {
-                    return qty + 1;
-                  }
-                  return qty;
-                }, 0)
-              );
-            }
-          }
-        );
-      }
-      return () => {
-        unsubscribe();
-      };
+      // let unsubscribe: () => void = utils.noop;
+      // if (ordersInProgressCache) {
+      //   unsubscribe = ordersInProgressCache.onChange(
+      //     (data: OrdersInProgressCacheData | undefined) => {
+      //       if (data) {
+      //         setInProgressQty(
+      //           data.orders.reduce((qty, order) => {
+      //             if (
+      //               order.dispatch_provider_id === DispatchProvider.OWNER &&
+      //               order.customer.id === data.user
+      //             ) {
+      //               return qty + 1;
+      //             }
+      //             return qty;
+      //           }, 0)
+      //         );
+      //       }
+      //     }
+      //   );
+      // }
+      // return () => {
+      //   unsubscribe();
+      // };
     }, [ordersInProgressCache])
   );
 

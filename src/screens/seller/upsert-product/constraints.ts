@@ -1,11 +1,14 @@
 export default {
-  name: {
+  images: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
     },
+    arrayWithValues: {
+      message: '^Imágenes se están subiendo',
+    },
   },
-  description: {
+  name: {
     presence: {
       allowEmpty: false,
       message: '^Es requerido',
@@ -17,19 +20,10 @@ export default {
       message: '^Es requerido',
     },
     numericality: {
-      greaterThanOrEqualTo: 1000,
+      greaterThanOrEqualTo: 100,
       lessThanOrEqualTo: 3000000,
-      notGreaterThanOrEqualTo: '^Debe ser mayor o igual a 1000',
+      notGreaterThanOrEqualTo: '^Debe ser mayor o igual a 100',
       notLessThanOrEqualTo: '^Debe ser menor o igual que 3 000 000',
-    },
-  },
-  images: {
-    presence: {
-      allowEmpty: false,
-      message: '^Es requerido',
-    },
-    arrayWithValues: {
-      message: '^Imágenes se están subiendo',
     },
   },
 } as { [key: string]: any };

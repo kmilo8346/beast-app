@@ -316,7 +316,6 @@ export default ({ navigation, route }: ScreenProps) => {
           }}
         />
         <Input
-          required
           multiline
           label="Descripción"
           lengthCounter

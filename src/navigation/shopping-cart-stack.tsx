@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 // screens
-import { ShoppingCartScreen, SignInScreen, CheckoutScreen } from '../screens';
+import { ShoppingCartScreen, SignInScreen } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
 
@@ -20,13 +20,6 @@ export default () => {
         name="SignIn"
         component={SignInScreen}
         options={{ title: '' }}
-      />
-      <ShoppingCartStack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{
-          title: '',
-        }}
       />
     </ShoppingCartStack.Navigator>
   );

@@ -5,7 +5,7 @@ import { TextStyle } from 'react-native';
 
 // navigation
 import HomeStackScreen from './home-stack';
-import SellerStackScreen from './seller-stackv2';
+import SellerStackScreen from './seller-stack';
 import MenuStackScreen from './menu-stack';
 // components
 import Icon from '../components/icon';
@@ -89,27 +89,29 @@ export default () => {
 
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe: () => void = utils.noop;
-      if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(
-          (data: OrdersInProgressCacheData | undefined) => {
-            if (data) {
-              dispatch({
-                type: 'set_sales_in_progress_qty',
-                qty: data.orders.reduce((qty, order) => {
-                  if (order.transaction.store.user === data.user) {
-                    return qty + 1;
-                  }
-                  return qty;
-                }, 0),
-              });
-            }
-          }
-        );
-      }
-      return () => {
-        unsubscribe();
-      };
+      // let unsubscribe: () => void = utils.noop;
+      // if (state.orders_in_progress_cache) {
+      //   unsubscribe = state.orders_in_progress_cache.onChange(
+      //     (data: OrdersInProgressCacheData | undefined) => {
+      //       if (data) {
+      //         dispatch({
+      //           type: 'set_sales_in_progress_qty',
+      //           qty: data.orders.reduce((qty, order) => {
+      //             if (
+      //               order.transaction.shopping_cart.store.user === data.user
+      //             ) {
+      //               return qty + 1;
+      //             }
+      //             return qty;
+      //           }, 0),
+      //         });
+      //       }
+      //     }
+      //   );
+      // }
+      // return () => {
+      //   unsubscribe();
+      // };
     }, [state.orders_in_progress_cache])
   );
 

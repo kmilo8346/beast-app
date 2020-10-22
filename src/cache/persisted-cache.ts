@@ -7,7 +7,7 @@ import { capture } from '../lib/sentry';
 const prefix = '[persisted cache]';
 
 export default class PersistedCache<T> extends Cache<T> {
-  private path: string;
+  protected path: string;
 
   constructor(path: string) {
     super();
@@ -19,9 +19,8 @@ export default class PersistedCache<T> extends Cache<T> {
       const raw: string | null = await AsyncStorage.getItem(
         `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/${this.path}`
       );
-      if (raw) {
-        this.data = JSON.parse(raw);
-      }
+
+      this.data = raw ? JSON.parse(raw) : undefined;
     } catch (error) {
       capture(prefix, 'Load error', error);
     }

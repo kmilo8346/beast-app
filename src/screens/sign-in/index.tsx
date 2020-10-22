@@ -208,6 +208,7 @@ export default ({ navigation, route }: ScreenProps) => {
         });
         await userCache.setData(created);
       }
+
       if (redirect.name === 'MainRootStack') {
         navigation.dispatch(
           CommonActions.reset({
@@ -216,7 +217,7 @@ export default ({ navigation, route }: ScreenProps) => {
           })
         );
       } else {
-        navigation.replace(redirect.name, redirect.params);
+        navigation.navigate(redirect.name, redirect.params);
       }
     } catch (error) {
       if (
@@ -255,6 +256,7 @@ export default ({ navigation, route }: ScreenProps) => {
         body: newUser as AnonymouslyUser,
       });
       await userCache.setData(created);
+
       navigation.dispatch(
         CommonActions.reset({
           index: 1,

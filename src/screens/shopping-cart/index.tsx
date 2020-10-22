@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useReducer,
+  useRef,
 } from 'react';
 import {
   ActivityIndicator,
@@ -16,9 +17,18 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import axios, { CancelTokenSource } from 'axios';
+import Constants from 'expo-constants';
 
 // constraints
 import constraints from './constraints';
+// local components
+import SetPhoneModal from './components/set-phone-modal';
+import ItemComponent from './components/item';
+import UnavailableProductsDialog from './components/unavailable-products-dialog';
+// screen components
+import ConfirmDialog from '../components/dialogs/confirm-dialog';
+import InfoDialog from '../components/dialogs/info-dialog';
 // components
 import Icon from '../../components/icon';
 import Text from '../../components/text';
@@ -27,13 +37,14 @@ import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import MapPinShadedBlueIcon from '../../components/svgs/icons/map-pin-shaded-blue';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
-// screen components
-import ConfirmDialog from '../components/dialogs/confirm-dialog';
-// local components
-import SetPhoneModal from './components/set-phone-modal';
-import ItemComponent from './components/item';
+import LoadingOverlay, {
+  ILoadingOverlay,
+} from '../../components/loading-overlay';
+import Toast, { IToast } from '../../components/toast';
+import CheckBlueThinImage from '../../components/svgs/images/check-blue-thin';
 // clients
 import userClient from '../../clients/user-client';
+import orderClient from '../../clients/order-client';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache, {
@@ -48,13 +59,16 @@ import cloudinary from '../../lib/cloudinary';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import * as utils from '../../lib/utils';
+import { v4 as uuidv4, generatePushID } from '../../lib/uuid';
 // types
-import { User, Place, Product, Store } from '../../types';
+import { User, Product, Store, LoggedUser } from '../../types';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
 
 const prefix = '[shopping cart screen]';
+let updateUserRequestSource: CancelTokenSource;
+let createOrderRequestSource: CancelTokenSource;
 
 interface StateStore {
   editing: boolean;
@@ -65,19 +79,11 @@ interface StateStores {
 }
 enum ShoppingCartView {
   SHOPPING_CART = 'shopping_cart',
-  USER_CANCELLED = 'USER_CANCELLED',
-  PAYMENT_APPROVED = 'PAYMENT_APPROVED',
-  PAYMENT_IN_PROCESS = 'PAYMENT_IN_PROCESS',
-  PAYMENT_PENDING = 'PAYMENT_PENDING',
-  PAYMENT_REJECTED = 'PAYMENT_PENDING',
+  ORDER_CREATED = 'order_created',
 }
 type SetViewAction = {
   type: 'set_view';
   view: ShoppingCartView;
-};
-type SetAddressAction = {
-  type: 'set_address';
-  address: Place;
 };
 type SetShoppingCartSnapshotAction = {
   type: 'set_shopping_cart_snapshot';
@@ -122,9 +128,32 @@ type SetPendingRemovalAction = {
   type: 'set_pending_removal';
   pending_removal?: string;
 };
+type SetIdempotencyAction = {
+  type: 'set_idempotency';
+  idempotency: string;
+};
+type SetLastOrderedStoreAction = {
+  type: 'set_last_ordered_store';
+  last_ordered_store: Store;
+};
+type SetDisabledStoreDialogAction = {
+  type: 'set_disabled_store_dialog';
+  disabled_store_dialog: string;
+};
+type SetClosedStoreDialogAction = {
+  type: 'set_closed_store_dialog';
+  closed_store_dialog: string;
+};
+type SetUnavailableProductsDialogAction = {
+  type: 'set_unavailable_products_dialog';
+  unavailable_products_dialog?: { store: Store; products: Product[] };
+};
+type SetUnexpectedErrorDialogAction = {
+  type: 'set_unexpected_error_dialog';
+  unexpected_error_dialog: boolean;
+};
 type Action =
   | SetViewAction
-  | SetAddressAction
   | SetShoppingCartSnapshotAction
   | SetSelectedStoreAction
   | ToogleEditProductsAction
@@ -135,10 +164,15 @@ type Action =
   | ValidateFormValuesAction
   | SetFormSubmittedAction
   | SetFormErrorsAction
-  | SetPendingRemovalAction;
+  | SetPendingRemovalAction
+  | SetIdempotencyAction
+  | SetLastOrderedStoreAction
+  | SetDisabledStoreDialogAction
+  | SetClosedStoreDialogAction
+  | SetUnavailableProductsDialogAction
+  | SetUnexpectedErrorDialogAction;
 type State = {
   view: ShoppingCartView;
-  address: Place;
   shopping_cart_snapshot: ShoppingCartSnapshot;
   selected_store?: string;
   state_stores: StateStores;
@@ -151,13 +185,17 @@ type State = {
     errors?: { [key: string]: string[] };
   };
   pending_removal?: string;
+  idempotency?: string;
+  last_ordered_store?: Store;
+  disabled_store_dialog: string;
+  closed_store_dialog: string;
+  unavailable_products_dialog?: { store: Store; products: Product[] };
+  unexpected_error_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_view':
       return { ...state, view: action.view };
-    case 'set_address':
-      return { ...state, address: action.address };
     case 'set_shopping_cart_snapshot':
       return {
         ...state,
@@ -251,21 +289,50 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         pending_removal: action.pending_removal,
       };
+    case 'set_idempotency':
+      return { ...state, idempotency: action.idempotency };
+    case 'set_last_ordered_store':
+      return {
+        ...state,
+        last_ordered_store: action.last_ordered_store,
+        idempotency: generatePushID(),
+        view: ShoppingCartView.ORDER_CREATED,
+      };
+    case 'set_disabled_store_dialog':
+      return {
+        ...state,
+        disabled_store_dialog: action.disabled_store_dialog,
+      };
+    case 'set_closed_store_dialog':
+      return {
+        ...state,
+        closed_store_dialog: action.closed_store_dialog,
+      };
+    case 'set_unavailable_products_dialog':
+      return {
+        ...state,
+        unavailable_products_dialog: action.unavailable_products_dialog,
+      };
+    case 'set_unexpected_error_dialog':
+      return {
+        ...state,
+        unexpected_error_dialog: action.unexpected_error_dialog,
+      };
     default:
       return state;
   }
 };
 interface ScreenProps {
   navigation: any;
+  route: any;
 }
 
-export default ({ navigation }: ScreenProps) => {
+export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(
     reducer,
     {
       view: ShoppingCartView.SHOPPING_CART,
-      address: userCache.getAddress() as Place,
       shopping_cart_snapshot: [],
       state_stores: {},
       phone_modal: false,
@@ -274,6 +341,9 @@ export default ({ navigation }: ScreenProps) => {
         phone: (userCache.getData() as User).phone,
         submitted: false,
       },
+      disabled_store_dialog: '',
+      closed_store_dialog: '',
+      unexpected_error_dialog: false,
     },
     (initialState) => {
       const snapshot = getSnapshot(shoppingCartCache.getData());
@@ -298,20 +368,29 @@ export default ({ navigation }: ScreenProps) => {
   if (!address) {
     throw new Error(`${prefix} User address must be defined`);
   }
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // event handler
   const updatePhone = async (phone: string) => {
     try {
       dispatch({ type: 'set_updating_phone', updating_phone: true });
-      await userClient.update({
-        pathVars: {
-          id: (userCache.getData() as User).id,
+      if (updateUserRequestSource) {
+        updateUserRequestSource.cancel();
+      }
+      updateUserRequestSource = axios.CancelToken.source();
+      await userClient.update(
+        {
+          pathVars: {
+            id: (userCache.getData() as User).id,
+          },
+          body: {
+            phone,
+            phone_verified: false,
+          },
         },
-        body: {
-          phone,
-          phone_verified: false,
-        },
-      });
+        updateUserRequestSource.token
+      );
       userCache.updateData({ phone, phone_verified: false });
     } catch (error) {
       capture(prefix, 'Update phone error', error);
@@ -320,36 +399,134 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const goToPayHandler = (event: GestureResponderEvent) => {
+  const createOrder = async () => {
+    const match = state.shopping_cart_snapshot.find(
+      (store_shopping_sart) =>
+        store_shopping_sart.store.id === state.selected_store
+    );
+    if (!match) {
+      throw new Error(
+        `${prefix} Selected store dont found in snapshot, selected: ${state.selected_store}`
+      );
+    }
+    try {
+      loadingOverlayRef.current?.show();
+      if (createOrderRequestSource) {
+        createOrderRequestSource.cancel();
+      }
+      createOrderRequestSource = axios.CancelToken.source();
+      const user = userCache.getData() as LoggedUser;
+
+      await orderClient.create(
+        {
+          body: {
+            idempotency: state.idempotency as string,
+            customer: {
+              id: user.id,
+              email: user.email,
+              first_name: user.first_name,
+              last_name: user.last_name,
+              photo_url: user.photo_url,
+              phone: user.phone as string,
+            },
+            transaction: {
+              country: Constants.manifest.extra.BEAST_COUNTRY,
+              currency: Constants.manifest.extra.BEAST_CURRENCY,
+              language: Constants.manifest.extra.BEAST_LANGUAGE,
+              delivery_address: address,
+              shopping_cart: {
+                store: match.store,
+                items: match.items,
+              },
+            },
+          },
+          source: ['id'],
+        },
+        createOrderRequestSource.token
+      );
+      dispatch({
+        type: 'set_last_ordered_store',
+        last_ordered_store: match.store,
+      });
+      shoppingCartCache.clearStore(match.store.id);
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'create order error', error);
+
+        if (error.response?.status === 400 && error.response.data.reason) {
+          if (error.response.data.reason === 'SHOP_DISABLED') {
+            setTimeout(() => {
+              dispatch({
+                type: 'set_disabled_store_dialog',
+                disabled_store_dialog: match.store.name,
+              });
+            }, 500);
+            return;
+          }
+          if (error.response.data.reason === 'SHOP_CLOSED') {
+            setTimeout(() => {
+              dispatch({
+                type: 'set_closed_store_dialog',
+                closed_store_dialog: match.store.name,
+              });
+            }, 500);
+            return;
+          }
+          if (error.response.data.reason === 'PRODUCTS_NOT_AVAILABLE') {
+            setTimeout(() => {
+              dispatch({
+                type: 'set_unavailable_products_dialog',
+                unavailable_products_dialog: {
+                  store: match.store,
+                  products: error.response.data.meta_data.products,
+                },
+              });
+            }, 500);
+            return;
+          }
+        }
+
+        setTimeout(() => {
+          dispatch({
+            type: 'set_unexpected_error_dialog',
+            unexpected_error_dialog: true,
+          });
+        }, 500);
+      }
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
+  };
+
+  const pressMakeOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form, constraints);
     if (errors) {
       Vibration.vibrate(400);
+      toastRef.current?.show({
+        message: 'Agregue número de teléfono, por favor',
+        type: 'ERROR',
+        expiration: 3,
+      });
       dispatch({ type: 'set_form_errors', errors });
       return;
-    }
-    const store_snapshot = state.shopping_cart_snapshot.find(
-      (store_snapshot) => store_snapshot.store.id === state.selected_store
-    );
-    if (!store_snapshot) {
-      throw new Error(`${prefix} Selected store snapshot must be defined`);
     }
     if (!userCache.isLogged()) {
       navigation.navigate('SignIn', {
         redirect: {
-          name: 'Checkout',
+          name: 'ShoppingCart',
           params: {
-            store_snapshot,
+            pay: uuidv4(),
           },
         },
         dont_allow_guest: true,
         reason: 'to_buy',
       });
-    } else {
-      navigation.push('Checkout', { store_snapshot });
+      return;
     }
+    createOrder();
   };
 
   const pressSetPhoneHandler = (event: GestureResponderEvent) => {
@@ -423,12 +600,69 @@ export default ({ navigation }: ScreenProps) => {
     dispatch({ type: 'set_pending_removal', pending_removal: undefined });
   };
 
+  const disabledStoreDialogOkHandler = () => {
+    dispatch({ type: 'set_disabled_store_dialog', disabled_store_dialog: '' });
+  };
+
+  const closedStoreDialogOkHandler = () => {
+    dispatch({ type: 'set_closed_store_dialog', closed_store_dialog: '' });
+  };
+
+  const unavailableProductsDialogOkHandler = () => {
+    if (state.unavailable_products_dialog) {
+      // delete unavailables from shopping cart
+      state.unavailable_products_dialog.products.forEach((product) => {
+        shoppingCartCache.set(
+          state.unavailable_products_dialog?.store as Store,
+          product,
+          0
+        );
+      });
+    }
+    dispatch({
+      type: 'set_unavailable_products_dialog',
+      unavailable_products_dialog: undefined,
+    });
+  };
+
+  const unavailableProductsDialogCancelHandler = () => {
+    dispatch({
+      type: 'set_unavailable_products_dialog',
+      unavailable_products_dialog: undefined,
+    });
+  };
+
+  const unexpectedErrorDialogOkHandler = () => {
+    dispatch({
+      type: 'set_unexpected_error_dialog',
+      unexpected_error_dialog: false,
+    });
+    setTimeout(() => {
+      createOrder();
+    }, 500);
+  };
+
+  const unexpectedErrorDialogCancelHandler = () => {
+    dispatch({
+      type: 'set_unexpected_error_dialog',
+      unexpected_error_dialog: false,
+    });
+  };
+
+  const pressContinueInShoppingCartHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_view', view: ShoppingCartView.SHOPPING_CART });
+  };
+
+  const goToHomeHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('Home');
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
-        const address = userCache.getAddress() as Place;
         const phone = (user as User).phone as string;
-        dispatch({ type: 'set_address', address });
         dispatch({
           type: 'change_form_value',
           attribute: 'phone',
@@ -458,18 +692,24 @@ export default ({ navigation }: ScreenProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (!state.shopping_cart_snapshot.length) {
+      if (
+        !state.shopping_cart_snapshot.length &&
+        state.view === ShoppingCartView.SHOPPING_CART
+      ) {
         setTimeout(() => {
           navigation.goBack();
         }, 1000);
       }
-    }, [state.shopping_cart_snapshot])
+    }, [state.shopping_cart_snapshot, state.view])
   );
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
-        if (!state.selected_store) {
+        if (
+          !state.selected_store ||
+          state.view !== ShoppingCartView.SHOPPING_CART
+        ) {
           return null;
         }
 
@@ -486,9 +726,87 @@ export default ({ navigation }: ScreenProps) => {
         );
       },
     });
-  }, [state.selected_store]);
+  }, [state.selected_store, state.view]);
+
+  useEffect(() => {
+    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
+  }, []);
+
+  useEffect(() => {
+    if (route.params?.pay) {
+      createOrder();
+    }
+  }, [route.params?.pay]);
 
   // render logic
+  if (state.view === ShoppingCartView.ORDER_CREATED) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.white,
+        }}
+      >
+        <CheckBlueThinImage />
+        <Text
+          level={1}
+          weight="bold"
+          style={{ marginTop: 25, marginBottom: 10 }}
+        >
+          ¡Listo!
+        </Text>
+        <Text
+          level={5}
+          style={{
+            lineHeight: 23,
+            textAlign: 'center',
+            marginHorizontal: 20,
+          }}
+        >
+          <Text level={5} weight="bold">
+            {state.last_ordered_store?.name}
+          </Text>
+          {` `}recibió tu pedido, te contactará en un instante.
+        </Text>
+        {shoppingCartCache.isEmpty() ? (
+          <Button
+            type="link"
+            title="Ver pedidos"
+            style={{ marginTop: 50 }}
+            onPress={() => null}
+          />
+        ) : (
+          <Button
+            type="link"
+            title="Seguir en carro"
+            style={{ marginTop: 50 }}
+            onPress={pressContinueInShoppingCartHandler}
+          />
+        )}
+
+        <View
+          style={[
+            {
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              paddingBottom: insets.bottom,
+            },
+            globalStyles.withMargin,
+          ]}
+        >
+          <Button
+            title="Ir a inicio"
+            style={globalStyles.withMainActionAir}
+            onPress={goToHomeHandler}
+          />
+        </View>
+      </View>
+    );
+  }
 
   // not data
   if (!state.shopping_cart_snapshot.length) {
@@ -525,9 +843,9 @@ export default ({ navigation }: ScreenProps) => {
     if (match) {
       mainAction = (
         <Button
-          title={`Ir a pagar ${match.store.name}`}
+          title={`Hacer pedido · ${match.store.name}`}
           style={globalStyles.withMainActionAir}
-          onPress={goToPayHandler}
+          onPress={pressMakeOrderHandler}
         />
       );
     }
@@ -816,6 +1134,7 @@ export default ({ navigation }: ScreenProps) => {
           globalStyles.withMargin,
         ]}
       >
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         {mainAction}
       </View>
       {state.phone_modal && (
@@ -833,6 +1152,37 @@ export default ({ navigation }: ScreenProps) => {
           onCancel={confirmDialogCancelHandler}
         />
       )}
+      {!!state.disabled_store_dialog && (
+        <InfoDialog
+          title="Tienda cerrada"
+          message={`${state.disabled_store_dialog} ya no está aceptando pedidos.`}
+          onOk={disabledStoreDialogOkHandler}
+        />
+      )}
+      {!!state.closed_store_dialog && (
+        <InfoDialog
+          title="Tienda cerrada momentáneamente"
+          message={`${state.closed_store_dialog} ya no está aceptando pedidos. Revisa su horario e intenta más tarde.`}
+          onOk={closedStoreDialogOkHandler}
+        />
+      )}
+      {!!state.unavailable_products_dialog && (
+        <UnavailableProductsDialog
+          products={state.unavailable_products_dialog.products}
+          onOk={unavailableProductsDialogOkHandler}
+          onCancel={unavailableProductsDialogCancelHandler}
+        />
+      )}
+      {state.unexpected_error_dialog && (
+        <ConfirmDialog
+          title="No pudimos hacer el pedido"
+          message="Ocurrió un error en este instante, por favor reintente."
+          okText="Reintentar"
+          onOk={unexpectedErrorDialogOkHandler}
+          onCancel={unexpectedErrorDialogCancelHandler}
+        />
+      )}
+      <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );
 };

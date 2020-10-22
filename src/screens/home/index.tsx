@@ -47,7 +47,6 @@ import {
   User,
   AddressInfo,
   Place,
-  DispatchProvider,
   SearchResponse,
   Product,
 } from '../../types';
@@ -424,10 +423,7 @@ export default ({ navigation }: ScreenProps) => {
               dispatch({
                 type: 'set_in_progress_qty',
                 qty: data.orders.reduce((qty, order) => {
-                  if (
-                    order.dispatch_provider_id === DispatchProvider.OWNER &&
-                    order.customer.id === data.user
-                  ) {
+                  if (order.customer.id === data.user) {
                     return qty + 1;
                   }
                   return qty;

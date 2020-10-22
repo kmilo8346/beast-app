@@ -10,7 +10,7 @@ import * as utils from '../lib/utils';
 // cache
 import PersistedCache from './persisted-cache';
 // types
-import { Order, OrderStatus } from '../types';
+import { Order } from '../types';
 import { capture } from '../lib/sentry';
 
 const prefix = '[orders in progress cache]';
@@ -74,11 +74,6 @@ export default class OrdersInProgressCache extends PersistedCache<
         new Date(b.updated_at).valueOf() - new Date(a.updated_at).valueOf()
     );
     const mark = new Date(newOrders[0].updated_at).toISOString();
-    newOrders = newOrders.filter(
-      (order) =>
-        order.status === OrderStatus.CREATED ||
-        order.status === OrderStatus.CONFIRMED
-    );
     await this.updateData({
       user: this.user,
       water_mark: mark,

@@ -2,12 +2,12 @@ import React from 'react';
 import { View, Image } from 'react-native';
 
 // components
-import Text from '../../../../components/text';
+import Text from '../../../../../../components/text';
 // libs
-import numberFormatter from '../../../../lib/formatters/number-formatter';
-import cloudinary from '../../../../lib/cloudinary';
+import numberFormatter from '../../../../../../lib/formatters/number-formatter';
+import cloudinary from '../../../../../../lib/cloudinary';
 // types
-import { Product } from '../../../../types';
+import { Product } from '../../../../../../types';
 
 interface ComponentProps {
   data: Product;

@@ -73,7 +73,6 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
           comunicarse.
         </Text>
         <Input
-          autoFocus
           returnKeyType="done"
           keyboardType="phone-pad"
           placeholder="Número de teléfono móvil"

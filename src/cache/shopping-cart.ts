@@ -4,6 +4,7 @@ import PersistedCache from './persisted-cache';
 import { Item, Product, Store } from '../types';
 
 // instances outside
+
 export const getSnapshot = (data?: ShoppingCart): ShoppingCartSnapshot => {
   const shoppingCart = data || {};
 

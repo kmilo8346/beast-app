@@ -101,6 +101,7 @@ export default ({ navigation }: BootProps) => {
         },
       });
       await userCache.setData(user);
+
       printUserInfo();
       navigation.replace('MainRootStack');
     } catch (error) {
@@ -121,7 +122,6 @@ export default ({ navigation }: BootProps) => {
     if (!authUser) {
       throw new Error(`${prefix} Auth user must be defined to boot beast app`);
     }
-    await userCache.load();
     fetchUser(authUser);
   };
 

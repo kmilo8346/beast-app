@@ -1,127 +1,51 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-
 // components
 import KeyboardAvoidingView from '../components/keyboard-avoiding-view';
 // navigation
 import commonStackOptions from './common-stack-options';
 // screens
 import {
+  MyStoreScreen,
   SignInScreen,
-  SetPhoneScreen,
-  SellerBootScreen,
-  SelectOrCreateStoreScreen,
-  SetStoreInfoScreen,
-  UpdateStoreInfoScreen,
-  SetStoreDeliveryInfoScreen,
-  MercadoPagoSignInScreen,
-  SellerDashboardScreen,
-  CreateOrUpdateProductScreen,
-  MyProductsScreen,
-  MySalesScreen,
-  OwnerSaleDetailsScreen,
-  OwnerRRSSSaleDetailsScreen,
-  StockVerificationScreen,
-  ChargeThroughRRSSScreen,
-  RRSSLinkCreatedScreen,
+  UpsertStoreScreen,
+  UpsertProductScreen,
+  SalesScreen,
 } from '../screens';
 
-const SellerStack = createStackNavigator();
+const Stack = createStackNavigator();
 
 export default () => {
   // render logic
   return (
     <KeyboardAvoidingView>
-      <SellerStack.Navigator
-        screenOptions={commonStackOptions}
-        initialRouteName="SellerBoot"
-      >
-        <SellerStack.Screen
-          name="SellerBoot"
-          component={SellerBootScreen}
-          options={{ title: '' }}
+      <Stack.Navigator screenOptions={commonStackOptions}>
+        <Stack.Screen
+          name="MyStore"
+          component={MyStoreScreen}
+          options={{ headerShown: false }}
         />
-        <SellerStack.Screen
+        <Stack.Screen
           name="SignIn"
           component={SignInScreen}
           options={{ title: '' }}
         />
-        <SellerStack.Screen
-          name="SetPhone"
-          component={SetPhoneScreen}
+        <Stack.Screen
+          name="UpsertStore"
+          component={UpsertStoreScreen}
           options={{ title: '' }}
         />
-        <SellerStack.Screen
-          name="SelectOrCreateStore"
-          component={SelectOrCreateStoreScreen}
-          options={{ title: 'Mis tiendas' }}
-        />
-        <SellerStack.Screen
-          name="SetStoreInfo"
-          component={SetStoreInfoScreen}
+        <Stack.Screen
+          name="UpsertProduct"
+          component={UpsertProductScreen}
           options={{ title: '' }}
         />
-        <SellerStack.Screen
-          name="SetStoreDeliveryInfo"
-          component={SetStoreDeliveryInfoScreen}
-          options={{ title: '' }}
+        <Stack.Screen
+          name="Sales"
+          component={SalesScreen}
+          options={{ title: 'Mis Ventas' }}
         />
-        <SellerStack.Screen
-          name="MercadoPagoSignIn"
-          component={MercadoPagoSignInScreen}
-          options={{ title: '' }}
-        />
-        <SellerStack.Screen
-          name="SellerDashboard"
-          component={SellerDashboardScreen}
-          options={{ headerShown: false }}
-        />
-        <SellerStack.Screen
-          name="UpdateStoreInfo"
-          component={UpdateStoreInfoScreen}
-          options={{ title: 'Información de tienda' }}
-        />
-        <SellerStack.Screen
-          name="CreateOrUpdateProduct"
-          component={CreateOrUpdateProductScreen}
-          options={{ headerTitle: '' }}
-        />
-        <SellerStack.Screen
-          name="MyProducts"
-          component={MyProductsScreen}
-          options={{ title: 'Mis productos' }}
-        />
-        <SellerStack.Screen
-          name="MySales"
-          component={MySalesScreen}
-          options={{ title: 'Ventas' }}
-        />
-        <SellerStack.Screen
-          name="OwnerSaleDetails"
-          component={OwnerSaleDetailsScreen}
-          options={{ title: 'Detalle de venta' }}
-        />
-        <SellerStack.Screen
-          name="StockVerificaton"
-          component={StockVerificationScreen}
-          options={{ title: 'Stock' }}
-        />
-        <SellerStack.Screen
-          name="OwnerRRSSSaleDetails"
-          component={OwnerRRSSSaleDetailsScreen}
-          options={{ title: 'Detalle de venta' }}
-        />
-        <SellerStack.Screen
-          name="ChargeThroughRRSS"
-          component={ChargeThroughRRSSScreen}
-          options={{ title: '' }}
-        />
-        <SellerStack.Screen
-          name="RRSSLinkCreated"
-          component={RRSSLinkCreatedScreen}
-          options={{ title: '' }}
-        />
-      </SellerStack.Navigator>
+      </Stack.Navigator>
     </KeyboardAvoidingView>
   );
 };
