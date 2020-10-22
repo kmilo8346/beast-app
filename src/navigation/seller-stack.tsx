@@ -11,6 +11,7 @@ import {
   UpsertStoreScreen,
   UpsertProductScreen,
   SalesScreen,
+  SaleDetailsScreen,
 } from '../screens';
 
 const Stack = createStackNavigator();
@@ -44,6 +45,11 @@ export default () => {
           name="Sales"
           component={SalesScreen}
           options={{ title: 'Mis Ventas' }}
+        />
+        <Stack.Screen
+          name="SaleDetails"
+          component={SaleDetailsScreen}
+          options={{ title: 'Detalle de venta' }}
         />
       </Stack.Navigator>
     </KeyboardAvoidingView>

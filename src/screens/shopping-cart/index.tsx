@@ -152,6 +152,10 @@ type SetUnexpectedErrorDialogAction = {
   type: 'set_unexpected_error_dialog';
   unexpected_error_dialog: boolean;
 };
+type SetMakeOrderDialogAction = {
+  type: 'set_make_order_dialog';
+  make_order_dialog: boolean;
+};
 type Action =
   | SetViewAction
   | SetShoppingCartSnapshotAction
@@ -170,7 +174,8 @@ type Action =
   | SetDisabledStoreDialogAction
   | SetClosedStoreDialogAction
   | SetUnavailableProductsDialogAction
-  | SetUnexpectedErrorDialogAction;
+  | SetUnexpectedErrorDialogAction
+  | SetMakeOrderDialogAction;
 type State = {
   view: ShoppingCartView;
   shopping_cart_snapshot: ShoppingCartSnapshot;
@@ -191,6 +196,7 @@ type State = {
   closed_store_dialog: string;
   unavailable_products_dialog?: { store: Store; products: Product[] };
   unexpected_error_dialog: boolean;
+  make_order_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -318,6 +324,11 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         unexpected_error_dialog: action.unexpected_error_dialog,
       };
+    case 'set_make_order_dialog':
+      return {
+        ...state,
+        make_order_dialog: action.make_order_dialog,
+      };
     default:
       return state;
   }
@@ -344,6 +355,7 @@ export default ({ navigation, route }: ScreenProps) => {
       disabled_store_dialog: '',
       closed_store_dialog: '',
       unexpected_error_dialog: false,
+      make_order_dialog: false,
     },
     (initialState) => {
       const snapshot = getSnapshot(shoppingCartCache.getData());
@@ -526,7 +538,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
       return;
     }
-    createOrder();
+    dispatch({ type: 'set_make_order_dialog', make_order_dialog: true });
   };
 
   const pressSetPhoneHandler = (event: GestureResponderEvent) => {
@@ -659,6 +671,22 @@ export default ({ navigation, route }: ScreenProps) => {
     navigation.navigate('Home');
   };
 
+  const makeOrderDialogOkHandler = () => {
+    dispatch({ type: 'set_make_order_dialog', make_order_dialog: false });
+    setTimeout(() => {
+      createOrder();
+    }, 500);
+  };
+
+  const makeOrderDialogCancelHandler = () => {
+    dispatch({ type: 'set_make_order_dialog', make_order_dialog: false });
+  };
+
+  const pressSeeOrdersHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('Orders');
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
@@ -734,7 +762,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useEffect(() => {
     if (route.params?.pay) {
-      createOrder();
+      dispatch({ type: 'set_make_order_dialog', make_order_dialog: true });
     }
   }, [route.params?.pay]);
 
@@ -775,7 +803,7 @@ export default ({ navigation, route }: ScreenProps) => {
             type="link"
             title="Ver pedidos"
             style={{ marginTop: 50 }}
-            onPress={() => null}
+            onPress={pressSeeOrdersHandler}
           />
         ) : (
           <Button
@@ -1180,6 +1208,15 @@ export default ({ navigation, route }: ScreenProps) => {
           okText="Reintentar"
           onOk={unexpectedErrorDialogOkHandler}
           onCancel={unexpectedErrorDialogCancelHandler}
+        />
+      )}
+      {state.make_order_dialog && (
+        <ConfirmDialog
+          title="¿Está seguro de realizar pedido?"
+          message="Realizar pedido no tiene costo, le enviaremos el detalle de tu pedido al vendedor de forma inmediata."
+          okText="Si, continuar"
+          onOk={makeOrderDialogOkHandler}
+          onCancel={makeOrderDialogCancelHandler}
         />
       )}
       <LoadingOverlay ref={loadingOverlayRef} />

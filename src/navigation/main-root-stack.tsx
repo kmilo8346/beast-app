@@ -6,7 +6,7 @@ import MainTabScreen from './main-tab';
 import ShoppingCartStackScreen from './shopping-cart-stack';
 import commonStackOptions from './common-stack-options';
 // screens
-import { SellerMenuScreen } from '../screens';
+import { MyStoreMenu } from '../screens';
 
 const MainRootStack = createStackNavigator();
 
@@ -25,9 +25,9 @@ export default () => {
         options={{ headerShown: false }}
       />
       <MainRootStack.Screen
-        name="SellerMenu"
-        component={SellerMenuScreen}
-        options={{ title: 'Menu' }}
+        name="MyStoreMenu"
+        component={MyStoreMenu}
+        options={{ title: '' }}
       />
     </MainRootStack.Navigator>
   );

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Image, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios, { CancelTokenSource } from 'axios';
+import * as Linking from 'expo-linking';
+import * as IntentLauncher from 'expo-intent-launcher';
+import Constants from 'expo-constants';
 
+// screen components
+import ConfirmDialog from '../../../screens/components/dialogs/confirm-dialog';
 // components
 import Touchable from '../../touchable';
 import Icon from '../../icon';
@@ -79,12 +84,17 @@ export default ({
   path,
   errors,
   onChange = () => null,
-  onPermisionNotGranted = () => null,
+  onPermisionNotGranted,
   onError = () => null,
 }: InputImagesProps) => {
   // state
   const [images, setImages] = useState<InputImage[]>(fromValue(value));
   const [selector, setSelector] = useState(false);
+  const [permissionCameraDialog, setPermissionCameraDialog] = useState(false);
+  const [
+    permissionImageLibraryDialog,
+    setPermissionImageLibraryDialog,
+  ] = useState(false);
 
   // event handlers
   const addImage = (uri: string) => {
@@ -173,10 +183,13 @@ export default ({
   const pickImageFromImageLibrary = async () => {
     try {
       if (Platform.OS === 'ios') {
-        // Permissions.CAMERA_ROLL on iOS 10 is required
         const permisionResponse = await ImagePicker.requestCameraRollPermissionsAsync();
         if (permisionResponse.status !== 'granted') {
-          onPermisionNotGranted();
+          if (onPermisionNotGranted) {
+            onPermisionNotGranted();
+          } else {
+            setPermissionImageLibraryDialog(true);
+          }
           return;
         }
       }
@@ -201,7 +214,11 @@ export default ({
     try {
       const cameraPermisionResponse = await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermisionResponse.status !== 'granted') {
-        onPermisionNotGranted();
+        if (onPermisionNotGranted) {
+          onPermisionNotGranted();
+        } else {
+          setPermissionCameraDialog(true);
+        }
         return;
       }
 
@@ -245,6 +262,52 @@ export default ({
 
   const pressAddImageHandler = () => {
     setSelector(true);
+  };
+
+  const permissionCameraDialogOkHandler = () => {
+    setPermissionCameraDialog(false);
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else if (Platform.OS === 'android') {
+      let pkg = '';
+      if (Constants.appOwnership === 'expo') {
+        pkg = 'host.exp.exponent';
+      } else if (Constants.appOwnership === 'standalone') {
+        pkg = Constants.manifest.android.package;
+      }
+
+      IntentLauncher.startActivityAsync(
+        IntentLauncher.ACTION_APPLICATION_DETAILS_SETTINGS,
+        { data: `package:${pkg}` }
+      );
+    }
+  };
+
+  const permissionCameraDialogCancelHandler = () => {
+    setPermissionCameraDialog(false);
+  };
+
+  const permissionImageLibraryDialogOkHandler = () => {
+    setPermissionImageLibraryDialog(false);
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else if (Platform.OS === 'android') {
+      let pkg = '';
+      if (Constants.appOwnership === 'expo') {
+        pkg = 'host.exp.exponent';
+      } else if (Constants.appOwnership === 'standalone') {
+        pkg = Constants.manifest.android.package;
+      }
+
+      IntentLauncher.startActivityAsync(
+        IntentLauncher.ACTION_APPLICATION_DETAILS_SETTINGS,
+        { data: `package:${pkg}` }
+      );
+    }
+  };
+
+  const permissionImageLibraryDialogCancelHandler = () => {
+    setPermissionImageLibraryDialog(false);
   };
 
   useEffect(() => {
@@ -377,6 +440,24 @@ export default ({
           ]}
           onRequestClose={selectorRequestCloseHandler}
           onCallAction={selectorCallActionHandler}
+        />
+      )}
+      {permissionCameraDialog && (
+        <ConfirmDialog
+          title="No se puede acceder a la cámara"
+          message="Autorice el acceso a la cámara para poder tomar fotos cuando quiera."
+          okText="Autorizar"
+          onOk={permissionCameraDialogOkHandler}
+          onCancel={permissionCameraDialogCancelHandler}
+        />
+      )}
+      {permissionImageLibraryDialog && (
+        <ConfirmDialog
+          title="No se puede acceder a las fotos"
+          message="Autorice el acceso a las fotos para elegir de su biblioteca de fotos."
+          okText="Autorizar"
+          onOk={permissionImageLibraryDialogOkHandler}
+          onCancel={permissionImageLibraryDialogCancelHandler}
         />
       )}
     </View>

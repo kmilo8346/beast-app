@@ -35,7 +35,7 @@ export default ({ store, product, style }: ComponentProps) => {
 
   // event handlers
   const changeQtyHandler = (qty: number) => {
-    shoppingCartCache.set(store, product, qty);
+    shoppingCartCache.set(store as Store, product, qty);
   };
 
   const pressDescriptionHandler = (event: GestureResponderEvent) => {
@@ -75,25 +75,32 @@ export default ({ store, product, style }: ComponentProps) => {
         </Text>
       </Text>
 
-      <Touchable
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginBottom: 5,
-        }}
-        onPress={pressDescriptionHandler}
-      >
-        <Text level={6} weight="normal">
-          Descripción
-        </Text>
-        {expanded ? <Icon name="chevron-up" /> : <Icon name="chevron-down" />}
-      </Touchable>
-      {expanded && (
-        <View style={{ marginHorizontal: 10, marginBottom: 15 }}>
-          <Text level={7}>{product.description}</Text>
-        </View>
+      {!!product.description && (
+        <>
+          <Touchable
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+            onPress={pressDescriptionHandler}
+          >
+            <Text level={6} weight="normal">
+              Descripción
+            </Text>
+            {expanded ? (
+              <Icon name="chevron-up" />
+            ) : (
+              <Icon name="chevron-down" />
+            )}
+          </Touchable>
+          {expanded && (
+            <View style={{ marginHorizontal: 10, marginBottom: 15 }}>
+              <Text level={7}>{product.description}</Text>
+            </View>
+          )}
+        </>
       )}
-      <View style={{ minHeight: 45 }}>
+      <View style={{ minHeight: 45, marginTop: 5 }}>
         {!!store && typeof qty !== 'undefined' && (
           <NumberInput
             value={qty}

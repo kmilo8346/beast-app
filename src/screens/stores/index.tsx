@@ -140,6 +140,7 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'reset' });
       const response = await fetch({
         location: (address as Place).geometry.location,
+        enabled: true,
       });
       dispatch({
         type: 'set_stores',
@@ -162,6 +163,7 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'set_refreshing', refreshing: true });
       const response = await fetch({
         location: (address as Place).geometry.location,
+        enabled: true,
       });
       dispatch({
         type: 'set_stores',

@@ -51,7 +51,7 @@ export default ({
     );
   }
   return (
-    <View style={[{ flexDirection: 'row' }, style]}>
+    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
       <View
         style={{
           borderWidth: 2,
@@ -60,6 +60,7 @@ export default ({
           justifyContent: 'center',
           alignItems: 'center',
           minWidth: 30,
+          minHeight: 38,
         }}
       >
         <Text level={6} weight="bold">

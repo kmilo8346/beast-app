@@ -215,6 +215,7 @@ export default ({ navigation }: ScreenProps) => {
       const response = await fetch({
         enabled: true,
         location: (address as Place).geometry.location,
+        store_enabled: true,
       });
       dispatch({
         type: 'set_products',
@@ -238,6 +239,7 @@ export default ({ navigation }: ScreenProps) => {
       const response = await fetch({
         enabled: true,
         location: (address as Place).geometry.location,
+        store_enabled: true,
       });
       dispatch({
         type: 'set_products',

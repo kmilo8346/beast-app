@@ -82,6 +82,9 @@ type SetOpeningHoursModalAction = {
   type: 'set_opening_hours_modal';
   opening_hours_modal: boolean;
 };
+type TooggleExpandedAction = {
+  type: 'toogle_expanded';
+};
 type Action =
   | ResetAction
   | SetProductsAction
@@ -91,7 +94,8 @@ type Action =
   | SetRefreshingAction
   | SetRefreshingAction
   | SetAmountAction
-  | SetOpeningHoursModalAction;
+  | SetOpeningHoursModalAction
+  | TooggleExpandedAction;
 type State = {
   products?: SearchResponse<Product>;
   error?: Error;
@@ -100,6 +104,7 @@ type State = {
   refreshing: boolean;
   amount?: number;
   opening_hours_modal: boolean;
+  expanded: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -123,6 +128,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, amount: action.amount };
     case 'set_opening_hours_modal':
       return { ...state, opening_hours_modal: action.opening_hours_modal };
+    case 'toogle_expanded':
+      return { ...state, expanded: !state.expanded };
     default:
       return state;
   }
@@ -144,6 +151,7 @@ export default ({ navigation, route }: ScreenProps) => {
     fetching_more: false,
     refreshing: false,
     opening_hours_modal: false,
+    expanded: false,
   });
 
   // event handlers
@@ -277,6 +285,11 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const closeOpeningHoursModal = () => {
     dispatch({ type: 'set_opening_hours_modal', opening_hours_modal: false });
+  };
+
+  const pressDescriptionHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'toogle_expanded' });
   };
 
   useEffect(() => {
@@ -417,13 +430,40 @@ export default ({ navigation, route }: ScreenProps) => {
                   weight="bold"
                   numberOfLines={1}
                   ellipsizeMode="tail"
-                  style={{ flex: 1, marginBottom: 15 }}
+                  style={{ flex: 1 }}
                 >
                   {store.name}
                 </Text>
+                {!!store.description && (
+                  <>
+                    <Touchable
+                      style={{
+                        marginTop: 5,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}
+                      onPress={pressDescriptionHandler}
+                    >
+                      <Text level={6} weight="normal">
+                        Descripción
+                      </Text>
+                      {state.expanded ? (
+                        <Icon name="chevron-up" />
+                      ) : (
+                        <Icon name="chevron-down" />
+                      )}
+                    </Touchable>
+                    {state.expanded && (
+                      <View style={{ marginHorizontal: 10, marginBottom: 10 }}>
+                        <Text level={7}>{store.description}</Text>
+                      </View>
+                    )}
+                  </>
+                )}
 
                 <View
                   style={{
+                    marginTop: 10,
                     flexDirection: 'row',
                     alignItems: 'center',
                     marginBottom: 3,
@@ -471,8 +511,8 @@ export default ({ navigation, route }: ScreenProps) => {
                     {state.opening_hours_modal ? (
                       <Icon name="chevron-up" />
                     ) : (
-                        <Icon name="chevron-down" />
-                      )}
+                      <Icon name="chevron-down" />
+                    )}
                   </View>
                 </Touchable>
 
@@ -538,7 +578,6 @@ export default ({ navigation, route }: ScreenProps) => {
       </View>
       {state.contact && (
         <ActionSheetContact
-          whatsapp_introduction="Hola!👋. Escribo desde *Shop Shop* para consultarle algo 😃"
           phone={store.phone}
           onRequestClose={contactStoreCloseHandler}
         />
