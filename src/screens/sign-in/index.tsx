@@ -95,8 +95,14 @@ export default ({ navigation, route }: ScreenProps) => {
   const insets = useSafeAreaInsets();
 
   // event handlers
-  const removeAnonymously = async (anonymously: firebase.User | null) => {
+  const removeAnonymously = async (
+    anonymously: firebase.User | null,
+    newUser: firebase.User
+  ) => {
     try {
+      if (anonymously?.uid === newUser.uid) {
+        return;
+      }
       if (anonymously) {
         await Promise.all([
           anonymously.delete(),
@@ -145,7 +151,7 @@ export default ({ navigation, route }: ScreenProps) => {
       }
 
       // removing anonymously user
-      removeAnonymously(prevAuthUser);
+      removeAnonymously(prevAuthUser, result.user);
       // linking current auth user with credential to link
       if (info.credentialToLink) {
         await result.user.linkWithCredential(info.credentialToLink);
