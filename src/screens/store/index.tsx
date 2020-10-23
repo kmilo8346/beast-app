@@ -70,6 +70,10 @@ type SetFetchingMoreAction = {
   type: 'set_fetching_more';
   fetching_more: boolean;
 };
+type SetFetchMoreErrorAction = {
+  type: 'set_fetch_more_error';
+  fetch_more_error?: Error;
+};
 type SetRefreshingAction = {
   type: 'set_refreshing';
   refreshing: boolean;
@@ -91,6 +95,7 @@ type Action =
   | SetErrorAction
   | SetContactAction
   | SetFetchingMoreAction
+  | SetFetchMoreErrorAction
   | SetRefreshingAction
   | SetRefreshingAction
   | SetAmountAction
@@ -101,6 +106,7 @@ type State = {
   error?: Error;
   contact: boolean;
   fetching_more: boolean;
+  fetch_more_error?: Error;
   refreshing: boolean;
   amount?: number;
   opening_hours_modal: boolean;
@@ -122,6 +128,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, contact: action.contact };
     case 'set_fetching_more':
       return { ...state, fetching_more: action.fetching_more };
+    case 'set_fetch_more_error':
+      return { ...state, fetch_more_error: action.fetch_more_error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
     case 'set_amount':
@@ -214,8 +222,6 @@ export default ({ navigation, route }: ScreenProps) => {
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Refresh error', error);
-
-        dispatch({ type: 'set_error', error });
       }
     } finally {
       dispatch({ type: 'set_refreshing', refreshing: false });
@@ -227,6 +233,7 @@ export default ({ navigation, route }: ScreenProps) => {
       throw new Error(`${prefix} To fetch more must be state products`);
     }
     try {
+      dispatch({ type: 'set_fetch_more_error', fetch_more_error: undefined });
       dispatch({ type: 'set_fetching_more', fetching_more: true });
       const products = await fetch(
         state.products.filters,
@@ -245,7 +252,7 @@ export default ({ navigation, route }: ScreenProps) => {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Fetch more error', error);
 
-        dispatch({ type: 'set_error', error });
+        dispatch({ type: 'set_fetch_more_error', fetch_more_error: error });
       }
     } finally {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
@@ -262,11 +269,12 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const retryHandler = () => {
-    if (!state.products) {
-      load();
-    } else {
-      fetchMore();
-    }
+    load();
+  };
+
+  const retryFetchMoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    fetchMore();
   };
 
   const pressProductHandler = useCallback((product: Product) => {
@@ -558,7 +566,36 @@ export default ({ navigation, route }: ScreenProps) => {
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        ListFooterComponent={<View style={globalStyles.withScreenAir} />}
+        ListFooterComponent={
+          <View
+            style={[
+              {
+                alignItems: 'center',
+                height: 60,
+              },
+              globalStyles.withScreenAir,
+            ]}
+          >
+            {state.fetching_more && (
+              <ActivityIndicator style={{ marginTop: 20 }} />
+            )}
+            {!!state.fetch_more_error && (
+              <View style={{ flexDirection: 'row', marginTop: 20 }}>
+                <Text level={6}>No se pudo cargar más.</Text>
+                <Button
+                  title={
+                    <Text level={6} color={colors.blue} weight="bold">
+                      Reintentar
+                    </Text>
+                  }
+                  type="link"
+                  style={{ paddingHorizontal: 5 }}
+                  onPress={retryFetchMoreHandler}
+                />
+              </View>
+            )}
+          </View>
+        }
         onRefresh={refresh}
         onEndReached={() => {
           if (state.products && state.products.from < state.products.total) {

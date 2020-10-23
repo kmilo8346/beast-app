@@ -5,7 +5,12 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import { View, FlatList, GestureResponderEvent } from 'react-native';
+import {
+  View,
+  FlatList,
+  GestureResponderEvent,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
@@ -86,6 +91,10 @@ type SetFetchingMoreAction = {
   type: 'set_fetching_more';
   fetching_more: boolean;
 };
+type SetFetchMoreErrorAction = {
+  type: 'set_fetch_more_error';
+  fetch_more_error?: Error;
+};
 type SetOrdersInProgressCacheAction = {
   type: 'set_orders_in_progress_cache';
   cache: OrdersInProgressCache;
@@ -110,6 +119,7 @@ type Action =
   | SetErrorAction
   | SetRefreshingAction
   | SetFetchingMoreAction
+  | SetFetchMoreErrorAction
   | SetOrdersInProgressCacheAction
   | SetInProgressQtyAction
   | SetAddressModalAction
@@ -121,6 +131,7 @@ type State = {
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
+  fetch_more_error?: Error;
   orders_in_progress_cache?: OrdersInProgressCache;
   in_progress_qty?: number;
   address_modal: boolean;
@@ -140,6 +151,10 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, error: action.error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
+    case 'set_fetching_more':
+      return { ...state, fetching_more: action.fetching_more };
+    case 'set_fetch_more_error':
+      return { ...state, fetch_more_error: action.fetch_more_error };
     case 'set_orders_in_progress_cache':
       return { ...state, orders_in_progress_cache: action.cache };
     case 'set_in_progress_qty':
@@ -251,8 +266,6 @@ export default ({ navigation }: ScreenProps) => {
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Refresh error', error);
-
-        dispatch({ type: 'set_error', error });
       }
     } finally {
       dispatch({ type: 'set_refreshing', refreshing: false });
@@ -264,6 +277,7 @@ export default ({ navigation }: ScreenProps) => {
       throw new Error(`${prefix} To fetch more must be state products`);
     }
     try {
+      dispatch({ type: 'set_fetch_more_error', fetch_more_error: undefined });
       dispatch({ type: 'set_fetching_more', fetching_more: true });
       const products = await fetch(
         state.products.filters,
@@ -282,7 +296,7 @@ export default ({ navigation }: ScreenProps) => {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Fetch more error', error);
 
-        dispatch({ type: 'set_error', error });
+        dispatch({ type: 'set_fetch_more_error', fetch_more_error: error });
       }
     } finally {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
@@ -365,11 +379,12 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const retryHandler = () => {
-    if (state.products) {
-      load();
-    } else {
-      fetchMore();
-    }
+    load();
+  };
+
+  const retryFetchMoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    fetchMore();
   };
 
   const confirmDialogOkHandler = () => {
@@ -635,7 +650,36 @@ export default ({ navigation }: ScreenProps) => {
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        ListFooterComponent={<View style={globalStyles.withScreenAir} />}
+        ListFooterComponent={
+          <View
+            style={[
+              {
+                alignItems: 'center',
+                height: 60,
+              },
+              globalStyles.withScreenAir,
+            ]}
+          >
+            {state.fetching_more && (
+              <ActivityIndicator style={{ marginTop: 20 }} />
+            )}
+            {!!state.fetch_more_error && (
+              <View style={{ flexDirection: 'row', marginTop: 20 }}>
+                <Text level={6}>No se pudo cargar más.</Text>
+                <Button
+                  title={
+                    <Text level={6} color={colors.blue} weight="bold">
+                      Reintentar
+                    </Text>
+                  }
+                  type="link"
+                  style={{ paddingHorizontal: 5 }}
+                  onPress={retryFetchMoreHandler}
+                />
+              </View>
+            )}
+          </View>
+        }
         onRefresh={refresh}
         onEndReached={() => {
           if (state.products && state.products.from < state.products.total) {
