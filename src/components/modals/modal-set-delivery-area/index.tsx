@@ -66,7 +66,7 @@ const availableRadius = [
 const toCircle = (center: Place, radius: string): Circle => {
   return {
     type: 'circle',
-    coordinates: [center.geometry.location.lng, center.geometry.location.lat],
+    coordinates: [center.location.lon, center.location.lat],
     radius,
   };
 };

@@ -229,7 +229,7 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'reset' });
       const response = await fetch({
         enabled: true,
-        location: (address as Place).geometry.location,
+        location: (address as Place).location,
         store_enabled: true,
       });
       dispatch({
@@ -253,7 +253,7 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'set_refreshing', refreshing: true });
       const response = await fetch({
         enabled: true,
-        location: (address as Place).geometry.location,
+        location: (address as Place).location,
         store_enabled: true,
       });
       dispatch({

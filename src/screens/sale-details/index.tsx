@@ -81,7 +81,7 @@ export default ({ route }: ScreenProps) => {
     Linking.openURL(
       utils.createUrl(`${Constants.manifest.extra.GOOGLE_MAPS_URL}/search/`, {
         api: 1,
-        query: `${order.transaction.delivery_address.geometry.location.lat},${order.transaction.delivery_address.geometry.location.lng}`,
+        query: `${order.transaction.delivery_address.location.lat},${order.transaction.delivery_address.location.lon}`,
         query_place_id: order.transaction.delivery_address.id,
       })
     );
@@ -103,29 +103,29 @@ export default ({ route }: ScreenProps) => {
       map_image_url: utils.createUrl(
         `${Constants.manifest.extra.GOOGLE_MAPS_API_URL}/staticmap`,
         {
-          center: `${order.transaction.delivery_address.geometry.location.lat},${order.transaction.delivery_address.geometry.location.lng}`,
+          center: `${order.transaction.delivery_address.location.lat},${order.transaction.delivery_address.location.lon}`,
           zoom: 13,
           size: '140x105',
           scale: 2,
           format: 'png',
-          markers: `icon:${Constants.manifest.extra.GOOGLE_MAPS_CUSTOM_MARKER}|scale:2|${order.transaction.delivery_address.geometry.location.lat},${order.transaction.delivery_address.geometry.location.lng}`,
+          markers: `icon:${Constants.manifest.extra.GOOGLE_MAPS_CUSTOM_MARKER}|scale:2|${order.transaction.delivery_address.location.lat},${order.transaction.delivery_address.location.lon}`,
           key: Constants.manifest.extra.GOOGLE_MAPS_API_KEY,
         }
       ),
     });
   }, [
-    order.transaction.delivery_address.geometry.location.lat,
-    order.transaction.delivery_address.geometry.location.lng,
+    order.transaction.delivery_address.location.lat,
+    order.transaction.delivery_address.location.lon,
   ]);
 
   // render logic
   let addressText = `${order.transaction.delivery_address.route.short_name} ${order.transaction.delivery_address.street_number.short_name}`;
   let fullNameText = order.customer.first_name;
   const distance = utils.distance(
-    store.delivery_area.center.geometry.location.lat,
-    store.delivery_area.center.geometry.location.lng,
-    order.transaction.delivery_address.geometry.location.lat,
-    order.transaction.delivery_address.geometry.location.lng,
+    store.delivery_area.center.location.lat,
+    store.delivery_area.center.location.lon,
+    order.transaction.delivery_address.location.lat,
+    order.transaction.delivery_address.location.lon,
     'K'
   );
   let distanceText = `A ${numberFormatter.humanizeDistance(

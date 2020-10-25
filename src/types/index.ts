@@ -89,11 +89,6 @@ export interface AddressProp {
   long_name: string;
 }
 
-export interface Location {
-  lat: number;
-  lng: number;
-}
-
 export interface Place {
   id: string;
   url: string;
@@ -104,11 +99,9 @@ export interface Place {
   administrative_area_level_2: AddressProp;
   administrative_area_level_1: AddressProp;
   apartment: string;
-  geometry: {
-    location: {
-      lat: number;
-      lng: number;
-    };
+  location: {
+    lat: number;
+    lon: number;
   };
 }
 

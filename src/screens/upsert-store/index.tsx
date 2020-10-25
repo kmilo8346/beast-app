@@ -131,10 +131,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   geometry: {
                     type: 'circle',
                     radius: '50m',
-                    coordinates: [
-                      address.geometry.location.lng,
-                      address.geometry.location.lat,
-                    ],
+                    coordinates: [address.location.lon, address.location.lat],
                   },
                 }
               : undefined;
