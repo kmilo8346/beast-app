@@ -8,10 +8,11 @@ import commonStackOptions from './common-stack-options';
 import {
   MyStoreScreen,
   SignInScreen,
+  MyStoreMenu,
   UpsertStoreScreen,
   UpsertProductScreen,
-  SalesScreen,
-  SaleDetailsScreen,
+  SellerOrdersScreen,
+  SellerOrderDetailsScreen,
 } from '../screens';
 
 const Stack = createStackNavigator();
@@ -32,6 +33,11 @@ export default () => {
           options={{ title: '' }}
         />
         <Stack.Screen
+          name="MyStoreMenu"
+          component={MyStoreMenu}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
           name="UpsertStore"
           component={UpsertStoreScreen}
           options={{ title: '' }}
@@ -42,14 +48,14 @@ export default () => {
           options={{ title: '' }}
         />
         <Stack.Screen
-          name="Sales"
-          component={SalesScreen}
-          options={{ title: 'Mis Ventas' }}
+          name="SellerOrders"
+          component={SellerOrdersScreen}
+          options={{ title: 'Mis Órdenes' }}
         />
         <Stack.Screen
-          name="SaleDetails"
-          component={SaleDetailsScreen}
-          options={{ title: 'Detalle de venta' }}
+          name="SellerOrderDetails"
+          component={SellerOrderDetailsScreen}
+          options={{ title: 'Detalle de orden' }}
         />
       </Stack.Navigator>
     </KeyboardAvoidingView>

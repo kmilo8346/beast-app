@@ -1,6 +1,5 @@
-import React, { useCallback, useReducer, useEffect } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useFocusEffect } from '@react-navigation/native';
 import { TextStyle } from 'react-native';
 
 // navigation
@@ -10,111 +9,12 @@ import MenuStackScreen from './menu-stack';
 // components
 import Icon from '../components/icon';
 import Text from '../components/text';
-// cache
-import userCache from '../cache/user';
-import OrdersInProgressCache, {
-  OrdersInProgressCacheData,
-} from '../cache/orders-in-progress-cache';
-import ordersInProgressCacheManager from '../cache/orders-in-progress-cache-manager';
-// libs
-import * as utils from '../lib/utils';
-// types
-import { User } from '../types';
 // styles
 import colors from '../styles/colors';
 
-type SetUserAction = {
-  type: 'set_user';
-  user: User;
-};
-type SetOrdersInProgressCacheAction = {
-  type: 'set_orders_in_progress_cache';
-  cache: OrdersInProgressCache;
-};
-type SetSalesInProgressQtyAction = {
-  type: 'set_sales_in_progress_qty';
-  qty: number;
-};
-type Action =
-  | SetUserAction
-  | SetOrdersInProgressCacheAction
-  | SetSalesInProgressQtyAction;
-type State = {
-  user: User;
-  orders_in_progress_cache?: OrdersInProgressCache;
-  sales_in_progress_qty?: number;
-};
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'set_user':
-      return { ...state, user: action.user };
-    case 'set_orders_in_progress_cache':
-      return { ...state, orders_in_progress_cache: action.cache };
-    case 'set_sales_in_progress_qty':
-      return { ...state, sales_in_progress_qty: action.qty };
-    default:
-      return state;
-  }
-};
 const MainTab = createBottomTabNavigator();
 
 export default () => {
-  // state
-  const [state, dispatch] = useReducer(reducer, {
-    user: userCache.getData() as User,
-  });
-
-  // event handlers
-  const instanceOrdersInProgressCache = async (user: string) => {
-    const cache = await ordersInProgressCacheManager.get(user);
-    dispatch({ type: 'set_orders_in_progress_cache', cache });
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = userCache.onChange((user) => {
-        dispatch({ type: 'set_user', user: user as User });
-      });
-      return () => {
-        unsubscribe();
-      };
-    }, [])
-  );
-
-  useEffect(() => {
-    if (state.user.id) {
-      instanceOrdersInProgressCache(state.user.id);
-    }
-  }, [state.user.id]);
-
-  useFocusEffect(
-    useCallback(() => {
-      // let unsubscribe: () => void = utils.noop;
-      // if (state.orders_in_progress_cache) {
-      //   unsubscribe = state.orders_in_progress_cache.onChange(
-      //     (data: OrdersInProgressCacheData | undefined) => {
-      //       if (data) {
-      //         dispatch({
-      //           type: 'set_sales_in_progress_qty',
-      //           qty: data.orders.reduce((qty, order) => {
-      //             if (
-      //               order.transaction.shopping_cart.store.user === data.user
-      //             ) {
-      //               return qty + 1;
-      //             }
-      //             return qty;
-      //           }, 0),
-      //         });
-      //       }
-      //     }
-      //   );
-      // }
-      // return () => {
-      //   unsubscribe();
-      // };
-    }, [state.orders_in_progress_cache])
-  );
-
   // render logic
   return (
     <MainTab.Navigator
@@ -170,16 +70,7 @@ export default () => {
       initialRouteName="HomeStack"
     >
       <MainTab.Screen name="HomeStack" component={HomeStackScreen} />
-      <MainTab.Screen
-        name="SellerStack"
-        component={SellerStackScreen}
-        options={{
-          tabBarBadge:
-            state.sales_in_progress_qty && state.sales_in_progress_qty > 0
-              ? state.sales_in_progress_qty
-              : undefined,
-        }}
-      />
+      <MainTab.Screen name="SellerStack" component={SellerStackScreen} />
       <MainTab.Screen name="MenuStack" component={MenuStackScreen} />
     </MainTab.Navigator>
   );

@@ -73,50 +73,53 @@ export default class RESTClient<T, V> {
     );
   }
 
-  async create(params: CreateParams<V>, cancelToken?: CancelToken): Promise<T> {
+  async create(
+    params: CreateParams<V>,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
     const { pathVars, ...data } = params;
     const response = await this.axios.post<T>(
       interpolate(this.prefix, pathVars),
       data,
-      { cancelToken }
+      config
     );
     return response.data;
   }
 
   async update(
     params: UpdateParams<T>,
-    cancelToken?: CancelToken
+    config?: AxiosRequestConfig
   ): Promise<void> {
     const { pathVars, ...data } = params;
-    await this.axios.put<T>(interpolate(`${this.prefix}/:id`, pathVars), data, {
-      cancelToken,
-    });
+    await this.axios.put<T>(
+      interpolate(`${this.prefix}/:id`, pathVars),
+      data,
+      config
+    );
   }
 
   async action(
     path: string,
     params: ActionParams<T>,
-    cancelToken?: CancelToken
+    config?: AxiosRequestConfig
   ): Promise<void> {
     const { pathVars, ...data } = params;
     await this.axios.post<T>(
       interpolate(`${this.prefix}/:id/${path}`, pathVars),
       data,
-      {
-        cancelToken,
-      }
+      config
     );
   }
 
-  async get(params: GetParams, cancelToken?: CancelToken): Promise<T> {
+  async get(params: GetParams, config?: AxiosRequestConfig): Promise<T> {
     const { pathVars, source } = params;
     const response = await this.axios.get<T>(
       interpolate(`${this.prefix}/:id`, pathVars),
       {
+        ...config,
         params: {
           source,
         },
-        cancelToken,
       }
     );
     return response.data;
@@ -124,23 +127,27 @@ export default class RESTClient<T, V> {
 
   async search(
     params: SearchParams,
-    cancelToken?: CancelToken
+    config?: AxiosRequestConfig
   ): Promise<SearchResponse<T>> {
     const { pathVars, ...data } = params;
     const response = await this.axios.get<SearchResponse<T>>(
       interpolate(`${this.prefix}`, pathVars),
       {
+        ...config,
         params: data,
-        cancelToken,
       }
     );
     return response.data;
   }
 
-  async delete(params: DeleteParams, cancelToken?: CancelToken): Promise<void> {
+  async delete(
+    params: DeleteParams,
+    config?: AxiosRequestConfig
+  ): Promise<void> {
     const { pathVars } = params;
-    await this.axios.delete<T>(interpolate(`${this.prefix}/:id`, pathVars), {
-      cancelToken,
-    });
+    await this.axios.delete<T>(
+      interpolate(`${this.prefix}/:id`, pathVars),
+      config
+    );
   }
 }

@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
 
 // constraints
 import constraints from './constraints';
@@ -401,7 +402,7 @@ export default ({ navigation, route }: ScreenProps) => {
             phone_verified: false,
           },
         },
-        updateUserRequestSource.token
+        { cancelToken: updateUserRequestSource.token }
       );
       userCache.updateData({ phone, phone_verified: false });
     } catch (error) {
@@ -454,7 +455,9 @@ export default ({ navigation, route }: ScreenProps) => {
           },
           source: ['id'],
         },
-        createOrderRequestSource.token
+        {
+          cancelToken: createOrderRequestSource.token,
+        }
       );
       dispatch({
         type: 'set_last_ordered_store',
@@ -507,6 +510,25 @@ export default ({ navigation, route }: ScreenProps) => {
       }
     } finally {
       loadingOverlayRef.current?.hide();
+    }
+  };
+
+  const requestNotificationPermisions = async () => {
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(
+        Permissions.NOTIFICATIONS
+      );
+      console.log(
+        `${prefix} Notification permision current status, status ${existingStatus}`
+      );
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(
+          Permissions.NOTIFICATIONS
+        );
+        console.log(
+          `${prefix} Notification permision status after request the user, status ${status}`
+        );
+      }
     }
   };
 
@@ -684,7 +706,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressSeeOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('Orders');
+    navigation.navigate('ClientOrders');
   };
 
   useFocusEffect(
@@ -705,6 +727,10 @@ export default ({ navigation, route }: ScreenProps) => {
       };
     }, [])
   );
+
+  useEffect(() => {
+    requestNotificationPermisions();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = shoppingCartCache.onChange((data) => {

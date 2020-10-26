@@ -5,6 +5,8 @@ import { GestureResponderEvent, View } from 'react-native';
 import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
+// cache
+import usePendingSellerOrdersCache from '../../../../cache/use-pending-seller-orders-cache';
 // libs
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../lib/formatters/date-formatter';
@@ -22,10 +24,12 @@ export default memo(({ data, navigation }: ComponentProps) => {
   const [stats, setStats] = useState<
     { total: number; amount: number } | undefined
   >();
+  const [isViewed, setIsViewed] = useState<boolean | undefined>();
+  const pendingSellerOrdersCache = usePendingSellerOrdersCache();
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('SaleDetails', { order: data });
+    navigation.navigate('SellerOrderDetails', { order: data });
   };
 
   useEffect(() => {
@@ -41,6 +45,18 @@ export default memo(({ data, navigation }: ComponentProps) => {
       )
     );
   }, [data]);
+
+  useEffect(() => {
+    if (!pendingSellerOrdersCache) {
+      return;
+    }
+    const unsubscribe = pendingSellerOrdersCache.onChange(() => {
+      setIsViewed(pendingSellerOrdersCache.isViewed(data));
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [pendingSellerOrdersCache]);
 
   // render logic
   let totalText = '';
@@ -90,9 +106,16 @@ export default memo(({ data, navigation }: ComponentProps) => {
           )}
         </Text>
       </View>
-      <Text level={5} weight="bold" style={{ marginHorizontal: 10 }}>
-        {amountText}
-      </Text>
+      <View style={{ marginHorizontal: 10 }}>
+        <Text level={5} weight="bold">
+          {amountText}
+        </Text>
+        {typeof isViewed !== 'undefined' && !isViewed && (
+          <Text level={5} weight="bold" color={colors.red}>
+            nuevo
+          </Text>
+        )}
+      </View>
       <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
     </Touchable>
   );

@@ -181,7 +181,7 @@ export default ({ navigation, route }: ScreenProps) => {
         from,
         size,
       },
-      fetchRequestSource.token
+      { cancelToken: fetchRequestSource.token }
     );
     return products;
   };

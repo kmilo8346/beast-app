@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
+import * as Notifications from 'expo-notifications';
 
 // components
 import Text from '../../components/text';
@@ -37,15 +38,12 @@ import ProductCard from './components/product-card';
 import userClient from '../../clients/user-client';
 import productClient from '../../clients/product-client';
 // libs
-import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
 // cache
 import userCache from '../../cache/user';
-import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
-import OrdersInProgressCache, {
-  OrdersInProgressCacheData,
-} from '../../cache/orders-in-progress-cache';
 import shoppingCartCache from '../../cache/shopping-cart';
+import { getTotal } from '../../cache/pending-seller-orders-cache';
+import usePendingSellerOrdersCache from '../../cache/use-pending-seller-orders-cache';
 // types
 import {
   LoggedUser,
@@ -95,13 +93,9 @@ type SetFetchMoreErrorAction = {
   type: 'set_fetch_more_error';
   fetch_more_error?: Error;
 };
-type SetOrdersInProgressCacheAction = {
-  type: 'set_orders_in_progress_cache';
-  cache: OrdersInProgressCache;
-};
-type SetInProgressQtyAction = {
-  type: 'set_in_progress_qty';
-  qty: number;
+type SetPendingSellerOrdersAction = {
+  type: 'set_pending_seller_orders';
+  pending_seller_orders: number;
 };
 type SetAddressModalAction = {
   type: 'set_address_modal';
@@ -110,6 +104,10 @@ type SetAddressModalAction = {
 type SetPendingAddressInfoAction = {
   type: 'set_pending_address_info';
   pending_address_info?: AddressInfo;
+};
+type SetNewSaleDialogAction = {
+  type: 'set_new_sale_dialog';
+  new_sale_dialog: string;
 };
 type Action =
   | SetUserAction
@@ -120,10 +118,10 @@ type Action =
   | SetRefreshingAction
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction
-  | SetOrdersInProgressCacheAction
-  | SetInProgressQtyAction
+  | SetPendingSellerOrdersAction
   | SetAddressModalAction
-  | SetPendingAddressInfoAction;
+  | SetPendingAddressInfoAction
+  | SetNewSaleDialogAction;
 type State = {
   user: User;
   updating: boolean;
@@ -132,10 +130,10 @@ type State = {
   refreshing: boolean;
   fetching_more: boolean;
   fetch_more_error?: Error;
-  orders_in_progress_cache?: OrdersInProgressCache;
-  in_progress_qty?: number;
+  pending_seller_orders?: number;
   address_modal: boolean;
   pending_address_info?: AddressInfo;
+  new_sale_dialog: string;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -155,14 +153,14 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, fetching_more: action.fetching_more };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
-    case 'set_orders_in_progress_cache':
-      return { ...state, orders_in_progress_cache: action.cache };
-    case 'set_in_progress_qty':
-      return { ...state, in_progress_qty: action.qty };
+    case 'set_pending_seller_orders':
+      return { ...state, pending_seller_orders: action.pending_seller_orders };
     case 'set_address_modal':
       return { ...state, address_modal: action.address_modal };
     case 'set_pending_address_info':
       return { ...state, pending_address_info: action.pending_address_info };
+    case 'set_new_sale_dialog':
+      return { ...state, new_sale_dialog: action.new_sale_dialog };
     default:
       return state;
   }
@@ -180,10 +178,12 @@ export default ({ navigation }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
     address_modal: false,
+    new_sale_dialog: '',
   });
   if (!state.user) {
     throw new Error(`${prefix} User must be defined`);
   }
+  const pendingSellerOrdersCache = usePendingSellerOrdersCache();
   const address = userCache.getAddress();
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
@@ -196,11 +196,6 @@ export default ({ navigation }: ScreenProps) => {
   }
 
   // event handlers
-  const instanceOrdersInProgressCache = async (user: string) => {
-    const cache = await ordersInProgressCacheManager.get(user);
-    dispatch({ type: 'set_orders_in_progress_cache', cache });
-  };
-
   const fetch = async (
     filters?: { [key: string]: any },
     from = 0,
@@ -219,7 +214,7 @@ export default ({ navigation }: ScreenProps) => {
         from,
         size,
       },
-      fetchRequestSource.token
+      { cancelToken: fetchRequestSource.token }
     );
     return response;
   };
@@ -350,9 +345,9 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const pressInProgressButtonHandler = (event: GestureResponderEvent) => {
+  const pressSeePendingSellerOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('Orders', { view: 'IN_PROGRESS' });
+    navigation.navigate('SellerOrders');
   };
 
   const pressAddAddressHandler = (event: GestureResponderEvent) => {
@@ -407,6 +402,22 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('Product', { product });
   };
 
+  const newSaleDialogOkHandler = () => {
+    const order = state.new_sale_dialog;
+    dispatch({
+      type: 'set_new_sale_dialog',
+      new_sale_dialog: '',
+    });
+    navigation.navigate('SellerOrderDetails', { order });
+  };
+
+  const newSaleDialogCancelHandler = () => {
+    dispatch({
+      type: 'set_new_sale_dialog',
+      new_sale_dialog: '',
+    });
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
@@ -425,36 +436,60 @@ export default ({ navigation }: ScreenProps) => {
   }, [state.user.current_address, state.user.addresses]);
 
   useEffect(() => {
-    if (state.user.id) {
-      instanceOrdersInProgressCache(state.user.id);
+    if (!pendingSellerOrdersCache) {
+      return;
     }
-  }, [state.user.id]);
+    const unsubscribe = pendingSellerOrdersCache.onChange((data) => {
+      dispatch({
+        type: 'set_pending_seller_orders',
+        pending_seller_orders: getTotal(data),
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [pendingSellerOrdersCache]);
 
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe: () => void = utils.noop;
-      if (state.orders_in_progress_cache) {
-        unsubscribe = state.orders_in_progress_cache.onChange(
-          (data: OrdersInProgressCacheData | undefined) => {
-            if (data) {
-              dispatch({
-                type: 'set_in_progress_qty',
-                qty: data.orders.reduce((qty, order) => {
-                  if (order.customer.id === data.user) {
-                    return qty + 1;
-                  }
-                  return qty;
-                }, 0),
-              });
-            }
+      const notificationReceivedListener = Notifications.addNotificationReceivedListener(
+        (notification) => {
+          const order = (notification.request.content.data.body as any).order;
+          if (
+            userCache.isLogged() &&
+            order &&
+            typeof order === 'string' &&
+            !state.new_sale_dialog
+          ) {
+            dispatch({ type: 'set_new_sale_dialog', new_sale_dialog: order });
           }
-        );
-      }
+        }
+      );
       return () => {
-        unsubscribe();
+        Notifications.removeNotificationSubscription(
+          notificationReceivedListener
+        );
       };
-    }, [state.orders_in_progress_cache])
+    }, [])
   );
+
+  useEffect(() => {
+    const notificationResponseReceivedListener = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const order = (response.notification.request.content.data.body as any)
+          .order;
+        if (userCache.isLogged() && order && typeof order === 'string') {
+          navigation.navigate('SellerOrderDetails', { order });
+        }
+      }
+    );
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationResponseReceivedListener
+      );
+    };
+  }, []);
 
   // render logic
   let message = '¡Hola!';
@@ -472,9 +507,9 @@ export default ({ navigation }: ScreenProps) => {
       />
     );
   }
-  let inProgressComponent: ReactNode = null;
-  if (state.in_progress_qty && state.in_progress_qty > 0) {
-    inProgressComponent = (
+  let pendingSellerOrdersComponent: ReactNode = null;
+  if (state.pending_seller_orders && state.pending_seller_orders > 0) {
+    pendingSellerOrdersComponent = (
       <Touchable
         style={{
           flexDirection: 'row',
@@ -483,7 +518,7 @@ export default ({ navigation }: ScreenProps) => {
           paddingLeft: 30,
           paddingVertical: 7,
         }}
-        onPress={pressInProgressButtonHandler}
+        onPress={pressSeePendingSellerOrdersHandler}
       >
         <BagWhiteIcon />
         <Text
@@ -491,7 +526,9 @@ export default ({ navigation }: ScreenProps) => {
           weight="bold"
           color={colors.white}
           style={{ marginLeft: 10 }}
-        >{`Tienes ${state.in_progress_qty} pedidos en curso`}</Text>
+        >{`Tienes ${state.pending_seller_orders} ${
+          state.pending_seller_orders > 1 ? 'órdenes' : 'orden'
+        } pendiente`}</Text>
       </Touchable>
     );
   }
@@ -722,7 +759,7 @@ export default ({ navigation }: ScreenProps) => {
           ref={toastRef}
           containerStyle={[{ marginBottom: 10 }, globalStyles.withMargin]}
         />
-        {inProgressComponent}
+        {pendingSellerOrdersComponent}
       </View>
       {state.address_modal && (
         <ModalManageAddress
@@ -737,6 +774,16 @@ export default ({ navigation }: ScreenProps) => {
           okText="Si, cambiar"
           onOk={confirmDialogOkHandler}
           onCancel={confirmDialogCancelHandler}
+        />
+      )}
+      {!!state.new_sale_dialog && (
+        <ConfirmDialog
+          title="¡Tienes una nueva venta!"
+          message="Uno de tus clientes te acaba de hacer una venta. No lo hagas esperar."
+          okText="Ver venta"
+          cancelText="Más tarde"
+          onOk={newSaleDialogOkHandler}
+          onCancel={newSaleDialogCancelHandler}
         />
       )}
     </View>

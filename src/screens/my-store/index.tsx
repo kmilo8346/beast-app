@@ -9,6 +9,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 
 // local components
 import ProductItem from './components/product-item';
@@ -209,7 +211,7 @@ export default ({ navigation, route }: ScreenProps) => {
             id: state.user?.current_store,
           },
         },
-        fetchStoreRequestSource.token
+        { cancelToken: fetchStoreRequestSource.token }
       );
       storeCache.setData(store);
     } catch (error) {
@@ -235,7 +237,7 @@ export default ({ navigation, route }: ScreenProps) => {
         size,
         sort: { updated_at: 'desc' },
       },
-      fetchProductsRequestSource.token
+      { cancelToken: fetchProductsRequestSource.token }
     );
     return response;
   };
@@ -262,6 +264,25 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const boot = () => {
     Promise.all([hydrate(), load()]);
+  };
+
+  const requestNotificationPermisions = async () => {
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(
+        Permissions.NOTIFICATIONS
+      );
+      console.log(
+        `${prefix} Notification permision current status, status ${existingStatus}`
+      );
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(
+          Permissions.NOTIFICATIONS
+        );
+        console.log(
+          `${prefix} Notification permision status after request the user, status ${status}`
+        );
+      }
+    }
   };
 
   const refresh = async () => {
@@ -382,7 +403,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useEffect(() => {
     if (state.user?.current_store) {
-      boot();
+      Promise.all([boot(), requestNotificationPermisions()]);
     }
   }, [state.user?.current_store]);
 
@@ -517,11 +538,12 @@ export default ({ navigation, route }: ScreenProps) => {
       ]}
     >
       <View style={globalStyles.screenWithoutHeaderSpace} />
-      <View
+      <Touchable
         style={[
           { flexDirection: 'row', alignItems: 'center', paddingBottom: 5 },
           globalStyles.withMargin,
         ]}
+        onPress={pressMenuHandler}
       >
         <Image
           source={{
@@ -533,7 +555,7 @@ export default ({ navigation, route }: ScreenProps) => {
             borderRadius: 30,
           }}
         />
-        <View style={{ marginLeft: 10, flex: 1 }}>
+        <View style={{ marginLeft: 20, flex: 1 }}>
           <Text
             level={2}
             weight="bold"
@@ -546,13 +568,10 @@ export default ({ navigation, route }: ScreenProps) => {
           {status}
         </View>
 
-        <Touchable
-          style={{ width: 50, alignItems: 'flex-end' }}
-          onPress={pressMenuHandler}
-        >
-          <Icon name="menu" />
-        </Touchable>
-      </View>
+        <View style={{ width: 50, alignItems: 'flex-end' }}>
+          <Icon name="more-vertical" />
+        </View>
+      </Touchable>
       <FlatList
         data={state.products.hits}
         refreshing={state.refreshing}

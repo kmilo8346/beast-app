@@ -25,7 +25,7 @@ export default memo(({ data, navigation }: ComponentProps) => {
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('OrderDetails', { order: data });
+    navigation.navigate('ClientOrderDetails', { order: data });
   };
 
   useEffect(() => {

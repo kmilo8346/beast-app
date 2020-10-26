@@ -29,7 +29,7 @@ export default ({ navigation }: ScreenProps) => {
   const pressMySalesHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('SellerStack', {
-      screen: 'Sales',
+      screen: 'SellerOrders',
     });
   };
 
@@ -47,8 +47,8 @@ export default ({ navigation }: ScreenProps) => {
         onPress={pressEditStoreHandler}
       />
       <Item
-        name="Mis ventas"
-        description="Histórico de ventas"
+        name="Mis órdenes"
+        description="Histórico de órdenes"
         onPress={pressMySalesHandler}
       />
     </View>

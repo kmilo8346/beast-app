@@ -3,57 +3,63 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 // screens
 import {
-  SignInScreen,
   HomeScreen,
   ProductScreen,
   StoresScreen,
   StoreScreen,
-  OrdersScreen,
-  OrderDetailsScreen,
+  ClientOrdersScreen,
+  ClientOrderDetailsScreen,
+  SellerOrdersScreen,
+  SellerOrderDetailsScreen,
 } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
 
-const HomeStack = createStackNavigator();
+const Stack = createStackNavigator();
 
 export default () => {
   return (
-    <HomeStack.Navigator screenOptions={commonStackOptions}>
-      <HomeStack.Screen
+    <Stack.Navigator screenOptions={commonStackOptions}>
+      <Stack.Screen
         name="Home"
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <HomeStack.Screen
+      <Stack.Screen
         name="Product"
         component={ProductScreen}
         options={{ title: '' }}
       />
-      <HomeStack.Screen
+      <Stack.Screen
         name="Stores"
         component={StoresScreen}
         options={{ title: 'Tiendas' }}
       />
-      <HomeStack.Screen
+      <Stack.Screen
         name="Store"
         component={StoreScreen}
         options={{ title: '' }}
       />
-      <HomeStack.Screen
-        name="Orders"
-        component={OrdersScreen}
+      <Stack.Screen
+        name="ClientOrders"
+        component={ClientOrdersScreen}
         options={{ title: 'Pedidos' }}
       />
-      <HomeStack.Screen
-        name="OrderDetails"
-        component={OrderDetailsScreen}
+      <Stack.Screen
+        name="ClientOrderDetails"
+        component={ClientOrderDetailsScreen}
         options={{ title: 'Detalle de pedido' }}
       />
-      <HomeStack.Screen
-        name="SignIn"
-        component={SignInScreen}
-        options={{ title: '' }}
+      <Stack.Screen
+        name="SellerOrders"
+        component={SellerOrdersScreen}
+        options={{ title: 'Mis Órdenes' }}
       />
-    </HomeStack.Navigator>
+      <Stack.Screen
+        name="SellerOrderDetails"
+        component={SellerOrderDetailsScreen}
+        options={{ title: 'Detalle de orden' }}
+      />
+    </Stack.Navigator>
   );
 };

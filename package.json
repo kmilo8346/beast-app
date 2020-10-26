@@ -32,6 +32,7 @@
     "expo-font": "~8.2.1",
     "expo-google-app-auth": "^8.1.2",
     "expo-image-picker": "~8.3.0",
+    "expo-intent-launcher": "~8.2.1",
     "expo-notifications": "~0.3.3",
     "expo-random": "~8.2.1",
     "expo-secure-store": "~9.0.1",
@@ -43,6 +44,7 @@
     "react": "16.11.0",
     "react-dom": "16.11.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
+    "react-native-event-source": "^1.1.0",
     "react-native-gesture-handler": "~1.6.0",
     "react-native-reanimated": "~1.9.0",
     "react-native-safe-area-context": "~3.0.7",
@@ -50,8 +52,7 @@
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.11.7",
     "sentry-expo": "^2.1.2",
-    "validate.js": "^0.13.1",
-    "expo-intent-launcher": "~8.2.1"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
@@ -62,6 +63,7 @@
     "@types/qs": "^6.9.4",
     "@types/react": "~16.9.41",
     "@types/react-native": "~0.62.13",
+    "@types/react-native-event-source": "^1.1.0",
     "@types/validate.js": "^0.11.0",
     "babel-preset-expo": "^8.2.3",
     "eslint": "^7.2.0",

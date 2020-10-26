@@ -6,8 +6,8 @@ import {
   SignInScreen,
   SetPhoneScreen,
   MenuScreen,
-  OrdersScreen,
-  OrderDetailsScreen,
+  ClientOrdersScreen,
+  ClientOrderDetailsScreen,
   StoreScreen,
   ProductScreen,
 } from '../screens';
@@ -25,13 +25,13 @@ export default () => {
         options={{ headerShown: false }}
       />
       <MenuStack.Screen
-        name="Orders"
-        component={OrdersScreen}
+        name="ClientOrders"
+        component={ClientOrdersScreen}
         options={{ title: 'Pedidos' }}
       />
       <MenuStack.Screen
-        name="OrderDetails"
-        component={OrderDetailsScreen}
+        name="ClientOrderDetails"
+        component={ClientOrderDetailsScreen}
         options={{ title: 'Detalle de pedido' }}
       />
       <MenuStack.Screen

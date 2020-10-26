@@ -139,7 +139,7 @@ export default ({ navigation, route }: ScreenProps) => {
             id: product.store_info.id,
           },
         },
-        fetchStoreRequestSource.token
+        { cancelToken: fetchStoreRequestSource.token }
       );
       dispatch({ type: 'set_store', store });
     } catch (error) {
@@ -169,7 +169,7 @@ export default ({ navigation, route }: ScreenProps) => {
           from: 0,
           size: defaultSize,
         },
-        fetchProductsRequestSource.token
+        { cancelToken: fetchProductsRequestSource.token }
       );
       dispatch({ type: 'set_products', products });
     } catch (error) {

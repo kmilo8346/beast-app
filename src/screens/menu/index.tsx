@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  ReactNode,
-  useRef,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, { useState, ReactNode, useRef, useCallback } from 'react';
 import {
   ScrollView,
   View,
@@ -32,16 +26,11 @@ import ModalHelp from './components/modal-help';
 import userClient from '../../clients/user-client';
 // lib
 import firebase from '../../lib/firebase';
-import * as utils from '../../lib/utils';
 import { capture } from '../../lib/sentry';
 // types
 import { LoggedUser, AddressInfo } from '../../types';
 // cache
 import userCache from '../../cache/user';
-import ordersInProgressCacheManager from '../../cache/orders-in-progress-cache-manager';
-import OrdersInProgressCache, {
-  OrdersInProgressCacheData,
-} from '../../cache/orders-in-progress-cache';
 import shoppingCartCache from '../../cache/shopping-cart';
 // styles
 import globalStyles from '../../styles';
@@ -57,11 +46,6 @@ interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const [user, setUser] = useState(userCache.getData());
-  const [
-    ordersInProgressCache,
-    setOrdersInProgressCache,
-  ] = useState<OrdersInProgressCache | null>(null);
-  const [inProgressQty, setInProgressQty] = useState<number | null>(null);
   const [modalManageAddress, setModalManageAddress] = useState(false);
   const [updatingAddressInfo, setUpdatingAddressInfo] = useState(false);
   const [modalHelp, setModalHelp] = useState(false);
@@ -82,11 +66,6 @@ export default ({ navigation }: ScreenProps) => {
   }
 
   // event handlers
-  const instanceOrdersInProgressCache = async (user: string) => {
-    const cache = await ordersInProgressCacheManager.get(user);
-    setOrdersInProgressCache(cache);
-  };
-
   const updateAddressInfo = async (info: AddressInfo) => {
     try {
       const prev_current_address = userCache.getData()?.current_address;
@@ -139,16 +118,7 @@ export default ({ navigation }: ScreenProps) => {
 
   const pressMyOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    if (inProgressQty && inProgressQty > 0) {
-      navigation.navigate('Orders', { view: 'IN_PROGRESS' });
-    } else {
-      navigation.navigate('Orders', { view: 'HISTORICAL' });
-    }
-  };
-
-  const pressHelpHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    setModalHelp(true);
+    navigation.navigate('ClientOrders');
   };
 
   const pressCloseSessionHandler = async (event: GestureResponderEvent) => {
@@ -224,40 +194,6 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
     }, [])
   );
 
-  useEffect(() => {
-    if (user.id) {
-      instanceOrdersInProgressCache(user.id);
-    }
-  }, [user.id]);
-
-  useFocusEffect(
-    useCallback(() => {
-      // let unsubscribe: () => void = utils.noop;
-      // if (ordersInProgressCache) {
-      //   unsubscribe = ordersInProgressCache.onChange(
-      //     (data: OrdersInProgressCacheData | undefined) => {
-      //       if (data) {
-      //         setInProgressQty(
-      //           data.orders.reduce((qty, order) => {
-      //             if (
-      //               order.dispatch_provider_id === DispatchProvider.OWNER &&
-      //               order.customer.id === data.user
-      //             ) {
-      //               return qty + 1;
-      //             }
-      //             return qty;
-      //           }, 0)
-      //         );
-      //       }
-      //     }
-      //   );
-      // }
-      // return () => {
-      //   unsubscribe();
-      // };
-    }, [ordersInProgressCache])
-  );
-
   // render logic
   const address = userCache.getAddress();
   let addressText = 'Administra tus direcciones';
@@ -276,10 +212,7 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
     if (user.phone) {
       phoneText = user.phone;
     }
-    let myOrdersText = 'Pedidos en curso, histórico';
-    if (inProgressQty && inProgressQty > 0) {
-      myOrdersText = `Tienes ${inProgressQty} pedidos en curso`;
-    }
+
     content = (
       <ScrollView
         style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
@@ -320,14 +253,13 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
         <Item
           name="Mis pedidos"
           onPress={pressMyOrdersHandler}
-          description={myOrdersText}
+          description="Histórico de pedidos"
         />
         <Item
           name="Compartir app"
           description="Comparte con amigos y clientes"
           onPress={pressShareHandler}
         />
-        <Item name="Ayuda" onPress={pressHelpHandler} />
 
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
@@ -374,7 +306,6 @@ ${Constants.manifest.extra.BEAST_WEB_URL}`,
           processing={updatingAddressInfo}
           onPress={pressMyAddressesHandler}
         />
-        <Item name="Ayuda" onPress={pressHelpHandler} />
 
         <View style={globalStyles.withScreenAir} />
       </ScrollView>

@@ -51,10 +51,10 @@ class App extends React.Component<{}, State> {
       if (authUser) {
         deviceAgent.sync({ user_id: authUser.uid });
 
-        const orderInProgressCache = await ordersInProgressCacheManager.get(
-          authUser.uid
-        );
-        orderInProgressCache.startListening();
+        // const orderInProgressCache = await ordersInProgressCacheManager.get(
+        //   authUser.uid
+        // );
+        // orderInProgressCache.startListening();
 
         // indetify user in sentry
         const user: Sentry.User = {

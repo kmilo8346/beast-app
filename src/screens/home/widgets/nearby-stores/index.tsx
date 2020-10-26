@@ -87,7 +87,7 @@ export default ({ data }: ComponentProps) => {
         from,
         size,
       },
-      fetchRequestSource.token
+      { cancelToken: fetchRequestSource.token }
     );
     return stores;
   };

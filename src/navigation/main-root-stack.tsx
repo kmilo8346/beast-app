@@ -5,8 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import MainTabScreen from './main-tab';
 import ShoppingCartStackScreen from './shopping-cart-stack';
 import commonStackOptions from './common-stack-options';
-// screens
-import { MyStoreMenu } from '../screens';
 
 const MainRootStack = createStackNavigator();
 
@@ -23,11 +21,6 @@ export default () => {
         name="ShoppingCartStack"
         component={ShoppingCartStackScreen}
         options={{ headerShown: false }}
-      />
-      <MainRootStack.Screen
-        name="MyStoreMenu"
-        component={MyStoreMenu}
-        options={{ title: '' }}
       />
     </MainRootStack.Navigator>
   );

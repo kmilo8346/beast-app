@@ -9,7 +9,7 @@ import axios, { CancelTokenSource } from 'axios';
 
 // local components
 import Skeletton from './components/skeletton';
-import SaleItem from './components/sale-item';
+import OrderItem from './components/order-item';
 // components
 import Text from '../../components/text';
 import ErrorView from '../../components/error-view';
@@ -18,9 +18,9 @@ import DesertImage from '../../components/svgs/images/desert';
 // clients
 import orderClient from '../../clients/order-client';
 // cache
-import storeCache from '../../cache/store';
+import userCache from '../../cache/user';
 // types
-import { Order, SearchResponse, Store } from '../../types';
+import { LoggedUser, Order, SearchResponse } from '../../types';
 // libs
 import { capture } from '../../lib/sentry';
 // styles
@@ -28,7 +28,7 @@ import colors from '../../styles/colors';
 import globalStyles from '../../styles';
 
 // instances outside component
-const prefix = '[sales screen]';
+const prefix = '[client orders screen]';
 let fetchRequestSource: CancelTokenSource;
 
 type ResetAction = {
@@ -97,7 +97,7 @@ export default ({ navigation }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
   });
-  const store = storeCache.getData() as Store;
+  const user = userCache.getData() as LoggedUser;
 
   // event handlers
   const fetch = async (from = 0, size = 10) => {
@@ -108,13 +108,13 @@ export default ({ navigation }: ScreenProps) => {
     const response = await orderClient.search(
       {
         filters: {
-          store: store.id,
+          customer: user.id,
         },
         from,
         size,
         sort: { created_at: 'desc' },
       },
-      fetchRequestSource.token
+      { cancelToken: fetchRequestSource.token }
     );
     return response;
   };
@@ -230,7 +230,9 @@ export default ({ navigation }: ScreenProps) => {
         refreshing={state.refreshing}
         keyExtractor={(item: Order) => item.id}
         renderItem={({ item }) => {
-          return <SaleItem key={item.id} data={item} navigation={navigation} />;
+          return (
+            <OrderItem key={item.id} data={item} navigation={navigation} />
+          );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         ListEmptyComponent={

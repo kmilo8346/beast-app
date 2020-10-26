@@ -9,7 +9,7 @@ import axios, { CancelTokenSource } from 'axios';
 
 // local components
 import Skeletton from './components/skeletton';
-import OrderItem from './components/order-item';
+import SellerOrderItem from './components/seller-order-item';
 // components
 import Text from '../../components/text';
 import ErrorView from '../../components/error-view';
@@ -28,8 +28,8 @@ import colors from '../../styles/colors';
 import globalStyles from '../../styles';
 
 // instances outside component
-const prefix = '[orders screen]';
-let fetchRequestSource: CancelTokenSource;
+const prefix = '[seller orders screen]';
+let fetchOrdersRequestSource: CancelTokenSource;
 
 type ResetAction = {
   type: 'reset';
@@ -100,21 +100,21 @@ export default ({ navigation }: ScreenProps) => {
   const user = userCache.getData() as LoggedUser;
 
   // event handlers
-  const fetch = async (from = 0, size = 10) => {
-    if (fetchRequestSource) {
-      fetchRequestSource.cancel();
+  const fetchOrders = async (from = 0, size = 10) => {
+    if (fetchOrdersRequestSource) {
+      fetchOrdersRequestSource.cancel();
     }
-    fetchRequestSource = axios.CancelToken.source();
+    fetchOrdersRequestSource = axios.CancelToken.source();
     const response = await orderClient.search(
       {
         filters: {
-          customer: user.id,
+          store: user.current_store,
         },
         from,
         size,
         sort: { created_at: 'desc' },
       },
-      fetchRequestSource.token
+      { cancelToken: fetchOrdersRequestSource.token }
     );
     return response;
   };
@@ -122,7 +122,7 @@ export default ({ navigation }: ScreenProps) => {
   const load = async () => {
     try {
       dispatch({ type: 'reset' });
-      const response = await fetch();
+      const response = await fetchOrders();
       dispatch({
         type: 'set_orders',
         orders: {
@@ -142,7 +142,7 @@ export default ({ navigation }: ScreenProps) => {
   const refresh = async () => {
     try {
       dispatch({ type: 'set_refreshing', refreshing: true });
-      const response = await fetch();
+      const response = await fetchOrders();
       dispatch({
         type: 'set_orders',
         orders: {
@@ -166,7 +166,7 @@ export default ({ navigation }: ScreenProps) => {
     try {
       dispatch({ type: 'set_fetch_more_error', fetch_more_error: undefined });
       dispatch({ type: 'set_fetching_more', fetching_more: true });
-      const orders = await fetch(state.orders.from, state.orders.size);
+      const orders = await fetchOrders(state.orders.from, state.orders.size);
       dispatch({
         type: 'set_orders',
         orders: {
@@ -199,7 +199,7 @@ export default ({ navigation }: ScreenProps) => {
     load();
 
     return () => {
-      fetchRequestSource && fetchRequestSource.cancel;
+      fetchOrdersRequestSource && fetchOrdersRequestSource.cancel;
     };
   }, []);
 
@@ -231,7 +231,11 @@ export default ({ navigation }: ScreenProps) => {
         keyExtractor={(item: Order) => item.id}
         renderItem={({ item }) => {
           return (
-            <OrderItem key={item.id} data={item} navigation={navigation} />
+            <SellerOrderItem
+              key={item.id}
+              data={item}
+              navigation={navigation}
+            />
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
