@@ -12,6 +12,7 @@ import Touchable from '../../../components/touchable';
 import Icon from '../../../components/icon';
 import Badge from '../../../components/badge';
 // cache
+import userCache from '../../../cache/user';
 import shoppingCartCache, { getTotal } from '../../../cache/shopping-cart';
 // lib
 import { navigate } from '../../../lib/root-navigation';
@@ -23,6 +24,7 @@ interface ComponentProps {
 export default ({ style }: ComponentProps) => {
   // state
   const [total, setTotal] = useState<number | undefined>();
+  const address = userCache.getAddress();
 
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
@@ -42,7 +44,7 @@ export default ({ style }: ComponentProps) => {
   );
 
   // render logic
-  if (typeof total === 'undefined' || total <= 0) {
+  if (typeof total === 'undefined' || total <= 0 || !address) {
     return null;
   }
 

@@ -1,5 +1,3 @@
-import { capture } from '../sentry';
-
 const prefix = '[number formatter]';
 
 class NumberFormatter {

@@ -10,13 +10,11 @@ const Loading = require('../../../assets/lotties/carga.json');
 const client_messages = [
   'Despachos por siempre gratis',
   'Las tiendas están muy cercas de ti',
-  'Tu compra sin intermediarios',
   'Descubre lo que vende tu vecino',
 ];
 const seller_messages = [
-  'Shop Shop no gana con tus ventas',
-  'La comisión de Mercado Pago es baja',
   'No tienes que ser empresa para vender',
+  'Genera confianza con tus clientes',
 ];
 
 export enum MessageTypes {

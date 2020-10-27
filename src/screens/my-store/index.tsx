@@ -17,7 +17,7 @@ import ProductItem from './components/product-item';
 import Skeletton from './components/skeletton';
 // components
 import Text from '../../components/text';
-import LogoBackgroundWhiteImage from '../../components/svgs/images/bag-logo-background-white';
+import LogoBackgroundWhiteImage from '../../components/svgs/images/bag-logo-background-blue-big';
 import Button from '../../components/buttons/button';
 import ErrorView from '../../components/error-view';
 import Touchable from '../../components/touchable';

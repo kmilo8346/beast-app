@@ -477,7 +477,9 @@ export default ({ navigation }: ScreenProps) => {
         const order = (response.notification.request.content.data.body as any)
           .order;
         if (userCache.isLogged() && order && typeof order === 'string') {
-          navigation.navigate('SellerOrderDetails', { order });
+          setTimeout(() => {
+            navigation.navigate('SellerOrderDetails', { order });
+          }, 300);
         }
       }
     );
@@ -775,9 +777,9 @@ export default ({ navigation }: ScreenProps) => {
       )}
       {!!state.new_sale_dialog && (
         <ConfirmDialog
-          title="¡Tienes una nueva venta!"
-          message="Uno de tus clientes te acaba de hacer una venta. No lo hagas esperar."
-          okText="Ver venta"
+          title="¡Tienes una nueva orden!"
+          message="Uno de tus clientes te acaba de hacer una orden. No lo hagas esperar."
+          okText="Ver orden"
           cancelText="Más tarde"
           onOk={newSaleDialogOkHandler}
           onCancel={newSaleDialogCancelHandler}

@@ -44,8 +44,7 @@ export default ({ navigation }: ScreenProps) => {
         weight="light"
         style={{ marginTop: 30, lineHeight: 23, textAlign: 'center' }}
       >
-        Comprar y vender nunca fue tan sencillo. Descubre lo que venden tus
-        vecinos y más.
+        Descubre lo que venden tus vecinos o llega a clientes totalmente gratis.
       </Text>
       <View
         style={[
@@ -60,7 +59,7 @@ export default ({ navigation }: ScreenProps) => {
         ]}
       >
         <Button
-          title="Empieza hacer tus compras"
+          title="Empieza con Shop Shop"
           onPress={pressMainActionHandler}
           style={globalStyles.withMainActionAir}
         />

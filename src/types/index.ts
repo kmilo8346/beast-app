@@ -237,6 +237,10 @@ export interface CreateOrder {
 
 export interface Order extends CreateOrder {
   id: string;
+  stats: {
+    amount: number;
+    total: number;
+  };
   created_at: Date;
   updated_at: Date;
 }
@@ -255,4 +259,25 @@ export interface Device extends CreateDevice {
 export interface AddressInfo {
   current_address: string;
   addresses: Place[];
+}
+
+export interface CreateMercadoPagoCheckout {
+  customer: {
+    email: string;
+    first_name: string;
+    last_name?: string;
+    phone: string;
+  };
+  transaction: {
+    currency: string;
+    delivery_address: {
+      street_number: AddressProp;
+      route: AddressProp;
+    };
+    store: {
+      name: string;
+      payment_provider: PaymentProvider;
+    };
+    amount: number;
+  };
 }

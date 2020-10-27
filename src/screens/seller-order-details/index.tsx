@@ -1,12 +1,15 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { ReactNode, useEffect, useReducer } from 'react';
 import { View, ScrollView, GestureResponderEvent, Image } from 'react-native';
 import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
 import axios, { CancelTokenSource } from 'axios';
+import isAfter from 'date-fns/isAfter';
+import sub from 'date-fns/sub';
 
 // local components
 import Skeletton from './components/skeletton';
 import ProductItem from './components/product-item';
+import CreatePaymentLinkModal from './components/create-payment-link-modal';
 // components
 import Text from '../../components/text';
 import Divider from '../../components/divider';
@@ -60,13 +63,18 @@ type SetMapImageUrlAction = {
   type: 'set_map_image_url';
   map_image_url: string;
 };
+type SetPaymentLinkModalAction = {
+  type: 'set_payment_link_modal';
+  payment_link_modal: boolean;
+};
 type Action =
   | SetOrderAction
   | SetStoreAction
   | SetErrorAction
   | SetContactModalAction
   | SetAmountAction
-  | SetMapImageUrlAction;
+  | SetMapImageUrlAction
+  | SetPaymentLinkModalAction;
 type State = {
   order?: Order;
   store?: Store;
@@ -74,6 +82,7 @@ type State = {
   contact_modal: boolean;
   amount?: number;
   map_image_url?: string;
+  payment_link_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -89,6 +98,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, amount: action.amount };
     case 'set_map_image_url':
       return { ...state, map_image_url: action.map_image_url };
+    case 'set_payment_link_modal':
+      return { ...state, payment_link_modal: action.payment_link_modal };
     default:
       return state;
   }
@@ -105,12 +116,12 @@ export default ({ route }: ScreenProps) => {
       typeof route.params.order === 'string' ? undefined : route.params.order,
     store: storeCache.getData(),
     contact_modal: false,
+    payment_link_modal: false,
   });
   const user = userCache.getData() as LoggedUser;
 
   // event handlers
   const fetchOrder = async (id: string) => {
-    console.log('fecthing order');
     try {
       dispatch({ type: 'set_error', error: undefined });
       if (fetchOrderRequestSource) {
@@ -184,6 +195,15 @@ export default ({ route }: ScreenProps) => {
     if (typeof route.params.order === 'string') {
       fetchOrder(route.params.order);
     }
+  };
+
+  const pressPaymentLinkHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({ type: 'set_payment_link_modal', payment_link_modal: true });
+  };
+
+  const paymentLinkModalCloseHandler = () => {
+    dispatch({ type: 'set_payment_link_modal', payment_link_modal: false });
   };
 
   useEffect(() => {
@@ -288,13 +308,34 @@ export default ({ route }: ScreenProps) => {
   if (distance === 0) {
     distanceText = 'En tu misma dirección';
   }
-
+  let paymentButton: ReactNode = null;
+  if (
+    isAfter(new Date(state.order.created_at), sub(new Date(), { days: 3 })) &&
+    state.store.payment_provider
+  ) {
+    paymentButton = (
+      <Button
+        type="link"
+        title={
+          <Text level={6} weight="bold" color={colors.blue}>
+            Cobrar
+          </Text>
+        }
+        style={{ paddingRight: 0 }}
+        onPress={pressPaymentLinkHandler}
+      />
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }]}>
         <View
           style={[
-            { flexDirection: 'row', alignItems: 'center', marginVertical: 20 },
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginVertical: 20,
+            },
             globalStyles.withMargin,
           ]}
         >
@@ -380,15 +421,18 @@ export default ({ route }: ScreenProps) => {
         <Divider type="thick" />
 
         <View style={[{ marginVertical: 20 }, globalStyles.withMargin]}>
-          <Text
-            level={5}
-            weight="bold"
+          <View
             style={{
               marginBottom: 20,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
             }}
           >
-            Productos
-          </Text>
+            <Text level={5} weight="bold">
+              Productos
+            </Text>
+            {paymentButton}
+          </View>
 
           <Divider type="thin" style={{ marginBottom: 15 }} />
           {state.order.transaction.shopping_cart.items.map(
@@ -445,6 +489,13 @@ export default ({ route }: ScreenProps) => {
         <ActionSheetContact
           phone={state.order.customer.phone}
           onRequestClose={contactModalCloseHandler}
+        />
+      )}
+      {state.payment_link_modal && (
+        <CreatePaymentLinkModal
+          order={state.order}
+          store={state.store as Store}
+          onClose={paymentLinkModalCloseHandler}
         />
       )}
     </View>

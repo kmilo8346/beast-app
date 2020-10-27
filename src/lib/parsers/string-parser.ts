@@ -12,8 +12,9 @@ class StringParser {
   }
 
   fromCurrency(text: string): number {
-    if (!text) return 0;
-    return parseInt(text?.replace(/[^0-9]/g, ''), 10);
+    const t = text?.replace(/[^0-9]/g, '');
+    if (!t) return 0;
+    return parseInt(t, 10);
   }
 
   fromPhone(text: string): string {
