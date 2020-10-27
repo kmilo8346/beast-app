@@ -6,9 +6,9 @@ import {
   Vibration,
   View,
   Clipboard,
-  Share,
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
+import * as Linking from 'expo-linking';
 
 // constraints
 import constraints from './constraints';
@@ -242,9 +242,11 @@ export default ({ order, store, onClose }: ComponentProps) => {
     event.stopPropagation();
 
     try {
-      await Share.share({
-        message: `Hola, puedes pagar tu pedido de ${order.transaction.shopping_cart.store.name} en el siguiente vínculo:\n${state.link}`,
-      });
+      await Linking.openURL(
+        `whatsapp://send?text=${`Hola, puedes pagar tu pedido de ${order.transaction.shopping_cart.store.name} en el siguiente vínculo:\n${state.link}`}&phone=${
+          order.customer.phone
+        }`
+      );
       onClose();
     } catch (error) {
       capture(prefix, 'Press send to client handler error', error);
