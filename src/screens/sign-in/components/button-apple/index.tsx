@@ -6,8 +6,6 @@ import * as SecureStore from 'expo-secure-store';
 // libs
 import firebase from '../../../../lib/firebase';
 import { capture } from '../../../../lib/sentry';
-// styles
-import colors from '../../../../styles/colors';
 
 // instances outside component
 const prefix = '[button apple component]';

@@ -42,8 +42,9 @@ import { capture } from '../../lib/sentry';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache from '../../cache/shopping-cart';
-import { getTotal } from '../../cache/pending-seller-orders-cache';
-import usePendingSellerOrdersCache from '../../cache/use-pending-seller-orders-cache';
+import pendingSellerOrdersCache, {
+  getTotal,
+} from '../../cache/pending-seller-orders-cache';
 // types
 import {
   LoggedUser,
@@ -183,7 +184,6 @@ export default ({ navigation }: ScreenProps) => {
   if (!state.user) {
     throw new Error(`${prefix} User must be defined`);
   }
-  const pendingSellerOrdersCache = usePendingSellerOrdersCache();
   const address = userCache.getAddress();
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
@@ -436,10 +436,7 @@ export default ({ navigation }: ScreenProps) => {
   }, [state.user.current_address, state.user.addresses]);
 
   useEffect(() => {
-    if (!pendingSellerOrdersCache) {
-      return;
-    }
-    const unsubscribe = pendingSellerOrdersCache.onChange((data) => {
+    const unsubscribe = pendingSellerOrdersCache.onChange((data: any) => {
       dispatch({
         type: 'set_pending_seller_orders',
         pending_seller_orders: getTotal(data),
@@ -449,7 +446,7 @@ export default ({ navigation }: ScreenProps) => {
     return () => {
       unsubscribe();
     };
-  }, [pendingSellerOrdersCache]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

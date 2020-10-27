@@ -17,7 +17,7 @@ import ActionSheetContact from '../../components/modals/action-sheet-contact';
 // cache
 import storeCache from '../../cache/store';
 import userCache from '../../cache/user';
-import usePendingSellerOrdersCache from '../../cache/use-pending-seller-orders-cache';
+import pendingSellerOrdersCache from '../../cache/pending-seller-orders-cache';
 // clients
 import orderClient from '../../clients/order-client';
 import storeClient from '../../clients/store-client';
@@ -99,7 +99,6 @@ interface ScreenProps {
 }
 
 export default ({ route }: ScreenProps) => {
-  console.log('route.params', JSON.stringify(route.params));
   // state
   const [state, dispatch] = useReducer(reducer, {
     order:
@@ -108,7 +107,6 @@ export default ({ route }: ScreenProps) => {
     contact_modal: false,
   });
   const user = userCache.getData() as LoggedUser;
-  const pendingSellerOrdersCache = usePendingSellerOrdersCache();
 
   // event handlers
   const fetchOrder = async (id: string) => {
@@ -242,14 +240,12 @@ export default ({ route }: ScreenProps) => {
   ]);
 
   useEffect(() => {
-    if (pendingSellerOrdersCache) {
-      const id =
-        typeof route.params.order === 'string'
-          ? route.params.order
-          : route.params.order.id;
-      pendingSellerOrdersCache.markAsViewed(id);
-    }
-  }, [pendingSellerOrdersCache]);
+    const id =
+      typeof route.params.order === 'string'
+        ? route.params.order
+        : route.params.order.id;
+    pendingSellerOrdersCache.markAsViewed(id);
+  }, []);
 
   // render logic
   if (state.error) {

@@ -6,7 +6,7 @@ import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
 // cache
-import usePendingSellerOrdersCache from '../../../../cache/use-pending-seller-orders-cache';
+import pendingSellerOrdersCache from '../../../../cache/pending-seller-orders-cache';
 // libs
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../lib/formatters/date-formatter';
@@ -25,7 +25,7 @@ export default memo(({ data, navigation }: ComponentProps) => {
     { total: number; amount: number } | undefined
   >();
   const [isViewed, setIsViewed] = useState<boolean | undefined>();
-  const pendingSellerOrdersCache = usePendingSellerOrdersCache();
+
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -47,16 +47,13 @@ export default memo(({ data, navigation }: ComponentProps) => {
   }, [data]);
 
   useEffect(() => {
-    if (!pendingSellerOrdersCache) {
-      return;
-    }
     const unsubscribe = pendingSellerOrdersCache.onChange(() => {
       setIsViewed(pendingSellerOrdersCache.isViewed(data));
     });
     return () => {
       unsubscribe();
     };
-  }, [pendingSellerOrdersCache]);
+  }, []);
 
   // render logic
   let totalText = '';

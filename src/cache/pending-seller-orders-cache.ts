@@ -1,17 +1,21 @@
-import EventSource from 'react-native-event-source';
-import Constants from 'expo-constants';
 import isAfter from 'date-fns/isAfter';
 import sub from 'date-fns/sub';
 import axios, { CancelTokenSource } from 'axios';
+import { Channel } from 'pusher-js/react-native';
+import { AppState, AppStateStatus, AsyncStorage } from 'react-native';
+import Constants from 'expo-constants';
+import axiosRetry from 'axios-retry';
 
 // clients
 import orderClient from '../clients/order-client';
 // cache
-import PersistedCache from './persisted-cache';
+import Cache from './cache';
+import userCache from './user';
 // types
 import { Order } from '../types';
 // libs
 import { capture } from '../lib/sentry';
+import pusher from '../lib/pusher';
 
 // instances outside
 const prefix = '[pending seller orders cache]';
@@ -27,22 +31,83 @@ export interface PendingSellerOrdersCacheData {
   viewed: { [key: string]: boolean };
 }
 
-export default class PendingSellerOrdersCache extends PersistedCache<
-  PendingSellerOrdersCacheData
-> {
-  private seller: string;
+class PendingSellerOrdersCache extends Cache<PendingSellerOrdersCacheData> {
+  private active: boolean;
 
-  private source: EventSource;
+  private seller?: string;
 
-  constructor(seller: string) {
-    super(`pending-seller-orders/${seller}`);
-    this.seller = seller;
-    this.source = new EventSource(
-      `${Constants.manifest.extra.BEAST_API_URL}/streams/orders?filters[seller]=${seller}`
-    );
+  private channel?: Channel;
+
+  constructor() {
+    super();
+    this.active = AppState.currentState === 'active';
+    this.seller = userCache.getData()?.id;
+    this.takeDecision(this.active, this.seller);
+
+    userCache.onChange((data) => {
+      this.takeDecision(this.active, data?.id);
+    });
+
+    AppState.addEventListener('change', (state: AppStateStatus) => {
+      this.takeDecision(state === 'active', this.seller);
+    });
   }
 
-  private onDataHandler(data: Order | Order[]) {
+  private async load(seller: string) {
+    try {
+      const raw: string | null = await AsyncStorage.getItem(
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/seller/${seller}/pending-orders`
+      );
+
+      this.data = raw ? JSON.parse(raw) : undefined;
+    } catch (error) {
+      capture(prefix, 'Load error', error);
+    }
+  }
+
+  async persist(seller: string) {
+    try {
+      await AsyncStorage.setItem(
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/seller/${seller}/pending-orders`,
+        JSON.stringify(this.data)
+      );
+    } catch (error) {
+      capture(prefix, 'Persist error', error);
+    }
+  }
+
+  private async setSellerData(
+    seller: string,
+    data: PendingSellerOrdersCacheData
+  ) {
+    this.setData(data);
+    await this.persist(seller);
+  }
+
+  private async updateSellerData(
+    seller: string,
+    update: Partial<PendingSellerOrdersCacheData>
+  ) {
+    this.updateData(update);
+    await this.persist(seller);
+  }
+
+  private takeDecision(active: boolean, seller?: string) {
+    // skip when not change
+    if (this.active === active && this.seller === seller) {
+      return;
+    }
+    this.active = active;
+    this.seller = seller;
+
+    if (active && seller) {
+      this.startListening(seller);
+    } else {
+      this.stopListening();
+    }
+  }
+
+  private onDataHandler(seller: string, data: Order | Order[]) {
     let newOrders = Array.isArray(data) ? data : [data];
 
     const orders = this.data?.orders || [];
@@ -69,7 +134,7 @@ export default class PendingSellerOrdersCache extends PersistedCache<
 
     newOrders = newOrders.filter((order) => !this.isViewed(order));
 
-    this.updateData({
+    this.updateSellerData(seller, {
       water_mark: newOrders.length
         ? new Date(newOrders[0].updated_at).toISOString()
         : (this.data?.water_mark as string),
@@ -78,21 +143,23 @@ export default class PendingSellerOrdersCache extends PersistedCache<
   }
 
   markAsViewed(id: string) {
-    this.updateData({
-      orders: (this.data?.orders || []).filter((order) => order.id !== id),
-      viewed: { ...this.data?.viewed, [id]: true },
-    });
+    if (this.seller) {
+      this.updateSellerData(this.seller, {
+        orders: (this.data?.orders || []).filter((order) => order.id !== id),
+        viewed: { ...this.data?.viewed, [id]: true },
+      });
+    }
   }
 
   isViewed(order: Order): boolean {
-    if (isAfter(sub(new Date(), { days: 5 }), new Date(order.updated_at))) {
+    if (isAfter(sub(new Date(), { days: 2 }), new Date(order.updated_at))) {
       return true;
     }
 
     return !!this.data?.viewed[order.id];
   }
 
-  async fetch() {
+  async fetch(seller: string) {
     try {
       if (fetchRequestSource) {
         fetchRequestSource.cancel();
@@ -102,7 +169,7 @@ export default class PendingSellerOrdersCache extends PersistedCache<
       const response = await orderClient.search(
         {
           filters: {
-            seller: this.seller,
+            seller,
             water_mark: this.data?.water_mark,
           },
           from: 0,
@@ -114,11 +181,12 @@ export default class PendingSellerOrdersCache extends PersistedCache<
           cancelToken: fetchRequestSource.token,
           'axios-retry': {
             retries: 100,
+            retryDelay: axiosRetry.exponentialDelay,
           },
         } as any
       );
 
-      this.onDataHandler(response.hits);
+      this.onDataHandler(seller, response.hits);
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Fetch error', error);
@@ -126,33 +194,30 @@ export default class PendingSellerOrdersCache extends PersistedCache<
     }
   }
 
-  async startListening() {
-    await this.load();
+  async startListening(seller: string) {
+    await this.load(seller);
     // set defaults
     if (!this.data) {
-      this.setData({
-        water_mark: sub(new Date(), { days: 5 }).toISOString(),
+      this.setSellerData(seller, {
+        water_mark: sub(new Date(), { days: 2 }).toISOString(),
         orders: [],
         viewed: {},
       });
     }
 
-    await this.fetch();
+    this.fetch(seller);
 
-    this.source.addEventListener('message', (event) => {
-      if (event.type !== 'message') {
-        console.warn(`${prefix} Invalid event type, type: ${event.type}`);
-        return;
-      }
-
-      if (event.data) {
-        this.onDataHandler(JSON.parse(event.data));
-      }
+    this.channel = pusher.subscribe(`seller_${this.seller}`);
+    this.channel.bind('order.created', (data: Order) => {
+      this.onDataHandler(seller, [data]);
     });
   }
 
   async stopListening() {
     fetchRequestSource && fetchRequestSource.cancel();
-    this.source.removeAllListeners();
+    this.channel?.unbind();
+    pusher.unsubscribe(`seller_${this.seller}`);
   }
 }
+
+export default new PendingSellerOrdersCache();
