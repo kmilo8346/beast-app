@@ -60,7 +60,7 @@ export default memo(({ data, navigation }: ComponentProps) => {
   let amountText = '';
   let fullNameText = data.customer.first_name;
   if (stats) {
-    totalText = `${stats.total} product${stats.total > 1 ? 's' : ''}`;
+    totalText = `${stats.total} producto${stats.total > 1 ? 's' : ''}`;
     amountText = numberFormatter.toCurrency(stats.amount);
   }
   if (data.customer.last_name) {
