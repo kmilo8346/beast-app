@@ -594,7 +594,7 @@ export default ({ navigation, route }: ScreenProps) => {
               weight="bold"
               style={{ marginTop: 40, marginBottom: 15 }}
             >
-              Aun no agregas productos
+              Aún no agregas productos
             </Text>
           </View>
         }
