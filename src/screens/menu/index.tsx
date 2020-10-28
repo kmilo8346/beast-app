@@ -145,7 +145,7 @@ export default ({ navigation }: ScreenProps) => {
   const pressShareHandler = async () => {
     try {
       await Share.share({
-        message: `Te invito a usar Shop Shop, la app para comprar y vender con tus vecinos y más. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
+        message: `Te invito a usar Shop Shop, la app para comprar y vender entre vecinos y más. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
       });
     } catch (error) {
       capture(prefix, 'Press share handler error', error);
