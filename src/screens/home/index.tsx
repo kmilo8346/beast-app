@@ -779,7 +779,7 @@ export default ({ navigation }: ScreenProps) => {
       {!!state.new_sale_dialog && (
         <ConfirmDialog
           title="¡Tienes una nueva orden!"
-          message="Uno de tus clientes te acaba de hacer una orden. No lo hagas esperar."
+          message="Uno de tus clientes acaba de realizar una orden. No lo hagas esperar."
           okText="Ver orden"
           cancelText="Más tarde"
           onOk={newSaleDialogOkHandler}
