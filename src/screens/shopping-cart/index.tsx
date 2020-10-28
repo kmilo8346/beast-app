@@ -1238,7 +1238,7 @@ export default ({ navigation, route }: ScreenProps) => {
       )}
       {state.make_order_dialog && (
         <ConfirmDialog
-          title="¿Está seguro de realizar pedido?"
+          title="¿Desea realizar pedido?"
           message="Realizar pedido no tiene costo, le enviaremos el detalle de tu pedido al vendedor de forma inmediata."
           okText="Si, continuar"
           onOk={makeOrderDialogOkHandler}
