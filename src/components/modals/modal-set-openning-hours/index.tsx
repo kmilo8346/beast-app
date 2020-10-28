@@ -460,7 +460,7 @@ export default ({
           </Text>
         )}
         <Button
-          title="Guardar"
+          title="Continuar"
           onPress={saveHandler}
           style={[globalStyles.withMainActionAir, { marginTop: 10 }]}
         />

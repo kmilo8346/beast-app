@@ -130,7 +130,7 @@ export default ({ value, errors, onChange = utils.noop }: ComponentProps) => {
     <View>
       <FakeInput
         required={false}
-        label="Proveedor de pago"
+        label="Vínculo de pago"
         placeholder="Agrega proveedor de pago"
         suffix="chevron-down"
         value={text}

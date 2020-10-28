@@ -180,7 +180,7 @@ export default ({
         />
 
         <Button
-          title="Guardar"
+          title="Continuar"
           onPress={saveHandler}
           style={globalStyle.withMainActionAir}
         />
