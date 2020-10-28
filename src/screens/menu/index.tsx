@@ -144,10 +144,8 @@ export default ({ navigation }: ScreenProps) => {
 
   const pressShareHandler = async () => {
     try {
-      const user = userCache.getData() as LoggedUser;
       await Share.share({
-        message: `${user.first_name} quiere que instales Shop Shop para que compres y vendas sin límites. Aquí puedes descargar la App:
-${Constants.manifest.extra.BEAST_WEB_URL}`,
+        message: `Te invito a usar Shop Shop, la app para comprar y vender con tus vecinos y más. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
       });
     } catch (error) {
       capture(prefix, 'Press share handler error', error);
