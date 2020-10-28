@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.59](https://github.com/firedevs-team/beast-app/compare/v1.0.58...v1.0.59) (2020-10-28)
+
+
+### Bug Fixes
+
+* **input-set-opening-hours:** fix humanizeOpeningHoursText function to recognize opening at 12:00 am ([5256a5e](https://github.com/firedevs-team/beast-app/commit/5256a5ecac0c607904c286b147ad9d4ce441547e))
+* **seller order item:** text ([dd2d002](https://github.com/firedevs-team/beast-app/commit/dd2d002fe9f297d915e8221aa3e43ae8e06f1533))
+* **sign in:** bug ([7cbb220](https://github.com/firedevs-team/beast-app/commit/7cbb2208d0c9915821d05cd8e308b0cb0aec0f1b))
+
 ### [1.0.58](https://github.com/firedevs-team/beast-app/compare/v1.0.57...v1.0.58) (2020-10-14)
 
 

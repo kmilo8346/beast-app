@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.58",
+    "version": "1.0.59",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,7 +27,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.58",
+      "buildNumber": "1.0.59",
       "config": {
         "usesNonExemptEncryption": false
       },
@@ -41,7 +41,7 @@
     "android": {
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
-      "versionCode": 380010058,
+      "versionCode": 380010059,
       "permissions": [
         "CAMERA",
         "VIBRATE"
