@@ -109,7 +109,7 @@ export default memo(({ data, navigation }: ComponentProps) => {
         </Text>
         {typeof isViewed !== 'undefined' && !isViewed && (
           <Text level={5} weight="bold" color={colors.red}>
-            nuevo
+            revisar
           </Text>
         )}
       </View>
