@@ -53,7 +53,7 @@ export default () => {
       <Stack.Screen
         name="SellerOrders"
         component={SellerOrdersScreen}
-        options={{ title: 'Mis Órdenes' }}
+        options={{ title: 'Mis órdenes' }}
       />
       <Stack.Screen
         name="SellerOrderDetails"
