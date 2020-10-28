@@ -452,7 +452,8 @@ export default ({ navigation }: ScreenProps) => {
     useCallback(() => {
       const notificationReceivedListener = Notifications.addNotificationReceivedListener(
         (notification) => {
-          const order = (notification.request.content.data.body as any).order;
+          const data = notification.request.content.data;
+          const order = data.order || (data.body as any).order;
           if (
             userCache.isLogged() &&
             order &&
@@ -474,8 +475,8 @@ export default ({ navigation }: ScreenProps) => {
   useEffect(() => {
     const notificationResponseReceivedListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        const order = (response.notification.request.content.data.body as any)
-          .order;
+        const data = response.notification.request.content.data;
+        const order = data.order || (data.body as any).order;
         if (userCache.isLogged() && order && typeof order === 'string') {
           setTimeout(() => {
             navigation.navigate('SellerOrderDetails', { order });
@@ -527,7 +528,7 @@ export default ({ navigation }: ScreenProps) => {
           style={{ marginLeft: 10 }}
         >{`Tienes ${state.pending_seller_orders} ${
           state.pending_seller_orders > 1 ? 'órdenes' : 'orden'
-        } pendiente`}</Text>
+        } sin revisar`}</Text>
       </Touchable>
     );
   }
