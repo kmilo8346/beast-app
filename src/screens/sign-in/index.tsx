@@ -390,8 +390,8 @@ export default ({ navigation, route }: ScreenProps) => {
         {subtitle}
       </Text>
       <View style={{ marginBottom: 25 }} />
-      <ButtonGoogle onOK={signInOkHandler} />
-      <View style={{ marginBottom: 15 }} />
+      {/* <ButtonGoogle onOK={signInOkHandler} />
+      <View style={{ marginBottom: 15 }} /> */}
       {Platform.OS !== 'ios' && (
         <>
           <ButtonFacebook onOK={signInOkHandler} />

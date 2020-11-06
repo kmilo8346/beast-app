@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBar, View } from 'react-native';
+import { StatusBar, View, LogBox } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
@@ -13,12 +13,13 @@ import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
 import Sentry, { capture } from './lib/sentry';
 // cache
-import ordersInProgressCacheManager from './cache/orders-in-progress-cache-manager';
 import shoppingCartCache from './cache/shopping-cart';
 // fonts
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
 const MonserratNormal = require('../assets/fonts/monserrat/normal.ttf');
 const MonserratLight = require('../assets/fonts/monserrat/light.ttf');
+
+LogBox.ignoreLogs(['Setting a timer']);
 
 // instances outside component
 const prefix = '[beast]';
@@ -51,20 +52,15 @@ class App extends React.Component<{}, State> {
       if (authUser) {
         deviceAgent.sync({ user_id: authUser.uid });
 
-        // const orderInProgressCache = await ordersInProgressCacheManager.get(
-        //   authUser.uid
-        // );
-        // orderInProgressCache.startListening();
-
         // indetify user in sentry
-        const user: Sentry.User = {
+        const user: Sentry.Native.User = {
           id: authUser.uid,
         };
         if (!authUser.isAnonymous) {
           user.username = authUser.displayName as string;
           user.email = authUser.email as string;
         }
-        Sentry.setUser(user);
+        Sentry.Native.setUser(user);
       }
     });
   };

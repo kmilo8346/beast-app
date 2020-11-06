@@ -38,9 +38,9 @@ export default ({ onOK = () => null }: ButtonFacebookProps) => {
   const login = async () => {
     try {
       setProcessing(true);
-      await Facebook.initializeAsync(
-        Constants.manifest.extra.FACEBOOK_AUTH_CLIENT_ID
-      );
+      await Facebook.initializeAsync({
+        appId: Constants.manifest.extra.FACEBOOK_AUTH_CLIENT_ID,
+      });
       const result = await Facebook.logInWithReadPermissionsAsync();
       if (result.type === 'success') {
         setImmediate(() => {

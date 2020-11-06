@@ -13,7 +13,16 @@
           "package_name": "com.firedevs.beast"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "525584270888-2lpl70unih1prdosjslvs33vlbo9jibg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.firedevs.beast",
+            "certificate_hash": "595adb7bf5992a757d1159be90e4089882d7b2a7"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBKO_5MvZ1OXH2DcHaxhZpyTYwD4Q6eMDU"
@@ -23,10 +32,11 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "525584270888-rjkb70j65davl37cbp36pn71rdjkl9m6.apps.googleusercontent.com",
+              "client_id": "525584270888-aahu8mo0bg0rdulpu7pd2ml2moup2s4q.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.firedevs.beast"
+                "bundle_id": "com.firedevs.beast",
+                "app_store_id": "1531418420"
               }
             }
           ]

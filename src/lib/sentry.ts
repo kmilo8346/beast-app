@@ -13,7 +13,7 @@ export const capture = (
   prefix: string,
   message: string,
   error?: Error,
-  extend?: (scope: Sentry.Scope) => void
+  extend?: (scope: Sentry.Native.Scope) => void
 ) => {
   // eslint-disable-next-line no-undef
   if (__DEV__) {
@@ -24,16 +24,16 @@ export const capture = (
     console.log(logMessage);
   }
 
-  Sentry.withScope((scope: Sentry.Scope) => {
+  Sentry.Native.withScope((scope: Sentry.Native.Scope) => {
     scope.setExtra('prefix', prefix);
     if (extend) {
       extend(scope);
     }
     if (error) {
       scope.setExtra('message', message);
-      Sentry.captureException(error);
+      Sentry.Native.captureException(error);
     } else {
-      Sentry.captureMessage(message);
+      Sentry.Native.captureMessage(message);
     }
   });
 };
