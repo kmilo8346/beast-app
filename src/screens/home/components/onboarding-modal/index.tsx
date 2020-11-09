@@ -77,11 +77,10 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Agrega productos a tu carro
+              Agrega productos a tu carrito
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Encuentra los productos para ti o dentro de tus tiendas
-              preferidas.
+              Encuentra productos recomendados o busca en tus tiendas favoritas.
             </Text>
           </View>
         </View>
@@ -92,11 +91,11 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Haz tu pedido sin pagar
+              Pide primero y paga después
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Hacer un pedido no requiere pagar inmediatamente, la tienda se
-              pondrá en contacto.
+              Haz tu pedido desde la app y la tienda te contactará para acordar
+              el pago y despacho.
             </Text>
           </View>
         </View>
@@ -110,8 +109,8 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
               Vende sin comisiones
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Crea tu tienda, con tu horario de trabajo, tu área de despacho, se
-              tu propio jefe.
+              Crea tu tienda, con tu horario de atención y área de despacho en
+              menos de un minuto.
             </Text>
           </View>
         </View>
