@@ -345,7 +345,7 @@ export default ({ navigation }: ScreenProps) => {
       if (!onboarding) {
         setTimeout(() => {
           dispatch({ type: 'set_onboarding_modal', onboarding_modal: true });
-        }, 700);
+        }, 300);
       }
     } catch (error) {
       capture(prefix, 'Show onboarding error', error);
@@ -640,79 +640,50 @@ export default ({ navigation }: ScreenProps) => {
         <Skeleton />
       </View>
     );
-  } else if (!state.products?.hits.length) {
-    content = (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <SleepingCatImage />
-        <Text
-          level={6}
-          style={{
-            marginTop: 20,
-            marginBottom: 20,
-            textAlign: 'center',
-            width: 320,
-          }}
-        >
-          En este momento no hay tiendas{' '}
-          <Text level={6} weight="bold">
-            {' '}
-            abiertas
-          </Text>{' '}
-          en tu zona.
-        </Text>
-        <Text
-          level={5}
-          weight="bold"
-          style={{ marginBottom: 40, textAlign: 'center' }}
-        >
-          ¡Inténtalo de nuevo más tarde!
-        </Text>
-        <Button
-          title="¡O, crea tu tienda hoy!"
-          type="link"
-          onPress={pressCreateStoreHandler}
-        />
-      </View>
-    );
   } else {
     content = (
       <FlatList
         data={state.products.hits}
         numColumns={2}
         refreshing={state.refreshing}
-        ListHeaderComponent={
-          <View>
-            <FreeDeliveryImage />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 15,
-                marginBottom: 15,
-              }}
-            >
-              <Text
-                level={4}
-                weight="bold"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{ flex: 1 }}
+        ListHeaderComponent={() => {
+          if (!state.products?.hits.length) {
+            return null;
+          }
+          return (
+            <View>
+              <FreeDeliveryImage />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginTop: 15,
+                  marginBottom: 15,
+                }}
               >
-                Productos para ti
-              </Text>
-              <Button
-                type="link"
-                title={
-                  <Text level={6} weight="bold" color={colors.blue}>
-                    Ver tiendas
-                  </Text>
-                }
-                style={{ paddingRight: 0 }}
-                onPress={pressSeeStoresHandler}
-              />
+                <Text
+                  level={4}
+                  weight="bold"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ flex: 1 }}
+                >
+                  Productos para ti
+                </Text>
+                <Button
+                  type="link"
+                  title={
+                    <Text level={6} weight="bold" color={colors.blue}>
+                      Ver tiendas
+                    </Text>
+                  }
+                  style={{ paddingRight: 0 }}
+                  onPress={pressSeeStoresHandler}
+                />
+              </View>
             </View>
-          </View>
-        }
+          );
+        }}
         keyExtractor={(item: Product) => item.id}
         renderItem={({ item, index }) => {
           return (
@@ -725,6 +696,45 @@ export default ({ navigation }: ScreenProps) => {
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListEmptyComponent={
+          <View
+            style={{
+              marginTop: 50,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <SleepingCatImage />
+            <Text
+              level={6}
+              style={{
+                marginTop: 20,
+                marginBottom: 20,
+                textAlign: 'center',
+                width: 320,
+              }}
+            >
+              En este momento no hay tiendas{' '}
+              <Text level={6} weight="bold">
+                {' '}
+                abiertas
+              </Text>{' '}
+              en tu zona.
+            </Text>
+            <Text
+              level={5}
+              weight="bold"
+              style={{ marginBottom: 40, textAlign: 'center' }}
+            >
+              ¡Inténtalo de nuevo más tarde!
+            </Text>
+            <Button
+              title="¡O, crea tu tienda hoy!"
+              type="link"
+              onPress={pressCreateStoreHandler}
+            />
+          </View>
+        }
         ListFooterComponent={
           <View
             style={[

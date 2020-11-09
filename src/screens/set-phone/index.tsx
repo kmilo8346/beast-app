@@ -119,7 +119,7 @@ export default ({ navigation, route }: ScreenProps) => {
       setTimeout(() => {
         navigation.navigate('VerifyPhone', {
           phone: response.phone,
-          code: response.code,
+          codes: [response.code],
           redirect: route.params.redirect,
         });
       }, 300);

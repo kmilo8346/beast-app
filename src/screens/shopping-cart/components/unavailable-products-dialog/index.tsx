@@ -8,7 +8,7 @@ import Divider from '../../../../components/divider';
 // screen components
 import Dialog from '../../../components/dialogs/dialog';
 // local components
-import ItemComponent from '../item';
+import ItemComponent from './components/item';
 // libs
 import * as utils from '../../../../lib/utils';
 // types

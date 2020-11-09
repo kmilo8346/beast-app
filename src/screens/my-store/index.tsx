@@ -335,6 +335,22 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressCreateStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
+    if (!state.user?.phone || !state.user.phone_verified) {
+      navigation.navigate('SetPhone', {
+        redirect: {
+          name: 'UpsertStore',
+        },
+      });
+      return;
+    }
+    if (!state.user?.first_name) {
+      navigation.navigate('AddUserData', {
+        redirect: {
+          name: 'UpsertStore',
+        },
+      });
+      return;
+    }
     navigation.navigate('UpsertStore');
   };
 
@@ -367,24 +383,6 @@ export default ({ navigation, route }: ScreenProps) => {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (!state.user?.phone || !state.user.phone_verified) {
-      navigation.navigate('SetPhone', {
-        redirect: {
-          name: 'MyStore',
-        },
-      });
-      return;
-    }
-    if (!state.user?.first_name) {
-      navigation.navigate('AddUserData', {
-        redirect: {
-          name: 'MyStore',
-        },
-      });
-    }
-  }, [state.user]);
 
   useFocusEffect(
     useCallback(() => {
@@ -434,11 +432,11 @@ export default ({ navigation, route }: ScreenProps) => {
   // render logic
   const insets = useSafeAreaInsets();
 
-  if (!state.user?.phone || !state.user?.phone_verified) {
-    return null;
-  }
-
-  if (!state.user.current_store) {
+  if (
+    !state.user?.phone ||
+    !state.user?.phone_verified ||
+    !state.user.current_store
+  ) {
     return (
       <View
         style={{

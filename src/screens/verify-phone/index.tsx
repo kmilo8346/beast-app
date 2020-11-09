@@ -9,8 +9,10 @@ import Button from '../../components/buttons/button';
 import LoadingOverlay, {
   ILoadingOverlay,
 } from '../../components/loading-overlay';
+import Toast, { IToast } from '../../components/toast';
 // clients
 import userClient from '../../clients/user-client';
+import phoneClient from '../../clients/phone-client';
 // libs
 import { capture } from '../../lib/sentry';
 import stringFormatter from '../../lib/formatters/string-formatter';
@@ -54,8 +56,9 @@ interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {});
-  const { phone, code } = route.params;
+  const { phone, codes } = route.params;
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const createUser = async () => {
@@ -103,7 +106,7 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const changeCodeHandler = (text: string) => {
-    if (text !== code) {
+    if (codes.indexOf(text) === -1) {
       return;
     }
     createUser();
@@ -111,6 +114,36 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const retryHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
+  };
+
+  const pressResendCodeHandler = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    try {
+      loadingOverlayRef.current?.show();
+      const response = await phoneClient.code({
+        phone,
+      });
+      navigation.setParams({
+        ...route.params,
+        phone: response.phone,
+        code: [...codes, response.code],
+      });
+      toastRef.current?.show({
+        type: 'INFO',
+        message: 'Código reenviado correctamente',
+        expiration: 3,
+      });
+    } catch (error) {
+      capture(prefix, 'Press resend code handler error', error);
+
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: 'No se pudo reenviar el código, reintente',
+        expiration: 3,
+      });
+    } finally {
+      loadingOverlayRef.current?.hide();
+    }
   };
 
   useEffect(() => {
@@ -166,10 +199,31 @@ export default ({ navigation, route }: ScreenProps) => {
           autoFocus
           keyboardType="numeric"
           placeholder="Introduce el código enviado"
-          style={{ paddingLeft: 10 }}
           onChangeText={changeCodeHandler}
         />
+        <Button
+          type="link"
+          title={
+            <Text level={7} color={colors.blue}>
+              Reenviar código sms
+            </Text>
+          }
+          style={{
+            alignSelf: 'flex-start',
+            paddingHorizontal: 0,
+            paddingLeft: 4,
+          }}
+          onPress={pressResendCodeHandler}
+        />
       </ScrollView>
+      <View
+        style={[
+          { position: 'absolute', left: 0, right: 0, bottom: 0 },
+          globalStyles.withMargin,
+        ]}
+      >
+        <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
+      </View>
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );

@@ -15,25 +15,48 @@ interface ComponentProps {
 
 export default ({ data }: ComponentProps) => {
   // render logic
+  const hasDescription = !!data.description;
   return (
     <View style={{ flexDirection: 'row', marginBottom: 10 }}>
       <Image
         source={{ uri: cloudinary.dynamicUrl(data.images[0], 'w_100') }}
         style={{ width: 50, height: 50, borderRadius: 10 }}
       />
-      <View style={{ flex: 1, marginLeft: 15 }}>
-        <Text level={6} weight="bold" numberOfLines={1} ellipsizeMode="tail">
-          {data.name}
-        </Text>
+      <View
+        style={{
+          flex: 1,
+          marginLeft: 15,
+          justifyContent: hasDescription ? 'flex-start' : 'center',
+        }}
+      >
         <Text
-          level={7}
+          level={6}
+          weight="bold"
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={{ marginBottom: 2 }}
+          style={{ marginTop: hasDescription ? 3 : 0 }}
         >
-          {data.description}
+          {data.name}
         </Text>
-        <Text level={6} weight="bold">
+        {hasDescription && (
+          <Text
+            level={7}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginTop: 2 }}
+          >
+            {data.description}
+          </Text>
+        )}
+      </View>
+      <View
+        style={{ justifyContent: hasDescription ? 'flex-start' : 'center' }}
+      >
+        <Text
+          level={6}
+          weight="bold"
+          style={{ marginTop: hasDescription ? 3 : 0 }}
+        >
           {numberFormatter.toCurrency(data.price)}
         </Text>
       </View>
