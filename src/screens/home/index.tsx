@@ -27,7 +27,7 @@ import BagWhiteIcon from '../../components/svgs/icons/bag-white';
 import Button from '../../components/buttons/button';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
-import FreeDeliveryImage from '../../components/svgs/images/free-delivery';
+import BannerImage from '../../components/svgs/images/banner';
 // screen components
 import ModalManageAddress from '../components/modal-manage-address';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
@@ -652,7 +652,7 @@ export default ({ navigation }: ScreenProps) => {
           }
           return (
             <View>
-              <FreeDeliveryImage />
+              <BannerImage />
               <View
                 style={{
                   flexDirection: 'row',
@@ -771,7 +771,7 @@ export default ({ navigation }: ScreenProps) => {
             fetchMore();
           }
         }}
-        style={[{ flex: 1, marginTop: 15 }, globalStyles.withPadding]}
+        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
       />
     );
   }

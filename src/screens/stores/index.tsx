@@ -21,7 +21,7 @@ import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 import Bone from '../../components/bone';
-import FreeDeliveryImage from '../../components/svgs/images/free-delivery';
+import BannerImage from '../../components/svgs/images/banner';
 import Icon from '../../components/icon';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';
@@ -357,7 +357,7 @@ export default ({ navigation }: ScreenProps) => {
       refreshing={state.refreshing}
       ListHeaderComponent={
         <View style={{ marginBottom: 15 }}>
-          <FreeDeliveryImage />
+          <BannerImage />
         </View>
       }
       keyExtractor={(item: Store) => item.id}
