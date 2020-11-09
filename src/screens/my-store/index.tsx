@@ -34,7 +34,7 @@ import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
 import * as utils from '../../lib/utils';
 // types
-import { LoggedUser, Product, SearchResponse, Store } from '../../types';
+import { Product, SearchResponse, Store, User } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -46,7 +46,7 @@ let fetchProductsRequestSource: CancelTokenSource;
 
 type SetUserAction = {
   type: 'set_user';
-  user: LoggedUser;
+  user?: User;
 };
 type SetStoreAction = {
   type: 'set_store';
@@ -100,7 +100,7 @@ type Action =
   | UpdateProductAction
   | DeleteProductAction;
 type State = {
-  user?: LoggedUser;
+  user?: User;
   store?: Store;
   products?: SearchResponse<Product>;
   error?: Error;
@@ -190,6 +190,7 @@ interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
+    user: userCache.getData(),
     refreshing: false,
     fetching_more: false,
   });
@@ -368,21 +369,27 @@ export default ({ navigation, route }: ScreenProps) => {
   }, []);
 
   useEffect(() => {
-    if (!userCache.isLogged()) {
-      navigation.replace('SignIn', {
+    if (!state.user?.phone || !state.user.phone_verified) {
+      navigation.navigate('SetPhone', {
         redirect: {
           name: 'MyStore',
         },
-        dont_allow_guest: true,
-        reason: 'to_sell',
+      });
+      return;
+    }
+    if (!state.user?.first_name) {
+      navigation.navigate('AddUserData', {
+        redirect: {
+          name: 'MyStore',
+        },
       });
     }
-  }, []);
+  }, [state.user]);
 
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
-        dispatch({ type: 'set_user', user: user as LoggedUser });
+        dispatch({ type: 'set_user', user });
       });
       return () => {
         unsubscribe();
@@ -427,7 +434,7 @@ export default ({ navigation, route }: ScreenProps) => {
   // render logic
   const insets = useSafeAreaInsets();
 
-  if (!state.user?.email) {
+  if (!state.user?.phone || !state.user?.phone_verified) {
     return null;
   }
 

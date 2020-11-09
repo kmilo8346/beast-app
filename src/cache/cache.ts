@@ -7,7 +7,7 @@ export default class Cache<T> {
     this.subscribers = [];
   }
 
-  private notify(data: T) {
+  private notify(data: T | undefined) {
     this.subscribers.forEach((callback) => {
       callback(data);
     });
@@ -29,6 +29,11 @@ export default class Cache<T> {
 
   replaceData(replace: Partial<T>) {
     this.data = { ...replace } as T;
+    this.notify(this.data);
+  }
+
+  resetData() {
+    this.data = undefined;
     this.notify(this.data);
   }
 

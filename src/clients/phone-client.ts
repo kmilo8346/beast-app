@@ -1,7 +1,7 @@
 import { CancelToken } from 'axios';
 import RestClient from './rest-client';
 
-class PhoneClient extends RestClient<any> {
+class PhoneClient extends RestClient<any, any> {
   /**
    * Request to beast api a code for a phone verification
    * @param data
@@ -12,7 +12,7 @@ class PhoneClient extends RestClient<any> {
       phone: string;
     },
     cancelToken?: CancelToken
-  ): Promise<{ code: string }> {
+  ): Promise<{ phone: string; code: string }> {
     const response = await this.axios.post<any>(`${this.prefix}/code`, data, {
       cancelToken,
     });

@@ -3,9 +3,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 // screens
 import {
-  SignInScreen,
   SetPhoneScreen,
+  VerifyPhoneScreen,
+  AddUserDataScreen,
   MenuScreen,
+  EditUserDataScreen,
   ClientOrdersScreen,
   ClientOrderDetailsScreen,
   StoreScreen,
@@ -14,46 +16,56 @@ import {
 // navigation
 import commonStackOptions from './common-stack-options';
 
-const MenuStack = createStackNavigator();
+const Stack = createStackNavigator();
 
 export default () => {
   return (
-    <MenuStack.Navigator screenOptions={commonStackOptions}>
-      <MenuStack.Screen
+    <Stack.Navigator screenOptions={commonStackOptions}>
+      <Stack.Screen
         name="Menu"
         component={MenuScreen}
         options={{ headerShown: false }}
       />
-      <MenuStack.Screen
-        name="ClientOrders"
-        component={ClientOrdersScreen}
-        options={{ title: 'Pedidos' }}
-      />
-      <MenuStack.Screen
-        name="ClientOrderDetails"
-        component={ClientOrderDetailsScreen}
-        options={{ title: 'Detalle de pedido' }}
-      />
-      <MenuStack.Screen
-        name="Store"
-        component={StoreScreen}
-        options={{ title: '' }}
-      />
-      <MenuStack.Screen
-        name="Product"
-        component={ProductScreen}
-        options={{ title: '' }}
-      />
-      <MenuStack.Screen
-        name="SignIn"
-        component={SignInScreen}
-        options={{ title: '' }}
-      />
-      <MenuStack.Screen
+      <Stack.Screen
         name="SetPhone"
         component={SetPhoneScreen}
         options={{ title: '' }}
       />
-    </MenuStack.Navigator>
+      <Stack.Screen
+        name="VerifyPhone"
+        component={VerifyPhoneScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="AddUserData"
+        component={AddUserDataScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="EditUserData"
+        component={EditUserDataScreen}
+        options={{ title: 'Edita tus datos' }}
+      />
+      <Stack.Screen
+        name="ClientOrders"
+        component={ClientOrdersScreen}
+        options={{ title: 'Pedidos' }}
+      />
+      <Stack.Screen
+        name="ClientOrderDetails"
+        component={ClientOrderDetailsScreen}
+        options={{ title: 'Detalle de pedido' }}
+      />
+      <Stack.Screen
+        name="Store"
+        component={StoreScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="Product"
+        component={ProductScreen}
+        options={{ title: '' }}
+      />
+    </Stack.Navigator>
   );
 };

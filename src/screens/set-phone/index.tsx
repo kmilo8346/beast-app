@@ -1,6 +1,5 @@
 import React, { useReducer, useRef } from 'react';
 import { View, Vibration, ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // components
 import Text from '../../components/text';
@@ -11,20 +10,19 @@ import LoadingOverlay, {
   ILoadingOverlay,
 } from '../../components/loading-overlay';
 // clients
-import userClient from '../../clients/user-client';
+import phoneClient from '../../clients/phone-client';
+// cache
+import userCache from '../../cache/user';
 // libs
 import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
 import stringFormatter from '../../lib/formatters/string-formatter';
 import stringParser from '../../lib/parsers/string-parser';
-// cache
-import userCache from '../../cache/user';
 // constraints
 import constraints from './constraints';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
-import { LoggedUser } from '../../types';
 
 // instances outside component
 const prefix = '[set phone screen]';
@@ -83,22 +81,17 @@ const reducer = (state: State, action: Action): State => {
 
 interface ScreenProps {
   navigation: any;
+  route: any;
 }
 
-export default ({ navigation }: ScreenProps) => {
-  const insets = useSafeAreaInsets();
+export default ({ navigation, route }: ScreenProps) => {
   // state
-  const user = userCache.getData() as LoggedUser;
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const [state, dispatch] = useReducer(reducer, {
     form: {
-      phone: user.phone,
+      phone: userCache.getData()?.phone,
       submitted: false,
     },
   });
-
   const toastRef = useRef<IToast>(null);
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
@@ -117,20 +110,19 @@ export default ({ navigation }: ScreenProps) => {
       dispatch({ type: 'set_form_errors', errors });
       return;
     }
+
     try {
       loadingOverlayRef.current?.show();
-      const update = {
-        phone: state.form.phone,
-        phone_verified: false,
-      };
-      await userClient.update({
-        pathVars: {
-          id: user.id,
-        },
-        body: update,
+      const response = await phoneClient.code({
+        phone: state.form.phone as string,
       });
-      await userCache.updateData(update);
-      navigation.goBack();
+      setTimeout(() => {
+        navigation.navigate('VerifyPhone', {
+          phone: response.phone,
+          code: response.code,
+          redirect: route.params.redirect,
+        });
+      }, 300);
     } catch (error) {
       capture(prefix, 'Submit handler error', error);
 
@@ -145,10 +137,6 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   // render logic
-  let title = 'Agrega teléfono móvil';
-  if (user.phone) {
-    title = 'Actualiza teléfono móvil';
-  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }, globalStyles.withPadding]}>
@@ -159,17 +147,16 @@ export default ({ navigation }: ScreenProps) => {
           ellipsizeMode="tail"
           style={{ marginBottom: 10 }}
         >
-          {title}
+          Teléfono móvil
         </Text>
         <Text
           level={5}
           weight="light"
           style={{ marginBottom: 60, lineHeight: 23 }}
         >
-          Usaremos tu teléfono para comunicarnos de ser necesario.
+          Inicia sesión con tu teléfono móvil y únete a nuestra comunidad.
         </Text>
         <Input
-          autoFocus
           returnKeyType="done"
           keyboardType="phone-pad"
           placeholder="Número de teléfono móvil"
@@ -191,7 +178,6 @@ export default ({ navigation }: ScreenProps) => {
         style={[
           { position: 'absolute', left: 0, right: 0, bottom: 0 },
           globalStyles.withMargin,
-          { paddingBottom: insets.bottom },
         ]}
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />

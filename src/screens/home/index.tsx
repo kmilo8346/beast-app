@@ -10,11 +10,13 @@ import {
   FlatList,
   GestureResponderEvent,
   ActivityIndicator,
+  AsyncStorage,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 // components
 import Text from '../../components/text';
@@ -34,6 +36,7 @@ import ConfirmDialog from '../components/dialogs/confirm-dialog';
 import SelectAddress from './components/select-address';
 import Skeleton from './components/skeleton';
 import ProductCard from './components/product-card';
+import OnboardingModal from './components/onboarding-modal';
 // clients
 import userClient from '../../clients/user-client';
 import productClient from '../../clients/product-client';
@@ -46,14 +49,7 @@ import pendingSellerOrdersCache, {
   getTotal,
 } from '../../cache/pending-seller-orders-cache';
 // types
-import {
-  LoggedUser,
-  User,
-  AddressInfo,
-  Place,
-  SearchResponse,
-  Product,
-} from '../../types';
+import { User, AddressInfo, Place, SearchResponse, Product } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -65,7 +61,7 @@ const defaultSize = 10;
 
 type SetUserAction = {
   type: 'set_user';
-  user: User;
+  user?: User;
 };
 type SetUpdatingAction = {
   type: 'set_updating';
@@ -110,6 +106,10 @@ type SetNewSaleDialogAction = {
   type: 'set_new_sale_dialog';
   new_sale_dialog: string;
 };
+type SetOnboardingModalAction = {
+  type: 'set_onboarding_modal';
+  onboarding_modal: boolean;
+};
 type Action =
   | SetUserAction
   | SetUpdatingAction
@@ -122,9 +122,10 @@ type Action =
   | SetPendingSellerOrdersAction
   | SetAddressModalAction
   | SetPendingAddressInfoAction
-  | SetNewSaleDialogAction;
+  | SetNewSaleDialogAction
+  | SetOnboardingModalAction;
 type State = {
-  user: User;
+  user?: User;
   updating: boolean;
   products?: SearchResponse<Product>;
   error?: Error;
@@ -135,6 +136,7 @@ type State = {
   address_modal: boolean;
   pending_address_info?: AddressInfo;
   new_sale_dialog: string;
+  onboarding_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -162,6 +164,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, pending_address_info: action.pending_address_info };
     case 'set_new_sale_dialog':
       return { ...state, new_sale_dialog: action.new_sale_dialog };
+    case 'set_onboarding_modal':
+      return { ...state, onboarding_modal: action.onboarding_modal };
     default:
       return state;
   }
@@ -174,21 +178,19 @@ interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    user: userCache.getData() as User,
+    user: userCache.getData(),
     updating: false,
     refreshing: false,
     fetching_more: false,
     address_modal: false,
     new_sale_dialog: '',
+    onboarding_modal: false,
   });
-  if (!state.user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const address = userCache.getAddress();
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
   let addressInfo;
-  if (state.user.current_address && state.user.addresses?.length) {
+  if (state.user?.current_address && state.user.addresses?.length) {
     addressInfo = {
       current_address: state.user.current_address,
       addresses: state.user.addresses,
@@ -300,17 +302,19 @@ export default ({ navigation }: ScreenProps) => {
 
   const updateAddressInfo = async (info: AddressInfo) => {
     try {
-      const prev_current_address = state.user.current_address;
+      const prev_current_address = state.user?.current_address;
       dispatch({ type: 'set_updating', updating: true });
-      await userClient.update({
-        pathVars: {
-          id: state.user.id,
-        },
-        body: {
-          current_address: info.current_address,
-          addresses: info.addresses,
-        },
-      });
+      if (state.user?.id) {
+        await userClient.update({
+          pathVars: {
+            id: state.user.id,
+          },
+          body: {
+            current_address: info.current_address,
+            addresses: info.addresses,
+          },
+        });
+      }
       await userCache.updateData({
         current_address: info.current_address,
         addresses: info.addresses,
@@ -331,9 +335,26 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
+  const showOnBoarding = async () => {
+    try {
+      const raw: string | null = await AsyncStorage.getItem(
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`
+      );
+
+      const onboarding = raw ? JSON.parse(raw) : undefined;
+      if (!onboarding) {
+        setTimeout(() => {
+          dispatch({ type: 'set_onboarding_modal', onboarding_modal: true });
+        }, 700);
+      }
+    } catch (error) {
+      capture(prefix, 'Show onboarding error', error);
+    }
+  };
+
   const changeAddressInfoHandler = async (info: AddressInfo) => {
     if (
-      state.user.current_address !== info.current_address &&
+      state.user?.current_address !== info.current_address &&
       !shoppingCartCache.isEmpty()
     ) {
       dispatch({
@@ -418,10 +439,22 @@ export default ({ navigation }: ScreenProps) => {
     });
   };
 
+  const onBoardingModalCloseHandler = async () => {
+    dispatch({ type: 'set_onboarding_modal', onboarding_modal: false });
+    try {
+      await AsyncStorage.setItem(
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`,
+        JSON.stringify(true)
+      );
+    } catch (error) {
+      capture(prefix, 'On boarding modal close handler error', error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
-        dispatch({ type: 'set_user', user: user as User });
+        dispatch({ type: 'set_user', user });
       });
       return () => {
         unsubscribe();
@@ -430,10 +463,10 @@ export default ({ navigation }: ScreenProps) => {
   );
 
   useEffect(() => {
-    if (state.user.current_address && state.user.addresses?.length) {
+    if (state.user?.current_address && state.user?.addresses?.length) {
       load();
     }
-  }, [state.user.current_address, state.user.addresses]);
+  }, [state.user?.current_address, state.user?.addresses]);
 
   useEffect(() => {
     const unsubscribe = pendingSellerOrdersCache.onChange((data: any) => {
@@ -455,7 +488,7 @@ export default ({ navigation }: ScreenProps) => {
           const data = notification.request.content.data;
           const order = data.order || (data.body as any).order;
           if (
-            userCache.isLogged() &&
+            state.user?.current_store &&
             order &&
             typeof order === 'string' &&
             !state.new_sale_dialog
@@ -477,7 +510,7 @@ export default ({ navigation }: ScreenProps) => {
       (response) => {
         const data = response.notification.request.content.data;
         const order = data.order || (data.body as any).order;
-        if (userCache.isLogged() && order && typeof order === 'string') {
+        if (state.user?.current_store && order && typeof order === 'string') {
           setTimeout(() => {
             navigation.navigate('SellerOrderDetails', { order });
           }, 300);
@@ -491,11 +524,16 @@ export default ({ navigation }: ScreenProps) => {
     };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      showOnBoarding();
+    }, [])
+  );
+
   // render logic
   let message = '¡Hola!';
-  if (userCache.isLogged()) {
-    const logged = state.user as LoggedUser;
-    message = `¡Hola ${logged.first_name}!`;
+  if (state.user?.first_name) {
+    message = `¡Hola ${state.user.first_name}!`;
   }
   let selectAddressComponent: ReactNode = null;
   if (addressInfo) {
@@ -785,6 +823,9 @@ export default ({ navigation }: ScreenProps) => {
           onOk={newSaleDialogOkHandler}
           onCancel={newSaleDialogCancelHandler}
         />
+      )}
+      {state.onboarding_modal && (
+        <OnboardingModal onClose={onBoardingModalCloseHandler} />
       )}
     </View>
   );

@@ -6,7 +6,6 @@ import {
   Vibration,
   View,
 } from 'react-native';
-
 import Constants from 'expo-constants';
 
 // constraints
@@ -39,10 +38,11 @@ import { v4 as uuidv4 } from '../../lib/uuid';
 import stringFormatter from '../../lib/formatters/string-formatter';
 import stringParser from '../../lib/parsers/string-parser';
 import { capture } from '../../lib/sentry';
+// types
+import { Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
-import { LoggedUser, Store } from '../../types';
 
 // instances outside component
 const prefix = '[upsert store screen]';
@@ -113,15 +113,15 @@ interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // state
-  const user = userCache.getData() as LoggedUser;
+  const user = userCache.getData();
   const [state, dispatch] = useReducer(reducer, {
     form: {
       store:
         route.params?.store ||
         (({
-          reference: `${`${user.id}`.substring(0, 6)}-${uuidv4()}`,
-          phone: user.phone,
-          user: user.id,
+          reference: `${`${user?.id as string}`.substring(0, 6)}-${uuidv4()}`,
+          phone: user?.phone as string,
+          user: user?.id as string,
           delivery_area: (() => {
             const address = userCache.getAddress();
             return address
@@ -159,7 +159,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
       await userClient.update({
         pathVars: {
-          id: user.id,
+          id: user?.id as string,
         },
         body: {
           current_store: created.id,
@@ -248,7 +248,9 @@ export default ({ navigation, route }: ScreenProps) => {
           size={1}
           label="Imagen"
           required
-          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${state.form.store?.reference}/\${}`}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${
+            state.form.store?.reference
+          }/${new Date().getTime()}-\${}`}
           value={state.form.store?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {

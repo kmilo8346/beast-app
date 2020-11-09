@@ -16,6 +16,7 @@ import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import ErrorView from '../../components/error-view';
 import Button from '../../components/buttons/button';
+import BagHeadImage from '../../components/svgs/images/bag-head';
 import ActionSheetContact from '../../components/modals/action-sheet-contact';
 // cache
 import storeCache from '../../cache/store';
@@ -30,7 +31,7 @@ import dateFormatter from '../../lib/formatters/date-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import { capture } from '../../lib/sentry';
 // types
-import { LoggedUser, Order, Store } from '../../types';
+import { Order, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -118,7 +119,6 @@ export default ({ route }: ScreenProps) => {
     contact_modal: false,
     payment_link_modal: false,
   });
-  const user = userCache.getData() as LoggedUser;
 
   // event handlers
   const fetchOrder = async (id: string) => {
@@ -217,7 +217,7 @@ export default ({ route }: ScreenProps) => {
 
   useEffect(() => {
     if (!state.store) {
-      fetchStore(user.current_store as string);
+      fetchStore(userCache.getData()?.current_store as string);
     }
     return () => {
       fetchStoreRequestSource && fetchStoreRequestSource.cancel();
@@ -326,6 +326,21 @@ export default ({ route }: ScreenProps) => {
       />
     );
   }
+  let photoComponent: ReactNode = <BagHeadImage />;
+  if (state.order.customer.photo_url) {
+    photoComponent = (
+      <Image
+        source={{
+          uri: state.order.customer.photo_url,
+        }}
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 100,
+        }}
+      />
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }]}>
@@ -339,16 +354,7 @@ export default ({ route }: ScreenProps) => {
             globalStyles.withMargin,
           ]}
         >
-          <Image
-            source={{
-              uri: state.order.customer.photo_url,
-            }}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 100,
-            }}
-          />
+          {photoComponent}
           <View
             style={{
               marginLeft: 15,

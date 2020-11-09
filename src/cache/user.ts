@@ -1,11 +1,11 @@
 // cache
 import PersistedCache from './persisted-cache';
 // types
-import { User, LoggedUser, Place } from '../types';
+import { Place, User } from '../types';
 
 class UserCache extends PersistedCache<User> {
   isLogged() {
-    return (this.data as LoggedUser).email !== undefined;
+    return this.data?.phone !== undefined;
   }
 
   getAddress(): Place | undefined {

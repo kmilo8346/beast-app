@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   GestureResponderEvent,
   ScrollView,
-  Vibration,
   View,
   Image,
 } from 'react-native';
@@ -21,10 +20,7 @@ import axios, { CancelTokenSource } from 'axios';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 
-// constraints
-import constraints from './constraints';
 // local components
-import SetPhoneModal from './components/set-phone-modal';
 import ItemComponent from './components/item';
 import UnavailableProductsDialog from './components/unavailable-products-dialog';
 // screen components
@@ -44,7 +40,6 @@ import LoadingOverlay, {
 import Toast, { IToast } from '../../components/toast';
 import CheckBlueThinImage from '../../components/svgs/images/check-blue-thin';
 // clients
-import userClient from '../../clients/user-client';
 import orderClient from '../../clients/order-client';
 // cache
 import userCache from '../../cache/user';
@@ -53,22 +48,19 @@ import shoppingCartCache, {
   getSnapshot,
 } from '../../cache/shopping-cart';
 // lib
-import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
-import stringFormatter from '../../lib/formatters/string-formatter';
 import cloudinary from '../../lib/cloudinary';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import * as utils from '../../lib/utils';
 import { v4 as uuidv4, generatePushID } from '../../lib/uuid';
 // types
-import { User, Product, Store, LoggedUser } from '../../types';
+import { Product, Store, LoggedUser } from '../../types';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
 
 const prefix = '[shopping cart screen]';
-let updateUserRequestSource: CancelTokenSource;
 let createOrderRequestSource: CancelTokenSource;
 
 interface StateStore {
@@ -110,21 +102,6 @@ type SetUpdatingPhoneAction = {
   type: 'set_updating_phone';
   updating_phone: boolean;
 };
-type ChangeFormValueAction = {
-  type: 'change_form_value';
-  attribute: string;
-  value: string;
-};
-type ValidateFormValuesAction = {
-  type: 'validate_form_values';
-};
-type SetFormSubmittedAction = {
-  type: 'set_form_submitted';
-};
-type SetFormErrorsAction = {
-  type: 'set_form_errors';
-  errors: { [key: string]: string[] };
-};
 type SetPendingRemovalAction = {
   type: 'set_pending_removal';
   pending_removal?: string;
@@ -165,10 +142,6 @@ type Action =
   | ToogleExpandProductAction
   | SetPhoneModalAction
   | SetUpdatingPhoneAction
-  | ChangeFormValueAction
-  | ValidateFormValuesAction
-  | SetFormSubmittedAction
-  | SetFormErrorsAction
   | SetPendingRemovalAction
   | SetIdempotencyAction
   | SetLastOrderedStoreAction
@@ -182,14 +155,6 @@ type State = {
   shopping_cart_snapshot: ShoppingCartSnapshot;
   selected_store?: string;
   state_stores: StateStores;
-  phone_modal: boolean;
-  updating_phone: boolean;
-  form: {
-    phone?: string;
-
-    submitted: boolean;
-    errors?: { [key: string]: string[] };
-  };
   pending_removal?: string;
   idempotency?: string;
   last_ordered_store?: Store;
@@ -248,49 +213,6 @@ const reducer = (state: State, action: Action): State => {
           },
         },
       };
-    case 'set_phone_modal':
-      return {
-        ...state,
-        phone_modal: action.phone_modal,
-      };
-    case 'set_updating_phone':
-      return {
-        ...state,
-        updating_phone: action.updating_phone,
-      };
-    case 'change_form_value':
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          [action.attribute]: action.value,
-        },
-      };
-    case 'validate_form_values':
-      if (!state.form.submitted) return state;
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          errors: validate(state.form, constraints),
-        },
-      };
-    case 'set_form_submitted':
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          submitted: true,
-        },
-      };
-    case 'set_form_errors':
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          errors: action.errors,
-        },
-      };
     case 'set_pending_removal':
       return {
         ...state,
@@ -347,12 +269,6 @@ export default ({ navigation, route }: ScreenProps) => {
       view: ShoppingCartView.SHOPPING_CART,
       shopping_cart_snapshot: [],
       state_stores: {},
-      phone_modal: false,
-      updating_phone: false,
-      form: {
-        phone: (userCache.getData() as User).phone,
-        submitted: false,
-      },
       disabled_store_dialog: '',
       closed_store_dialog: '',
       unexpected_error_dialog: false,
@@ -385,33 +301,6 @@ export default ({ navigation, route }: ScreenProps) => {
   const toastRef = useRef<IToast>(null);
 
   // event handler
-  const updatePhone = async (phone: string) => {
-    try {
-      dispatch({ type: 'set_updating_phone', updating_phone: true });
-      if (updateUserRequestSource) {
-        updateUserRequestSource.cancel();
-      }
-      updateUserRequestSource = axios.CancelToken.source();
-      await userClient.update(
-        {
-          pathVars: {
-            id: (userCache.getData() as User).id,
-          },
-          body: {
-            phone,
-            phone_verified: false,
-          },
-        },
-        { cancelToken: updateUserRequestSource.token }
-      );
-      userCache.updateData({ phone, phone_verified: false });
-    } catch (error) {
-      capture(prefix, 'Update phone error', error);
-    } finally {
-      dispatch({ type: 'set_updating_phone', updating_phone: false });
-    }
-  };
-
   const createOrder = async () => {
     const match = state.shopping_cart_snapshot.find(
       (store_shopping_sart) =>
@@ -534,47 +423,30 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressMakeOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_form_submitted' });
-    // validate
-    const errors = validate(state.form, constraints);
-    if (errors) {
-      Vibration.vibrate(400);
-      toastRef.current?.show({
-        message: 'Agregue número de teléfono, por favor',
-        type: 'ERROR',
-        expiration: 3,
-      });
-      dispatch({ type: 'set_form_errors', errors });
-      return;
-    }
-    if (!userCache.isLogged()) {
-      navigation.navigate('SignIn', {
+    const user = userCache.getData();
+    if (!user?.phone || !user.phone_verified) {
+      navigation.navigate('SetPhone', {
         redirect: {
           name: 'ShoppingCart',
           params: {
             pay: uuidv4(),
           },
         },
-        dont_allow_guest: true,
-        reason: 'to_buy',
+      });
+      return;
+    }
+    if (!user?.first_name) {
+      navigation.navigate('AddUserData', {
+        redirect: {
+          name: 'ShoppingCart',
+          params: {
+            pay: uuidv4(),
+          },
+        },
       });
       return;
     }
     dispatch({ type: 'set_make_order_dialog', make_order_dialog: true });
-  };
-
-  const pressSetPhoneHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    dispatch({ type: 'set_phone_modal', phone_modal: true });
-  };
-
-  const changePhoneHandler = (phone: string) => {
-    dispatch({ type: 'set_phone_modal', phone_modal: false });
-    updatePhone(phone);
-  };
-
-  const closeModalPhoneHandler = () => {
-    dispatch({ type: 'set_phone_modal', phone_modal: false });
   };
 
   const pressToogleEditHandler = (store: string) => {
@@ -708,25 +580,6 @@ export default ({ navigation, route }: ScreenProps) => {
     event.stopPropagation();
     navigation.navigate('ClientOrders');
   };
-
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = userCache.onChange((user) => {
-        const phone = (user as User).phone as string;
-        dispatch({
-          type: 'change_form_value',
-          attribute: 'phone',
-          value: phone,
-        });
-        dispatch({
-          type: 'validate_form_values',
-        });
-      });
-      return () => {
-        unsubscribe();
-      };
-    }, [])
-  );
 
   useEffect(() => {
     requestNotificationPermisions();
@@ -883,12 +736,6 @@ export default ({ navigation, route }: ScreenProps) => {
   if (address.apartment) {
     addressText = `${addressText} · ${address.apartment}`;
   }
-  let phoneText = 'Agrega teléfono de contacto';
-  if (state.form.phone) {
-    phoneText = stringFormatter.toPhone(state.form.phone, {
-      prefix: true,
-    }) as string;
-  }
   let mainAction: ReactNode = null;
   if (state.selected_store) {
     const match = state.shopping_cart_snapshot.find(
@@ -913,7 +760,7 @@ export default ({ navigation, route }: ScreenProps) => {
             globalStyles.withMargin,
           ]}
         >
-          <View style={[{ flexDirection: 'row', marginBottom: 20 }]}>
+          <View style={[{ flexDirection: 'row' }]}>
             <MapPinShadedBlueIcon />
             <View style={{ marginLeft: 15, flex: 1 }}>
               <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
@@ -924,45 +771,6 @@ export default ({ navigation, route }: ScreenProps) => {
               </Text>
             </View>
           </View>
-          <Touchable
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingLeft: 5,
-            }}
-            onPress={pressSetPhoneHandler}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                level={6}
-                weight="bold"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{ marginBottom: 2 }}
-              >
-                Número de teléfono
-              </Text>
-              <Text level={6} numberOfLines={1} ellipsizeMode="tail">
-                {phoneText}
-              </Text>
-            </View>
-            {state.updating_phone ? (
-              <ActivityIndicator />
-            ) : state.phone_modal ? (
-              <Icon name="chevron-up" />
-            ) : (
-              <Icon name="chevron-down" />
-            )}
-          </Touchable>
-          {state.form.errors?.phone?.length ? (
-            <Text
-              level={8}
-              color={colors.red}
-              style={{ marginTop: 5, marginLeft: 7 }}
-            >
-              {state.form.errors.phone[0]}
-            </Text>
-          ) : null}
         </View>
 
         <Divider type="thick" />
@@ -1184,6 +992,7 @@ export default ({ navigation, route }: ScreenProps) => {
             right: 0,
             bottom: 0,
             paddingBottom: insets.bottom,
+            backgroundColor: colors.white,
           },
           globalStyles.withMargin,
         ]}
@@ -1191,13 +1000,6 @@ export default ({ navigation, route }: ScreenProps) => {
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         {mainAction}
       </View>
-      {state.phone_modal && (
-        <SetPhoneModal
-          value={state.form.phone}
-          onChange={changePhoneHandler}
-          onClose={closeModalPhoneHandler}
-        />
-      )}
       {state.pending_removal && (
         <ConfirmDialog
           title="¿Seguro que quieres eliminar la tienda seleccionada?"

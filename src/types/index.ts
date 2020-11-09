@@ -174,40 +174,25 @@ export interface Product extends CreateProduct {
   updated_at: Date;
 }
 
-export interface CreateAnonymouslyUser {
-  id: string;
-  current_address?: string;
-  addresses?: Place[];
-  phone?: string;
-  phone_verified?: boolean;
-}
-
-export interface CreateLoggedUser {
-  id: string;
-  email: string;
-  first_name: string;
+export interface CreateUser {
+  id?: string;
+  phone: string;
+  phone_verified: boolean;
+  email?: string;
+  email_verified?: boolean;
+  first_name?: string;
   last_name?: string;
-  photo_url: string;
-  phone?: string;
-  phone_verified?: boolean;
+  photo_url?: string;
   current_address?: string;
   addresses?: Place[];
-}
-
-export type CreateUser = CreateAnonymouslyUser | CreateLoggedUser;
-
-export interface AnonymouslyUser extends CreateAnonymouslyUser {
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface LoggedUser extends CreateLoggedUser {
   current_store?: string;
+}
+
+export interface User extends CreateUser {
+  id: string;
   created_at: Date;
   updated_at: Date;
 }
-
-export type User = AnonymouslyUser | LoggedUser;
 
 export interface Item extends Product {
   qty: number;
@@ -217,10 +202,10 @@ export interface CreateOrder {
   idempotency: string;
   customer: {
     id: string;
-    email: string;
+    email?: string;
     first_name: string;
     last_name?: string;
-    photo_url: string;
+    photo_url?: string;
     phone: string;
   };
   transaction: {

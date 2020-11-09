@@ -6,10 +6,12 @@ import {
   GestureResponderEvent,
   Vibration,
   Share,
+  AsyncStorage,
 } from 'react-native';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
 
 // components
 import Text from '../../components/text';
@@ -25,10 +27,9 @@ import ModalHelp from './components/modal-help';
 // clients
 import userClient from '../../clients/user-client';
 // lib
-import firebase from '../../lib/firebase';
 import { capture } from '../../lib/sentry';
 // types
-import { LoggedUser, AddressInfo } from '../../types';
+import { AddressInfo } from '../../types';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache from '../../cache/shopping-cart';
@@ -52,13 +53,10 @@ export default ({ navigation }: ScreenProps) => {
   const [pendingAddressInfo, setPendingAddressInfo] = useState<
     AddressInfo | undefined
   >();
-  if (!user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
   let addressInfo;
-  if (user.current_address && user.addresses?.length) {
+  if (user?.current_address && user.addresses?.length) {
     addressInfo = {
       current_address: user.current_address,
       addresses: user.addresses,
@@ -70,15 +68,17 @@ export default ({ navigation }: ScreenProps) => {
     try {
       const prev_current_address = userCache.getData()?.current_address;
       setUpdatingAddressInfo(true);
-      await userClient.update({
-        pathVars: {
-          id: user.id,
-        },
-        body: {
-          current_address: info.current_address,
-          addresses: info.addresses,
-        },
-      });
+      if (user?.id) {
+        await userClient.update({
+          pathVars: {
+            id: user.id,
+          },
+          body: {
+            current_address: info.current_address,
+            addresses: info.addresses,
+          },
+        });
+      }
       await userCache.updateData({
         current_address: info.current_address,
         addresses: info.addresses,
@@ -88,7 +88,7 @@ export default ({ navigation }: ScreenProps) => {
         navigation.dispatch(
           CommonActions.reset({
             index: 1,
-            routes: [{ name: 'MainRootStack' }],
+            routes: [{ name: 'MainTab' }],
           })
         );
       }
@@ -111,11 +111,6 @@ export default ({ navigation }: ScreenProps) => {
     setModalManageAddress(true);
   };
 
-  const pressPhoneNumberHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('SetPhone');
-  };
-
   const pressMyOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('ClientOrders');
@@ -123,23 +118,26 @@ export default ({ navigation }: ScreenProps) => {
 
   const pressCloseSessionHandler = async (event: GestureResponderEvent) => {
     event.stopPropagation();
-    await firebase.auth().signOut();
     shoppingCartCache.clear();
+    userCache.resetData();
+    try {
+      await AsyncStorage.setItem(
+        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`,
+        JSON.stringify(false)
+      );
+    } catch (error) {
+      capture(prefix, 'Unsetting onboarding error', error);
+    }
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
-        routes: [{ name: 'Boot' }],
+        routes: [{ name: 'MainTab' }],
       })
     );
   };
 
   const pressStartSessionHandler = () => {
-    navigation.navigate('SignIn', {
-      redirect: {
-        name: 'MainRootStack',
-      },
-      dont_allow_guest: true,
-    });
+    navigation.navigate('SetPhone', { redirect: { name: 'Menu' } });
   };
 
   const pressShareHandler = async () => {
@@ -181,6 +179,18 @@ export default ({ navigation }: ScreenProps) => {
     setPendingAddressInfo(undefined);
   };
 
+  const pressMyAccountHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('EditUserData');
+  };
+
+  const pressTermsHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    WebBrowser.openBrowserAsync(
+      `${Constants.manifest.extra.BEAST_WEB_URL}/policies`
+    );
+  };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
@@ -195,119 +205,48 @@ export default ({ navigation }: ScreenProps) => {
   // render logic
   const address = userCache.getAddress();
   let addressText = 'Administra tus direcciones';
+  let photoComponent: ReactNode = <BagHeadImage />;
+  let firstNameComponent: ReactNode = (
+    <Text
+      level={3}
+      weight="bold"
+      numberOfLines={1}
+      ellipsizeMode="tail"
+      style={{ marginLeft: 10, flex: 1, flexWrap: 'wrap' }}
+    >
+      ¡Hola!
+    </Text>
+  );
+  let mainAction: ReactNode = null;
+  let fingerprint: ReactNode = null;
   if (address) {
     addressText = `${address.route.short_name} ${address.street_number.short_name}`;
     if (address.apartment) {
       addressText = `${addressText} · ${address.apartment}`;
     }
   }
-
-  let content: ReactNode | null = null;
-  let mainAction: ReactNode | null = null;
-  if (userCache.isLogged()) {
-    const user = userCache.getData() as LoggedUser;
-    let phoneText = 'Agrega tu teléfono móvil';
-    if (user.phone) {
-      phoneText = user.phone;
-    }
-
-    content = (
-      <ScrollView
-        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 30,
-          }}
-        >
-          <Image
-            source={{
-              uri: user.photo_url,
-            }}
-            style={{ width: 50, height: 50, borderRadius: 100 }}
-          />
-          <Text
-            level={3}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ marginLeft: 10, flex: 1, flexWrap: 'wrap' }}
-          >{`¡Hola ${user.first_name}!`}</Text>
-        </View>
-
-        <Item
-          name="Mis direcciones"
-          description={addressText}
-          processing={updatingAddressInfo}
-          onPress={pressMyAddressesHandler}
-        />
-        <Item
-          name="Número de teléfono"
-          description={phoneText}
-          onPress={pressPhoneNumberHandler}
-        />
-        <Item
-          name="Mis pedidos"
-          onPress={pressMyOrdersHandler}
-          description="Histórico de pedidos"
-        />
-        <Item
-          name="Compartir app"
-          description="Comparte con amigos y clientes"
-          onPress={pressShareHandler}
-        />
-
-        <View style={globalStyles.withScreenAir} />
-      </ScrollView>
-    );
-    mainAction = (
-      <Button
-        title="Cerrar sesión"
-        style={globalStyles.withMainActionAir}
-        onPress={pressCloseSessionHandler}
+  if (user?.photo_url) {
+    photoComponent = (
+      <Image
+        source={{
+          uri: user.photo_url,
+        }}
+        style={{ width: 50, height: 50, borderRadius: 100 }}
       />
     );
-  } else {
-    content = (
-      <ScrollView
-        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 15,
-          }}
-        >
-          <BagHeadImage />
-          <Text
-            level={3}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ marginLeft: 10 }}
-          >
-            ¡Hola invitado!
-          </Text>
-        </View>
-
-        <Text level={6} style={{ marginBottom: 10, lineHeight: 20 }}>
-          Crea una cuenta para poder realizar compras y ofrecerte una mejor
-          experiencia.
-        </Text>
-
-        <Item
-          name="Mis direcciones"
-          description={addressText}
-          processing={updatingAddressInfo}
-          onPress={pressMyAddressesHandler}
-        />
-
-        <View style={globalStyles.withScreenAir} />
-      </ScrollView>
+  }
+  if (user?.first_name) {
+    firstNameComponent = (
+      <Text
+        level={3}
+        weight="bold"
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={{ marginLeft: 10, flex: 1, flexWrap: 'wrap' }}
+      >{`¡Hola ${user.first_name}!`}</Text>
     );
+  }
+  if (!user?.phone || !user.phone_verified) {
     mainAction = (
       <Button
         title="Iniciar sesión"
@@ -316,25 +255,26 @@ export default ({ navigation }: ScreenProps) => {
       />
     );
   }
-  let fingerprint: ReactNode | null = null;
   switch (Constants.manifest.extra.BEAST_ENVIRONMENT) {
     case 'development':
       fingerprint = (
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 15,
+            paddingBottom: 10,
             backgroundColor: colors.white,
           }}
         >
           <Text level={7} style={{ marginBottom: 5 }}>
             Development
           </Text>
-          <Text
-            level={7}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >{`Usuario ${user.id}`}</Text>
+          {!!user?.id && (
+            <Text
+              level={7}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >{`Usuario ${user.id}`}</Text>
+          )}
         </View>
       );
       break;
@@ -343,19 +283,21 @@ export default ({ navigation }: ScreenProps) => {
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 15,
+            paddingBottom: 10,
             backgroundColor: colors.white,
           }}
         >
           <Text level={7} style={{ marginBottom: 5 }}>
             Staging
           </Text>
-          <Text
-            level={7}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ marginBottom: 5 }}
-          >{`Usuario ${user.id}`}</Text>
+          {!!user?.id && (
+            <Text
+              level={7}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ marginBottom: 5 }}
+            >{`Usuario ${user.id}`}</Text>
+          )}
           <Text
             level={7}
             numberOfLines={1}
@@ -369,7 +311,7 @@ export default ({ navigation }: ScreenProps) => {
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 15,
+            paddingBottom: 10,
             backgroundColor: colors.white,
           }}
         >
@@ -390,7 +332,6 @@ export default ({ navigation }: ScreenProps) => {
     default:
       break;
   }
-
   return (
     <View
       style={{
@@ -407,7 +348,62 @@ export default ({ navigation }: ScreenProps) => {
       >
         Más opciones
       </Text>
-      {content}
+      <ScrollView
+        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 15,
+          }}
+        >
+          {photoComponent}
+          {firstNameComponent}
+        </View>
+
+        {!!user?.id && (
+          <Item
+            name="Mi cuenta"
+            description="Edita datos de tu cuenta"
+            onPress={pressMyAccountHandler}
+          />
+        )}
+        {!!user?.id && (
+          <Item
+            name="Mis pedidos"
+            onPress={pressMyOrdersHandler}
+            description="Histórico de pedidos"
+          />
+        )}
+        <Item
+          name="Mis direcciones"
+          description={addressText}
+          processing={updatingAddressInfo}
+          onPress={pressMyAddressesHandler}
+        />
+        <Item
+          name="Compartir app"
+          description="Comparte con amigos y clientes"
+          onPress={pressShareHandler}
+        />
+        <Item
+          name="Términos y condiciones"
+          description="Revisa los términos y condiciones"
+          onPress={pressTermsHandler}
+        />
+
+        {user?.phone && user.phone_verified && (
+          <Button
+            title="Cerrar sesión"
+            type="link"
+            style={{ alignSelf: 'center', marginTop: 20 }}
+            onPress={pressCloseSessionHandler}
+          />
+        )}
+
+        <View style={globalStyles.withScreenAir} />
+      </ScrollView>
       <View
         style={[
           {

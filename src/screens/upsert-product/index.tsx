@@ -38,10 +38,11 @@ import { v4 as uuidv4 } from '../../lib/uuid';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import stringParser from '../../lib/parsers/string-parser';
 import { capture } from '../../lib/sentry';
+// types
+import { Product, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
-import { LoggedUser, Product, Store } from '../../types';
 
 // instances outside component
 const prefix = '[upsert product screen]';
@@ -120,7 +121,7 @@ interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // state
-  const user = userCache.getData() as LoggedUser;
+  const user = userCache.getData();
   const store = storeCache.getData() as Store;
   const [state, dispatch] = useReducer(reducer, {
     form: {
@@ -138,7 +139,7 @@ export default ({ navigation, route }: ScreenProps) => {
             tags: [],
             images: [],
             enabled: true,
-            reference: `${`${user.id}`.substring(0, 6)}-${uuidv4()}`,
+            reference: `${`${user?.id as string}`.substring(0, 6)}-${uuidv4()}`,
             store_info: {
               id: store.id,
               enabled: store.enabled,
@@ -296,7 +297,11 @@ export default ({ navigation, route }: ScreenProps) => {
         <InputImages
           required
           label="Imágenes"
-          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${store.reference}/products/${state.form.product.reference}/\${}`}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${
+            store.reference
+          }/products/${
+            state.form.product.reference
+          }/${new Date().getTime()}-\${}`}
           value={state.form.product?.images}
           errors={state.form.errors?.images}
           onChange={(images) => {

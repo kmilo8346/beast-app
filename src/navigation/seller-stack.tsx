@@ -7,7 +7,9 @@ import commonStackOptions from './common-stack-options';
 // screens
 import {
   MyStoreScreen,
-  SignInScreen,
+  SetPhoneScreen,
+  VerifyPhoneScreen,
+  AddUserDataScreen,
   MyStoreMenu,
   UpsertStoreScreen,
   UpsertProductScreen,
@@ -28,8 +30,18 @@ export default () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="SignIn"
-          component={SignInScreen}
+          name="SetPhone"
+          component={SetPhoneScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="VerifyPhone"
+          component={VerifyPhoneScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="AddUserData"
+          component={AddUserDataScreen}
           options={{ title: '' }}
         />
         <Stack.Screen

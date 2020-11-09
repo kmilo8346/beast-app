@@ -4,15 +4,18 @@ import registerRootComponent from 'expo/build/launch/registerRootComponent';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
 
-import Navigation from './navigation';
+import Navigation from './navigation/index';
 // components
 import ErrorView from './components/error-view';
+// clients
+import userClient from './clients/user-client';
 // libs
 import firebase from './lib/firebase';
 import * as utils from './lib/utils';
 import deviceAgent from './lib/device-agent';
 import Sentry, { capture } from './lib/sentry';
 // cache
+import userCache from './cache/user';
 import shoppingCartCache from './cache/shopping-cart';
 // fonts
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
@@ -31,7 +34,7 @@ interface State {
 }
 
 class App extends React.Component<{}, State> {
-  private unsubscribe: () => void;
+  private unsubscribe_user_change: () => void;
 
   constructor(props: any) {
     super(props);
@@ -39,7 +42,7 @@ class App extends React.Component<{}, State> {
       is_ready: false,
       has_error: false,
     };
-    this.unsubscribe = utils.noop;
+    this.unsubscribe_user_change = utils.noop;
   }
 
   static getDerivedStateFromError = () => {
@@ -48,17 +51,23 @@ class App extends React.Component<{}, State> {
   };
 
   componentDidMount = () => {
-    this.unsubscribe = auth.onAuthStateChanged(async (authUser) => {
-      if (authUser) {
-        deviceAgent.sync({ user_id: authUser.uid });
+    // TODO: change
+    this.unsubscribe_user_change = userCache.onChange((data) => {
+      if (data) {
+        deviceAgent.sync({ user_id: data.id });
 
         // indetify user in sentry
         const user: Sentry.Native.User = {
-          id: authUser.uid,
+          id: data.id,
         };
-        if (!authUser.isAnonymous) {
-          user.username = authUser.displayName as string;
-          user.email = authUser.email as string;
+        if (data.first_name) {
+          user.username = data.first_name;
+        }
+        if (data.email) {
+          user.email = data.email;
+        }
+        if (data.phone) {
+          user.phone = data.phone;
         }
         Sentry.Native.setUser(user);
       }
@@ -66,11 +75,57 @@ class App extends React.Component<{}, State> {
   };
 
   componentWillUnmount = () => {
-    this.unsubscribe();
+    this.unsubscribe_user_change();
   };
 
   componentDidCatch = (error: any) => {
     capture(prefix, 'Unexpected error', error);
+  };
+
+  initAuth = async () => {
+    return new Promise((resolve, reject) => {
+      auth.onAuthStateChanged((authUser) => {
+        if (!authUser) {
+          auth.signInAnonymously().catch((error) => {
+            capture(prefix, 'Init auth error', error);
+            reject(error);
+          });
+        } else {
+          resolve(authUser);
+        }
+      });
+    });
+  };
+
+  initUser = async () => {
+    await userCache.load();
+    const cache = userCache.getData();
+
+    if (!cache?.id) {
+      return;
+    }
+
+    try {
+      const user = await userClient.get({ pathVars: { id: cache.id } });
+      userCache.setData(user);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        capture(prefix, 'Init user error', error);
+        userCache.resetData();
+        return;
+      }
+      console.warn(
+        `${prefix} Fresh user cant be resolved, using cache instead`
+      );
+    }
+  };
+
+  cacheFont = async () => {
+    await Font.loadAsync({
+      MonserratBold,
+      MonserratNormal,
+      MonserratLight,
+    });
   };
 
   retryHandler = () => {
@@ -80,24 +135,20 @@ class App extends React.Component<{}, State> {
   appLoadingStartHandler = async () => {
     this.setState({ is_ready: false });
     // tasks
-    await Promise.all([this.cacheFont(), shoppingCartCache.load()]);
+    await this.initAuth();
+    await Promise.all([
+      this.cacheFont(),
+      shoppingCartCache.load(),
+      this.initUser(),
+    ]);
   };
 
   appLoadingErrorHandler = (error: Error) => {
-    capture(prefix, 'Preloading assets error', error);
+    capture(prefix, 'App loading handler error', error);
   };
 
   appLoadingFinishHandler = () => {
     this.setState({ is_ready: true });
-    console.info(`${prefix} Preloading finished`);
-  };
-
-  cacheFont = async () => {
-    await Font.loadAsync({
-      MonserratBold,
-      MonserratNormal,
-      MonserratLight,
-    });
   };
 
   render() {

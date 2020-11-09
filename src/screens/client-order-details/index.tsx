@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { ReactNode, useEffect, useReducer } from 'react';
 import { View, ScrollView, GestureResponderEvent, Image } from 'react-native';
 
 // local components
@@ -9,6 +9,7 @@ import Text from '../../components/text';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
+import BagHeadImage from '../../components/svgs/images/bag-head';
 import ActionSheetContact from '../../components/modals/action-sheet-contact';
 import MapPinShadedBlueIcon from '../../components/svgs/icons/map-pin-shaded-blue';
 // libs
@@ -90,6 +91,24 @@ export default ({ navigation, route }: ScreenProps) => {
   if (order.transaction.delivery_address.apartment) {
     addressText = `${addressText} · ${order.transaction.delivery_address.apartment}`;
   }
+  let photoComponent: ReactNode = <BagHeadImage />;
+  if (order.customer.photo_url) {
+    photoComponent = (
+      <Image
+        source={{
+          uri: cloudinary.dynamicUrl(
+            order.transaction.shopping_cart.store.images[0],
+            'w_500'
+          ),
+        }}
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 10,
+        }}
+      />
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView style={[{ flex: 1 }]}>
@@ -100,19 +119,7 @@ export default ({ navigation, route }: ScreenProps) => {
           ]}
           onPress={pressStoreHandler}
         >
-          <Image
-            source={{
-              uri: cloudinary.dynamicUrl(
-                order.transaction.shopping_cart.store.images[0],
-                'w_500'
-              ),
-            }}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 10,
-            }}
-          />
+          {photoComponent}
           <View
             style={{
               marginLeft: 15,

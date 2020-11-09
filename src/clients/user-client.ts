@@ -1,5 +1,5 @@
 import RestClient from './rest-client';
-import { User, CreateUser } from '../types';
+import { CreateUser, User } from '../types';
 
 class UserClient extends RestClient<User, CreateUser> {}
 

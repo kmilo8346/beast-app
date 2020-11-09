@@ -47,7 +47,7 @@ const defaultSize = 10;
 
 type SetUserAction = {
   type: 'set_user';
-  user: User;
+  user?: User;
 };
 type ResetAction = {
   type: 'reset';
@@ -81,7 +81,7 @@ type Action =
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction;
 type State = {
-  user: User;
+  user?: User;
   stores?: SearchResponse<Store>;
   error?: Error;
   refreshing: boolean;
@@ -116,13 +116,10 @@ interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    user: userCache.getData() as User,
+    user: userCache.getData(),
     refreshing: false,
     fetching_more: false,
   });
-  if (!state.user) {
-    throw new Error(`${prefix} User must be defined`);
-  }
   const address = userCache.getAddress();
 
   // event handlers
@@ -244,7 +241,7 @@ export default ({ navigation }: ScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = userCache.onChange((user) => {
-        dispatch({ type: 'set_user', user: user as User });
+        dispatch({ type: 'set_user', user });
       });
       return () => {
         unsubscribe();
@@ -253,10 +250,10 @@ export default ({ navigation }: ScreenProps) => {
   );
 
   useEffect(() => {
-    if (state.user.current_address && state.user.addresses?.length) {
+    if (state.user?.current_address && state.user.addresses?.length) {
       load();
     }
-  }, [state.user.current_address, state.user.addresses]);
+  }, [state.user?.current_address, state.user?.addresses]);
 
   useLayoutEffect(() => {
     navigation.setOptions({

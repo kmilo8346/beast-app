@@ -1,8 +1,6 @@
-export { default as BootScreen } from './boot';
-export { default as OnboardingScreen } from './onboarding';
-export { default as TermsScreen } from './terms';
-export { default as SignInScreen } from './sign-in';
 export { default as SetPhoneScreen } from './set-phone';
+export { default as VerifyPhoneScreen } from './verify-phone';
+export { default as AddUserDataScreen } from './add-user-data';
 export { default as HomeScreen } from './home';
 export { default as ProductScreen } from './product';
 export { default as StoresScreen } from './stores';
@@ -15,5 +13,6 @@ export { default as MyStoreMenu } from './my-store-menu';
 export { default as SellerOrdersScreen } from './seller-orders';
 export { default as SellerOrderDetailsScreen } from './seller-order-details';
 export { default as MenuScreen } from './menu';
+export { default as EditUserDataScreen } from './edit-user-data';
 export { default as ClientOrdersScreen } from './client-orders';
 export { default as ClientOrderDetailsScreen } from './client-order-details';

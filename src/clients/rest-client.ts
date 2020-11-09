@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, CancelToken } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import Constants from 'expo-constants';
 import axiosRetry from 'axios-retry';
 import qs from 'qs';

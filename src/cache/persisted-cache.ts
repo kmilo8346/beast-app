@@ -30,7 +30,7 @@ export default class PersistedCache<T> extends Cache<T> {
     try {
       await AsyncStorage.setItem(
         `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/${this.path}`,
-        JSON.stringify(this.data)
+        JSON.stringify(this.data || '')
       );
     } catch (error) {
       capture(prefix, 'Persist error', error);
@@ -49,6 +49,11 @@ export default class PersistedCache<T> extends Cache<T> {
 
   async replaceData(replace: Partial<T>) {
     super.replaceData(replace);
+    await this.persist();
+  }
+
+  async resetData() {
+    super.resetData();
     await this.persist();
   }
 }

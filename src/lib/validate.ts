@@ -118,4 +118,20 @@ validate.validators.arrayWithValues = (
   return options.message;
 };
 
+validate.validators.notRequiredString = (
+  value: string,
+  options: {
+    message: string;
+  }
+) => {
+  if (
+    typeof value === 'undefined' ||
+    (typeof value === 'string' && value.length > 0)
+  ) {
+    return null;
+  }
+
+  return options.message;
+};
+
 export default validate;

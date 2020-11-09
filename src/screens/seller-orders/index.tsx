@@ -20,7 +20,7 @@ import orderClient from '../../clients/order-client';
 // cache
 import userCache from '../../cache/user';
 // types
-import { LoggedUser, Order, SearchResponse } from '../../types';
+import { Order, SearchResponse } from '../../types';
 // libs
 import { capture } from '../../lib/sentry';
 // styles
@@ -97,7 +97,6 @@ export default ({ navigation }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
   });
-  const user = userCache.getData() as LoggedUser;
 
   // event handlers
   const fetchOrders = async (from = 0, size = 10) => {
@@ -108,7 +107,7 @@ export default ({ navigation }: ScreenProps) => {
     const response = await orderClient.search(
       {
         filters: {
-          store: user.current_store,
+          store: userCache.getData()?.current_store as string,
         },
         from,
         size,
