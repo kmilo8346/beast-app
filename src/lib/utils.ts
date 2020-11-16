@@ -1,6 +1,6 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 
-import { Item, CreateUser, OpeningHours } from '../types';
+import { Item, CreateUser, OpeningHours, Place } from '../types';
 import numberFormatter from './formatters/number-formatter';
 
 const prefix = '[utils]';
@@ -285,4 +285,30 @@ export const humanizeOpenInfo = (
       nextOpenDay.dayOpeningHours.day
     )} ${numberFormatter.humanizeTime(nextOpenDay.dayOpeningHours.open)}`,
   };
+};
+
+export const formatPlace = (place: Place): string => {
+  if (place.formatted_address) {
+    return place.formatted_address;
+  }
+
+  let formatted = '';
+  if (place.route) {
+    formatted = place.route.short_name;
+  }
+  if (place.street_number) {
+    formatted = `${formatted} ${place.street_number}`;
+  }
+
+  if (place.locality) {
+    formatted = `${formatted ? `${formatted}, ` : ''}${place.locality}`;
+  }
+
+  if (place.administrative_area_level_1) {
+    formatted = `${formatted ? `${formatted}, ` : ''}${
+      place.administrative_area_level_1
+    }`;
+  }
+
+  return formatted;
 };

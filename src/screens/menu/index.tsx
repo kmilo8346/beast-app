@@ -28,6 +28,7 @@ import ModalHelp from './components/modal-help';
 import userClient from '../../clients/user-client';
 // lib
 import { capture } from '../../lib/sentry';
+import * as utils from '../../lib/utils';
 // types
 import { AddressInfo } from '../../types';
 // cache
@@ -220,10 +221,7 @@ export default ({ navigation }: ScreenProps) => {
   let mainAction: ReactNode = null;
   let fingerprint: ReactNode = null;
   if (address) {
-    addressText = `${address.route.short_name} ${address.street_number.short_name}`;
-    if (address.apartment) {
-      addressText = `${addressText} · ${address.apartment}`;
-    }
+    addressText = utils.formatPlace(address);
   }
   if (user?.photo_url) {
     photoComponent = (

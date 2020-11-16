@@ -27,7 +27,13 @@ export default ({
   let descriptionComponent: ReactNode | null = null;
   if (description) {
     descriptionComponent = (
-      <Text level={6} color={colors.blackLight3} style={styles.description}>
+      <Text
+        level={6}
+        color={colors.blackLight3}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={styles.description}
+      >
         {description}
       </Text>
     );

@@ -316,7 +316,7 @@ export default ({ order, store, onClose }: ComponentProps) => {
           alignItems: 'center',
         }}
       >
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.black} />
       </View>
     );
   }

@@ -1,11 +1,12 @@
 import React, { useReducer } from 'react';
-import { GestureResponderEvent, Vibration } from 'react-native';
+import { GestureResponderEvent, Vibration, View } from 'react-native';
 import validate from 'validate.js';
 
+// screen components
+import AddressInput from '../../../address-input';
 // components
 import Button from '../../../../../components/buttons/button';
 import Input from '../../../../../components/inputs/input';
-import InputPlaceAutocomplete from '../../../../../components/inputs/input-place-autocomplete';
 // types
 import { Place } from '../../../../../types';
 // constraints
@@ -21,10 +22,6 @@ type ChangeValueAction = {
 type ValidateValueAction = {
   type: 'validate_value';
 };
-type ChangeViewAction = {
-  type: 'change_view';
-  view: 'FORM' | 'AUTOCOMPLETE';
-};
 type SetSubmittedAction = {
   type: 'set_submitted';
 };
@@ -36,12 +33,10 @@ type SetFormErrorsAction = {
 type Action =
   | ChangeValueAction
   | ValidateValueAction
-  | ChangeViewAction
   | SetSubmittedAction
   | SetFormErrorsAction;
 
 type State = {
-  view: 'FORM' | 'AUTOCOMPLETE';
   form: {
     // fields
     address?: Place | undefined;
@@ -73,8 +68,6 @@ const reducer = (state: State, action: Action): State => {
           errors: validate(state.form, constraints),
         },
       };
-    case 'change_view':
-      return { ...state, view: action.view };
     case 'set_submitted':
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
@@ -91,7 +84,6 @@ export interface AddAddressFormProps {
 export default ({ onAdd }: AddAddressFormProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    view: 'FORM',
     form: {
       // fields
       address: undefined,
@@ -107,12 +99,7 @@ export default ({ onAdd }: AddAddressFormProps) => {
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value' });
   };
-  const openAutomcompleteHandler = () => {
-    dispatch({ type: 'change_view', view: 'AUTOCOMPLETE' });
-  };
-  const closeAutomcompleteHandler = () => {
-    dispatch({ type: 'change_view', view: 'FORM' });
-  };
+
   const saveHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     // set submitted
@@ -128,44 +115,30 @@ export default ({ onAdd }: AddAddressFormProps) => {
   };
 
   // render logic
-  let apartment = null;
-  let button = null;
-
-  if (state.view === 'FORM') {
-    apartment = (
+  return (
+    <View>
+      <AddressInput
+        label="Dirección"
+        value={state.form.address}
+        errors={state.form.errors?.address}
+        placeholder="Jose Manuel Rodríguez 927"
+        onChange={(address) => {
+          changeHandler('address', address);
+        }}
+      />
       <Input
         placeholder="1009"
-        label="Departamento"
+        label="Dept./Oficina/Piso"
         value={state.form.apartment}
         onChangeText={(text) => {
           changeHandler('apartment', text);
         }}
       />
-    );
-    button = (
       <Button
         title="Agregar"
         onPress={saveHandler}
         style={globalStyle.withMainActionAir}
       />
-    );
-  }
-
-  return (
-    <>
-      <InputPlaceAutocomplete
-        label="Dirección"
-        placeholder="Jose Manuel Rodríguez 927"
-        value={state.form.address}
-        onChange={(address) => {
-          changeHandler('address', address);
-        }}
-        onOpen={openAutomcompleteHandler}
-        onClose={closeAutomcompleteHandler}
-        errors={state.form.errors?.address}
-      />
-      {apartment}
-      {button}
-    </>
+    </View>
   );
 };

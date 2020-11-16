@@ -33,6 +33,7 @@ export default ({ children, onClose = utils.noop }: FullModalProps) => {
   // render logic
   return (
     <Modal
+      statusBarTranslucent
       animationType="slide"
       onDismiss={dismissHandler}
       onRequestClose={requestCloseHandler}

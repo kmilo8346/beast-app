@@ -46,6 +46,7 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
   const insets = useSafeAreaInsets();
   return (
     <Modal
+      statusBarTranslucent
       animationType="slide"
       onDismiss={dismissHandler}
       onRequestClose={requestCloseHandler}

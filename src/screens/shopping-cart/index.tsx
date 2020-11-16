@@ -55,7 +55,7 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import * as utils from '../../lib/utils';
 import { v4 as uuidv4, generatePushID } from '../../lib/uuid';
 // types
-import { Product, Store, LoggedUser } from '../../types';
+import { Product, Store } from '../../types';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -317,19 +317,19 @@ export default ({ navigation, route }: ScreenProps) => {
         createOrderRequestSource.cancel();
       }
       createOrderRequestSource = axios.CancelToken.source();
-      const user = userCache.getData() as LoggedUser;
+      const user = userCache.getData();
 
       await orderClient.create(
         {
           body: {
             idempotency: state.idempotency as string,
             customer: {
-              id: user.id,
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              photo_url: user.photo_url,
-              phone: user.phone as string,
+              id: user?.id as string,
+              email: user?.email as string,
+              first_name: user?.first_name as string,
+              last_name: user?.last_name as string,
+              photo_url: user?.photo_url as string,
+              phone: user?.phone as string,
             },
             transaction: {
               country: Constants.manifest.extra.BEAST_COUNTRY,
@@ -732,10 +732,7 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   }
 
-  let addressText = `${address.route.short_name} ${address.street_number.short_name}`;
-  if (address.apartment) {
-    addressText = `${addressText} · ${address.apartment}`;
-  }
+  const addressText = utils.formatPlace(address);
   let mainAction: ReactNode = null;
   if (state.selected_store) {
     const match = state.shopping_cart_snapshot.find(
@@ -766,7 +763,12 @@ export default ({ navigation, route }: ScreenProps) => {
               <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
                 Dirección de entrega
               </Text>
-              <Text level={6} numberOfLines={2} ellipsizeMode="tail">
+              <Text
+                level={6}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+                style={{ lineHeight: 20 }}
+              >
                 {addressText}
               </Text>
             </View>

@@ -14,6 +14,8 @@ import Icon from '../../../../components/icon';
 import MapPinGreyIcon from '../../../../components/svgs/icons/map-pin-grey';
 // screen components
 import ModalManageAddress from '../../../components/modal-manage-address';
+// lib
+import * as utils from '../../../../lib/utils';
 // types
 import { AddressInfo } from '../../../../types';
 import colors from '../../../../styles/colors';
@@ -62,10 +64,7 @@ export default ({
   };
 
   // render logic
-  let text = `Enviar a ${address.route.short_name} ${address.street_number.short_name}`;
-  if (address.apartment) {
-    text += ` · ${address.apartment}`;
-  }
+  const text = `Enviar a ${utils.formatPlace(address)}`;
   let icon: ReactNode = <Icon name="chevron-down" />;
   if (processing) {
     icon = <ActivityIndicator size="small" color={colors.black} />;

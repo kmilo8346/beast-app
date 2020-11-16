@@ -26,7 +26,7 @@ export default ({ value, onChange }: ComponentProps) => {
   // event handlers
   const addHandler = (place: Place) => {
     setInfo((prevInfo) => {
-      const current_address = prevInfo?.current_address || place.id;
+      const current_address = place.id;
       const addresses = utils.replaceOrAdd(
         prevInfo?.addresses || [],
         place,
@@ -76,10 +76,8 @@ export default ({ value, onChange }: ComponentProps) => {
     const options = info.addresses.map(
       (address: Place, _index: number, array: Place[]) => ({
         key: address.id,
-        title: `${address.route.short_name}`,
-        subtitle: `${address.street_number.short_name}${
-          address.apartment ? `, ${address.apartment}` : ''
-        }, ${address.locality.short_name}`,
+        title: `${utils.formatPlace(address)}`,
+        subtitle: address.apartment,
         readonly: array.length === 1,
       })
     );

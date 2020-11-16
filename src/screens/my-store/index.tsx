@@ -614,7 +614,10 @@ export default ({ navigation, route }: ScreenProps) => {
             ]}
           >
             {state.fetching_more && (
-              <ActivityIndicator style={{ marginTop: 20 }} />
+              <ActivityIndicator
+                color={colors.black}
+                style={{ marginTop: 20 }}
+              />
             )}
             {!!state.fetch_more_error && (
               <View style={{ flexDirection: 'row', marginTop: 20 }}>

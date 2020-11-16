@@ -36,7 +36,12 @@ export default forwardRef<Ref, LoadingOverlayProps>(
     }));
 
     return (
-      <Modal visible={isVisible} animationType="fade" transparent>
+      <Modal
+        statusBarTranslucent
+        visible={isVisible}
+        animationType="fade"
+        transparent
+      >
         <View
           style={[
             {

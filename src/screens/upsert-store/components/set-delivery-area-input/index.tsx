@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 
-// upsert store components
-import FakeInput from '../fake-input';
+// screen components
+import FakeInput from '../../../components/fake-input';
 // components
 import ModalSetDeliveryArea from '../../../../components/modals/modal-set-delivery-area';
 // types
@@ -37,7 +37,7 @@ export default ({ value, errors, onChange = utils.noop }: ComponentProps) => {
   // render logic
   let areaText = '';
   if (value) {
-    areaText = `${value.center.route.short_name} ${value.center.street_number.short_name}, ${value.radius}`;
+    areaText = `${utils.formatPlace(value.center)} · ${value.radius}`;
   }
   let suffix = 'chevron-down';
   if (isVisible) {

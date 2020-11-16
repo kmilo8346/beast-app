@@ -1,12 +1,13 @@
-import React, { ReactNode, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { View, GestureResponderEvent, Vibration } from 'react-native';
 
+// screen components
+import AddressInput from '../../../screens/components/address-input';
 // components
 import Modal, { ModalProps } from '../modal';
 import Button from '../../buttons/button';
 import Text from '../../text';
 import InputSelectOptions from '../../inputs/input-select-options';
-import InputPlaceAutocomplete from '../../inputs/input-place-autocomplete';
 // types
 import { Place, DeliveryArea, Circle } from '../../../types';
 // libs
@@ -43,24 +44,24 @@ const availableRadius = [
     title: '500m',
   },
   {
-    key: '600m',
-    title: '600m',
-  },
-  {
-    key: '700m',
-    title: '700m',
-  },
-  {
-    key: '800m',
-    title: '800m',
-  },
-  {
-    key: '900m',
-    title: '900m',
-  },
-  {
     key: '1000m',
     title: '1km',
+  },
+  {
+    key: '2000m',
+    title: '2km',
+  },
+  {
+    key: '3000m',
+    title: '3km',
+  },
+  {
+    key: '4000m',
+    title: '4km',
+  },
+  {
+    key: '5000m',
+    title: '5km',
   },
 ];
 const toCircle = (center: Place, radius: string): Circle => {
@@ -79,10 +80,6 @@ type ChangeValueAction = {
 type ValidateValueAction = {
   type: 'validate_value';
 };
-type ChangeViewAction = {
-  type: 'change_view';
-  view: 'FORM' | 'AUTOCOMPLETE';
-};
 type SetSubmittedAction = {
   type: 'set_submitted';
 };
@@ -93,11 +90,9 @@ type SetFormErrorsAction = {
 type Action =
   | ChangeValueAction
   | ValidateValueAction
-  | ChangeViewAction
   | SetSubmittedAction
   | SetFormErrorsAction;
 type State = {
-  view: 'FORM' | 'AUTOCOMPLETE';
   form: {
     // fields
     center?: Place;
@@ -129,8 +124,6 @@ const reducer = (state: State, action: Action): State => {
           errors: validate(state.form, constraints),
         },
       };
-    case 'change_view':
-      return { ...state, view: action.view };
     case 'set_submitted':
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
@@ -152,7 +145,6 @@ export default ({
 }: ModalManageDeliveryTimeProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    view: 'FORM',
     form: {
       // fields
       center: deliveryArea?.center,
@@ -168,12 +160,7 @@ export default ({
     dispatch({ type: 'change_value', attribute, value });
     dispatch({ type: 'validate_value' });
   };
-  const openAutomcompleteHandler = () => {
-    dispatch({ type: 'change_view', view: 'AUTOCOMPLETE' });
-  };
-  const closeAutomcompleteHandler = () => {
-    dispatch({ type: 'change_view', view: 'FORM' });
-  };
+
   const saveHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     // set submitted
@@ -197,20 +184,25 @@ export default ({
   };
 
   // render logic
-  let subtitle: ReactNode | null = null;
-  let others: ReactNode | null = null;
-  if (state.view === 'FORM') {
-    subtitle = (
-      <Text
-        level={5}
-        weight="light"
-        style={{ lineHeight: 20, marginBottom: 30 }}
-      >
-        Crea un área de despacho que se acomode a tu negocio.
-      </Text>
-    );
-    others = (
-      <>
+  return (
+    <Modal {...otherProps} title="Área de despacho">
+      <View style={[globalStyle.withMargin]}>
+        <Text
+          level={5}
+          weight="light"
+          style={{ lineHeight: 20, marginBottom: 30 }}
+        >
+          Crea un área de despacho que se acomode a tu negocio.
+        </Text>
+        <AddressInput
+          label="Dirección"
+          value={state.form.center}
+          errors={state.form.errors?.address}
+          placeholder="Jose Manuel Rodríguez 927"
+          onChange={(place) => {
+            changeHandler('center', place);
+          }}
+        />
         <InputSelectOptions
           label="Radio de entrega"
           placeholder="Seleccione radio de entrega"
@@ -222,31 +214,11 @@ export default ({
             changeHandler('radius', key);
           }}
         />
-
         <Button
           title="Continuar"
           onPress={saveHandler}
           style={globalStyle.withMainActionAir}
         />
-      </>
-    );
-  }
-  return (
-    <Modal {...otherProps} title="Área de despacho">
-      <View style={[globalStyle.withMargin]}>
-        {subtitle}
-        <InputPlaceAutocomplete
-          label="Dirección de tienda"
-          placeholder="Jose Manuel Rodríguez 927"
-          value={state.form.center}
-          onChange={(place) => {
-            changeHandler('center', place);
-          }}
-          onOpen={openAutomcompleteHandler}
-          onClose={closeAutomcompleteHandler}
-          errors={state.form.errors?.center}
-        />
-        {others}
       </View>
     </Modal>
   );

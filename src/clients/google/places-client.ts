@@ -3,7 +3,7 @@ import RestClient from '../rest-client';
 
 import { PlacesAutocompletResponse, PlacesDetailsResponse } from '../../types';
 
-class PlacesClient extends RestClient<any> {
+class PlacesClient extends RestClient<any, any> {
   /**
    * Places autocomplete request
    * @param params
@@ -35,7 +35,7 @@ class PlacesClient extends RestClient<any> {
    */
   async details(
     params: {
-      placeId: string;
+      place_id: string;
       sessiontoken: string;
     },
     cancelToken?: CancelToken

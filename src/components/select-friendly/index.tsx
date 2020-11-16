@@ -10,7 +10,7 @@ import colors from '../../styles/colors';
 export interface Option {
   key: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   readonly?: boolean;
 }
 
@@ -49,6 +49,7 @@ export default ({
             deleteIcon = (
               <ButtonIcon
                 icon="trash-2"
+                style={{ alignSelf: 'center' }}
                 onPress={(e) => {
                   e.stopPropagation();
                   onDelete(option.key);
@@ -59,7 +60,12 @@ export default ({
         }
 
         const optionStyle: StyleProp<ViewStyle> = [
-          { flexDirection: 'row', marginBottom: 18 },
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 18,
+            minHeight: 40,
+          },
         ];
         if (index === array.length - 1) {
           optionStyle.push({ marginBottom: 12 });
@@ -73,23 +79,31 @@ export default ({
             style={optionStyle}
           >
             {selectIcon}
-            <View style={{ flex: 1, marginLeft: 18, marginRight: 10 }}>
+            <View
+              style={{
+                flex: 1,
+                marginLeft: 18,
+                marginRight: 10,
+              }}
+            >
               <Text
                 level={6}
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={{ marginBottom: 3 }}
+                style={{ marginBottom: 3, lineHeight: 20 }}
               >
                 {option.title}
               </Text>
-              <Text
-                level={6}
-                color={colors.blackLight3}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {option.subtitle}
-              </Text>
+              {!!option.subtitle && (
+                <Text
+                  level={6}
+                  color={colors.blackLight3}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {option.subtitle}
+                </Text>
+              )}
             </View>
             {deleteIcon}
           </Touchable>

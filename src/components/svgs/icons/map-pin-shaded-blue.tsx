@@ -2,9 +2,14 @@ import React from 'react';
 import Svg, { G, Ellipse, Path } from 'react-native-svg';
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
-export default () => {
+interface ComponentProps {
+  width?: number;
+  height?: number;
+}
+
+export default ({ width = 40, height = 40 }: ComponentProps) => {
   return (
-    <Svg width={40} height={40} viewBox="0 0 30 30">
+    <Svg width={width} height={height} viewBox="0 0 30 30">
       <G transform="translate(1 1.5)" fill="none" fillRule="evenodd">
         <Ellipse fill="#EDF6FF" cx={14} cy={23.917} rx={14} ry={2.317} />
         <G fillRule="nonzero">

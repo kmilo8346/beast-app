@@ -4,8 +4,8 @@ import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
 
-// upsert store components
-import FakeInput from '../fake-input';
+// screen components
+import FakeInput from '../../../components/fake-input';
 // screen components
 import ConfirmDialog from '../../../components/dialogs/confirm-dialog';
 import InfoDialog from '../../../components/dialogs/info-dialog';

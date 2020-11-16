@@ -287,7 +287,7 @@ export default ({ route }: ScreenProps) => {
     return <Skeletton />;
   }
 
-  let addressText = `${state.order.transaction.delivery_address.route.short_name} ${state.order.transaction.delivery_address.street_number.short_name}`;
+  let addressText = utils.formatPlace(state.order.transaction.delivery_address);
   let fullNameText = state.order.customer.first_name;
   const distance = utils.distance(
     state.store.delivery_area.center.location.lat,
@@ -403,14 +403,8 @@ export default ({ route }: ScreenProps) => {
               />
             </Touchable>
           )}
-          <View style={{ marginLeft: 15, marginTop: 5, flex: 1 }}>
-            <Text
-              level={6}
-              weight="bold"
-              numberOfLines={2}
-              ellipsizeMode="tail"
-              style={{ lineHeight: 20, marginBottom: 7 }}
-            >
+          <View style={{ marginLeft: 15, marginTop: 0, flex: 1 }}>
+            <Text level={6} style={{ lineHeight: 20, marginBottom: 7 }}>
               {addressText}
             </Text>
             <Text

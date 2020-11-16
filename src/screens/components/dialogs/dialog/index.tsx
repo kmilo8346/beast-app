@@ -30,6 +30,7 @@ export default ({
   return (
     <Modal
       {...otherProps}
+      statusBarTranslucent
       animationType="fade"
       transparent
       visible

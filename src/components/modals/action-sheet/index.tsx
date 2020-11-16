@@ -37,6 +37,7 @@ export default ({ options, onCallAction, ...otherProps }: ActionSheetProps) => {
 
   return (
     <Modal
+      statusBarTranslucent
       {...otherProps}
       draggable={false}
       modalStyle={{ backgroundColor: 'transparent' }}

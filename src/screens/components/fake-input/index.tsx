@@ -2,11 +2,11 @@ import React from 'react';
 import { GestureResponderEvent, View } from 'react-native';
 
 // components
-import Text from '../../../../components/text';
-import Icon from '../../../../components/icon';
-import Touchable from '../../../../components/touchable';
+import Text from '../../../components/text';
+import Icon from '../../../components/icon';
+import Touchable from '../../../components/touchable';
 // styles
-import colors from '../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 interface ComponentProps {
   label: string;
@@ -41,7 +41,16 @@ export default ({
     </Text>
   );
   if (value) {
-    text = <Text level={6}>{value}</Text>;
+    text = (
+      <Text
+        level={6}
+        numberOfLines={2}
+        ellipsizeMode="tail"
+        style={{ lineHeight: 20, marginRight: 29 }}
+      >
+        {value}
+      </Text>
+    );
   }
   return (
     <View style={{ marginBottom: 12 }}>
@@ -63,7 +72,17 @@ export default ({
         >
           {text}
         </View>
-        <Icon name={suffix} style={{ position: 'absolute', right: 5 }} />
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+          }}
+        >
+          <Icon name={suffix} style={{ marginRight: 5 }} />
+        </View>
       </Touchable>
       <Text
         level={8}

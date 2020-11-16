@@ -16,6 +16,7 @@ import MapPinShadedBlueIcon from '../../components/svgs/icons/map-pin-shaded-blu
 import cloudinary from '../../lib/cloudinary';
 import dateFormatter from '../../lib/formatters/date-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
+import * as utils from '../../lib/utils';
 // types
 import { Order } from '../../types';
 // styles
@@ -87,7 +88,7 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [order.transaction.shopping_cart.items]);
 
   // render logic
-  let addressText = `${order.transaction.delivery_address.route.short_name} ${order.transaction.delivery_address.street_number.short_name}`;
+  let addressText = utils.formatPlace(order.transaction.delivery_address);
   if (order.transaction.delivery_address.apartment) {
     addressText = `${addressText} · ${order.transaction.delivery_address.apartment}`;
   }
@@ -162,7 +163,7 @@ export default ({ navigation, route }: ScreenProps) => {
             <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
               Dirección de entrega
             </Text>
-            <Text level={6} numberOfLines={2} ellipsizeMode="tail">
+            <Text level={6} style={{ lineHeight: 20 }}>
               {addressText}
             </Text>
           </View>

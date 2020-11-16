@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.60",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,18 +17,14 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
       "buildNumber": "1.0.60",
       "config": {
         "usesNonExemptEncryption": false,
-        "googleSignIn": {
-          "reservedClientId": "com.googleusercontent.apps.525584270888-rjkb70j65davl37cbp36pn71rdjkl9m6"
-        }
+        "googleMapsApiKey": "AIzaSyD1Gd5wIw-a6ELjxPlMMgGj1x_FKWWF61c"
       },
       "infoPlist": {
         "NSCameraUsageDescription": "Esta app usa la cámara para tomar imágenes de tiendas y productos",
@@ -45,22 +37,15 @@
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
       "versionCode": 390010060,
-      "permissions": [
-        "CAMERA",
-        "VIBRATE"
-      ],
+      "permissions": ["CAMERA", "VIBRATE"],
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
       "config": {
-        "googleSignIn": {
-          "apiKey": "AIzaSyD1Gd5wIw-a6ELjxPlMMgGj1x_FKWWF61c",
-          "certificateHash": "59:5A:DB:7B:F5:99:2A:75:7D:11:59:BE:90:E4:08:98:82:D7:B2:A7"
+        "googleMaps": {
+          "apiKey": "AIzaSyD1Gd5wIw-a6ELjxPlMMgGj1x_FKWWF61c"
         }
       }
     },
-    "facebookScheme": "fb587498002202284",
-    "facebookAppId": "587498002202284",
-    "facebookDisplayName": "Shop Shop",
     "hooks": {
       "postPublish": [
         {

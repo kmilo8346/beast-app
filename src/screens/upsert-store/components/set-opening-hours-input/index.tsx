@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 
-// upsert store components
-import FakeInput from '../fake-input';
+// screen components
+import FakeInput from '../../../components/fake-input';
 // components
 import ModalSetOpeningHours from '../../../../components/modals/modal-set-openning-hours';
 // types
