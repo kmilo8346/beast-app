@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.61](https://github.com/firedevs-team/beast-app/compare/v1.0.60...v1.0.61) (2020-11-16)
+
+
+### Bug Fixes
+
+* **pp:** bugs ([ba87151](https://github.com/firedevs-team/beast-app/commit/ba87151bc8c15b51a613f51c3715f23a4fe4341a))
+* **select frendly :** title ([77fece7](https://github.com/firedevs-team/beast-app/commit/77fece74cfc6f29ac571e689f2d7458289832599))
+* **shopping cart:** address ([259f302](https://github.com/firedevs-team/beast-app/commit/259f3021d556e874be7951bc6ee57b8617b2f105))
+* **utils:** map place ([8db97cf](https://github.com/firedevs-team/beast-app/commit/8db97cfd3d84302916017be54231833a49032119))
+
 ### [1.0.60](https://github.com/firedevs-team/beast-app/compare/v1.0.59...v1.0.60) (2020-11-09)
 
 ### [1.0.59](https://github.com/firedevs-team/beast-app/compare/v1.0.58...v1.0.59) (2020-10-28)
