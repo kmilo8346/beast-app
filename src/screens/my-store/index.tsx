@@ -335,14 +335,6 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressCreateStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    if (!state.user?.phone || !state.user.phone_verified) {
-      navigation.navigate('SetPhone', {
-        redirect: {
-          name: 'UpsertStore',
-        },
-      });
-      return;
-    }
     if (!state.user?.first_name) {
       navigation.navigate('AddUserData', {
         redirect: {
@@ -371,6 +363,15 @@ export default ({ navigation, route }: ScreenProps) => {
   const pressMenuHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('MyStoreMenu');
+  };
+
+  const pressStartSessionHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('SetPhone', {
+      redirect: {
+        name: 'MyStore',
+      },
+    });
   };
 
   useEffect(() => {
@@ -432,11 +433,45 @@ export default ({ navigation, route }: ScreenProps) => {
   // render logic
   const insets = useSafeAreaInsets();
 
-  if (
-    !state.user?.phone ||
-    !state.user?.phone_verified ||
-    !state.user.current_store
-  ) {
+  if (!state.user?.phone || !state.user?.phone_verified) {
+    return (
+      <View
+        style={[
+          {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.white,
+          },
+          globalStyles.withPadding,
+        ]}
+      >
+        <Text
+          level={4}
+          weight="bold"
+          style={{ marginTop: 25, marginBottom: 10 }}
+        >
+          Inicia sesión para comenzar
+        </Text>
+        <Text
+          level={5}
+          weight="light"
+          style={{
+            lineHeight: 23,
+            textAlign: 'center',
+            marginHorizontal: 20,
+            marginBottom: 40,
+          }}
+        >
+          Ofrece tus productos y llega a clientes totalmente gratis
+        </Text>
+
+        <Button title="Iniciar sesión" onPress={pressStartSessionHandler} />
+      </View>
+    );
+  }
+
+  if (!state.user.current_store) {
     return (
       <View
         style={{
