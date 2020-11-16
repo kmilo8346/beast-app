@@ -732,7 +732,10 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   }
 
-  const addressText = utils.formatPlace(address);
+  let addressText = utils.formatPlace(address);
+  if (address.apartment) {
+    addressText = `${addressText} · ${address.apartment}`;
+  }
   let mainAction: ReactNode = null;
   if (state.selected_store) {
     const match = state.shopping_cart_snapshot.find(
