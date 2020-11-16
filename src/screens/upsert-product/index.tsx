@@ -293,7 +293,10 @@ export default ({ navigation, route }: ScreenProps) => {
   // render logic
   return (
     <View style={[{ flex: 1, backgroundColor: colors.white }]}>
-      <ScrollView style={[globalStyles.withPadding, { flex: 1 }]}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        style={[globalStyles.withPadding, { flex: 1 }]}
+      >
         <InputImages
           required
           label="Imágenes"

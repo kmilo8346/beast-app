@@ -50,6 +50,10 @@ class Cloudinary {
   }
 
   dynamicUrl(url: string, transformation: string): string {
+    if (url.indexOf('res.cloudinary.com/firedevs') === -1) {
+      return url;
+    }
+
     const position = url.indexOf('image/upload/') + 'image/upload/'.length;
     return [
       url.slice(0, position),
