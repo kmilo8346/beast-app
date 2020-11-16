@@ -88,7 +88,7 @@ export default ({
             >
               <Text
                 level={6}
-                numberOfLines={1}
+                numberOfLines={2}
                 ellipsizeMode="tail"
                 style={{ marginBottom: 3, lineHeight: 20 }}
               >
