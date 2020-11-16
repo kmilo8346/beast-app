@@ -297,16 +297,18 @@ export const formatPlace = (place: Place): string => {
     formatted = place.route.short_name;
   }
   if (place.street_number) {
-    formatted = `${formatted} ${place.street_number}`;
+    formatted = `${formatted} ${place.street_number.short_name}`;
   }
 
   if (place.locality) {
-    formatted = `${formatted ? `${formatted}, ` : ''}${place.locality}`;
+    formatted = `${formatted ? `${formatted}, ` : ''}${
+      place.locality.short_name
+    }`;
   }
 
   if (place.administrative_area_level_1) {
     formatted = `${formatted ? `${formatted}, ` : ''}${
-      place.administrative_area_level_1
+      place.administrative_area_level_1.short_name
     }`;
   }
 
