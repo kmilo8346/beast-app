@@ -1,5 +1,11 @@
-import React, { ReactNode, useEffect, useReducer } from 'react';
-import { Modal, GestureResponderEvent, View, ScrollView } from 'react-native';
+import React, { ReactNode, useEffect, useReducer, useRef } from 'react';
+import {
+  Modal,
+  GestureResponderEvent,
+  View,
+  ScrollView,
+  TextInput as RNTextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -228,6 +234,10 @@ export default ({ onChange, onClose }: ComponentProps) => {
     onClose();
   };
 
+  const showHandler = () => {
+    ref.current?.focus();
+  };
+
   const changeQueryHandler = (query: string) => {
     dispatch({ type: 'set_query', query });
   };
@@ -385,12 +395,14 @@ export default ({ onChange, onClose }: ComponentProps) => {
       </View>
     );
   }
+  const ref = useRef<RNTextInput>(null);
   return (
     <Modal
       statusBarTranslucent
       animationType="slide"
       onDismiss={dismissHandler}
       onRequestClose={requestCloseHandler}
+      onShow={showHandler}
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
         <Touchable
@@ -406,6 +418,7 @@ export default ({ onChange, onClose }: ComponentProps) => {
           <Icon name="x" />
         </Touchable>
         <TextInput
+          ref={ref}
           value={state.query}
           loading={state.loading}
           style={[globalStyles.withMargin, { marginTop: 15, marginBottom: 15 }]}
