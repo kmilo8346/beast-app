@@ -29,6 +29,7 @@ import userClient from '../../clients/user-client';
 // lib
 import { capture } from '../../lib/sentry';
 import * as utils from '../../lib/utils';
+import cloudinary from '../../lib/cloudinary';
 // types
 import { AddressInfo } from '../../types';
 // cache
@@ -227,7 +228,8 @@ export default ({ navigation }: ScreenProps) => {
     photoComponent = (
       <Image
         source={{
-          uri: user.photo_url,
+          uri: cloudinary.dynamicUrl(user.photo_url, 'w_100'),
+          ,
         }}
         style={{ width: 50, height: 50, borderRadius: 100 }}
       />

@@ -149,6 +149,7 @@ export interface CreateStore {
 
 export interface Store extends CreateStore {
   id: string;
+  slug: string;
   created_at: Date;
   updated_at: Date;
 }
