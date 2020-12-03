@@ -20,14 +20,7 @@ export default () => {
     >
       <View style={globalStyles.screenWithoutHeaderSpace} />
       <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-        <View style={{ width: 50, alignItems: 'center' }}>
-          <Bone width={40} height={40} borderRadius={10} />
-        </View>
-        <Bone
-          height={30}
-          borderRadius={10}
-          style={{ marginLeft: 15, flex: 1 }}
-        />
+        <Bone height={70} borderRadius={10} style={{ flex: 1 }} />
       </View>
 
       {[1, 2, 3, 4, 5, 6].map((index) => (

@@ -158,7 +158,7 @@ export default ({ navigation, route }: ScreenProps) => {
   // event handlers
   const createProduct = async () => {
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
       const created = await productClient.create({
         pathVars: {
           storeId: store.id,
@@ -176,18 +176,24 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 
   const updateProduct = async () => {
     try {
-      loadingOverlayRef.current?.show();
-      await productClient.update({
+      await loadingOverlayRef.current?.show();
+      const updated = await productClient.update({
         pathVars: { storeId: store.id, id: state.form.product.id },
         body: state.form.product,
+        source: ['updated_at'],
       });
-      navigation.navigate('MyStore', { update: state.form.product });
+      navigation.navigate('MyStore', {
+        update: {
+          ...state.form.product,
+          ...updated,
+        },
+      });
     } catch (error) {
       capture(prefix, 'Update product error', error);
 
@@ -198,13 +204,13 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 
   const deleteProduct = async () => {
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
       await productClient.delete({
         pathVars: { storeId: store.id, id: state.form.product.id },
       });
@@ -219,7 +225,7 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

@@ -2,9 +2,9 @@ import React from 'react';
 import Svg, { G, Path } from 'react-native-svg';
 /* SVGR has dropped some elements not supported by react-native-svg: title */
 
-export default () => {
+export default ({ width = 90, height = 90 }) => {
   return (
-    <Svg width={90} height={90} viewBox="0 0 90 90">
+    <Svg width={width} height={height} viewBox="0 0 90 90">
       <G fillRule="nonzero" fill="none">
         <Path
           d="M89.632 44.865c0 24.725-20.042 44.767-44.767 44.767C20.143 89.632.101 69.59.101 44.865.1 20.143 20.143.101 44.865.101 69.59.1 89.632 20.143 89.632 44.865z"

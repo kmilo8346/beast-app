@@ -63,7 +63,7 @@ export default ({ navigation, route }: ScreenProps) => {
   // event handlers
   const createUser = async () => {
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
       dispatch({ type: 'reset' });
       // creating user
       if (createRequestSource) {
@@ -101,7 +101,7 @@ export default ({ navigation, route }: ScreenProps) => {
         dispatch({ type: 'set_error', error });
       }
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 
@@ -119,7 +119,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const pressResendCodeHandler = async (event: GestureResponderEvent) => {
     event.stopPropagation();
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
       const response = await phoneClient.code({
         phone,
       });
@@ -142,7 +142,7 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

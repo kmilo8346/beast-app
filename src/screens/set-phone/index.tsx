@@ -112,7 +112,7 @@ export default ({ navigation, route }: ScreenProps) => {
     }
 
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
       const response = await phoneClient.code({
         phone: state.form.phone as string,
       });
@@ -132,7 +132,7 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

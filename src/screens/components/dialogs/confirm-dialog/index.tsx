@@ -77,14 +77,14 @@ export default ({
         <View
           style={{
             flexDirection: 'row',
-            paddingVertical: 10,
-            marginTop: 10,
+            marginTop: 0,
           }}
         >
           <View style={{ flex: 1 }}>
             <Button
               title={cancelText}
               type="link"
+              style={{ paddingVertical: 13 }}
               onPress={pressCancelHandler}
             />
           </View>
@@ -100,7 +100,10 @@ export default ({
               title={okText}
               type="link"
               onPress={pressOkHandler}
-              style={{ paddingHorizontal: 0 }}
+              style={{
+                paddingHorizontal: 0,
+                paddingVertical: 13,
+              }}
             />
           </View>
         </View>

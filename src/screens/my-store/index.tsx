@@ -9,8 +9,6 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
 
 // local components
 import ProductItem from './components/product-item';
@@ -267,25 +265,6 @@ export default ({ navigation, route }: ScreenProps) => {
     Promise.all([hydrate(), load()]);
   };
 
-  const requestNotificationPermisions = async () => {
-    if (Constants.isDevice) {
-      const { status: existingStatus } = await Permissions.getAsync(
-        Permissions.NOTIFICATIONS
-      );
-      console.log(
-        `${prefix} Notification permision current status, status ${existingStatus}`
-      );
-      if (existingStatus !== 'granted') {
-        const { status } = await Permissions.askAsync(
-          Permissions.NOTIFICATIONS
-        );
-        console.log(
-          `${prefix} Notification permision status after request the user, status ${status}`
-        );
-      }
-    }
-  };
-
   const refresh = async () => {
     try {
       dispatch({ type: 'set_refreshing', refreshing: true });
@@ -409,7 +388,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useEffect(() => {
     if (state.user?.current_store) {
-      Promise.all([boot(), requestNotificationPermisions()]);
+      boot();
     }
   }, [state.user?.current_store]);
 

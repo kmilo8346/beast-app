@@ -7,12 +7,22 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+// components
+import CheckBlueIcon from '../svgs/images/check-blue';
 // styles
 import colors from '../../styles/colors';
 
+let showResolve: () => void;
+let hideResolve: () => void;
+
+export enum LoadingStatus {
+  OK = 'ok',
+}
+
 export type ILoadingOverlay = {
-  show: () => void;
-  hide: () => void;
+  show: () => Promise<void>;
+  status: (status: LoadingStatus) => void;
+  hide: () => Promise<void>;
 };
 
 type Ref = ILoadingOverlay;
@@ -25,22 +35,57 @@ export default forwardRef<Ref, LoadingOverlayProps>(
   ({ containerStyle }, ref) => {
     // state
     const [isVisible, setIsVisible] = useState(false);
+    const [status, setStatus] = useState<LoadingStatus | undefined>();
+
     // event handlers
+    const showHandler = () => {
+      showResolve && showResolve();
+    };
+
+    const dismissHandler = () => {
+      hideResolve && hideResolve();
+    };
+
     useImperativeHandle(ref, () => ({
-      show: () => {
-        setIsVisible(true);
+      show: async () => {
+        return new Promise((resolve) => {
+          showResolve = resolve;
+          setIsVisible(true);
+        });
       },
-      hide: () => {
-        setIsVisible(false);
+      status: async (status: LoadingStatus) => {
+        setStatus(status);
+      },
+      hide: async () => {
+        return new Promise((resolve) => {
+          hideResolve = resolve;
+
+          if (!status) {
+            setIsVisible(false);
+          } else {
+            setTimeout(() => {
+              setIsVisible(false);
+              // reset status
+              setStatus(undefined);
+            }, 1000);
+          }
+        });
       },
     }));
 
+    // render logic
+    let component = <ActivityIndicator size="small" color={colors.white} />;
+    if (status === LoadingStatus.OK) {
+      component = <CheckBlueIcon width={50} height={50} />;
+    }
     return (
       <Modal
-        statusBarTranslucent
+        transparent
         visible={isVisible}
         animationType="fade"
-        transparent
+        statusBarTranslucent
+        onShow={showHandler}
+        onDismiss={dismissHandler}
       >
         <View
           style={[
@@ -53,7 +98,7 @@ export default forwardRef<Ref, LoadingOverlayProps>(
             containerStyle,
           ]}
         >
-          <ActivityIndicator size="small" color={colors.white} />
+          {component}
         </View>
       </Modal>
     );

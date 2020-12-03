@@ -57,11 +57,13 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           globalStyles.withPadding,
         ]}
       >
-        <Text
-          level={2}
-          weight="bold"
-          style={{ marginTop: 20, letterSpacing: 0.6 }}
-        >
+        <View
+          style={{
+            height: 30,
+            width: '100%',
+          }}
+        />
+        <Text level={2} weight="bold" style={{ letterSpacing: 0.6 }}>
           Bienvenido a
         </Text>
         <Text

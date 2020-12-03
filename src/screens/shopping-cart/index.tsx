@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
 
 // local components
 import ItemComponent from './components/item';
@@ -330,6 +329,7 @@ export default ({ navigation, route }: ScreenProps) => {
               last_name: user?.last_name as string,
               photo_url: user?.photo_url as string,
               phone: user?.phone as string,
+              created_at: user?.created_at as Date,
             },
             transaction: {
               country: Constants.manifest.extra.BEAST_COUNTRY,
@@ -399,25 +399,6 @@ export default ({ navigation, route }: ScreenProps) => {
       }
     } finally {
       loadingOverlayRef.current?.hide();
-    }
-  };
-
-  const requestNotificationPermisions = async () => {
-    if (Constants.isDevice) {
-      const { status: existingStatus } = await Permissions.getAsync(
-        Permissions.NOTIFICATIONS
-      );
-      console.log(
-        `${prefix} Notification permision current status, status ${existingStatus}`
-      );
-      if (existingStatus !== 'granted') {
-        const { status } = await Permissions.askAsync(
-          Permissions.NOTIFICATIONS
-        );
-        console.log(
-          `${prefix} Notification permision status after request the user, status ${status}`
-        );
-      }
     }
   };
 
@@ -582,10 +563,6 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   useEffect(() => {
-    requestNotificationPermisions();
-  }, []);
-
-  useEffect(() => {
     const unsubscribe = shoppingCartCache.onChange((data) => {
       dispatch({
         type: 'set_shopping_cart_snapshot',
@@ -675,7 +652,7 @@ export default ({ navigation, route }: ScreenProps) => {
           <Text level={5} weight="bold">
             {state.last_ordered_store?.name}
           </Text>
-          {` `}recibió tu pedido, te contactará en un instante.
+          {` `} te confirmará y te contactará en un instante 😉.
         </Text>
         {shoppingCartCache.isEmpty() ? (
           <Button
@@ -1047,7 +1024,7 @@ export default ({ navigation, route }: ScreenProps) => {
         <ConfirmDialog
           title="¿Desea realizar pedido?"
           message="Realizar pedido no tiene costo, le enviaremos el detalle de tu pedido al vendedor de forma inmediata."
-          okText="Si, continuar"
+          okText="Si, Continuar"
           onOk={makeOrderDialogOkHandler}
           onCancel={makeOrderDialogCancelHandler}
         />

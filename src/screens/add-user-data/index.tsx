@@ -112,25 +112,27 @@ export default ({ navigation, route }: ScreenProps) => {
   // event handlers
   const updateUser = async () => {
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
 
       if (updateRequestSource) {
         updateRequestSource.cancel();
       }
       updateRequestSource = axios.CancelToken.source();
-      await userClient.update(
+      const updated = await userClient.update(
         {
           pathVars: { id: userCache.getData()?.id as string },
           body: {
             first_name: state.form.first_name,
             last_name: state.form.last_name,
           },
+          source: ['updated_at'],
         },
         { cancelToken: updateRequestSource.token }
       );
       userCache.updateData({
         first_name: state.form.first_name,
         last_name: state.form.last_name,
+        ...updated,
       });
       setTimeout(() => {
         navigation.navigate(
@@ -150,7 +152,7 @@ export default ({ navigation, route }: ScreenProps) => {
         });
       }
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

@@ -153,20 +153,24 @@ export default ({ navigation, route }: ScreenProps) => {
   // event handlers
   const createStore = async () => {
     try {
-      loadingOverlayRef.current?.show();
-      const created = await storeClient.create({
+      await loadingOverlayRef.current?.show();
+      const storeCreated = await storeClient.create({
         body: state.form.store,
       });
-      await userClient.update({
+      const userUpdated = await userClient.update({
         pathVars: {
           id: user?.id as string,
         },
         body: {
-          current_store: created.id,
+          current_store: storeCreated.id,
         },
+        source: ['updated_at'],
       });
-      storeCache.setData(created);
-      userCache.updateData({ current_store: created.id });
+      storeCache.setData(storeCreated);
+      userCache.updateData({
+        current_store: storeCreated.id,
+        ...userUpdated,
+      });
       navigation.navigate('MyStore');
     } catch (error) {
       capture(prefix, 'Create store error', error);
@@ -178,18 +182,22 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 
   const updateStore = async () => {
     try {
-      loadingOverlayRef.current?.show();
-      await storeClient.update({
+      await loadingOverlayRef.current?.show();
+      const updated = await storeClient.update({
         pathVars: { id: state.form.store.id },
         body: state.form.store,
+        source: ['updated_at'],
       });
-      storeCache.setData(state.form.store);
+      storeCache.setData({
+        ...state.form.store,
+        ...updated,
+      });
       navigation.navigate('MyStore');
     } catch (error) {
       capture(prefix, 'Update store error', error);
@@ -201,7 +209,7 @@ export default ({ navigation, route }: ScreenProps) => {
         expiration: 3,
       });
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

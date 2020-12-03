@@ -132,13 +132,13 @@ export default ({ navigation }: ScreenProps) => {
   // event handlers
   const updateUser = async () => {
     try {
-      loadingOverlayRef.current?.show();
+      await loadingOverlayRef.current?.show();
 
       if (updateRequestSource) {
         updateRequestSource.cancel();
       }
       updateRequestSource = axios.CancelToken.source();
-      await userClient.update(
+      const updated = await userClient.update(
         {
           pathVars: { id: state.id },
           body: {
@@ -147,6 +147,7 @@ export default ({ navigation }: ScreenProps) => {
             last_name: state.form.last_name,
             email: state.form.email,
           },
+          source: ['updated_at'],
         },
         { cancelToken: updateRequestSource.token }
       );
@@ -155,6 +156,7 @@ export default ({ navigation }: ScreenProps) => {
         first_name: state.form.first_name,
         last_name: state.form.last_name,
         email: state.form.email,
+        ...updated,
       });
       setTimeout(() => {
         navigation.goBack();
@@ -171,7 +173,7 @@ export default ({ navigation }: ScreenProps) => {
         });
       }
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

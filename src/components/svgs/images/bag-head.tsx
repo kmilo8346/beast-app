@@ -1,9 +1,9 @@
 import * as React from 'react';
 import Svg, { Circle, Mask, Path, G } from 'react-native-svg';
 
-function SvgComponent() {
+function SvgComponent({ width = 50, height = 59 }) {
   return (
-    <Svg width={50} height={59} viewBox="0 0 50 59" fill="none">
+    <Svg width={width} height={height} viewBox="0 0 50 59" fill="none">
       <Circle cx={24.621} cy={33.621} r={24.621} fill="#F2F7FF" />
       <Mask
         id="prefix__a"

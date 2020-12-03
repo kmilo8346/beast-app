@@ -23,6 +23,7 @@ import userCache from '../../cache/user';
 import { Order, SearchResponse } from '../../types';
 // libs
 import { capture } from '../../lib/sentry';
+import { eventEmitter } from '../../lib/event-emitter';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -31,6 +32,10 @@ import globalStyles from '../../styles';
 const prefix = '[seller orders screen]';
 let fetchOrdersRequestSource: CancelTokenSource;
 
+type SetFilterAction = {
+  type: 'set_filter';
+  filter: string;
+};
 type ResetAction = {
   type: 'reset';
 };
@@ -54,13 +59,18 @@ type SetFetchMoreErrorAction = {
   type: 'set_fetch_more_error';
   fetch_more_error?: Error;
 };
+type UpdateOrderAction = {
+  type: 'update_order';
+  order: Order;
+};
 type Action =
   | ResetAction
   | SetOrdersAction
   | SetErrorAction
   | SetRefreshingAction
   | SetFetchingMoreAction
-  | SetFetchMoreErrorAction;
+  | SetFetchMoreErrorAction
+  | UpdateOrderAction;
 type State = {
   orders?: SearchResponse<Order>;
   error?: Error;
@@ -82,6 +92,21 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, fetching_more: action.fetching_more };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
+    case 'update_order':
+      return {
+        ...state,
+        orders: state.orders
+          ? {
+              ...state.orders,
+              hits: (state.orders?.hits || []).map((order) => {
+                if (order.id === action.order.id) {
+                  return action.order;
+                }
+                return order;
+              }),
+            }
+          : state.orders,
+      };
     default:
       return state;
   }
@@ -202,6 +227,19 @@ export default ({ navigation }: ScreenProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    const removeListener = eventEmitter.on(
+      'seller-order.updated',
+      (order: Order) => {
+        dispatch({ type: 'update_order', order });
+      }
+    );
+
+    return () => {
+      removeListener();
+    };
+  }, []);
+
   // render logic
   if (state.error) {
     return (
@@ -261,7 +299,10 @@ export default ({ navigation }: ScreenProps) => {
             ]}
           >
             {state.fetching_more && (
-              <ActivityIndicator style={{ marginTop: 20 }} />
+              <ActivityIndicator
+                color={colors.black}
+                style={{ marginTop: 20 }}
+              />
             )}
             {!!state.fetch_more_error && (
               <View style={{ flexDirection: 'row', marginTop: 20 }}>

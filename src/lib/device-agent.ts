@@ -53,8 +53,6 @@ class DeviceAgent {
 
       let created: Device | null = null;
       if (!device.id) {
-        console.log(`${prefix} Creating device`);
-
         created = await deviceClient.create({
           body: device as CreateDevice,
         });

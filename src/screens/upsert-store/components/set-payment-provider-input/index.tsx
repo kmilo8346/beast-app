@@ -74,7 +74,7 @@ export default ({ value, errors, onChange = utils.noop }: ComponentProps) => {
           throw new Error(`${prefix} Invalid redirect state`);
         }
 
-        loadingOverlayRef.current?.show();
+        await loadingOverlayRef.current?.show();
         const credentials = await createCredentials(
           redirectData.queryParams.code
         );
@@ -91,7 +91,7 @@ export default ({ value, errors, onChange = utils.noop }: ComponentProps) => {
 
       setUnexpectedErrorDialog(true);
     } finally {
-      loadingOverlayRef.current?.hide();
+      await loadingOverlayRef.current?.hide();
     }
   };
 

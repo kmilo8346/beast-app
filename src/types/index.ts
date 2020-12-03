@@ -15,11 +15,13 @@ export interface CreateParams<T> {
 export interface UpdateParams<T> {
   pathVars?: { [key: string]: any };
   body: RecursivePartial<T>;
+  source?: string[];
 }
 
 export interface ActionParams<T> {
   pathVars?: { [key: string]: any };
   body?: RecursivePartial<T>;
+  source?: string[];
 }
 
 export interface GetParams {
@@ -209,6 +211,7 @@ export interface CreateOrder {
     last_name?: string;
     photo_url?: string;
     phone: string;
+    created_at?: Date;
   };
   transaction: {
     country: string;
@@ -222,8 +225,30 @@ export interface CreateOrder {
   };
 }
 
+export enum OrderStatus {
+  CREATED = 'created',
+  CONFIRMED = 'confirmed',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled',
+}
+
+export enum CancellationExecuter {
+  CLIENT = 'client',
+  SELLER = 'seller',
+  BEAST = 'beast',
+}
+
+export enum CancellationReason {
+  INACTIVITY = 'inactivity',
+}
+
 export interface Order extends CreateOrder {
   id: string;
+  status: OrderStatus;
+  cancellation_information?: {
+    executer: CancellationExecuter;
+    reason?: CancellationReason;
+  };
   stats: {
     amount: number;
     total: number;

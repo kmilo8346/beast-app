@@ -23,6 +23,7 @@ import userCache from '../../cache/user';
 import { Order, SearchResponse } from '../../types';
 // libs
 import { capture } from '../../lib/sentry';
+import { eventEmitter } from '../../lib/event-emitter';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -54,13 +55,18 @@ type SetFetchMoreErrorAction = {
   type: 'set_fetch_more_error';
   fetch_more_error?: Error;
 };
+type UpdateOrderAction = {
+  type: 'update_order';
+  order: Order;
+};
 type Action =
   | ResetAction
   | SetOrdersAction
   | SetErrorAction
   | SetRefreshingAction
   | SetFetchingMoreAction
-  | SetFetchMoreErrorAction;
+  | SetFetchMoreErrorAction
+  | UpdateOrderAction;
 type State = {
   orders?: SearchResponse<Order>;
   error?: Error;
@@ -82,6 +88,21 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, fetching_more: action.fetching_more };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
+    case 'update_order':
+      return {
+        ...state,
+        orders: state.orders
+          ? {
+              ...state.orders,
+              hits: (state.orders?.hits || []).map((order) => {
+                if (order.id === action.order.id) {
+                  return action.order;
+                }
+                return order;
+              }),
+            }
+          : state.orders,
+      };
     default:
       return state;
   }
@@ -199,6 +220,19 @@ export default ({ navigation }: ScreenProps) => {
 
     return () => {
       fetchRequestSource && fetchRequestSource.cancel;
+    };
+  }, []);
+
+  useEffect(() => {
+    const removeListener = eventEmitter.on(
+      'client-order.updated',
+      (order: Order) => {
+        dispatch({ type: 'update_order', order });
+      }
+    );
+
+    return () => {
+      removeListener();
     };
   }, []);
 

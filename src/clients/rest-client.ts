@@ -89,26 +89,28 @@ export default class RESTClient<T, V> {
   async update(
     params: UpdateParams<T>,
     config?: AxiosRequestConfig
-  ): Promise<void> {
+  ): Promise<Partial<T>> {
     const { pathVars, ...data } = params;
-    await this.axios.put<T>(
+    const response = await this.axios.put<T>(
       interpolate(`${this.prefix}/:id`, pathVars),
       data,
       config
     );
+    return response.data;
   }
 
   async action(
     path: string,
     params: ActionParams<T>,
     config?: AxiosRequestConfig
-  ): Promise<void> {
+  ): Promise<Partial<T>> {
     const { pathVars, ...data } = params;
-    await this.axios.post<T>(
+    const response = await this.axios.post<T>(
       interpolate(`${this.prefix}/:id/${path}`, pathVars),
       data,
       config
     );
+    return response.data;
   }
 
   async get(params: GetParams, config?: AxiosRequestConfig): Promise<T> {

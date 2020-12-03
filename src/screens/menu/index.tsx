@@ -79,6 +79,7 @@ export default ({ navigation }: ScreenProps) => {
             current_address: info.current_address,
             addresses: info.addresses,
           },
+          source: ['updated_at'],
         });
       }
       await userCache.updateData({
@@ -229,7 +230,6 @@ export default ({ navigation }: ScreenProps) => {
       <Image
         source={{
           uri: cloudinary.dynamicUrl(user.photo_url, 'w_100'),
-          ,
         }}
         style={{ width: 50, height: 50, borderRadius: 100 }}
       />

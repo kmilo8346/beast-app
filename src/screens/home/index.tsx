@@ -11,32 +11,33 @@ import {
   GestureResponderEvent,
   ActivityIndicator,
   AsyncStorage,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
 
-// components
-import Text from '../../components/text';
-import Toast, { IToast } from '../../components/toast';
-import Divider from '../../components/divider';
-import Touchable from '../../components/touchable';
-import BagWhiteIcon from '../../components/svgs/icons/bag-white';
-import Button from '../../components/buttons/button';
-import BasketCatImage from '../../components/svgs/images/basket-cat';
-import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
-import BannerImage from '../../components/svgs/images/banner';
+// local components
+import Skeleton from './components/skeleton';
+import ProductCard from './components/product-card';
+import SelectAddress from './components/select-address';
+import OnboardingModal from './components/onboarding-modal';
+import InProgressNotifications from './components/in-progress-notifications';
 // screen components
 import ModalManageAddress from '../components/modal-manage-address';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
-// local components
-import SelectAddress from './components/select-address';
-import Skeleton from './components/skeleton';
-import ProductCard from './components/product-card';
-import OnboardingModal from './components/onboarding-modal';
+// components
+import Text from '../../components/text';
+import Toast, { IToast } from '../../components/toast';
+import Divider from '../../components/divider';
+import Button from '../../components/buttons/button';
+import BasketCatImage from '../../components/svgs/images/basket-cat';
+import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
+import BannerImage from '../../components/svgs/images/banner';
 // clients
 import userClient from '../../clients/user-client';
 import productClient from '../../clients/product-client';
@@ -300,6 +301,34 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
+  const requestNotificationPermisions = async () => {
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(
+        Permissions.NOTIFICATIONS
+      );
+      console.log(
+        `${prefix} Notification permision current status, status ${existingStatus}`
+      );
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(
+          Permissions.NOTIFICATIONS
+        );
+        console.log(
+          `${prefix} Notification permision status after request the user, status ${status}`
+        );
+      }
+    }
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: colors.red,
+        sound: 'default',
+      });
+    }
+  };
+
   const updateAddressInfo = async (info: AddressInfo) => {
     try {
       const prev_current_address = state.user?.current_address;
@@ -313,6 +342,7 @@ export default ({ navigation }: ScreenProps) => {
             current_address: info.current_address,
             addresses: info.addresses,
           },
+          source: ['updated_at'],
         });
       }
       await userCache.updateData({
@@ -364,11 +394,6 @@ export default ({ navigation }: ScreenProps) => {
     } else {
       updateAddressInfo(info);
     }
-  };
-
-  const pressSeePendingSellerOrdersHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('SellerOrders');
   };
 
   const pressAddAddressHandler = (event: GestureResponderEvent) => {
@@ -464,7 +489,7 @@ export default ({ navigation }: ScreenProps) => {
 
   useEffect(() => {
     if (state.user?.current_address && state.user?.addresses?.length) {
-      load();
+      Promise.all([load(), requestNotificationPermisions()]);
     }
   }, [state.user?.current_address, state.user?.addresses]);
 
@@ -481,38 +506,17 @@ export default ({ navigation }: ScreenProps) => {
     };
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      const notificationReceivedListener = Notifications.addNotificationReceivedListener(
-        (notification) => {
-          const data = notification.request.content.data;
-          const order = data.order || (data.body as any).order;
-          if (
-            state.user?.current_store &&
-            order &&
-            typeof order === 'string' &&
-            !state.new_sale_dialog
-          ) {
-            dispatch({ type: 'set_new_sale_dialog', new_sale_dialog: order });
-          }
-        }
-      );
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationReceivedListener
-        );
-      };
-    }, [])
-  );
-
   useEffect(() => {
     const notificationResponseReceivedListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        const data = response.notification.request.content.data;
-        const order = data.order || (data.body as any).order;
-        if (state.user?.current_store && order && typeof order === 'string') {
+        const data = response.notification.request.content.data || {};
+        if (data.beast_require_store && !state.user?.current_store) {
+          return;
+        }
+
+        if (data.beast_route) {
           setTimeout(() => {
-            navigation.navigate('SellerOrderDetails', { order });
+            navigation.navigate(data.beast_route, data.beast_params);
           }, 300);
         }
       }
@@ -545,31 +549,7 @@ export default ({ navigation }: ScreenProps) => {
       />
     );
   }
-  let pendingSellerOrdersComponent: ReactNode = null;
-  if (state.pending_seller_orders && state.pending_seller_orders > 0) {
-    pendingSellerOrdersComponent = (
-      <Touchable
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: colors.blue,
-          paddingLeft: 30,
-          paddingVertical: 7,
-        }}
-        onPress={pressSeePendingSellerOrdersHandler}
-      >
-        <BagWhiteIcon />
-        <Text
-          level={6}
-          weight="bold"
-          color={colors.white}
-          style={{ marginLeft: 10 }}
-        >{`Tienes ${state.pending_seller_orders} ${
-          state.pending_seller_orders > 1 ? 'órdenes' : 'orden'
-        } sin revisar`}</Text>
-      </Touchable>
-    );
-  }
+
   let content: ReactNode = null;
   // not current address
   if (!address) {
@@ -805,12 +785,19 @@ export default ({ navigation }: ScreenProps) => {
 
       {content}
 
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      >
         <Toast
           ref={toastRef}
           containerStyle={[{ marginBottom: 10 }, globalStyles.withMargin]}
         />
-        {pendingSellerOrdersComponent}
+        <InProgressNotifications navigation={navigation} />
       </View>
       {state.address_modal && (
         <ModalManageAddress

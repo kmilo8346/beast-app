@@ -1,17 +1,15 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, ReactNode, useEffect, useState } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
 
 // components
 import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
-// cache
-import pendingSellerOrdersCache from '../../../../cache/pending-seller-orders-cache';
 // libs
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 import dateFormatter from '../../../../lib/formatters/date-formatter';
 // types
-import { Order } from '../../../../types';
+import { Order, OrderStatus } from '../../../../types';
 // styles
 import colors from '../../../../styles/colors';
 
@@ -21,10 +19,7 @@ interface ComponentProps {
 }
 
 export default memo(({ data, navigation }: ComponentProps) => {
-  const [stats, setStats] = useState<
-    { total: number; amount: number } | undefined
-  >();
-  const [isViewed, setIsViewed] = useState<boolean | undefined>();
+  const [stats, setStats] = useState<{ amount: number } | undefined>();
 
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
@@ -37,34 +32,57 @@ export default memo(({ data, navigation }: ComponentProps) => {
       data.transaction.shopping_cart.items.reduce(
         (stats, item) => {
           const result = { ...stats };
-          result.total += item.qty;
           result.amount += item.qty * item.price;
           return result;
         },
-        { total: 0, amount: 0 }
+        { amount: 0 }
       )
     );
   }, [data]);
 
-  useEffect(() => {
-    const unsubscribe = pendingSellerOrdersCache.onChange(() => {
-      setIsViewed(pendingSellerOrdersCache.isViewed(data));
-    });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   // render logic
-  let totalText = '';
   let amountText = '';
   let fullNameText = data.customer.first_name;
+  let statusComponent: ReactNode = null;
   if (stats) {
-    totalText = `${stats.total} producto${stats.total > 1 ? 's' : ''}`;
     amountText = numberFormatter.toCurrency(stats.amount);
   }
   if (data.customer.last_name) {
     fullNameText = `${fullNameText} ${data.customer.last_name}`;
+  }
+  if (data.status) {
+    let color = colors.yellow;
+    let text = 'Creada';
+    if (data.status === OrderStatus.CONFIRMED) {
+      text = 'Confirmada';
+    } else if (data.status === OrderStatus.DELIVERED) {
+      color = colors.green;
+      text = 'Entregada';
+    } else if (data.status === OrderStatus.CANCELLED) {
+      color = colors.red;
+      text = 'Cancelada';
+    }
+    statusComponent = (
+      <View
+        style={{
+          marginHorizontal: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <View
+          style={{
+            borderRadius: 50,
+            backgroundColor: color,
+            width: 10,
+            height: 10,
+          }}
+        />
+        <Text level={7} style={{ marginLeft: 5 }}>
+          {text}
+        </Text>
+      </View>
+    );
   }
   return (
     <Touchable
@@ -74,45 +92,31 @@ export default memo(({ data, navigation }: ComponentProps) => {
         borderColor: colors.blackLight6,
         borderRadius: 13,
         paddingVertical: 10,
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
       }}
       onPress={pressHandler}
     >
       <View style={{ flex: 1 }}>
-        <Text
-          level={5}
-          weight="bold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginBottom: 5 }}
-        >
-          {fullNameText}
+        <Text level={7} color={colors.blackLight3} style={{ marginBottom: 5 }}>
+          {dateFormatter.format(
+            new Date(data.updated_at),
+            'd MMM, yyyy · HH:mm'
+          )}
         </Text>
         <Text
           level={6}
+          weight="bold"
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={{ marginBottom: 5 }}
+          style={{ marginBottom: 1 }}
         >
-          {totalText}
+          {fullNameText}
         </Text>
-        <Text level={7} color={colors.blackLight3}>
-          {dateFormatter.format(
-            new Date(data.created_at),
-            "dd MMMM, yyyy · HH:mm 'hrs'"
-          )}
-        </Text>
-      </View>
-      <View style={{ marginHorizontal: 10 }}>
-        <Text level={5} weight="bold">
+        <Text level={7} numberOfLines={1} ellipsizeMode="tail">
           {amountText}
         </Text>
-        {typeof isViewed !== 'undefined' && !isViewed && (
-          <Text level={5} weight="bold" color={colors.red}>
-            revisar
-          </Text>
-        )}
       </View>
+      {statusComponent}
       <Icon name="chevron-right" style={{ alignSelf: 'center' }} />
     </Touchable>
   );
