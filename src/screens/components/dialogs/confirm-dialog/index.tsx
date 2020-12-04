@@ -73,18 +73,17 @@ export default ({
           <View style={{ marginBottom: 10 }} />
         )}
 
-        <Divider />
+        <Divider style={{ marginTop: 6 }} />
         <View
           style={{
             flexDirection: 'row',
-            marginTop: 0,
           }}
         >
           <View style={{ flex: 1 }}>
             <Button
               title={cancelText}
               type="link"
-              style={{ paddingVertical: 13 }}
+              style={{ paddingVertical: 15 }}
               onPress={pressCancelHandler}
             />
           </View>
@@ -102,7 +101,7 @@ export default ({
               onPress={pressOkHandler}
               style={{
                 paddingHorizontal: 0,
-                paddingVertical: 13,
+                paddingVertical: 15,
               }}
             />
           </View>
