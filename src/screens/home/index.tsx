@@ -43,6 +43,7 @@ import userClient from '../../clients/user-client';
 import productClient from '../../clients/product-client';
 // libs
 import { capture } from '../../lib/sentry';
+import deviceAgent from '../../lib/device-agent';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache from '../../cache/shopping-cart';
@@ -316,6 +317,10 @@ export default ({ navigation }: ScreenProps) => {
         console.log(
           `${prefix} Notification permision status after request the user, status ${status}`
         );
+      }
+      // sync user id to device
+      if (state.user?.id) {
+        deviceAgent.sync({ user_id: state.user.id });
       }
     }
     if (Platform.OS === 'android') {
