@@ -197,7 +197,7 @@ export default ({ navigation, route }: ScreenProps) => {
           }, 300);
           eventEmitter.emit('client-order.updated', backendOrder);
           toastRef.current?.show({
-            message: 'Orden desactualizada, actualizando...',
+            message: 'Pedido desactualizado, actualizando...',
             type: 'ERROR',
             expiration: 3,
           });
@@ -694,7 +694,7 @@ export default ({ navigation, route }: ScreenProps) => {
           options={[
             {
               key: 'cancel_order',
-              text: 'Cancelar orden',
+              text: 'Cancelar pedido',
             },
             { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
           ]}
@@ -704,7 +704,7 @@ export default ({ navigation, route }: ScreenProps) => {
       )}
       {state.cancel_dialog && (
         <ConfirmDialog
-          title="¿Seguro que quieres cancelar la orden?"
+          title="¿Seguro que quieres cancelar el pedido?"
           okText="Si, Continuar"
           onOk={cancelDialogOkHandler}
           onCancel={cancelDialogCancelHandler}
@@ -713,7 +713,7 @@ export default ({ navigation, route }: ScreenProps) => {
       {state.cancel_error_dialog && (
         <ConfirmDialog
           title="Ocurrió un error inesperado"
-          message="No se pudo cancelar la orden"
+          message="No se pudo cancelar el pedido"
           okText="Reintentar"
           onOk={cancelErrorDialogOkHandler}
           onCancel={cancelErrorDialogCancelHandler}
