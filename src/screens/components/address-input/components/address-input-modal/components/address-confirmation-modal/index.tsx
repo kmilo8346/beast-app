@@ -78,7 +78,7 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
     onClose();
   };
 
-  const regionChangeHandler = (region: Region) => {
+  const regionChangeCompleteHandler = (region: Region) => {
     dispatch({ type: 'set_region', region });
   };
 
@@ -127,7 +127,7 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
             provider={PROVIDER_GOOGLE}
             initialRegion={state.region}
             style={{ width: '100%', height: '100%' }}
-            onRegionChange={regionChangeHandler}
+            onRegionChangeComplete={regionChangeCompleteHandler}
           />
           <View
             style={{
