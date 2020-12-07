@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.65](https://github.com/firedevs-team/beast-app/compare/v1.0.64...v1.0.65) (2020-12-07)
+
+
+### Bug Fixes
+
+* **app json:** permisions ([d3f5429](https://github.com/firedevs-team/beast-app/commit/d3f5429c147bb09d50188419599066b1d1f6da20))
+
 ### [1.0.64](https://github.com/firedevs-team/beast-app/compare/v1.0.63...v1.0.64) (2020-12-07)
 
 
