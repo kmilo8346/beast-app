@@ -213,11 +213,12 @@ export default ({
     try {
       const cameraPermisionResponse = await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermisionResponse.status !== 'granted') {
-        if (onPermisionNotGranted) {
-          onPermisionNotGranted();
-        } else {
-          setPermissionCameraDialog(true);
-        }
+        setPermissionCameraDialog(true);
+        return;
+      }
+      const cameraRollPermissionResponse = await ImagePicker.requestCameraRollPermissionsAsync();
+      if (cameraRollPermissionResponse.status !== 'granted') {
+        setPermissionImageLibraryDialog(true);
         return;
       }
 
