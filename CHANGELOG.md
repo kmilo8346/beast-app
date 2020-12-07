@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.64](https://github.com/firedevs-team/beast-app/compare/v1.0.63...v1.0.64) (2020-12-07)
+
+
+### Bug Fixes
+
+* **address input:** fixing map bug ([247227e](https://github.com/firedevs-team/beast-app/commit/247227eb0871a639beaeaede7e7d94ed4db36c84))
+* **client order details:** texts ([2c85bc4](https://github.com/firedevs-team/beast-app/commit/2c85bc46385efb5c6b91bc6e7335c45bc191f700))
+* **input images:** fix permission problem ([e3fa256](https://github.com/firedevs-team/beast-app/commit/e3fa256d32a061f976a3871ea5aac9dbff62cbc7))
+
 ### [1.0.63](https://github.com/firedevs-team/beast-app/compare/v1.0.62...v1.0.63) (2020-12-04)
 
 ### [1.0.62](https://github.com/firedevs-team/beast-app/compare/v1.0.61...v1.0.62) (2020-12-04)
