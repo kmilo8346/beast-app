@@ -20,6 +20,7 @@ import Text from '../../components/text';
 import Button from '../../components/buttons/button';
 import LoadingOverlay, {
   ILoadingOverlay,
+  LoadingStatus,
 } from '../../components/loading-overlay';
 import Toast, { IToast } from '../../components/toast';
 import Switch from '../../components/switch';
@@ -165,13 +166,16 @@ export default ({ navigation, route }: ScreenProps) => {
         },
         body: state.form.product,
       });
-      navigation.navigate('MyStore', { add: created });
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
+      setTimeout(() => {
+        navigation.navigate('MyStore', { add: created });
+      }, 1000);
     } catch (error) {
       capture(prefix, 'Create product error', error);
 
       Vibration.vibrate(400);
       toastRef.current?.show({
-        message: 'No se puedo crear, reintenta por favor',
+        message: 'No se puedo añadir, reintenta por favor',
         type: 'ERROR',
         expiration: 3,
       });
@@ -188,12 +192,15 @@ export default ({ navigation, route }: ScreenProps) => {
         body: state.form.product,
         source: ['updated_at'],
       });
-      navigation.navigate('MyStore', {
-        update: {
-          ...state.form.product,
-          ...updated,
-        },
-      });
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
+      setTimeout(() => {
+        navigation.navigate('MyStore', {
+          update: {
+            ...state.form.product,
+            ...updated,
+          },
+        });
+      }, 1000);
     } catch (error) {
       capture(prefix, 'Update product error', error);
 
@@ -214,7 +221,10 @@ export default ({ navigation, route }: ScreenProps) => {
       await productClient.delete({
         pathVars: { storeId: store.id, id: state.form.product.id },
       });
-      navigation.navigate('MyStore', { delete: state.form.product.id });
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
+      setTimeout(() => {
+        navigation.navigate('MyStore', { delete: state.form.product.id });
+      }, 1000);
     } catch (error) {
       capture(prefix, 'Delete product error', error);
 
@@ -276,7 +286,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: route.params?.product ? 'Editar producto' : 'Crear producto',
+      title: route.params?.product ? 'Editar producto' : 'Añadir producto',
       headerRight: () => {
         if (!route.params?.product) {
           return null;

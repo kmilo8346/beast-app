@@ -15,6 +15,7 @@ import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
 import LoadingOverlay, {
   ILoadingOverlay,
+  LoadingStatus,
 } from '../../components/loading-overlay';
 import InputImages from '../../components/inputs/input-images';
 // clients
@@ -158,9 +159,10 @@ export default ({ navigation }: ScreenProps) => {
         email: state.form.email,
         ...updated,
       });
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
       setTimeout(() => {
         navigation.goBack();
-      }, 300);
+      }, 1000);
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Update user error', error);

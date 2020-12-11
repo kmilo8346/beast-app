@@ -17,6 +17,7 @@ import Text from '../../components/text';
 import Button from '../../components/buttons/button';
 import LoadingOverlay, {
   ILoadingOverlay,
+  LoadingStatus,
 } from '../../components/loading-overlay';
 import Toast, { IToast } from '../../components/toast';
 import Switch from '../../components/switch';
@@ -171,7 +172,10 @@ export default ({ navigation, route }: ScreenProps) => {
         current_store: storeCreated.id,
         ...userUpdated,
       });
-      navigation.navigate('MyStore');
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
+      setTimeout(() => {
+        navigation.navigate('MyStore');
+      }, 1000);
     } catch (error) {
       capture(prefix, 'Create store error', error);
 
@@ -198,7 +202,10 @@ export default ({ navigation, route }: ScreenProps) => {
         ...state.form.store,
         ...updated,
       });
-      navigation.navigate('MyStore');
+      loadingOverlayRef.current?.status(LoadingStatus.OK);
+      setTimeout(() => {
+        navigation.navigate('MyStore');
+      }, 1000);
     } catch (error) {
       capture(prefix, 'Update store error', error);
 

@@ -51,11 +51,6 @@ export default () => {
         options={{ title: 'Detalle de pedido' }}
       />
       <Stack.Screen
-        name="SellerOrders"
-        component={SellerOrdersScreen}
-        options={{ title: 'Mis órdenes' }}
-      />
-      <Stack.Screen
         name="SellerOrderDetails"
         component={SellerOrderDetailsScreen}
         options={{ title: 'Detalle de orden' }}

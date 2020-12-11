@@ -14,13 +14,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ProductItem from './components/product-item';
 import Skeletton from './components/skeletton';
 // components
-import Text from '../../components/text';
-import LogoBackgroundWhiteImage from '../../components/svgs/images/bag-logo-background-blue-big';
-import Button from '../../components/buttons/button';
-import ErrorView from '../../components/error-view';
-import Touchable from '../../components/touchable';
 import Icon from '../../components/icon';
-import PhoneWithProductsImage from '../../components/svgs/images/phone-with-products-view';
+import Text from '../../components/text';
+import Divider from '../../components/divider';
+import Touchable from '../../components/touchable';
+import ErrorView from '../../components/error-view';
+import Button from '../../components/buttons/button';
+import ActionSheet from '../../components/modals/action-sheet';
+import BasketCatImage from '../../components/svgs/images/basket-cat';
+import LogoBackgroundWhiteImage from '../../components/svgs/images/bag-logo-background-blue-big';
 // clients
 import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
@@ -85,6 +87,10 @@ type DeleteProductAction = {
   type: 'delete_product';
   delete: string;
 };
+type SetStoreMenuAction = {
+  type: 'set_store_menu';
+  store_menu: boolean;
+};
 type Action =
   | SetUserAction
   | SetStoreAction
@@ -96,7 +102,8 @@ type Action =
   | SetFetchMoreErrorAction
   | AddProductAction
   | UpdateProductAction
-  | DeleteProductAction;
+  | DeleteProductAction
+  | SetStoreMenuAction;
 type State = {
   user?: User;
   store?: Store;
@@ -105,6 +112,7 @@ type State = {
   refreshing: boolean;
   fetching_more: boolean;
   fetch_more_error?: Error;
+  store_menu: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -175,6 +183,8 @@ const reducer = (state: State, action: Action): State => {
           ),
         },
       };
+    case 'set_store_menu':
+      return { ...state, store_menu: action.store_menu };
     default:
       return state;
   }
@@ -191,6 +201,7 @@ export default ({ navigation, route }: ScreenProps) => {
     user: userCache.getData(),
     refreshing: false,
     fetching_more: false,
+    store_menu: false,
   });
 
   // event handlers
@@ -334,14 +345,15 @@ export default ({ navigation, route }: ScreenProps) => {
     fetchMore();
   };
 
+  const pressEditStoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    const store = storeCache.getData();
+    navigation.navigate('UpsertStore', { store });
+  };
+
   const pressAddProductHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('UpsertProduct');
-  };
-
-  const pressMenuHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('MyStoreMenu');
   };
 
   const pressStartSessionHandler = (event: GestureResponderEvent) => {
@@ -351,6 +363,38 @@ export default ({ navigation, route }: ScreenProps) => {
         name: 'MyStore',
       },
     });
+  };
+
+  const pressMenuHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    dispatch({
+      type: 'set_store_menu',
+      store_menu: true,
+    });
+  };
+
+  const storeMenuCloseHandler = () => {
+    dispatch({
+      type: 'set_store_menu',
+      store_menu: false,
+    });
+  };
+
+  const storeMenuCallActionHandler = async (key: string) => {
+    dispatch({
+      type: 'set_store_menu',
+      store_menu: false,
+    });
+
+    switch (key) {
+      case 'orders':
+        setTimeout(() => {
+          navigation.navigate('SellerOrders');
+        }, 300);
+        break;
+      default:
+        break;
+    }
   };
 
   useEffect(() => {
@@ -409,6 +453,7 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'delete_product', delete: route.params?.delete });
     }
   }, [route.params?.delete]);
+
   // render logic
   const insets = useSafeAreaInsets();
 
@@ -519,33 +564,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const openInfo = utils.humanizeOpenInfo(state.store.opening_hours);
   let status: ReactNode = (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}
-    >
-      <Icon name="calendar" size={18} />
-      <Text
-        level={7}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-        color={openInfo.open ? colors.black : colors.red}
-        style={{ flex: 1, marginLeft: 5 }}
-      >
-        {openInfo.message}
-      </Text>
-    </View>
+    <Text level={7} numberOfLines={1} ellipsizeMode="tail">
+      {openInfo.message}
+    </Text>
   );
   if (!state.store.enabled) {
     status = (
-      <Text
-        level={7}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-        color={colors.red}
-        style={{ flex: 1, marginLeft: 5 }}
-      >
+      <Text level={7} numberOfLines={1} ellipsizeMode="tail">
         No visible a clientes
       </Text>
     );
@@ -557,43 +582,106 @@ export default ({ navigation, route }: ScreenProps) => {
       ]}
     >
       <View style={globalStyles.screenWithoutHeaderSpace} />
-      <Touchable
-        style={[
-          { flexDirection: 'row', alignItems: 'center', paddingBottom: 5 },
-          globalStyles.withMargin,
-        ]}
-        onPress={pressMenuHandler}
-      >
-        <Image
-          source={{
-            uri: cloudinary.dynamicUrl(state.store.images[0], 'w_100'),
-          }}
-          style={{
-            height: 50,
-            width: 50,
-            borderRadius: 30,
-          }}
-        />
-        <View style={{ marginLeft: 20, flex: 1 }}>
-          <Text
-            level={2}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ marginBottom: 5 }}
-          >
-            {state.store.name}
-          </Text>
-          {status}
-        </View>
 
-        <View style={{ width: 50, alignItems: 'flex-end' }}>
-          <Icon name="more-vertical" />
-        </View>
-      </Touchable>
       <FlatList
         data={state.products.hits}
         refreshing={state.refreshing}
+        ListHeaderComponent={() => {
+          return (
+            <>
+              <View style={globalStyles.withMargin}>
+                <Touchable
+                  style={{ alignItems: 'center', marginBottom: 20 }}
+                  onPress={pressEditStoreHandler}
+                >
+                  <Image
+                    source={{
+                      uri: cloudinary.dynamicUrl(
+                        (state.store as Store).images[0],
+                        'w_100'
+                      ),
+                    }}
+                    style={{
+                      height: 100,
+                      width: 100,
+                      borderRadius: 100,
+                    }}
+                  />
+                  <Text
+                    level={2}
+                    weight="bold"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ marginBottom: 5 }}
+                  >
+                    {(state.store as Store).name}
+                  </Text>
+                  {status}
+                </Touchable>
+
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                >
+                  <Button
+                    title="Editar tienda"
+                    style={{ flex: 1 }}
+                    onPress={pressEditStoreHandler}
+                  />
+                  <View style={{ width: 10 }} />
+                  <Touchable
+                    style={{
+                      justifyContent: 'center',
+                      alignSelf: 'stretch',
+                      backgroundColor: colors.blackLight6,
+                      paddingHorizontal: 20,
+                      borderRadius: 10,
+                    }}
+                    onPress={pressMenuHandler}
+                  >
+                    <Icon name="more-horizontal" />
+                  </Touchable>
+                </View>
+              </View>
+
+              <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+
+              {!!state.products?.hits.length && (
+                <View
+                  style={[
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 30,
+                    },
+                    globalStyles.withMargin,
+                  ]}
+                >
+                  <Text
+                    level={4}
+                    weight="bold"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ flex: 1 }}
+                  >
+                    Productos de esta tienda
+                  </Text>
+                  <Button
+                    type="link"
+                    title={
+                      <Text level={6} weight="bold" color={colors.blue}>
+                        Añadir
+                      </Text>
+                    }
+                    style={{
+                      paddingRight: 0,
+                    }}
+                    onPress={pressAddProductHandler}
+                  />
+                </View>
+              )}
+            </>
+          );
+        }}
         keyExtractor={(item: Product) => item.id}
         renderItem={({ item }) => {
           return (
@@ -606,15 +694,20 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         ListEmptyComponent={
-          <View style={{ flex: 1, alignItems: 'center', marginTop: 50 }}>
-            <PhoneWithProductsImage />
-            <Text
-              level={5}
-              weight="bold"
-              style={{ marginTop: 40, marginBottom: 15 }}
-            >
-              Aún no agregas productos
+          <View style={{ flex: 1, alignItems: 'center', marginTop: 30 }}>
+            <BasketCatImage width={120} height={120} />
+            <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
+              No tienes productos en tu tienda
             </Text>
+            <Button
+              type="link"
+              title={
+                <Text level={6} weight="bold" color={colors.blue}>
+                  Añadir
+                </Text>
+              }
+              onPress={pressAddProductHandler}
+            />
           </View>
         }
         ListFooterComponent={
@@ -624,6 +717,7 @@ export default ({ navigation, route }: ScreenProps) => {
                 alignItems: 'center',
                 height: 60,
               },
+              globalStyles.withMargin,
               globalStyles.withScreenAir,
             ]}
           >
@@ -656,27 +750,21 @@ export default ({ navigation, route }: ScreenProps) => {
             fetchMore();
           }
         }}
-        style={[{ flex: 1, paddingTop: 20 }, globalStyles.withPadding]}
+        style={[{ flex: 1, paddingTop: 20 }]}
       />
-      <View
-        style={[
-          {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: colors.white,
-            paddingTop: 2,
-          },
-          globalStyles.withMargin,
-        ]}
-      >
-        <Button
-          title="Agregar producto"
-          style={globalStyles.withMainActionAir}
-          onPress={pressAddProductHandler}
+      {state.store_menu && (
+        <ActionSheet
+          options={[
+            {
+              key: 'orders',
+              text: 'Órdenes de la tienda',
+            },
+            { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
+          ]}
+          onRequestClose={storeMenuCloseHandler}
+          onCallAction={storeMenuCallActionHandler}
         />
-      </View>
+      )}
     </View>
   );
 };

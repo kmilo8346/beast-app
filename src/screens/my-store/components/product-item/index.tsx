@@ -11,6 +11,8 @@ import cloudinary from '../../../../lib/cloudinary';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 // types
 import { Product } from '../../../../types';
+// styles
+import globalStyles from '../../../../styles';
 
 interface ComponentProps {
   data: Product;
@@ -45,7 +47,7 @@ export default memo(({ data, navigation }: ComponentProps) => {
   }
   return (
     <Touchable onPress={pressHandler}>
-      <View style={containerStyle}>
+      <View style={[containerStyle, globalStyles.withMargin]}>
         <Image
           source={{
             uri: cloudinary.dynamicUrl(data.images[0], 'w_500'),

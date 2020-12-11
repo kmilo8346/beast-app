@@ -10,7 +10,6 @@ import {
   SetPhoneScreen,
   VerifyPhoneScreen,
   AddUserDataScreen,
-  MyStoreMenu,
   UpsertStoreScreen,
   UpsertProductScreen,
   SellerOrdersScreen,
@@ -45,11 +44,6 @@ export default () => {
           options={{ title: '' }}
         />
         <Stack.Screen
-          name="MyStoreMenu"
-          component={MyStoreMenu}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
           name="UpsertStore"
           component={UpsertStoreScreen}
           options={{ title: '' }}
@@ -62,7 +56,7 @@ export default () => {
         <Stack.Screen
           name="SellerOrders"
           component={SellerOrdersScreen}
-          options={{ title: 'Mis órdenes' }}
+          options={{ title: 'Órdenes' }}
         />
         <Stack.Screen
           name="SellerOrderDetails"

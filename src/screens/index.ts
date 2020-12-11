@@ -9,7 +9,6 @@ export { default as ShoppingCartScreen } from './shopping-cart';
 export { default as MyStoreScreen } from './my-store';
 export { default as UpsertStoreScreen } from './upsert-store';
 export { default as UpsertProductScreen } from './upsert-product';
-export { default as MyStoreMenu } from './my-store-menu';
 export { default as SellerOrdersScreen } from './seller-orders';
 export { default as SellerOrderDetailsScreen } from './seller-order-details';
 export { default as MenuScreen } from './menu';

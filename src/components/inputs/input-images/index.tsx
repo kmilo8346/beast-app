@@ -196,7 +196,7 @@ export default ({
       // launch image library
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.7,
+        quality: 0.6,
       });
       if (result.cancelled) {
         return;
@@ -225,8 +225,7 @@ export default ({
       // launch camera
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.7,
+        quality: 0.6,
       });
       if (result.cancelled) {
         return;
