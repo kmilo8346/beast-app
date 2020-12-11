@@ -21,6 +21,7 @@ import shoppingCartCache from './cache/shopping-cart';
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
 const MonserratNormal = require('../assets/fonts/monserrat/normal.ttf');
 const MonserratLight = require('../assets/fonts/monserrat/light.ttf');
+const fontello = require('../assets/fonts/fontello/fontello.ttf');
 
 LogBox.ignoreLogs(['Setting a timer']);
 
@@ -125,6 +126,7 @@ class App extends React.Component<{}, State> {
       MonserratBold,
       MonserratNormal,
       MonserratLight,
+      fontello,
     });
   };
 

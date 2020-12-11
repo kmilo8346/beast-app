@@ -24,7 +24,7 @@ export default () => {
             let name;
             switch (route.name) {
               case 'SellerStack':
-                name = 'shopping-bag';
+                name = 'store';
                 break;
               case 'MenuStack':
                 name = 'menu';
@@ -39,7 +39,7 @@ export default () => {
             let text;
             switch (route.name) {
               case 'SellerStack':
-                text = 'Mi tienda';
+                text = 'Tienda';
                 break;
               case 'MenuStack':
                 text = 'Más';

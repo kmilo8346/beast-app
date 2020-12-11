@@ -70,6 +70,7 @@
     "eslint": "^7.2.0",
     "eslint-config-airbnb-typescript-prettier": "^2.1.1",
     "prettier": "^2.0.5",
+    "react-native-bundle-visualizer": "^2.2.1",
     "standard-version": "^9.0.0",
     "standard-version-expo": "^1.0.3",
     "typescript": "~3.9.2"
