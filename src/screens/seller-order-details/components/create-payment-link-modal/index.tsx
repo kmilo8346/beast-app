@@ -140,7 +140,6 @@ export default ({ order, store, onClose }: ComponentProps) => {
     loading: false,
   });
   const toastRef = useRef<IToast>(null);
-  // console.log(typeof state.form.amount, state.form.amount);
 
   // event handlers
   const createLink = async (amount: number) => {
@@ -250,6 +249,12 @@ export default ({ order, store, onClose }: ComponentProps) => {
       onClose();
     } catch (error) {
       capture(prefix, 'Press send to client handler error', error);
+
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: `No pudo ser enviado por Whatsapp`,
+        expiration: 3,
+      });
     }
   };
 
