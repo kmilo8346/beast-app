@@ -572,7 +572,7 @@ export default ({ navigation }: ScreenProps) => {
         <Text
           level={4}
           weight="bold"
-          style={{ marginTop: 25, marginBottom: 10 }}
+          style={{ marginTop: 25, marginBottom: 10, textAlign: 'center' }}
         >
           ¿Donde quieres recibir tu pedido?
         </Text>
