@@ -51,7 +51,11 @@ import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
-import * as utils from '../../lib/utils';
+import {
+  extractCurrentOpeningHours,
+  formatPlace,
+  humanizeCurrentClosedOpeningHours,
+} from '../../lib/utils';
 import { v4 as uuidv4, generatePushID } from '../../lib/uuid';
 // types
 import { Product, Store } from '../../types';
@@ -709,7 +713,7 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   }
 
-  let addressText = utils.formatPlace(address);
+  let addressText = formatPlace(address);
   if (address.apartment) {
     addressText = `${addressText} · ${address.apartment}`;
   }
@@ -763,7 +767,9 @@ export default ({ navigation, route }: ScreenProps) => {
           const items = storeState.expanded
             ? storeSnapshot.items
             : storeSnapshot.items.slice(0, 3);
-          const openInfo = utils.humanizeOpenInfo(store.opening_hours);
+          const currentOpeningHours = extractCurrentOpeningHours(
+            store.opening_hours
+          );
           return (
             <View key={`${storeSnapshot.store.id}`} style={{ marginTop: 20 }}>
               <View style={globalStyles.withMargin}>
@@ -854,23 +860,28 @@ export default ({ navigation, route }: ScreenProps) => {
                           )}
                         </Text>
                       </View>
-                      {!openInfo.open && (
+                      {currentOpeningHours.status === 'closed' && (
                         <View
                           style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: 0,
+                            backgroundColor: !currentOpeningHours.next_open
+                              ? colors.black
+                              : colors.red2,
+                            alignSelf: 'flex-start',
+                            borderRadius: 10,
+                            paddingVertical: 5,
+                            paddingHorizontal: 10,
                           }}
                         >
-                          <Icon name="calendar" size={16} />
                           <Text
                             level={7}
                             numberOfLines={1}
                             ellipsizeMode="tail"
-                            color={openInfo.open ? colors.black : colors.red}
-                            style={{ flex: 1, marginLeft: 5 }}
+                            weight="bold"
+                            color={colors.white}
                           >
-                            {openInfo.message}
+                            {humanizeCurrentClosedOpeningHours(
+                              currentOpeningHours
+                            )}
                           </Text>
                         </View>
                       )}

@@ -17,6 +17,7 @@ export default {
   blackLight9: '#E7E7E7',
   white: '#FFFFFF',
   red: '#FF3A30',
+  red2: '#EB5333',
   redLight1: '#FEF0F0',
   redLight2: '#F96363',
   redLight3: '#FFF0F0',
@@ -25,6 +26,7 @@ export default {
   yellowLight2: '#FFF4EE',
   green: '#34C759',
   green2: '#98D99B',
+  green3: '#5AC16E',
   greenLight1: '#F4FAF4',
 
   modalBackdrop: 'rgba(0,0,0,0.7)',

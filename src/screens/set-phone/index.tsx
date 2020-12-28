@@ -157,6 +157,7 @@ export default ({ navigation, route }: ScreenProps) => {
           Inicia sesión con tu teléfono móvil y únete a nuestra comunidad.
         </Text>
         <Input
+          autoFocus
           returnKeyType="done"
           keyboardType="phone-pad"
           placeholder="Número de teléfono móvil"

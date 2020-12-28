@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -32,7 +32,10 @@ import storeCache from '../../cache/store';
 // libs
 import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
-import * as utils from '../../lib/utils';
+import {
+  CurrentOpenginHours,
+  extractCurrentOpeningHours,
+} from '../../lib/utils';
 // types
 import { Product, SearchResponse, Store, User } from '../../types';
 // styles
@@ -91,6 +94,10 @@ type SetStoreMenuAction = {
   type: 'set_store_menu';
   store_menu: boolean;
 };
+type SetCurrentOpeningHoursAction = {
+  type: 'set_current_opening_hours';
+  current_opening_hours?: CurrentOpenginHours;
+};
 type Action =
   | SetUserAction
   | SetStoreAction
@@ -103,7 +110,8 @@ type Action =
   | AddProductAction
   | UpdateProductAction
   | DeleteProductAction
-  | SetStoreMenuAction;
+  | SetStoreMenuAction
+  | SetCurrentOpeningHoursAction;
 type State = {
   user?: User;
   store?: Store;
@@ -113,6 +121,7 @@ type State = {
   fetching_more: boolean;
   fetch_more_error?: Error;
   store_menu: boolean;
+  current_opening_hours?: CurrentOpenginHours;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -185,6 +194,8 @@ const reducer = (state: State, action: Action): State => {
       };
     case 'set_store_menu':
       return { ...state, store_menu: action.store_menu };
+    case 'set_current_opening_hours':
+      return { ...state, current_opening_hours: action.current_opening_hours };
     default:
       return state;
   }
@@ -333,7 +344,7 @@ export default ({ navigation, route }: ScreenProps) => {
       });
       return;
     }
-    navigation.navigate('UpsertStore');
+    navigation.navigate('CreateStoreWizzardSetName');
   };
 
   const retryHandler = () => {
@@ -348,7 +359,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const pressEditStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     const store = storeCache.getData();
-    navigation.navigate('UpsertStore', { store });
+    navigation.navigate('EditStore', { store });
   };
 
   const pressAddProductHandler = (event: GestureResponderEvent) => {
@@ -453,6 +464,19 @@ export default ({ navigation, route }: ScreenProps) => {
       dispatch({ type: 'delete_product', delete: route.params?.delete });
     }
   }, [route.params?.delete]);
+
+  useEffect(() => {
+    if (!state.store?.opening_hours) {
+      dispatch({ type: 'set_current_opening_hours' });
+    } else {
+      dispatch({
+        type: 'set_current_opening_hours',
+        current_opening_hours: extractCurrentOpeningHours(
+          state.store.opening_hours
+        ),
+      });
+    }
+  }, [state.store?.opening_hours]);
 
   // render logic
   const insets = useSafeAreaInsets();
@@ -562,19 +586,33 @@ export default ({ navigation, route }: ScreenProps) => {
     return <Skeletton />;
   }
 
-  const openInfo = utils.humanizeOpenInfo(state.store.opening_hours);
-  let status: ReactNode = (
-    <Text level={7} numberOfLines={1} ellipsizeMode="tail">
-      {openInfo.message}
-    </Text>
-  );
-  if (!state.store.enabled) {
-    status = (
-      <Text level={7} numberOfLines={1} ellipsizeMode="tail">
-        No visible a clientes
-      </Text>
-    );
+  let delivery_area_text = `Radio ${state.store.delivery_area.radius} · `;
+  let statusMessage = '';
+  let statusColor = '';
+  if (state.store.delivery_area.center.route) {
+    delivery_area_text = `${delivery_area_text} ${state.store.delivery_area.center.route.short_name}`;
+    if (state.store.delivery_area.center.street_number) {
+      delivery_area_text = `${delivery_area_text} ${state.store.delivery_area.center.street_number.short_name}`;
+    }
+  } else if (state.store.delivery_area.center.locality) {
+    delivery_area_text = `${delivery_area_text} ${state.store.delivery_area.center.locality.short_name}`;
+  } else {
+    delivery_area_text = `${delivery_area_text} ${state.store.delivery_area.center.administrative_area_level_3.short_name}`;
   }
+  if (state.current_opening_hours) {
+    if (state.current_opening_hours.status === 'closed') {
+      statusMessage = 'Tienda cerrada';
+      statusColor = colors.red2;
+    } else {
+      statusMessage = 'Tienda abierta';
+      statusColor = colors.green;
+    }
+    if (!state.store.enabled) {
+      statusMessage = 'Tienda no visible';
+      statusColor = colors.blackLight1;
+    }
+  }
+
   return (
     <View
       style={[
@@ -598,7 +636,7 @@ export default ({ navigation, route }: ScreenProps) => {
                     source={{
                       uri: cloudinary.dynamicUrl(
                         (state.store as Store).images[0],
-                        'w_100'
+                        'w_214'
                       ),
                     }}
                     style={{
@@ -612,18 +650,105 @@ export default ({ navigation, route }: ScreenProps) => {
                     weight="bold"
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={{ marginBottom: 5 }}
+                    style={{ marginBottom: 10 }}
                   >
                     {(state.store as Store).name}
                   </Text>
-                  {status}
+
+                  <Text
+                    level={7}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ textAlign: 'center', marginBottom: 10 }}
+                  >
+                    {delivery_area_text}
+                  </Text>
+
+                  {!!state.current_opening_hours && (
+                    <View
+                      style={{
+                        position: 'relative',
+                        borderRadius: 3,
+                        borderWidth: 3,
+                        borderColor: colors.white,
+
+                        shadowColor: '#000',
+                        shadowOffset: {
+                          width: 0,
+                          height: 1,
+                        },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 1.41,
+
+                        elevation: 2,
+                      }}
+                    >
+                      <View
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          top: -2,
+                          flexDirection: 'row',
+                          justifyContent: 'space-around',
+                          zIndex: 999999,
+                          height: 20,
+                        }}
+                      >
+                        <View
+                          style={{
+                            borderWidth: 1,
+                            borderColor: colors.blackLight5,
+                            borderRadius: 50,
+                            width: 5,
+                            height: 5,
+                            backgroundColor: colors.blackLight6,
+                          }}
+                        />
+                        <View
+                          style={{
+                            borderWidth: 1,
+                            borderColor: colors.blackLight5,
+                            borderRadius: 50,
+                            width: 5,
+                            height: 5,
+                            backgroundColor: colors.blackLight6,
+                          }}
+                        />
+                      </View>
+                      <View
+                        style={{
+                          borderRadius: 3,
+                          backgroundColor: statusColor,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Text
+                          level={5}
+                          weight="bold"
+                          color={colors.white}
+                          style={{
+                            textAlign: 'center',
+                          }}
+                        >
+                          {statusMessage}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                 </Touchable>
 
                 <View
-                  style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                  }}
                 >
                   <Button
-                    title="Editar tienda"
+                    title="Configurar tienda"
                     style={{ flex: 1 }}
                     onPress={pressEditStoreHandler}
                   />

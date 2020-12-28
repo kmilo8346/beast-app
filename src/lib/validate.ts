@@ -134,4 +134,16 @@ validate.validators.notRequiredString = (
   return options.message;
 };
 
+validate.validators.lessThanMax = (
+  _value: any,
+  _options: any,
+  _key: any,
+  attributes: { [key: string]: any }
+) => {
+  if (parseInt(attributes.gte, 10) < parseInt(attributes.lte, 10)) {
+    return null;
+  }
+  return '^Debe ser menor que el máximo';
+};
+
 export default validate;

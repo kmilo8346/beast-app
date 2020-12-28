@@ -108,11 +108,14 @@ export interface Place {
   formatted_address?: string;
 }
 
-export type OpeningHours = {
+export interface DayOpeningHours {
   day: '1' | '2' | '3' | '4' | '5' | '6' | '7';
   open: number;
   close: number;
-}[];
+  hours?: { open: number; close: number }[];
+}
+
+export type OpeningHours = DayOpeningHours[];
 
 export interface MercadoPagoCredentials {
   access_token: string;
@@ -146,7 +149,7 @@ export interface CreateStore {
   delivery_time: IntegerRange;
   delivery_area: DeliveryArea;
   opening_hours: OpeningHours;
-  payment_provider?: PaymentProvider;
+  payment_provider?: PaymentProvider | null;
 }
 
 export interface Store extends CreateStore {

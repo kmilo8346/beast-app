@@ -31,7 +31,10 @@ import storeClient from '../../clients/store-client';
 import { capture } from '../../lib/sentry';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import cloudinary from '../../lib/cloudinary';
-import * as utils from '../../lib/utils';
+import {
+  extractCurrentOpeningHours,
+  humanizeCurrentClosedOpeningHours,
+} from '../../lib/utils';
 // cache
 import userCache from '../../cache/user';
 // types
@@ -364,7 +367,9 @@ export default ({ navigation }: ScreenProps) => {
       renderItem={({ item }) => {
         const image = item.images[0];
         const imageSize = Dimensions.get('window').width - 40;
-        const openInfo = utils.humanizeOpenInfo(item.opening_hours);
+        const currentOpeningHours = extractCurrentOpeningHours(
+          item.opening_hours
+        );
 
         return (
           <Touchable
@@ -431,24 +436,29 @@ export default ({ navigation }: ScreenProps) => {
                   )}
                 </Text>
               </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 0,
-                }}
-              >
-                <Icon name="calendar" size={18} />
-                <Text
-                  level={7}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  color={openInfo.open ? colors.black : colors.red}
-                  style={{ flex: 1, marginLeft: 10 }}
+              {currentOpeningHours.status === 'closed' && (
+                <View
+                  style={{
+                    backgroundColor: !currentOpeningHours.next_open
+                      ? colors.black
+                      : colors.red2,
+                    alignSelf: 'flex-start',
+                    borderRadius: 10,
+                    paddingVertical: 5,
+                    paddingHorizontal: 10,
+                  }}
                 >
-                  {openInfo.message}
-                </Text>
-              </View>
+                  <Text
+                    level={7}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    weight="bold"
+                    color={colors.white}
+                  >
+                    {humanizeCurrentClosedOpeningHours(currentOpeningHours)}
+                  </Text>
+                </View>
+              )}
             </View>
           </Touchable>
         );

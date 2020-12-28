@@ -1,4 +1,6 @@
 /* eslint-disable prefer-destructuring */
+const prefix = '[string formatter]';
+
 class StringFormatter {
   /**
    * Format text as credit card
@@ -104,6 +106,43 @@ class StringFormatter {
       result = `+56 ${result}`;
     }
     return result;
+  }
+
+  /**
+   * Format numeric string day as week day
+   * @param day string ex: from monday to sunday "1"|"2","3","4","5","6","7"
+   */
+  toWeekDay(day: string, options = { capitalize: false }): string {
+    let text = '';
+    switch (day) {
+      case '1':
+        text = 'lunes';
+        break;
+      case '2':
+        text = 'martes';
+        break;
+      case '3':
+        text = 'miércoles';
+        break;
+      case '4':
+        text = 'jueves';
+        break;
+      case '5':
+        text = 'viernes';
+        break;
+      case '6':
+        text = 'sábado';
+        break;
+      case '7':
+        text = 'domingo';
+        break;
+      default:
+        throw new Error(`${prefix} Invalid param day: ${day}`);
+    }
+    if (options.capitalize) {
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+    }
+    return text;
   }
 }
 

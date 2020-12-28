@@ -2,6 +2,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { Item, CreateUser, OpeningHours, Place } from '../types';
 import numberFormatter from './formatters/number-formatter';
+import stringFormatter from './formatters/string-formatter';
 
 const prefix = '[utils]';
 
@@ -285,6 +286,142 @@ export const humanizeOpenInfo = (
       nextOpenDay.dayOpeningHours.day
     )} ${numberFormatter.humanizeTime(nextOpenDay.dayOpeningHours.open)}`,
   };
+};
+
+export const normalizeOpeningHours = (openingHours: OpeningHours) => {
+  return openingHours.map((dayOpeningHours) => {
+    const result = { ...dayOpeningHours };
+    if (!dayOpeningHours.hours) {
+      if (dayOpeningHours.open === 0 && dayOpeningHours.close === 0) {
+        result.hours = [];
+      } else {
+        result.hours = [
+          { open: dayOpeningHours.open, close: dayOpeningHours.close },
+        ];
+      }
+    }
+    result.hours = (result.hours || []).sort((a, b) => {
+      if (a.open < b.open) {
+        return -1;
+      }
+      return a.open > b.open ? 1 : 0;
+    });
+    return result;
+  });
+};
+
+export interface CurrentOpenedOpeningHours {
+  status: 'opened';
+  hours: { open: number; close: number }[];
+}
+export interface CurrentClosedOpenginHours {
+  status: 'closed';
+  next_open?: {
+    day: string;
+    day_time: number;
+    day_alias?: 'today' | 'tomorrow';
+  };
+}
+
+export type CurrentOpenginHours =
+  | CurrentOpenedOpeningHours
+  | CurrentClosedOpenginHours;
+
+export const extractCurrentOpeningHours = (
+  opening_hours: OpeningHours
+): CurrentOpenginHours => {
+  // normalize
+  const oh = normalizeOpeningHours(opening_hours);
+  // current info
+  const current_date = new Date();
+  let current_day = `${current_date.getDay()}`;
+  if (current_day === '0') {
+    current_day = '7';
+  }
+  const current_minutes = current_date.getMinutes();
+  const current_time = parseInt(
+    `${current_date.getHours()}${
+      current_minutes < 10 ? `0${current_minutes}` : current_minutes
+    }`,
+    10
+  );
+
+  // find current day
+  const index = oh.findIndex((i) => i.day === current_day);
+  if (index === -1) {
+    throw new Error(`${prefix} Today day dont found in opening hours`);
+  }
+  const currentDayOpeningHours = oh[index];
+  // opened
+  if (
+    (currentDayOpeningHours.hours || []).some(
+      (hours) => current_time >= hours.open && current_time < hours.close
+    )
+  ) {
+    return {
+      status: 'opened',
+      hours: currentDayOpeningHours.hours || [],
+    };
+  }
+
+  // closed
+  let cont = 0;
+  let i = index;
+  let alias: 'today' | 'tomorrow' | undefined;
+  const total = oh.length;
+  do {
+    cont++;
+    if (cont === 1) {
+      alias = 'today';
+    } else if (cont === 2) {
+      alias = 'tomorrow';
+    } else {
+      alias = undefined;
+    }
+    const doh = oh[i];
+    const hours = doh.hours || [];
+    for (let j = 0; j < hours.length; j++) {
+      const h = hours[j];
+      if (!(cont === 1 && current_time > h.open)) {
+        return {
+          status: 'closed',
+          next_open: {
+            day: doh.day,
+            day_time: h.open,
+            day_alias: alias,
+          },
+        };
+      }
+    }
+    i++;
+    if (i === total) {
+      i = 0;
+    }
+  } while (cont < total);
+  return {
+    status: 'closed',
+  };
+};
+
+export const humanizeCurrentClosedOpeningHours = (
+  closedOpeningHours: CurrentClosedOpenginHours
+): string => {
+  if (!closedOpeningHours.next_open) {
+    return 'Temporalmente no disponible';
+  }
+  let text = `Abre`;
+  if (closedOpeningHours.next_open.day_alias) {
+    if (closedOpeningHours.next_open.day_alias === 'tomorrow') {
+      text = `${text} mañana`;
+    }
+  } else {
+    text = `${text} ${stringFormatter.toWeekDay(
+      closedOpeningHours.next_open.day
+    )}`;
+  }
+  return `${text} ${numberFormatter.humanizeTime(
+    closedOpeningHours.next_open.day_time
+  )}`;
 };
 
 export const formatPlace = (place: Place): string => {

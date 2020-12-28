@@ -52,7 +52,7 @@ export default ({
   return (
     <View>
       <FakeInput
-        required
+        required={false}
         label={label}
         placeholder={placeholder}
         suffix={suffix}

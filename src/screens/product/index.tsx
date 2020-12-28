@@ -37,7 +37,11 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
-import * as utils from '../../lib/utils';
+import {
+  CurrentOpenginHours,
+  extractCurrentOpeningHours,
+  humanizeCurrentClosedOpeningHours,
+} from '../../lib/utils';
 // types
 import { Product, SearchResponse, Store } from '../../types';
 // styles
@@ -73,19 +77,25 @@ type SetAmountAction = {
   type: 'set_amount';
   amount: number;
 };
+type SetCurrentOpeningHoursAction = {
+  type: 'set_current_opening_hours';
+  current_opening_hours?: CurrentOpenginHours;
+};
 type Action =
   | ResetAction
   | SetStoreAction
   | SetProductsAction
   | SetErrorAction
   | SetRefreshingAction
-  | SetAmountAction;
+  | SetAmountAction
+  | SetCurrentOpeningHoursAction;
 type State = {
   store?: Store;
   products?: SearchResponse<Product>;
   error?: Error;
   refreshing: boolean;
   amount?: number;
+  current_opening_hours?: CurrentOpenginHours;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -106,6 +116,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, refreshing: action.refreshing };
     case 'set_amount':
       return { ...state, amount: action.amount };
+    case 'set_current_opening_hours':
+      return { ...state, current_opening_hours: action.current_opening_hours };
     default:
       return state;
   }
@@ -233,6 +245,21 @@ export default ({ navigation, route }: ScreenProps) => {
     }, [])
   );
 
+  useEffect(() => {
+    if (!state.store?.opening_hours) {
+      dispatch({
+        type: 'set_current_opening_hours',
+      });
+    } else {
+      dispatch({
+        type: 'set_current_opening_hours',
+        current_opening_hours: extractCurrentOpeningHours(
+          state.store.opening_hours
+        ),
+      });
+    }
+  }, [state.store?.opening_hours]);
+
   // render logic
   let storeComponent: ReactNode = (
     <>
@@ -252,7 +279,6 @@ export default ({ navigation, route }: ScreenProps) => {
     />
   );
   if (state.store) {
-    const openInfo = utils.humanizeOpenInfo(state.store.opening_hours);
     storeComponent = (
       <>
         <Touchable
@@ -305,23 +331,28 @@ export default ({ navigation, route }: ScreenProps) => {
                 )}
               </Text>
             </View>
-            {!openInfo.open && (
+            {state.current_opening_hours?.status === 'closed' && (
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 0,
+                  backgroundColor: !state.current_opening_hours.next_open
+                    ? colors.black
+                    : colors.red2,
+                  alignSelf: 'flex-start',
+                  borderRadius: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
                 }}
               >
-                <Icon name="calendar" size={16} />
                 <Text
                   level={7}
                   numberOfLines={1}
                   ellipsizeMode="tail"
-                  color={openInfo.open ? colors.black : colors.red}
-                  style={{ flex: 1, marginLeft: 5 }}
+                  weight="bold"
+                  color={colors.white}
                 >
-                  {openInfo.message}
+                  {humanizeCurrentClosedOpeningHours(
+                    state.current_opening_hours
+                  )}
                 </Text>
               </View>
             )}

@@ -16,19 +16,6 @@ import constraints from './constraints';
 // styles
 import globalStyle from '../../../styles';
 
-// extending validate validators
-validate.validators.lessThanMax = (
-  _value: any,
-  _options: any,
-  _key: any,
-  attributes: { [key: string]: any }
-) => {
-  if (parseInt(attributes.gte, 10) < parseInt(attributes.lte, 10)) {
-    return null;
-  }
-  return '^Mínimo debe ser menor que el máximo';
-};
-
 type ChangeValueAction = {
   type: 'change_value';
   attribute: string;

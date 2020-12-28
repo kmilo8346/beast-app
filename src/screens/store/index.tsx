@@ -39,7 +39,10 @@ import durationFormatter from '../../lib/formatters/duration-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
-import * as utils from '../../lib/utils';
+import {
+  extractCurrentOpeningHours,
+  humanizeCurrentClosedOpeningHours,
+} from '../../lib/utils';
 // types
 import { Product, SearchResponse, Store } from '../../types';
 // styles
@@ -403,7 +406,15 @@ export default ({ navigation, route }: ScreenProps) => {
       />
     );
   }
-  const openInfo = utils.humanizeOpenInfo(store.opening_hours);
+  const currentOpeningHours = extractCurrentOpeningHours(store.opening_hours);
+  let currentOpeningHoursMessage = '';
+  if (currentOpeningHours.status === 'closed') {
+    currentOpeningHoursMessage = humanizeCurrentClosedOpeningHours(
+      currentOpeningHours
+    );
+  } else {
+    currentOpeningHoursMessage = `Horario de atención`;
+  }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <FlatList
@@ -500,28 +511,44 @@ export default ({ navigation, route }: ScreenProps) => {
                 >
                   <Icon name="calendar" size={18} />
                   <View
-                    style={{
-                      marginLeft: 10,
-                      flex: 1,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}
+                    style={{ flex: 1, marginLeft: 10, flexDirection: 'row' }}
                   >
-                    <Text
-                      level={7}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                      color={openInfo.open ? colors.black : colors.red}
-                      style={{ flex: 1 }}
-                    >
-                      {openInfo.message}
-                    </Text>
-                    {state.opening_hours_modal ? (
-                      <Icon name="chevron-up" />
+                    {currentOpeningHours.status === 'closed' ? (
+                      <View
+                        style={{
+                          backgroundColor: !currentOpeningHours.next_open
+                            ? colors.black
+                            : colors.red2,
+                          alignSelf: 'flex-start',
+                          borderRadius: 10,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                        }}
+                      >
+                        <Text
+                          level={7}
+                          weight="bold"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          style={{
+                            color: colors.white,
+                          }}
+                        >
+                          {currentOpeningHoursMessage}
+                        </Text>
+                      </View>
                     ) : (
-                      <Icon name="chevron-down" />
+                      <Text level={7} numberOfLines={1} ellipsizeMode="tail">
+                        {currentOpeningHoursMessage}
+                      </Text>
                     )}
                   </View>
+
+                  {state.opening_hours_modal ? (
+                    <Icon name="chevron-up" />
+                  ) : (
+                    <Icon name="chevron-down" />
+                  )}
                 </Touchable>
 
                 <Touchable
@@ -624,7 +651,7 @@ export default ({ navigation, route }: ScreenProps) => {
       )}
       {state.opening_hours_modal && (
         <ViewOpeningHoursModal
-          value={store.opening_hours}
+          openingHours={store.opening_hours}
           onClose={closeOpeningHoursModal}
         />
       )}

@@ -21,7 +21,7 @@ class NumberFormatter {
     return `${Math.round(distance * 10) / 10} kms`;
   }
 
-  humanizeTime = (time: number): string => {
+  humanizeTime(time: number): string {
     if (time < 0 || time >= 2400) {
       throw new Error(`${prefix} Invalid argument, time: ${time}`);
     }
@@ -33,6 +33,7 @@ class NumberFormatter {
     let meridiem_time = 'am';
     if (parseInt(hours, 10) >= 12) {
       hours = `${parseInt(hours, 10) - 12}`;
+      hours = hours.padStart(2, '0');
       meridiem_time = 'pm';
     }
     if (parseInt(hours, 10) === 0) {
@@ -40,7 +41,7 @@ class NumberFormatter {
     }
 
     return `${hours}:${minutes} ${meridiem_time}`;
-  };
+  }
 }
 
 export default new NumberFormatter();

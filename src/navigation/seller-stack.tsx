@@ -10,6 +10,18 @@ import {
   SetPhoneScreen,
   VerifyPhoneScreen,
   AddUserDataScreen,
+  CreateStoreWizzardSetNameScreen,
+  CreateStoreWizzardSetImageScreen,
+  CreateStoreWizzardSetDeliveryAreaScreen,
+  CreateStoreScreen,
+  EditStoreScreen,
+  EditStoreSetImageScreen,
+  EditStoreSetNameScreen,
+  EditStoreSetDescriptionScreen,
+  EditStoreSetDeliveryAreaScreen,
+  EditStoreSetDeliveryTimeScreen,
+  EditStoreSetOpeningHoursScreen,
+  EditStoreSetDayOpeningHoursScreen,
   UpsertStoreScreen,
   UpsertProductScreen,
   SellerOrdersScreen,
@@ -41,6 +53,66 @@ export default () => {
         <Stack.Screen
           name="AddUserData"
           component={AddUserDataScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="CreateStoreWizzardSetName"
+          component={CreateStoreWizzardSetNameScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="CreateStoreWizzardSetImage"
+          component={CreateStoreWizzardSetImageScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="CreateStoreWizzardSetDeliveryArea"
+          component={CreateStoreWizzardSetDeliveryAreaScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="CreateStore"
+          component={CreateStoreScreen}
+          options={{ title: 'Creando tienda' }}
+        />
+        <Stack.Screen
+          name="EditStore"
+          component={EditStoreScreen}
+          options={{ title: 'Configurando tienda' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetImage"
+          component={EditStoreSetImageScreen}
+          options={{ title: 'Imagen' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetName"
+          component={EditStoreSetNameScreen}
+          options={{ title: 'Nombre' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetDescription"
+          component={EditStoreSetDescriptionScreen}
+          options={{ title: 'Descripción' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetDeliveryArea"
+          component={EditStoreSetDeliveryAreaScreen}
+          options={{ title: 'Área de despacho' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetDeliveryTime"
+          component={EditStoreSetDeliveryTimeScreen}
+          options={{ title: 'Tiempo de entrega' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetOpeningHours"
+          component={EditStoreSetOpeningHoursScreen}
+          options={{ title: 'Horario de atención' }}
+        />
+        <Stack.Screen
+          name="EditStoreSetDayOpeningHours"
+          component={EditStoreSetDayOpeningHoursScreen}
           options={{ title: '' }}
         />
         <Stack.Screen
