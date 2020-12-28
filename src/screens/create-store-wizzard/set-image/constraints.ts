@@ -5,7 +5,7 @@ export default {
       message: '^Es requerido',
     },
     arrayWithValues: {
-      message: '^Imagen se esta subiendo',
+      message: '^Imagen se está subiendo',
     },
   },
 } as { [key: string]: any };
