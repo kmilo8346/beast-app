@@ -56,7 +56,6 @@ export default ({ openingHours, onClose }: ComponentProps) => {
   };
 
   // render logic
-  console.log(oh.length);
   return (
     <Modal onRequestClose={requestCloseHandler} title="Horario de atención">
       <View style={globalStyles.modalSubtitleSpace} />

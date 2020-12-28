@@ -1,14 +1,10 @@
 import React, { useEffect, useLayoutEffect, useReducer } from 'react';
-import {
-  GestureResponderEvent,
-  ScrollView,
-  View,
-  Platform,
-} from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { GestureResponderEvent, ScrollView, View } from 'react-native';
 
 // constants
 import { defaultOpen, defaultClose } from '../../../constants';
+// local components
+import TimePicker from './components/time-picker';
 // components
 import Text from '../../../../components/text';
 import Divider from '../../../../components/divider';
@@ -249,34 +245,27 @@ export default ({ navigation, route }: ScreenProps) => {
                 </Text>
               </Touchable>
               {open && (
-                <View>
-                  <DateTimePicker
-                    mode="time"
-                    display="spinner"
-                    value={state.date}
-                    is24Hour={false}
-                    onChange={(event, selectedDate) => {
-                      if (Platform.OS === 'android') {
-                        dispatch({ type: 'set_expanded', expanded: null });
-                      }
-                      if (event.type === 'dismissed' || !selectedDate) {
-                        return;
-                      }
-                      dispatch({
-                        type: 'set_date',
-                        date: selectedDate,
-                      });
+                <TimePicker
+                  value={state.date}
+                  onChange={(date) => {
+                    dispatch({ type: 'set_expanded', expanded: null });
+                    dispatch({
+                      type: 'set_date',
+                      date,
+                    });
 
-                      const time = toTime(selectedDate);
-                      dispatch({
-                        type: 'update_hours',
-                        position: index,
-                        action: 'open',
-                        time,
-                      });
-                    }}
-                  />
-                </View>
+                    const time = toTime(date);
+                    dispatch({
+                      type: 'update_hours',
+                      position: index,
+                      action: 'open',
+                      time,
+                    });
+                  }}
+                  onDismiss={() => {
+                    dispatch({ type: 'set_expanded', expanded: null });
+                  }}
+                />
               )}
               <Divider style={{ marginLeft: 20 }} />
 
@@ -315,34 +304,28 @@ export default ({ navigation, route }: ScreenProps) => {
                 </Text>
               </Touchable>
               {close && (
-                <View>
-                  <DateTimePicker
-                    mode="time"
-                    display="spinner"
-                    value={state.date}
-                    is24Hour={false}
-                    onChange={(event, selectedDate) => {
-                      if (Platform.OS === 'android') {
-                        dispatch({ type: 'set_expanded', expanded: null });
-                      }
-                      if (event.type === 'dismissed' || !selectedDate) {
-                        return;
-                      }
-                      dispatch({
-                        type: 'set_date',
-                        date: selectedDate,
-                      });
+                <TimePicker
+                  value={state.date}
+                  onChange={(date) => {
+                    dispatch({ type: 'set_expanded', expanded: null });
 
-                      const time = toTime(selectedDate);
-                      dispatch({
-                        type: 'update_hours',
-                        position: index,
-                        action: 'close',
-                        time,
-                      });
-                    }}
-                  />
-                </View>
+                    dispatch({
+                      type: 'set_date',
+                      date,
+                    });
+
+                    const time = toTime(date);
+                    dispatch({
+                      type: 'update_hours',
+                      position: index,
+                      action: 'close',
+                      time,
+                    });
+                  }}
+                  onDismiss={() => {
+                    dispatch({ type: 'set_expanded', expanded: null });
+                  }}
+                />
               )}
               <Divider style={{ marginLeft: 20 }} />
 
