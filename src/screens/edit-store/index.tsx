@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { View, ScrollView, Image } from 'react-native';
 
 // local components
@@ -11,11 +11,12 @@ import Text from '../../components/text';
 import storeCache from '../../cache/store';
 // libs
 import cloudinary from '../../lib/cloudinary';
+import { normalizeOpeningHours } from '../../lib/utils';
 import stringFormatter from '../../lib/formatters/string-formatter';
 import numberFormatter from '../../lib/formatters/number-formatter';
 import durationFormatter from '../../lib/formatters/duration-formatter';
 // types
-import { Store } from '../../types';
+import { OpeningHours, Store } from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -26,14 +27,21 @@ type SetStoreAction = {
   type: 'set_store';
   store: Store;
 };
-type Action = SetStoreAction;
+type SetOpeningHoursAction = {
+  type: 'set_opening_hours';
+  opening_hours: OpeningHours;
+};
+type Action = SetStoreAction | SetOpeningHoursAction;
 type State = {
   store: Store;
+  opening_hours: OpeningHours;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_store':
       return { ...state, store: action.store };
+    case 'set_opening_hours':
+      return { ...state, opening_hours: action.opening_hours };
     default:
       return state;
   }
@@ -45,9 +53,16 @@ interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const [state, dispatch] = useReducer(reducer, {
-    store: storeCache.getData() as Store,
-  });
+  const [state, dispatch] = useReducer(
+    reducer,
+    (() => {
+      const store = storeCache.getData() as Store;
+      return {
+        store,
+        opening_hours: normalizeOpeningHours(store.opening_hours),
+      };
+    })()
+  );
 
   // event handlers
   const pressImageHandler = () => {
@@ -101,6 +116,13 @@ export default ({ navigation }: ScreenProps) => {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    dispatch({
+      type: 'set_opening_hours',
+      opening_hours: normalizeOpeningHours(state.store.opening_hours),
+    });
+  }, [state.store.opening_hours]);
 
   // render logic
   let delivery_area_text = '';
@@ -179,36 +201,8 @@ export default ({ navigation }: ScreenProps) => {
         label="Horario de atención"
         placeholder="Añadir horario de atención"
         value={
-          <View style={{ marginRight: 0 }}>
-            {state.store.opening_hours.map((day_opening_hours, index) => {
-              let component: ReactNode = <Text level={6}>Cerrado</Text>;
-              if (day_opening_hours.hours) {
-                if (day_opening_hours.hours.length) {
-                  component = day_opening_hours.hours.map((hours, index) => {
-                    return (
-                      <Text
-                        key={`${index}`}
-                        level={6}
-                        style={{ marginBottom: 3 }}
-                      >
-                        {`${numberFormatter.humanizeTime(
-                          hours.open
-                        )} a ${numberFormatter.humanizeTime(hours.close)}`}
-                      </Text>
-                    );
-                  });
-                }
-              } else if (
-                !(day_opening_hours.open === 0 && day_opening_hours.close === 0)
-              ) {
-                <Text level={6} style={{ marginBottom: 3 }}>
-                  {`${numberFormatter.humanizeTime(
-                    day_opening_hours.open
-                  )} a ${numberFormatter.humanizeTime(
-                    day_opening_hours.close
-                  )}`}
-                </Text>;
-              }
+          <View>
+            {state.opening_hours.map((day_opening_hours, index) => {
               return (
                 <View
                   key={`${day_opening_hours.day}-${index}`}
@@ -223,7 +217,26 @@ export default ({ navigation }: ScreenProps) => {
                       capitalize: true,
                     })}
                   </Text>
-                  <View>{component}</View>
+                  <View>
+                    {(day_opening_hours.hours || []).map((hours, index) => {
+                      return (
+                        <Text
+                          key={`${index}`}
+                          level={6}
+                          style={{ marginBottom: 3 }}
+                        >
+                          {`${numberFormatter.humanizeTime(
+                            hours.open
+                          )} a ${numberFormatter.humanizeTime(hours.close)}`}
+                        </Text>
+                      );
+                    })}
+                    {!day_opening_hours.hours?.length && (
+                      <Text level={6} style={{ marginBottom: 3 }}>
+                        Cerrado
+                      </Text>
+                    )}
+                  </View>
                 </View>
               );
             })}
