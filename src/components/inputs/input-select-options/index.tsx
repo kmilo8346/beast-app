@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 
 // components
 import Modal from '../../modals/modal';
@@ -72,9 +72,10 @@ export default ({
         <Modal
           type="auto"
           title={modalTitle}
+          modalStyle={{ marginTop: 110 }}
           onRequestClose={requestCloseHandler}
         >
-          <View style={globalStyle.withMargin}>
+          <ScrollView style={globalStyle.withPadding}>
             {options.map((option) => {
               let selectIcon = <Icon name="circle" />;
               const titleStyle = { marginBottom: 25 };
@@ -122,7 +123,7 @@ export default ({
                 </Touchable>
               );
             })}
-          </View>
+          </ScrollView>
         </Modal>
       )}
     </View>
