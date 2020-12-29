@@ -35,17 +35,6 @@ import colors from '../../../styles/colors';
 
 // instances outside component
 const prefix = '[edit store set opening hours screen]';
-const standarize = (opening_hours: OpeningHours): OpeningHours => {
-  return opening_hours.map((opening_hours) => {
-    if ('hours' in opening_hours) {
-      return opening_hours;
-    }
-    return {
-      ...opening_hours,
-      hours: [{ open: opening_hours.open, close: opening_hours.close }],
-    };
-  });
-};
 
 type UpdateDayOpeningHours = {
   type: 'update_day_opening_hours';
@@ -97,7 +86,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     form: {
       // fields
-      opening_hours: standarize(route.params.opening_hours),
+      opening_hours: route.params.opening_hours,
 
       // other state
       changed: false,

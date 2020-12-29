@@ -104,7 +104,7 @@ export default ({ navigation }: ScreenProps) => {
   const pressOpeningHoursHandler = () => {
     navigation.navigate('EditStoreSetOpeningHours', {
       id: state.store.id,
-      opening_hours: state.store.opening_hours,
+      opening_hours: state.opening_hours,
     });
   };
 
