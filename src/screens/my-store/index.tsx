@@ -605,7 +605,7 @@ export default ({ navigation, route }: ScreenProps) => {
       statusColor = colors.red2;
     } else {
       statusMessage = 'Tienda abierta';
-      statusColor = colors.green;
+      statusColor = colors.green3;
     }
     if (!state.store.enabled) {
       statusMessage = 'Tienda no visible';
