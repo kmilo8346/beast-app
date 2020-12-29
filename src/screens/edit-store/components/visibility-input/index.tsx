@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import Text from '../../../../components/text';
 import LoadingOverlay, {
   ILoadingOverlay,
+  LoadingStatus,
 } from '../../../../components/loading-overlay';
 import Switch from '../../../../components/switch';
 // clients
@@ -45,6 +46,7 @@ export default ({ id, enabled }: ComponentProps) => {
         },
       });
       storeCache.updateData(storeUpdated);
+      await loadingOverlayRef.current?.status(LoadingStatus.OK);
     } catch (error) {
       capture(prefix, 'Value change handler error', error);
       setState(!enabled);
