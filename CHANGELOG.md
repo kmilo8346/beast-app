@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.67](https://github.com/firedevs-team/beast-app/compare/v1.0.66...v1.0.67) (2020-12-29)
+
+
+### Bug Fixes
+
+* **app:** remove unused code ([720b379](https://github.com/firedevs-team/beast-app/commit/720b3791f8ccca0d64ed1df785fadd956d41bb0b))
+* **input-select-options:** fix with scrollview ([85514ad](https://github.com/firedevs-team/beast-app/commit/85514ada639cebb692293645e2b9474964a46a08))
+* **my store:** poster color ([883bd17](https://github.com/firedevs-team/beast-app/commit/883bd17d9d31d8b34edf1ea6cafd23b4ab571001))
+* **texts:** changing bad text ([1a42f17](https://github.com/firedevs-team/beast-app/commit/1a42f17e06a36f320f68b06028a01bbf37ce258e))
+
 ### [1.0.66](https://github.com/firedevs-team/beast-app/compare/v1.0.65...v1.0.66) (2020-12-11)
 
 ### [1.0.65](https://github.com/firedevs-team/beast-app/compare/v1.0.64...v1.0.65) (2020-12-07)
