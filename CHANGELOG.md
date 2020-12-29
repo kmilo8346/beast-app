@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.68](https://github.com/firedevs-team/beast-app/compare/v1.0.67...v1.0.68) (2020-12-29)
+
+
+### Bug Fixes
+
+* **set opening hours:** normalize opening hours ([06059db](https://github.com/firedevs-team/beast-app/commit/06059db27d0d2e3496edaf0ebeed04f8c5d7dbd8))
+
 ### [1.0.67](https://github.com/firedevs-team/beast-app/compare/v1.0.66...v1.0.67) (2020-12-29)
 
 
