@@ -397,7 +397,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   >
                     {state.store.name}
                   </Text>
-                  <Text level={6}>Ver tienda</Text>
+                  <Text level={6}>Ver más productos</Text>
                 </View>
                 <Icon name="chevron-right" />
               </Touchable>
