@@ -4,8 +4,7 @@ export default {
       allowEmpty: false,
       message: '^Es requerido',
     },
-    format: {
-      pattern: /^\+569\d{8}$/,
+    phone: {
       message: '^Número de teléfono inválido',
     },
   },

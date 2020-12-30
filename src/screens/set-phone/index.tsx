@@ -1,9 +1,19 @@
-import React, { useReducer, useRef } from 'react';
-import { View, Vibration, ScrollView } from 'react-native';
+import React, { useCallback, useReducer, useRef } from 'react';
+import {
+  View,
+  Vibration,
+  ScrollView,
+  GestureResponderEvent,
+} from 'react-native';
 
+// constraints
+import constraints from './constraints';
 // components
 import Text from '../../components/text';
+import Divider from '../../components/divider';
+import Modal from '../../components/modals/modal';
 import Input from '../../components/inputs/input';
+import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
 import LoadingOverlay, {
@@ -16,17 +26,63 @@ import userCache from '../../cache/user';
 // libs
 import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
-import stringFormatter from '../../lib/formatters/string-formatter';
+import { parsePhone } from '../../lib/phone-number';
 import stringParser from '../../lib/parsers/string-parser';
-// constraints
-import constraints from './constraints';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
 
 // instances outside component
 const prefix = '[set phone screen]';
+const prefixes: Prefix[] = [
+  {
+    country: 'Chile',
+    prefix: '+56',
+  },
+  {
+    country: 'Argentina',
+    prefix: '+54',
+  },
+  {
+    country: 'Colombia',
+    prefix: '+57',
+  },
+  {
+    country: 'Cuba',
+    prefix: '+53',
+  },
+  {
+    country: 'Perú',
+    prefix: '+51',
+  },
+  {
+    country: 'Uruguay',
+    prefix: '+598',
+  },
+  {
+    country: 'Venezuela',
+    prefix: '+58',
+  },
+];
+const format = (
+  text: string | undefined,
+  prefix: string
+): string | undefined => {
+  let result = text || '';
+  try {
+    result = parsePhone(result).formatInternational();
+  } catch (error) {}
+  return result.replace(prefix, '');
+};
+const parse = (text: string, prefix: string): string => {
+  return `${prefix}${text.replace(/ /g, '')}`;
+};
 
+type Prefix = {
+  //id: string;
+  country: string;
+  prefix: string;
+};
 type ChangePhoneAction = { type: 'change_phone'; phone: string };
 type ValidatePhoneAction = {
   type: 'validate_phone';
@@ -39,11 +95,21 @@ type SetFormErrorsAction = {
   type: 'set_form_errors';
   errors: { [key: string]: string[] };
 };
+type SetIsVisibleAction = {
+  type: 'set_is_visible';
+  is_visible: boolean;
+};
+type SetSelectedPrefixAction = {
+  type: 'set_selected_prefix';
+  selected_prefix: Prefix;
+};
 type Action =
   | ChangePhoneAction
   | ValidatePhoneAction
   | SetFormSubmittedAction
-  | SetFormErrorsAction;
+  | SetFormErrorsAction
+  | SetIsVisibleAction
+  | SetSelectedPrefixAction;
 type State = {
   form: {
     // fields
@@ -52,6 +118,8 @@ type State = {
     submitted: boolean;
     errors?: { [key: string]: string[] };
   };
+  is_visible: boolean;
+  selected_prefix: Prefix;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -67,13 +135,17 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         form: {
           ...state.form,
-          errors: validate.single(state.form.phone, constraints.phone),
+          errors: validate(state.form, constraints),
         },
       };
     case 'set_form_submitted':
       return { ...state, form: { ...state.form, submitted: true } };
     case 'set_form_errors':
       return { ...state, form: { ...state.form, errors: action.errors } };
+    case 'set_is_visible':
+      return { ...state, is_visible: action.is_visible };
+    case 'set_selected_prefix':
+      return { ...state, selected_prefix: action.selected_prefix };
     default:
       return state;
   }
@@ -91,6 +163,8 @@ export default ({ navigation, route }: ScreenProps) => {
       phone: userCache.getData()?.phone,
       submitted: false,
     },
+    is_visible: false,
+    selected_prefix: prefixes[0],
   });
   const toastRef = useRef<IToast>(null);
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
@@ -101,8 +175,29 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'validate_phone', phone });
   };
 
+  const pressPrefixHandler = useCallback(() => {
+    dispatch({ type: 'set_is_visible', is_visible: true });
+  }, []);
+
+  const selectPrefix = useCallback(
+    (prefix: Prefix) => {
+      const oldphone = state.form.phone;
+      const oldPrefix = state.selected_prefix.prefix;
+      const newPhone = oldphone?.replace(oldPrefix, prefix.prefix);
+      dispatch({ type: 'set_is_visible', is_visible: false });
+      dispatch({ type: 'set_selected_prefix', selected_prefix: prefix });
+      dispatch({ type: 'change_phone', phone: newPhone || '' });
+    },
+    [state]
+  );
+
+  const modalRequestCloseHandler = useCallback(() => {
+    dispatch({ type: 'set_is_visible', is_visible: false });
+  }, []);
+
   const submitHandler = async () => {
     dispatch({ type: 'set_form_submitted' });
+
     // validate
     const errors = validate(state.form, constraints);
     if (errors) {
@@ -156,16 +251,19 @@ export default ({ navigation, route }: ScreenProps) => {
         >
           Inicia sesión con tu teléfono móvil y únete a nuestra comunidad.
         </Text>
+
         <Input
           returnKeyType="done"
           keyboardType="phone-pad"
           placeholder="Número de teléfono móvil"
-          format={stringFormatter.toPhone}
-          parse={stringParser.fromPhone}
+          format={(text) => format(text, state.selected_prefix.prefix)}
+          parse={(text) => parse(text, state.selected_prefix.prefix)}
           prefix={
-            <Text level={6} style={{ color: colors.black, marginLeft: 10 }}>
-              +56
-            </Text>
+            <Touchable onPress={pressPrefixHandler} style={{ zIndex: 999 }}>
+              <Text level={6} style={{ color: colors.black, marginLeft: 5 }}>
+                {state.selected_prefix.prefix}
+              </Text>
+            </Touchable>
           }
           value={state.form.phone}
           errors={state.form.errors?.phone}
@@ -187,6 +285,34 @@ export default ({ navigation, route }: ScreenProps) => {
           onPress={submitHandler}
         />
       </View>
+      {state.is_visible && (
+        <Modal
+          type="auto"
+          title="Selecciona un país"
+          onRequestClose={modalRequestCloseHandler}
+        >
+          <ScrollView style={{ paddingBottom: 20 }}>
+            {prefixes.map((prefix) => {
+              return (
+                <Touchable
+                  key={prefix.country}
+                  onPress={(event: GestureResponderEvent) => {
+                    event.stopPropagation();
+                    selectPrefix(prefix);
+                  }}
+                >
+                  <View style={globalStyles.withMargin}>
+                    <Text level={5} style={{ paddingVertical: 15 }}>
+                      {`${prefix.country} (${prefix.prefix})`}
+                    </Text>
+                    <Divider />
+                  </View>
+                </Touchable>
+              );
+            })}
+          </ScrollView>
+        </Modal>
+      )}
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );

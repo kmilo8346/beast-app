@@ -1,5 +1,7 @@
 import validate from 'validate.js';
+
 import { OpeningHours } from '../types';
+import * as phoneNumber from './phone-number';
 
 // extending validate validators
 validate.validators.cardExpirationDate = (
@@ -128,6 +130,19 @@ validate.validators.notRequiredString = (
     typeof value === 'undefined' ||
     (typeof value === 'string' && value.length > 0)
   ) {
+    return null;
+  }
+
+  return options.message;
+};
+
+validate.validators.phone = (
+  value: string,
+  options: {
+    message: string;
+  }
+) => {
+  if (phoneNumber.isValid(value)) {
     return null;
   }
 
