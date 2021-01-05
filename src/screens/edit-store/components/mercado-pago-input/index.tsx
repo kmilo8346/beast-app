@@ -4,9 +4,8 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
 
-// local components
-import Input from '../input';
 // screen components
+import Input from '../../../components/input';
 import ConfirmDialog from '../../../components/dialogs/confirm-dialog';
 // components
 import Text from '../../../../components/text';

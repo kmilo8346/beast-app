@@ -2,11 +2,11 @@ import React, { useEffect, useReducer } from 'react';
 import { View, ScrollView, Image } from 'react-native';
 
 // local components
-import Input from './components/input';
 import MercadoPagoInput from './components/mercado-pago-input';
 import VisibilityInput from './components/visibility-input';
 // components
 import Text from '../../components/text';
+import Input from '../components/input';
 // cache
 import storeCache from '../../cache/store';
 // libs

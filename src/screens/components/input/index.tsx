@@ -2,13 +2,13 @@ import React, { ReactNode } from 'react';
 import { GestureResponderEvent, View } from 'react-native';
 
 // components
-import Icon from '../../../../components/icon';
-import Text from '../../../../components/text';
-import Touchable from '../../../../components/touchable';
+import Icon from '../../../components/icon';
+import Text from '../../../components/text';
+import Touchable from '../../../components/touchable';
 // libs
-import * as utils from '../../../../lib/utils';
+import * as utils from '../../../lib/utils';
 // styles
-import colors from '../../../../styles/colors';
+import colors from '../../../styles/colors';
 
 interface ComponentProps {
   label: string;
