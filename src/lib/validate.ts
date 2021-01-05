@@ -1,7 +1,7 @@
 import validate from 'validate.js';
 
 import { OpeningHours } from '../types';
-import * as phoneNumber from './phone-number';
+import phoneNumber from './phone-number';
 
 // extending validate validators
 validate.validators.cardExpirationDate = (

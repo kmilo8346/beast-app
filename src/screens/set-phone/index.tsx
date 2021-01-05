@@ -26,8 +26,7 @@ import userCache from '../../cache/user';
 // libs
 import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
-import { parsePhone } from '../../lib/phone-number';
-import stringParser from '../../lib/parsers/string-parser';
+import phoneNumber from '../../lib/phone-number';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -64,19 +63,6 @@ const prefixes: Prefix[] = [
     prefix: '+58',
   },
 ];
-const format = (
-  text: string | undefined,
-  prefix: string
-): string | undefined => {
-  let result = text || '';
-  try {
-    result = parsePhone(result).formatInternational();
-  } catch (error) {}
-  return result.replace(prefix, '');
-};
-const parse = (text: string, prefix: string): string => {
-  return `${prefix}${text.replace(/ /g, '')}`;
-};
 
 type Prefix = {
   //id: string;
@@ -256,8 +242,11 @@ export default ({ navigation, route }: ScreenProps) => {
           returnKeyType="done"
           keyboardType="phone-pad"
           placeholder="Número de teléfono móvil"
-          format={(text) => format(text, state.selected_prefix.prefix)}
-          parse={(text) => parse(text, state.selected_prefix.prefix)}
+          //format={(text) => format(text, state.selected_prefix.prefix)}
+          format={phoneNumber.formatPhone}
+          parse={(text) =>
+            phoneNumber.parsePhone(text, state.selected_prefix.prefix)
+          }
           prefix={
             <Touchable onPress={pressPrefixHandler} style={{ zIndex: 999 }}>
               <Text level={6} style={{ color: colors.black, marginLeft: 5 }}>
