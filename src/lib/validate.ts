@@ -1,7 +1,6 @@
 import validate from 'validate.js';
 
 import { OpeningHours } from '../types';
-import phoneNumber from './phone-number';
 
 // extending validate validators
 validate.validators.cardExpirationDate = (
@@ -142,8 +141,23 @@ validate.validators.phone = (
     message: string;
   }
 ) => {
-  if (phoneNumber.isValid(value)) {
-    return null;
+  if (value) {
+    // chile
+    if (/^\+56/.test(value)) {
+      if (/^\+569[\d]{8}$/.test(value)) {
+        return null;
+      }
+    }
+    // cuba
+    else if (/^\+53/.test(value)) {
+      if (/^\+535[\d]{7}$/.test(value)) {
+        return null;
+      }
+    }
+    // TODO: add more validations
+    else if (value.length > 7) {
+      return null;
+    }
   }
 
   return options.message;

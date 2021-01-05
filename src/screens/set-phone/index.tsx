@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef } from 'react';
 import {
   View,
   Vibration,
@@ -26,7 +26,6 @@ import userCache from '../../cache/user';
 // libs
 import validate from '../../lib/validate';
 import { capture } from '../../lib/sentry';
-import phoneNumber from '../../lib/phone-number';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
@@ -63,16 +62,60 @@ const prefixes: Prefix[] = [
     prefix: '+58',
   },
 ];
+const format = (
+  prefix: string,
+  phone: string | undefined
+): string | undefined => {
+  if (!phone) return undefined;
+
+  let result = phone;
+  switch (prefix) {
+    case '+56':
+      result = insertSpace(result, 1);
+      result = insertSpace(result, 6);
+      break;
+    case '+53':
+      result = insertSpace(result, 1);
+      break;
+    default:
+      break;
+  }
+  return result;
+
+  function insertSpace(text: string, position: number): string {
+    if (text.length > position) {
+      return [text.slice(0, position), ' ', text.slice(position)].join('');
+    }
+    return text;
+  }
+};
+const parse = (text: string) => {
+  return text.replace(/ /g, '');
+};
+const split = (phone: string): { prefix: string; body: string } => {
+  for (let i = 0; i < prefixes.length; i++) {
+    const { prefix } = prefixes[i];
+    if (phone.startsWith(prefix)) {
+      return {
+        prefix,
+        body: phone.split(prefix)[1],
+      };
+    }
+  }
+  throw new Error(`${prefix} Phone not supported`);
+};
 
 type Prefix = {
-  //id: string;
   country: string;
   prefix: string;
 };
-type ChangePhoneAction = { type: 'change_phone'; phone: string };
+type ChangeValueAction = {
+  type: 'change_value';
+  field: string;
+  value: string;
+};
 type ValidatePhoneAction = {
   type: 'validate_phone';
-  phone: string;
 };
 type SetFormSubmittedAction = {
   type: 'set_form_submitted';
@@ -90,7 +133,7 @@ type SetSelectedPrefixAction = {
   selected_prefix: Prefix;
 };
 type Action =
-  | ChangePhoneAction
+  | ChangeValueAction
   | ValidatePhoneAction
   | SetFormSubmittedAction
   | SetFormErrorsAction
@@ -99,20 +142,22 @@ type Action =
 type State = {
   form: {
     // fields
-    phone?: string;
+    prefix: string;
+    body?: string;
+    // generated
+    phone: string;
     // other states
     submitted: boolean;
     errors?: { [key: string]: string[] };
   };
   is_visible: boolean;
-  selected_prefix: Prefix;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'change_phone':
+    case 'change_value':
       return {
         ...state,
-        form: { ...state.form, phone: action.phone },
+        form: { ...state.form, [action.field]: action.value },
       };
     case 'validate_phone':
       if (!state.form.submitted) return state;
@@ -130,8 +175,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, form: { ...state.form, errors: action.errors } };
     case 'set_is_visible':
       return { ...state, is_visible: action.is_visible };
-    case 'set_selected_prefix':
-      return { ...state, selected_prefix: action.selected_prefix };
     default:
       return state;
   }
@@ -144,38 +187,56 @@ interface ScreenProps {
 
 export default ({ navigation, route }: ScreenProps) => {
   // state
-  const [state, dispatch] = useReducer(reducer, {
-    form: {
-      phone: userCache.getData()?.phone,
-      submitted: false,
-    },
-    is_visible: false,
-    selected_prefix: prefixes[0],
-  });
+  const [state, dispatch] = useReducer(
+    reducer,
+    (() => {
+      const user = userCache.getData();
+      let prefix = prefixes[0].prefix;
+      let body = '';
+      let phone = `${prefix}`;
+
+      if (user?.phone) {
+        const splitted = split(user.phone);
+        prefix = splitted.prefix;
+        body = splitted.body;
+        phone = user.phone;
+      }
+
+      return {
+        form: {
+          // fields
+          prefix,
+          body,
+          // generated
+          phone,
+          // other states
+          submitted: false,
+        },
+        is_visible: false,
+      };
+    })()
+  );
   const toastRef = useRef<IToast>(null);
   const loadingOverlayRef = useRef<ILoadingOverlay>(null);
 
   // event handlers
-  const changePhoneHandler = (phone: string) => {
-    dispatch({ type: 'change_phone', phone });
-    dispatch({ type: 'validate_phone', phone });
-  };
-
-  const pressPrefixHandler = useCallback(() => {
-    dispatch({ type: 'set_is_visible', is_visible: true });
-  }, []);
-
   const selectPrefix = useCallback(
-    (prefix: Prefix) => {
-      const oldphone = state.form.phone;
-      const oldPrefix = state.selected_prefix.prefix;
-      const newPhone = oldphone?.replace(oldPrefix, prefix.prefix);
+    (prefix: string) => {
       dispatch({ type: 'set_is_visible', is_visible: false });
-      dispatch({ type: 'set_selected_prefix', selected_prefix: prefix });
-      dispatch({ type: 'change_phone', phone: newPhone || '' });
+      dispatch({ type: 'change_value', field: 'prefix', value: prefix });
     },
     [state]
   );
+
+  const changeValueHandler = (field: string, value: string) => {
+    dispatch({ type: 'change_value', field, value });
+  };
+
+  const pressPrefixHandler = (event: GestureResponderEvent) => {
+    console.log('pressPrefixHandler');
+    event.stopPropagation();
+    dispatch({ type: 'set_is_visible', is_visible: true });
+  };
 
   const modalRequestCloseHandler = useCallback(() => {
     dispatch({ type: 'set_is_visible', is_visible: false });
@@ -192,30 +253,41 @@ export default ({ navigation, route }: ScreenProps) => {
       return;
     }
 
-    try {
-      await loadingOverlayRef.current?.show();
-      const response = await phoneClient.code({
-        phone: state.form.phone as string,
-      });
-      setTimeout(() => {
-        navigation.navigate('VerifyPhone', {
-          phone: response.phone,
-          codes: [response.code],
-          redirect: route.params.redirect,
-        });
-      }, 300);
-    } catch (error) {
-      capture(prefix, 'Submit handler error', error);
+    console.log(state.form.phone);
 
-      toastRef.current?.show({
-        type: 'ERROR',
-        message: 'Error inesperado, reintente por favor',
-        expiration: 3,
-      });
-    } finally {
-      await loadingOverlayRef.current?.hide();
-    }
+    // try {
+    //   await loadingOverlayRef.current?.show();
+    //   const response = await phoneClient.code({
+    //     phone: state.form.phone,
+    //   });
+    //   setTimeout(() => {
+    //     navigation.navigate('VerifyPhone', {
+    //       phone: response.phone,
+    //       codes: [response.code],
+    //       redirect: route.params.redirect,
+    //     });
+    //   }, 300);
+    // } catch (error) {
+    //   capture(prefix, 'Submit handler error', error);
+
+    //   toastRef.current?.show({
+    //     type: 'ERROR',
+    //     message: 'Error inesperado, reintente por favor',
+    //     expiration: 3,
+    //   });
+    // } finally {
+    //   await loadingOverlayRef.current?.hide();
+    // }
   };
+
+  useEffect(() => {
+    dispatch({
+      type: 'change_value',
+      field: 'phone',
+      value: `${state.form.prefix}${state.form.body}`,
+    });
+    dispatch({ type: 'validate_phone' });
+  }, [state.form.prefix, state.form.body]);
 
   // render logic
   return (
@@ -241,23 +313,45 @@ export default ({ navigation, route }: ScreenProps) => {
         <Input
           returnKeyType="done"
           keyboardType="phone-pad"
-          placeholder="Número de teléfono móvil"
-          //format={(text) => format(text, state.selected_prefix.prefix)}
-          format={phoneNumber.formatPhone}
-          parse={(text) =>
-            phoneNumber.parsePhone(text, state.selected_prefix.prefix)
-          }
+          format={(text) => format(state.form.prefix, text)}
+          parse={(text) => parse(text)}
           prefix={
-            <Touchable onPress={pressPrefixHandler} style={{ zIndex: 999 }}>
-              <Text level={6} style={{ color: colors.black, marginLeft: 5 }}>
-                {state.selected_prefix.prefix}
-              </Text>
-            </Touchable>
+            <View style={{ zIndex: 999999999, width: 50, height: 50 }}>
+              <Touchable
+                style={{
+                  backgroundColor: colors.blackLight6,
+                  paddingHorizontal: 5,
+                  paddingVertical: 3,
+                  borderRadius: 2,
+                  flex: 1,
+                }}
+                onPress={pressPrefixHandler}
+              >
+                <Text
+                  level={6}
+                  weight="bold"
+                  numberOfLines={1}
+                  color={colors.blackLight1}
+                  style={{ marginLeft: 5 }}
+                >
+                  {state.form.prefix}
+                </Text>
+              </Touchable>
+            </View>
           }
-          value={state.form.phone}
+          value={state.form.body}
           errors={state.form.errors?.phone}
-          onChangeText={changePhoneHandler}
+          style={{
+            fontSize: 20,
+            paddingLeft: 60,
+            fontFamily: 'MonserratBold',
+            fontWeight: 'bold',
+          }}
+          prefixStyle={{ width: 60 }}
           containerStyle={{ marginBottom: 30 }}
+          onChangeText={(body) => {
+            changeValueHandler('body', body);
+          }}
           onSubmitEditing={submitHandler}
         />
       </ScrollView>
@@ -287,7 +381,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   key={prefix.country}
                   onPress={(event: GestureResponderEvent) => {
                     event.stopPropagation();
-                    selectPrefix(prefix);
+                    selectPrefix(prefix.prefix);
                   }}
                 >
                   <View style={globalStyles.withMargin}>
