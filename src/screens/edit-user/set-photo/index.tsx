@@ -35,7 +35,7 @@ const prefix = '[edit user set photo_url screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
-  photo_url: string;
+  photo_url: string | null;
 };
 type ValidateValueAction = {
   type: 'validate_value';
@@ -60,7 +60,7 @@ type Action =
 type State = {
   form: {
     // fields
-    photo_url: string;
+    photo_url?: string | null;
 
     // other state
     changed: boolean;
@@ -128,7 +128,7 @@ export default ({ navigation, route }: ScreenProps) => {
           id: route.params.id,
         },
         body: {
-          photo_url: state.form.photo_url ? state.form.photo_url : '',
+          photo_url: state.form.photo_url,
         },
       });
       userCache.updateData(userUpdated);
@@ -159,11 +159,12 @@ export default ({ navigation, route }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
+    console.log(state.form.photo_url);
 
     updateUser();
   };
 
-  const changeHandler = (photo_url: string) => {
+  const changeHandler = (photo_url: string | null) => {
     dispatch({ type: 'change_value', photo_url });
     dispatch({ type: 'validate_value' });
   };
@@ -180,7 +181,6 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.form.photo_url]);
 
   // render logic
-  const user_photo = state.form.photo_url ? [state.form.photo_url] : [];
   return (
     <View style={[{ flex: 1, backgroundColor: colors.white }]}>
       <ScrollView
@@ -189,12 +189,13 @@ export default ({ navigation, route }: ScreenProps) => {
         <InputImages
           size={1}
           label="Imagen"
-          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/users/${route.params.id
-            }/${new Date().getTime()}-\${}`}
-          value={user_photo}
+          path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/users/${
+            route.params.id
+          }/${new Date().getTime()}-\${}`}
+          value={state.form.photo_url ? [state.form.photo_url] : undefined}
           errors={state.form.errors?.photo_url}
           onChange={(photo) => {
-            changeHandler(photo[0]);
+            changeHandler(photo.length > 0 ? photo[0] : null);
           }}
         />
         <View style={globalStyles.withScreenAir} />

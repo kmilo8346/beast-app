@@ -3,7 +3,6 @@ import { View, ScrollView, Image } from 'react-native';
 
 // components
 import Input from '../components/input';
-
 import BagHeadImage from '../../components/svgs/images/bag-head';
 // cache
 import userCache from '../../cache/user';
@@ -38,15 +37,9 @@ interface ScreenProps {
 
 export default ({ navigation }: ScreenProps) => {
   // state
-  const [state, dispatch] = useReducer(
-    reducer,
-    (() => {
-      const user = userCache.getData() as User;
-      return {
-        user,
-      };
-    })()
-  );
+  const [state, dispatch] = useReducer(reducer, {
+    user: userCache.getData() as User,
+  });
 
   // event handlers
   const pressPhotoHandler = () => {
@@ -87,12 +80,11 @@ export default ({ navigation }: ScreenProps) => {
   }, []);
 
   // render logic
-  const images = state.user.photo_url ? [state.user.photo_url] : [];
   let photoComponent: ReactNode = <BagHeadImage />;
   if (state.user.photo_url) {
     photoComponent = (
       <Image
-        source={{ uri: images[0] }}
+        source={{ uri: state.user.photo_url }}
         style={{ width: 107, height: 107, borderRadius: 10 }}
       />
     );

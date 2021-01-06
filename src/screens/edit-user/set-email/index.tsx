@@ -35,7 +35,7 @@ const prefix = '[edit user set email screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
-  email: string;
+  email: string | null;
 };
 type ValidateValueAction = {
   type: 'validate_value';
@@ -60,7 +60,7 @@ type Action =
 type State = {
   form: {
     // fields
-    email: string;
+    email?: string | null;
 
     // other state
     changed: boolean;
@@ -154,7 +154,7 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'set_form_submitted' });
     // validate
     const errors = validate(state.form, constraints);
-    if (errors && state.form.email) {
+    if (errors) {
       dispatch({ type: 'set_form_errors', errors });
       Vibration.vibrate(400);
       return;
@@ -163,7 +163,7 @@ export default ({ navigation, route }: ScreenProps) => {
     updateUser();
   };
 
-  const changeHandler = (email: string) => {
+  const changeHandler = (email: string | null) => {
     dispatch({ type: 'change_value', email });
     dispatch({ type: 'validate_value' });
   };
@@ -185,9 +185,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   // render logic
   const error =
-    Array.isArray(state.form.errors?.email) &&
-      state.form.errors?.email.length &&
-      state.form.email
+    Array.isArray(state.form.errors?.email) && state.form.errors?.email.length
       ? state.form.errors.email[0]
       : null;
   return (
@@ -197,13 +195,13 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         <TextInput
           autoFocus
-          maxLength={30}
+          maxLength={60}
           clearButtonMode="always"
           placeholder="Añade tu email"
-          value={state.form.email}
+          value={state.form.email || ''}
           style={{ fontSize: 14, fontFamily: 'MonserratNormal' }}
           onChangeText={(text: string) => {
-            changeHandler(text);
+            changeHandler(text || null);
           }}
           onSubmitEditing={submitEditingHandler}
         />
@@ -213,8 +211,9 @@ export default ({ navigation, route }: ScreenProps) => {
             {error}
           </Text>
         )}
-        <Text level={7} color={colors.blackLight4}>{`${state.form.email?.length || 0
-          }/30`}</Text>
+        <Text level={7} color={colors.blackLight4}>{`${
+          state.form.email?.length || 0
+        }/60`}</Text>
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View style={[globalStyles.withMargin]}>

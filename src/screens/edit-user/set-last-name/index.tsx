@@ -31,7 +31,7 @@ const prefix = '[edit user set last_name screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
-  last_name: string;
+  last_name: string | null;
 };
 type ValidateValueAction = {
   type: 'validate_value';
@@ -51,7 +51,7 @@ type Action =
 type State = {
   form: {
     // fields
-    last_name: string;
+    last_name?: string | null;
 
     // other state
     changed: boolean;
@@ -134,7 +134,7 @@ export default ({ navigation, route }: ScreenProps) => {
     updateUser();
   };
 
-  const changeHandler = (last_name: string) => {
+  const changeHandler = (last_name: string | null) => {
     dispatch({ type: 'change_value', last_name });
     dispatch({ type: 'validate_value' });
   };
@@ -165,10 +165,10 @@ export default ({ navigation, route }: ScreenProps) => {
           maxLength={30}
           clearButtonMode="always"
           placeholder="Tu apellido"
-          value={state.form.last_name}
+          value={state.form.last_name || ''}
           style={{ fontSize: 14, fontFamily: 'MonserratNormal' }}
           onChangeText={(text: string) => {
-            changeHandler(text);
+            changeHandler(text || null);
           }}
           onSubmitEditing={submitEditingHandler}
         />

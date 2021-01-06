@@ -125,6 +125,7 @@ validate.validators.notRequiredString = (
   }
 ) => {
   if (
+    value === null ||
     typeof value === 'undefined' ||
     (typeof value === 'string' && value.length > 0)
   ) {
