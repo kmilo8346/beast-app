@@ -40,7 +40,7 @@ import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 import BannerImage from '../../components/svgs/images/banner';
 // clients
 import userClient from '../../clients/user-client';
-import productClient from '../../clients/product-client';
+import storeProductClient from '../../clients/store-product-client';
 // libs
 import { capture } from '../../lib/sentry';
 import deviceAgent from '../../lib/device-agent';
@@ -209,14 +209,24 @@ export default ({ navigation }: ScreenProps) => {
       fetchRequestSource.cancel();
     }
     fetchRequestSource = axios.CancelToken.source();
-    const response = await productClient.search(
+    const response = await storeProductClient.search(
       {
-        pathVars: {
-          storeId: 'all',
-        },
         filters,
         from,
         size,
+        source: [
+          'id',
+          'name',
+          'price',
+          'store',
+          'enabled',
+          'reference',
+          'description',
+          'tags',
+          'images',
+          'created_at',
+          'updated_at',
+        ],
       },
       { cancelToken: fetchRequestSource.token }
     );

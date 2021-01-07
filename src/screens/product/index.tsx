@@ -148,7 +148,7 @@ export default ({ navigation, route }: ScreenProps) => {
       const store = await storeClient.get(
         {
           pathVars: {
-            id: product.store_info.id,
+            id: product.store,
           },
         },
         { cancelToken: fetchStoreRequestSource.token }
@@ -172,7 +172,7 @@ export default ({ navigation, route }: ScreenProps) => {
       const products = await productClient.search(
         {
           pathVars: {
-            storeId: product.store_info.id,
+            storeId: product.store,
           },
           filters: {
             enabled: true,
@@ -234,7 +234,7 @@ export default ({ navigation, route }: ScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = shoppingCartCache.onChangeStore(
-        product.store_info.id,
+        product.store,
         (data) => {
           dispatch({ type: 'set_amount', amount: getAmount(data) });
         }

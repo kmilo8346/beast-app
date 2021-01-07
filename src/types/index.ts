@@ -167,18 +167,31 @@ export interface CreateProduct {
   enabled: boolean;
   reference: string;
   description?: string;
-  store_info: {
-    id: string;
-    enabled: boolean;
-    delivery_area: Circle;
-    opening_hours: OpeningHours;
-  };
 }
 
 export interface Product extends CreateProduct {
   id: string;
+  store: string;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface Item extends Product {
+  qty: number;
+}
+
+export interface StoreProduct extends Product {
+  suggest: any;
+  store_info: {
+    id: string;
+    name: string;
+    enabled: boolean;
+    images: string[];
+    address: Place;
+    delivery_area: Circle;
+    delivery_time: IntegerRange;
+    opening_hours: OpeningHours;
+  };
 }
 
 export interface CreateUser {
@@ -199,10 +212,6 @@ export interface User extends CreateUser {
   id: string;
   created_at: Date;
   updated_at: Date;
-}
-
-export interface Item extends Product {
-  qty: number;
 }
 
 export interface CreateOrder {
