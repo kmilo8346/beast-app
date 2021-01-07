@@ -316,17 +316,16 @@ export default ({ navigation, route }: ScreenProps) => {
           format={(text) => format(state.form.prefix, text)}
           parse={(text) => parse(text)}
           prefix={
-            <View style={{ zIndex: 999999999, width: 50, height: 50 }}>
-              <Touchable
-                style={{
-                  backgroundColor: colors.blackLight6,
-                  paddingHorizontal: 5,
-                  paddingVertical: 3,
-                  borderRadius: 2,
-                  flex: 1,
-                }}
-                onPress={pressPrefixHandler}
-              >
+            <View
+              style={{
+                zIndex: 999999999,
+                backgroundColor: colors.blackLight6,
+                paddingHorizontal: 5,
+                paddingVertical: 3,
+                borderRadius: 2,
+              }}
+            >
+              <Touchable onPress={pressPrefixHandler}>
                 <Text
                   level={6}
                   weight="bold"
