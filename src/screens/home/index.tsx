@@ -609,17 +609,20 @@ export default ({ navigation }: ScreenProps) => {
   } else if (state.error) {
     content = (
       <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
+        style={[
+          {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+          globalStyles.withMargin,
+        ]}
       >
         <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
-          Ocurrió un error inesperado
+          No se pudo cargar los productos
         </Text>
-        <Text level={6} style={{ marginBottom: 10 }}>
-          El error fue registrado para su solución
+        <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
+          Pero no te desanimes, reintentalo una vez más
         </Text>
         <Button title="Reintentar" type="link" onPress={retryHandler} />
       </View>
