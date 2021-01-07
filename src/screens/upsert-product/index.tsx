@@ -126,28 +126,12 @@ export default ({ navigation, route }: ScreenProps) => {
   const store = storeCache.getData() as Store;
   const [state, dispatch] = useReducer(reducer, {
     form: {
-      product: route.params?.product
-        ? {
-            ...route.params?.product,
-            store_info: {
-              id: store.id,
-              enabled: store.enabled,
-              delivery_area: store.delivery_area.geometry,
-              opening_hours: store.opening_hours,
-            },
-          }
-        : (({
-            tags: [],
-            images: [],
-            enabled: true,
-            reference: `${`${user?.id as string}`.substring(0, 6)}-${uuidv4()}`,
-            store_info: {
-              id: store.id,
-              enabled: store.enabled,
-              delivery_area: store.delivery_area.geometry,
-              opening_hours: store.opening_hours,
-            },
-          } as unknown) as Product),
+      product: route.params?.product || {
+        tags: [],
+        images: [],
+        enabled: true,
+        reference: `${`${user?.id as string}`.substring(0, 6)}-${uuidv4()}`,
+      },
 
       submitted: false,
     },
