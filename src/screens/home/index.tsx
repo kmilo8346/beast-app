@@ -318,6 +318,8 @@ export default ({ navigation }: ScreenProps) => {
         capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_fetch_more_error', fetch_more_error: error });
+      } else {
+        console.log('fetch more is cancelled');
       }
     } finally {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
@@ -780,7 +782,11 @@ export default ({ navigation }: ScreenProps) => {
         }
         onRefresh={refresh}
         onEndReached={() => {
-          if (state.products && state.products.from < state.products.total) {
+          if (
+            state.products &&
+            !state.fetching_more &&
+            state.products.from < state.products.total
+          ) {
             fetchMore();
           }
         }}

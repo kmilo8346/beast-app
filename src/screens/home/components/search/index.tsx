@@ -479,7 +479,11 @@ export default ({ navigation }: ComponentProps) => {
           </View>
         }
         onEndReached={() => {
-          if (state.products && state.products.from < state.products.total) {
+          if (
+            state.products &&
+            !state.fetching_more &&
+            state.products.from < state.products.total
+          ) {
             fetchMore();
           }
         }}
