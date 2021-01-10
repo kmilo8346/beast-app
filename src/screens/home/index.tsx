@@ -21,6 +21,7 @@ import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 
 // local components
+import Search from './components/search';
 import Skeleton from './components/skeleton';
 import ProductCard from './components/product-card';
 import SelectAddress from './components/select-address';
@@ -32,12 +33,12 @@ import ShoppingCartIcon from '../components/shopping-cart-icon';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // components
 import Text from '../../components/text';
-import Toast, { IToast } from '../../components/toast';
 import Divider from '../../components/divider';
 import Button from '../../components/buttons/button';
+import Toast, { IToast } from '../../components/toast';
+import BannerImage from '../../components/svgs/images/banner';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
-import BannerImage from '../../components/svgs/images/banner';
 // clients
 import userClient from '../../clients/user-client';
 import storeProductClient from '../../clients/store-product-client';
@@ -51,7 +52,13 @@ import pendingSellerOrdersCache, {
   getTotal,
 } from '../../cache/pending-seller-orders-cache';
 // types
-import { User, AddressInfo, Place, SearchResponse, Product } from '../../types';
+import {
+  User,
+  AddressInfo,
+  Place,
+  SearchResponse,
+  StoreProduct,
+} from '../../types';
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
@@ -74,7 +81,7 @@ type ResetAction = {
 };
 type SetProductsAction = {
   type: 'set_products';
-  products: SearchResponse<Product>;
+  products: SearchResponse<StoreProduct>;
 };
 type SetErrorAction = {
   type: 'set_error';
@@ -129,7 +136,7 @@ type Action =
 type State = {
   user?: User;
   updating: boolean;
-  products?: SearchResponse<Product>;
+  products?: SearchResponse<StoreProduct>;
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
@@ -214,6 +221,9 @@ export default ({ navigation }: ScreenProps) => {
         filters,
         from,
         size,
+        sort: {
+          updated_at: 'desc',
+        },
         source: [
           'id',
           'name',
@@ -226,6 +236,8 @@ export default ({ navigation }: ScreenProps) => {
           'images',
           'created_at',
           'updated_at',
+          'store_info.name',
+          'store_info.images',
         ],
       },
       { cancelToken: fetchRequestSource.token }
@@ -459,7 +471,7 @@ export default ({ navigation }: ScreenProps) => {
     });
   };
 
-  const pressProductCardHandler = (product: Product) => {
+  const pressProductCardHandler = (product: StoreProduct) => {
     navigation.navigate('Product', { product });
   };
 
@@ -682,7 +694,7 @@ export default ({ navigation }: ScreenProps) => {
             </View>
           );
         }}
-        keyExtractor={(item: Product) => item.id}
+        keyExtractor={(item: StoreProduct) => item.id}
         renderItem={({ item, index }) => {
           return (
             <ProductCard
@@ -784,7 +796,13 @@ export default ({ navigation }: ScreenProps) => {
     >
       <View style={globalStyles.withMargin}>
         <View style={globalStyles.screenWithoutHeaderSpace} />
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 3,
+          }}
+        >
           <Text
             level={2}
             weight="bold"
@@ -794,7 +812,9 @@ export default ({ navigation }: ScreenProps) => {
           >
             {message}
           </Text>
+
           <ShoppingCartIcon />
+          <Search navigation={navigation} />
         </View>
         {selectAddressComponent}
       </View>

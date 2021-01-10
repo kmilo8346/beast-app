@@ -159,7 +159,6 @@ export default ({ navigation, route }: ScreenProps) => {
       Vibration.vibrate(400);
       return;
     }
-    console.log(state.form.photo_url);
 
     updateUser();
   };

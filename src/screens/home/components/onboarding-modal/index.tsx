@@ -70,9 +70,12 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           level={2}
           weight="bold"
           color={colors.blue}
-          style={{ marginBottom: 40, letterSpacing: 0.5 }}
+          style={{ marginBottom: 15, letterSpacing: 0.5 }}
         >
           Shop Shop
+        </Text>
+        <Text level={5} style={{ lineHeight: 23, marginBottom: 40 }}>
+          Haz tus compras a tus vecinos emprendedores y ahorra tiempo.
         </Text>
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
           <View style={{ marginTop: 5 }}>

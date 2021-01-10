@@ -181,7 +181,6 @@ export interface Item extends Product {
 }
 
 export interface StoreProduct extends Product {
-  suggest: any;
   store_info: {
     id: string;
     name: string;

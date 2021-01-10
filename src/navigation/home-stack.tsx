@@ -9,7 +9,6 @@ import {
   StoreScreen,
   ClientOrdersScreen,
   ClientOrderDetailsScreen,
-  SellerOrdersScreen,
   SellerOrderDetailsScreen,
 } from '../screens';
 // navigation

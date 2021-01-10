@@ -8,12 +8,15 @@ import Text from '../../../../components/text';
 import cloudinary from '../../../../lib/cloudinary';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 // types
-import { Product } from '../../../../types';
+import { StoreProduct } from '../../../../types';
+import colors from '../../../../styles/colors';
+
+const innerShadow = require('../../../../../assets/images/innershadow.png');
 
 interface ComponentProps {
-  product: Product;
+  product: StoreProduct;
   align: 'left' | 'right';
-  onPress: (product: Product) => void;
+  onPress: (product: StoreProduct) => void;
 }
 
 export default memo(({ product, align, onPress }: ComponentProps) => {
@@ -31,8 +34,58 @@ export default memo(({ product, align, onPress }: ComponentProps) => {
       style={{ width: '50%', marginBottom: 10 }}
     >
       <View
-        style={{ alignSelf: align === 'right' ? 'flex-end' : 'flex-start' }}
+        style={{
+          alignSelf: align === 'right' ? 'flex-end' : 'flex-start',
+        }}
       >
+        <Image
+          source={innerShadow}
+          style={[
+            {
+              position: 'absolute',
+              width: size,
+              height: size,
+              zIndex: 9,
+              borderRadius: 8,
+            },
+          ]}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: size,
+            zIndex: 9,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 5,
+            paddingTop: 5,
+          }}
+        >
+          <Image
+            source={{
+              uri: cloudinary.dynamicUrl(product.store_info.images[0], 'h_200'),
+              width: 30,
+              height: 30,
+            }}
+            style={{ borderRadius: 100, resizeMode: 'cover' }}
+          />
+          <Text
+            level={7}
+            weight="bold"
+            color={colors.white}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{
+              marginLeft: 4,
+              flex: 1,
+              letterSpacing: -0.2,
+            }}
+          >
+            {product.store_info.name}
+          </Text>
+        </View>
         <Image
           source={{
             uri: cloudinary.dynamicUrl(product.images[0], 'h_500'),
