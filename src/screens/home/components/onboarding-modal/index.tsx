@@ -75,7 +75,7 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           Shop Shop
         </Text>
         <Text level={5} style={{ lineHeight: 23, marginBottom: 40 }}>
-          Haz tus compras a tus vecinos emprendedores y ahorra tiempo.
+          Haz tus compras a tus vecinos y ahorra tiempo.
         </Text>
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
           <View style={{ marginTop: 5 }}>
