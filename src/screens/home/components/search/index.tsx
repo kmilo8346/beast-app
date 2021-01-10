@@ -201,6 +201,7 @@ export default ({ navigation }: ComponentProps) => {
             filters: {
               enabled: true,
               location: (state.address as Place).location,
+              store_enabled: true,
             },
             source: [
               'id',
