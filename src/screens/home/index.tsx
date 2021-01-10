@@ -471,9 +471,9 @@ export default ({ navigation }: ScreenProps) => {
     });
   };
 
-  const pressProductCardHandler = (product: StoreProduct) => {
+  const pressProductCardHandler = useCallback((product: StoreProduct) => {
     navigation.navigate('Product', { product });
-  };
+  }, []);
 
   const newSaleDialogOkHandler = () => {
     const order = state.new_sale_dialog;

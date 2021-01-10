@@ -533,7 +533,6 @@ export default ({ navigation }: ComponentProps) => {
                 <Icon name="search" size={16} color={colors.blackLight2} />
               </View>
               <TextInput
-                autoFocus
                 ref={ref}
                 value={state.query}
                 returnKeyType="search"
