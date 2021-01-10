@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.69](https://github.com/firedevs-team/beast-app/compare/v1.0.68...v1.0.69) (2021-01-10)
+
+
+### Bug Fixes
+
+* **home:** error message ([47046f5](https://github.com/firedevs-team/beast-app/commit/47046f54cdaa2ec55c3997fc8612d437f71ad65c))
+* **onboarding modal:** changing text ([ce758b7](https://github.com/firedevs-team/beast-app/commit/ce758b7220f8f6b316fc7db90fe5dd1b39787fc2))
+
 ### [1.0.68](https://github.com/firedevs-team/beast-app/compare/v1.0.67...v1.0.68) (2020-12-29)
 
 
