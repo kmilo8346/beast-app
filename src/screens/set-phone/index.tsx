@@ -64,9 +64,14 @@ const prefixes: Prefix[] = [
 ];
 const format = (
   prefix: string,
-  phone: string | undefined
+  phone: string | undefined,
+  spaced: boolean
 ): string | undefined => {
   if (!phone) return undefined;
+
+  if (!spaced) {
+    return phone;
+  }
 
   let result = phone;
   switch (prefix) {
@@ -132,13 +137,18 @@ type SetSelectedPrefixAction = {
   type: 'set_selected_prefix';
   selected_prefix: Prefix;
 };
+type SetSpacedAction = {
+  type: 'set_spaced';
+  spaced: boolean;
+};
 type Action =
   | ChangeValueAction
   | ValidatePhoneAction
   | SetFormSubmittedAction
   | SetFormErrorsAction
   | SetIsVisibleAction
-  | SetSelectedPrefixAction;
+  | SetSelectedPrefixAction
+  | SetSpacedAction;
 type State = {
   form: {
     // fields
@@ -151,6 +161,7 @@ type State = {
     errors?: { [key: string]: string[] };
   };
   is_visible: boolean;
+  spaced: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -175,6 +186,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, form: { ...state.form, errors: action.errors } };
     case 'set_is_visible':
       return { ...state, is_visible: action.is_visible };
+    case 'set_spaced':
+      return { ...state, spaced: action.spaced };
     default:
       return state;
   }
@@ -213,6 +226,7 @@ export default ({ navigation, route }: ScreenProps) => {
           submitted: false,
         },
         is_visible: false,
+        spaced: false,
       };
     })()
   );
@@ -233,7 +247,6 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const pressPrefixHandler = (event: GestureResponderEvent) => {
-    console.log('pressPrefixHandler');
     event.stopPropagation();
     dispatch({ type: 'set_is_visible', is_visible: true });
   };
@@ -253,31 +266,29 @@ export default ({ navigation, route }: ScreenProps) => {
       return;
     }
 
-    console.log(state.form.phone);
+    try {
+      await loadingOverlayRef.current?.show();
+      const response = await phoneClient.code({
+        phone: state.form.phone,
+      });
+      setTimeout(() => {
+        navigation.navigate('VerifyPhone', {
+          phone: response.phone,
+          codes: [response.code],
+          redirect: route.params.redirect,
+        });
+      }, 300);
+    } catch (error) {
+      capture(prefix, 'Submit handler error', error);
 
-    // try {
-    //   await loadingOverlayRef.current?.show();
-    //   const response = await phoneClient.code({
-    //     phone: state.form.phone,
-    //   });
-    //   setTimeout(() => {
-    //     navigation.navigate('VerifyPhone', {
-    //       phone: response.phone,
-    //       codes: [response.code],
-    //       redirect: route.params.redirect,
-    //     });
-    //   }, 300);
-    // } catch (error) {
-    //   capture(prefix, 'Submit handler error', error);
-
-    //   toastRef.current?.show({
-    //     type: 'ERROR',
-    //     message: 'Error inesperado, reintente por favor',
-    //     expiration: 3,
-    //   });
-    // } finally {
-    //   await loadingOverlayRef.current?.hide();
-    // }
+      toastRef.current?.show({
+        type: 'ERROR',
+        message: 'Error inesperado, reintente por favor',
+        expiration: 3,
+      });
+    } finally {
+      await loadingOverlayRef.current?.hide();
+    }
   };
 
   useEffect(() => {
@@ -310,49 +321,68 @@ export default ({ navigation, route }: ScreenProps) => {
           Inicia sesión con tu teléfono móvil y únete a nuestra comunidad.
         </Text>
 
-        <Input
-          returnKeyType="done"
-          keyboardType="phone-pad"
-          format={(text) => format(state.form.prefix, text)}
-          parse={(text) => parse(text)}
-          prefix={
+        <View>
+          <Touchable
+            style={{
+              zIndex: 999999999,
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 55,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 45,
+            }}
+            onPress={pressPrefixHandler}
+          >
             <View
               style={{
-                zIndex: 999999999,
                 backgroundColor: colors.blackLight6,
                 paddingHorizontal: 5,
                 paddingVertical: 3,
                 borderRadius: 2,
               }}
             >
-              <Touchable onPress={pressPrefixHandler}>
-                <Text
-                  level={6}
-                  weight="bold"
-                  numberOfLines={1}
-                  color={colors.blackLight1}
-                  style={{ marginLeft: 5 }}
-                >
-                  {state.form.prefix}
-                </Text>
-              </Touchable>
+              <Text
+                level={6}
+                weight="bold"
+                numberOfLines={1}
+                color={colors.blackLight1}
+              >
+                {state.form.prefix}
+              </Text>
             </View>
-          }
-          value={state.form.body}
-          errors={state.form.errors?.phone}
-          style={{
-            fontSize: 20,
-            paddingLeft: 60,
-            fontFamily: 'MonserratBold',
-            fontWeight: 'bold',
-          }}
-          prefixStyle={{ width: 60 }}
-          containerStyle={{ marginBottom: 30 }}
-          onChangeText={(body) => {
-            changeValueHandler('body', body);
-          }}
-          onSubmitEditing={submitHandler}
-        />
+          </Touchable>
+
+          <Input
+            autoFocus
+            returnKeyType="done"
+            keyboardType="phone-pad"
+            format={(text) => format(state.form.prefix, text, state.spaced)}
+            parse={(text) => parse(text)}
+            value={state.form.body}
+            errors={state.form.errors?.phone}
+            style={{
+              fontSize: 20,
+              paddingLeft: 55,
+              fontFamily: 'MonserratBold',
+              fontWeight: 'bold',
+            }}
+            prefixStyle={{ width: 60 }}
+            containerStyle={{ marginBottom: 30 }}
+            onChangeText={(body) => {
+              changeValueHandler('body', body);
+            }}
+            onSubmitEditing={submitHandler}
+            onBlur={() => {
+              dispatch({ type: 'set_spaced', spaced: true });
+            }}
+            onFocus={() => {
+              dispatch({ type: 'set_spaced', spaced: false });
+            }}
+          />
+        </View>
       </ScrollView>
       <View
         style={[

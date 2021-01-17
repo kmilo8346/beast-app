@@ -83,27 +83,36 @@ class StringFormatter {
     return `${formattedHour}:${formattedMinute}`;
   }
 
-  toPhone(
-    text: string | undefined,
-    options = { prefix: false }
-  ): string | undefined {
+  toPhone(text: string | undefined): string | undefined {
     if (!text) return undefined;
 
     let result = text;
-    result = result.replace(/^\+56/, '');
-
-    // space 1
-    if (result.length > 1)
-      result = [result.slice(0, 1), ' ', result.slice(1)].join('');
-
-    // space 2
-    if (result.length > 6)
-      result = [result.slice(0, 6), ' ', result.slice(6)].join('');
-
-    if (options && options.prefix) {
-      result = `+56 ${result}`;
+    if (result.startsWith('+56')) {
+      result = insertSpace(result, 3);
+      result = insertSpace(result, 5);
+      result = insertSpace(result, 10);
+    } else if (result.startsWith('+53')) {
+      result = insertSpace(result, 3);
+      result = insertSpace(result, 5);
+    } else if (result.startsWith('+54')) {
+      result = insertSpace(result, 3);
+    } else if (result.startsWith('+57')) {
+      result = insertSpace(result, 3);
+    } else if (result.startsWith('+51')) {
+      result = insertSpace(result, 3);
+    } else if (result.startsWith('+598')) {
+      result = insertSpace(result, 4);
+    } else if (result.startsWith('+58')) {
+      result = insertSpace(result, 3);
     }
     return result;
+
+    function insertSpace(text: string, position: number): string {
+      if (text.length > position) {
+        return [text.slice(0, position), ' ', text.slice(position)].join('');
+      }
+      return text;
+    }
   }
 }
 
