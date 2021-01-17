@@ -191,9 +191,7 @@ export default ({ navigation, route }: ScreenProps) => {
           style={{ marginBottom: 60, lineHeight: 23 }}
         >
           Te enviamos un código de verificación a tu número de teléfono
-          <Text level={5}>
-            {` ${stringFormatter.toPhone(phone, { prefix: true })}`}
-          </Text>
+          <Text level={5}>{` ${stringFormatter.toPhone(phone)}`}</Text>
         </Text>
         <Input
           autoFocus
