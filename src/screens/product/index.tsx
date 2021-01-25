@@ -50,12 +50,17 @@ import globalStyles from '../../styles';
 
 // instances outside component
 const prefix = '[product screen]';
+let fetchProductRequestSource: CancelTokenSource;
 let fetchStoreRequestSource: CancelTokenSource;
 let fetchProductsRequestSource: CancelTokenSource;
 const defaultSize = 10;
 
 type ResetAction = {
   type: 'reset';
+};
+type SetProductAction = {
+  type: 'set_product';
+  product: Product;
 };
 type SetStoreAction = {
   type: 'set_store';
@@ -83,6 +88,7 @@ type SetCurrentOpeningHoursAction = {
 };
 type Action =
   | ResetAction
+  | SetProductAction
   | SetStoreAction
   | SetProductsAction
   | SetErrorAction
@@ -90,6 +96,7 @@ type Action =
   | SetAmountAction
   | SetCurrentOpeningHoursAction;
 type State = {
+  product: Product;
   store?: Store;
   products?: SearchResponse<Product>;
   error?: Error;
@@ -106,6 +113,8 @@ const reducer = (state: State, action: Action): State => {
         products: undefined,
         error: undefined,
       };
+    case 'set_product':
+      return { ...state, product: action.product };
     case 'set_store':
       return { ...state, store: action.store };
     case 'set_products':
@@ -129,78 +138,148 @@ interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
-  const product: Product = route.params.product;
-  if (!product) {
-    throw new Error(`${prefix} Product param is required`);
-  }
   // state
   const [state, dispatch] = useReducer(reducer, {
+    product: route.params.product,
     refreshing: false,
   });
 
   // event handlers
-  const fetchStore = async () => {
-    try {
-      if (fetchStoreRequestSource) {
-        fetchStoreRequestSource.cancel();
-      }
-      fetchStoreRequestSource = axios.CancelToken.source();
-      const store = await storeClient.get(
-        {
-          pathVars: {
-            id: product.store,
-          },
+  const fetchProduct = async () => {
+    if (fetchProductRequestSource) {
+      fetchProductRequestSource.cancel();
+    }
+    fetchProductRequestSource = axios.CancelToken.source();
+    const product = await productClient.get(
+      {
+        pathVars: {
+          storeId: state.product.store,
+          id: state.product.id,
         },
-        { cancelToken: fetchStoreRequestSource.token }
-      );
-      dispatch({ type: 'set_store', store });
+      },
+      { cancelToken: fetchProductRequestSource.token }
+    );
+    return product;
+  };
+
+  const loadProduct = async () => {
+    try {
+      const product = await fetchProduct();
+      dispatch({ type: 'set_product', product });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        capture(prefix, 'Fetch store error', error);
+        capture(prefix, 'Load product error', error);
 
         dispatch({ type: 'set_error', error });
       }
     }
   };
 
-  const fetchProducts = async () => {
+  const refreshProduct = async () => {
     try {
-      if (fetchProductsRequestSource) {
-        fetchProductsRequestSource.cancel();
+      const product = await fetchProduct();
+      dispatch({ type: 'set_product', product });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Refresh product error', error);
       }
-      fetchProductsRequestSource = axios.CancelToken.source();
-      const products = await productClient.search(
-        {
-          pathVars: {
-            storeId: product.store,
-          },
-          filters: {
-            enabled: true,
-            must_not_id: product.id,
-          },
-          from: 0,
-          size: defaultSize,
+    }
+  };
+
+  const fetchStore = async () => {
+    if (fetchStoreRequestSource) {
+      fetchStoreRequestSource.cancel();
+    }
+    fetchStoreRequestSource = axios.CancelToken.source();
+    const store = await storeClient.get(
+      {
+        pathVars: {
+          id: state.product.store,
         },
-        { cancelToken: fetchProductsRequestSource.token }
-      );
+      },
+      { cancelToken: fetchStoreRequestSource.token }
+    );
+    return store;
+  };
+
+  const loadStore = async () => {
+    try {
+      const store = await fetchStore();
+      dispatch({ type: 'set_store', store });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Load store error', error);
+
+        dispatch({ type: 'set_error', error });
+      }
+    }
+  };
+
+  const refreshStore = async () => {
+    try {
+      const store = await fetchStore();
+      dispatch({ type: 'set_store', store });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Refresh store error', error);
+      }
+    }
+  };
+
+  const fetchProducts = async () => {
+    if (fetchProductsRequestSource) {
+      fetchProductsRequestSource.cancel();
+    }
+    fetchProductsRequestSource = axios.CancelToken.source();
+    const products = await productClient.search(
+      {
+        pathVars: {
+          storeId: state.product.store,
+        },
+        filters: {
+          enabled: true,
+          must_not_id: state.product.id,
+        },
+        from: 0,
+        size: defaultSize,
+      },
+      { cancelToken: fetchProductsRequestSource.token }
+    );
+    return products;
+  };
+
+  const loadProducts = async () => {
+    try {
+      const products = await fetchProducts();
       dispatch({ type: 'set_products', products });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        capture(prefix, 'Fetch products error', error);
+        capture(prefix, 'Load products error', error);
 
         dispatch({ type: 'set_error', error });
+      }
+    }
+  };
+
+  const refreshProducts = async () => {
+    try {
+      const products = await fetchProducts();
+      dispatch({ type: 'set_products', products });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Refresh products error', error);
       }
     }
   };
 
   const load = () => {
     dispatch({ type: 'reset' });
-    Promise.all([fetchStore(), fetchProducts()]);
+    Promise.all([loadProduct(), loadStore(), loadProducts()]);
   };
 
   const refresh = () => {
     dispatch({ type: 'set_refreshing', refreshing: true });
-    Promise.all([fetchStore(), fetchProducts()]);
+    Promise.all([refreshProduct(), refreshStore(), refreshProducts()]);
     dispatch({ type: 'set_refreshing', refreshing: false });
   };
 
@@ -222,8 +301,16 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   useEffect(() => {
+    return () => {
+      fetchProductRequestSource && fetchProductRequestSource.cancel();
+      fetchStoreRequestSource && fetchStoreRequestSource.cancel();
+      fetchProductsRequestSource && fetchProductsRequestSource.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
     load();
-  }, [product]);
+  }, [route.params.product]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -234,7 +321,7 @@ export default ({ navigation, route }: ScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = shoppingCartCache.onChangeStore(
-        product.store,
+        route.params.product.store,
         (data) => {
           dispatch({ type: 'set_amount', amount: getAmount(data) });
         }
@@ -242,7 +329,7 @@ export default ({ navigation, route }: ScreenProps) => {
       return () => {
         unsubscribe();
       };
-    }, [])
+    }, [route.params.product.store])
   );
 
   useEffect(() => {
@@ -451,10 +538,10 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
       >
         <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
-          Ocurrió un error inesperado
+          No se pudo cargar la información
         </Text>
-        <Text level={6} style={{ marginBottom: 10 }}>
-          El error fue registrado para su solución
+        <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
+          Pero no te desanimes, reintentalo una vez más
         </Text>
         <Button title="Reintentar" type="link" onPress={retryHandler} />
       </View>
@@ -490,8 +577,8 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         <ProductDetailsCard
           store={state.store}
-          product={product}
-          style={[{ paddingTop: 7, marginBottom: 10 }, globalStyles.withMargin]}
+          product={state.product}
+          style={[{ paddingTop: 7, marginBottom: 10 }]}
         />
         <Divider type="thick" />
         {content}

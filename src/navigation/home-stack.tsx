@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 // screens
 import {
   HomeScreen,
+  SearchScreen,
   ProductScreen,
   StoresScreen,
   StoreScreen,
@@ -22,6 +23,11 @@ export default () => {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Search"
+        component={SearchScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

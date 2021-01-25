@@ -9,28 +9,29 @@ import {
   View,
   Image,
   ActivityIndicator,
-  Dimensions,
   GestureResponderEvent,
   FlatList,
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 
-// components
-import Text from '../../components/text';
-import Divider from '../../components/divider';
-import Touchable from '../../components/touchable';
-import Icon from '../../components/icon';
-import Button from '../../components/buttons/button';
-import PhoneFilledDotsBlueIcon from '../../components/svgs/icons/phone-filled-dots-blue';
-import ActionSheetContact from '../../components/modals/action-sheet-contact';
-import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
+// local components
+import ViewOpeningHoursModal from './components/view-opening-hours-modal';
 // screen components
 import ProductCard from '../components/product-card';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
-// local components
-import ViewOpeningHoursModal from './components/view-opening-hours-modal';
+// components
+import Text from '../../components/text';
+import Icon from '../../components/icon';
+import Divider from '../../components/divider';
+import Touchable from '../../components/touchable';
+import Button from '../../components/buttons/button';
+import ReadMore from '../../components/text/read-more';
+import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
+import ActionSheetContact from '../../components/modals/action-sheet-contact';
+import PhoneFilledDotsBlueIcon from '../../components/svgs/icons/phone-filled-dots-blue';
 // clients
+import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
 // cache
 import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
@@ -40,6 +41,7 @@ import numberFormatter from '../../lib/formatters/number-formatter';
 import cloudinary from '../../lib/cloudinary';
 import { capture } from '../../lib/sentry';
 import {
+  CurrentOpenginHours,
   extractCurrentOpeningHours,
   humanizeCurrentClosedOpeningHours,
 } from '../../lib/utils';
@@ -51,11 +53,16 @@ import globalStyles from '../../styles';
 
 // instances outside component
 const prefix = '[store screen]';
-let fetchRequestSource: CancelTokenSource;
+let fetchStoreRequestSource: CancelTokenSource;
+let fetchProductsRequestSource: CancelTokenSource;
 const defaultSize = 10;
 
 type ResetAction = {
   type: 'reset';
+};
+type SetStoreAction = {
+  type: 'set_store';
+  store: Store;
 };
 type SetProductsAction = {
   type: 'set_products';
@@ -64,10 +71,6 @@ type SetProductsAction = {
 type SetErrorAction = {
   type: 'set_error';
   error: Error;
-};
-type SetContactAction = {
-  type: 'set_contact';
-  contact: boolean;
 };
 type SetFetchingMoreAction = {
   type: 'set_fetching_more';
@@ -81,6 +84,10 @@ type SetRefreshingAction = {
   type: 'set_refreshing';
   refreshing: boolean;
 };
+type SetContactAction = {
+  type: 'set_contact';
+  contact: boolean;
+};
 type SetAmountAction = {
   type: 'set_amount';
   amount: number;
@@ -92,28 +99,34 @@ type SetOpeningHoursModalAction = {
 type TooggleExpandedAction = {
   type: 'toogle_expanded';
 };
+type SetCurrentOpeningHoursAction = {
+  type: 'set_current_opening_hours';
+  current_opening_hours?: CurrentOpenginHours;
+};
 type Action =
   | ResetAction
+  | SetStoreAction
   | SetProductsAction
   | SetErrorAction
-  | SetContactAction
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction
   | SetRefreshingAction
-  | SetRefreshingAction
+  | SetContactAction
   | SetAmountAction
   | SetOpeningHoursModalAction
-  | TooggleExpandedAction;
+  | TooggleExpandedAction
+  | SetCurrentOpeningHoursAction;
 type State = {
+  store: Store;
   products?: SearchResponse<Product>;
   error?: Error;
-  contact: boolean;
   fetching_more: boolean;
   fetch_more_error?: Error;
   refreshing: boolean;
+  contact: boolean;
   amount?: number;
   opening_hours_modal: boolean;
-  expanded: boolean;
+  current_opening_hours?: CurrentOpenginHours;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -123,24 +136,30 @@ const reducer = (state: State, action: Action): State => {
         products: undefined,
         error: undefined,
       };
+    case 'set_store':
+      return { ...state, store: action.store };
     case 'set_products':
       return { ...state, products: action.products };
     case 'set_error':
       return { ...state, error: action.error };
-    case 'set_contact':
-      return { ...state, contact: action.contact };
     case 'set_fetching_more':
-      return { ...state, fetching_more: action.fetching_more };
+      return {
+        ...state,
+        fetching_more: action.fetching_more,
+        fetch_more_error: undefined,
+      };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
+    case 'set_contact':
+      return { ...state, contact: action.contact };
     case 'set_amount':
       return { ...state, amount: action.amount };
     case 'set_opening_hours_modal':
       return { ...state, opening_hours_modal: action.opening_hours_modal };
-    case 'toogle_expanded':
-      return { ...state, expanded: !state.expanded };
+    case 'set_current_opening_hours':
+      return { ...state, current_opening_hours: action.current_opening_hours };
     default:
       return state;
   }
@@ -152,47 +171,82 @@ interface ScreenProps {
 }
 
 export default ({ navigation, route }: ScreenProps) => {
-  const store: Store = route.params.store;
-  if (!store) {
-    throw new Error(`${prefix} Store param is required`);
-  }
   // state
   const [state, dispatch] = useReducer(reducer, {
-    contact: false,
+    store: route.params.store,
     fetching_more: false,
     refreshing: false,
+    contact: false,
     opening_hours_modal: false,
-    expanded: false,
   });
 
   // event handlers
-  const fetch = async (
+  const fetchStore = async () => {
+    if (fetchStoreRequestSource) {
+      fetchStoreRequestSource.cancel();
+    }
+    fetchStoreRequestSource = axios.CancelToken.source();
+    const store = await storeClient.get(
+      {
+        pathVars: {
+          id: state.store.id,
+        },
+      },
+      { cancelToken: fetchStoreRequestSource.token }
+    );
+    return store;
+  };
+
+  const loadStore = async () => {
+    try {
+      const store = await fetchStore();
+      dispatch({ type: 'set_store', store });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Load store error', error);
+
+        dispatch({ type: 'set_error', error });
+      }
+    }
+  };
+
+  const refreshStore = async () => {
+    try {
+      const store = await fetchStore();
+      dispatch({ type: 'set_store', store });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Refresh store error', error);
+      }
+    }
+  };
+
+  const fetchProducts = async (
     filters?: { [key: string]: any },
     from = 0,
     size = defaultSize
   ) => {
-    if (fetchRequestSource) {
-      fetchRequestSource.cancel();
+    if (fetchProductsRequestSource) {
+      fetchProductsRequestSource.cancel();
     }
-    fetchRequestSource = axios.CancelToken.source();
+    fetchProductsRequestSource = axios.CancelToken.source();
     const products = await productClient.search(
       {
         pathVars: {
-          storeId: store.id,
+          storeId: state.store.id,
         },
         filters,
         from,
         size,
       },
-      { cancelToken: fetchRequestSource.token }
+      { cancelToken: fetchProductsRequestSource.token }
     );
     return products;
   };
 
-  const load = async () => {
+  const loadProducts = async () => {
     try {
-      dispatch({ type: 'reset' });
-      const response = await fetch({ enabled: true });
+      const response = await fetchProducts({ enabled: true });
       dispatch({
         type: 'set_products',
         products: {
@@ -202,17 +256,16 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        capture(prefix, 'Load error', error);
+        capture(prefix, 'Load products error', error);
 
         dispatch({ type: 'set_error', error });
       }
     }
   };
 
-  const refresh = async () => {
+  const refreshProducts = async () => {
     try {
-      dispatch({ type: 'set_refreshing', refreshing: true });
-      const response = await fetch({
+      const response = await fetchProducts({
         enabled: true,
       });
       dispatch({
@@ -224,21 +277,29 @@ export default ({ navigation, route }: ScreenProps) => {
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
-        capture(prefix, 'Refresh error', error);
+        capture(prefix, 'Refresh products error', error);
       }
-    } finally {
-      dispatch({ type: 'set_refreshing', refreshing: false });
     }
   };
 
-  const fetchMore = async () => {
+  const load = () => {
+    dispatch({ type: 'reset' });
+    Promise.all([loadStore(), loadProducts()]);
+  };
+
+  const refresh = () => {
+    dispatch({ type: 'set_refreshing', refreshing: true });
+    Promise.all([refreshStore(), refreshProducts()]);
+    dispatch({ type: 'set_refreshing', refreshing: false });
+  };
+
+  const fetchMoreProducts = async () => {
     if (!state.products) {
       throw new Error(`${prefix} To fetch more must be state products`);
     }
     try {
-      dispatch({ type: 'set_fetch_more_error', fetch_more_error: undefined });
       dispatch({ type: 'set_fetching_more', fetching_more: true });
-      const products = await fetch(
+      const products = await fetchProducts(
         state.products.filters,
         state.products.from,
         state.products.size
@@ -262,6 +323,16 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
+  const retryHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    load();
+  };
+
+  const retryFetchMoreHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    fetchMoreProducts();
+  };
+
   const pressContactStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     dispatch({ type: 'set_contact', contact: true });
@@ -269,15 +340,6 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const contactStoreCloseHandler = () => {
     dispatch({ type: 'set_contact', contact: false });
-  };
-
-  const retryHandler = () => {
-    load();
-  };
-
-  const retryFetchMoreHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    fetchMore();
   };
 
   const pressProductHandler = useCallback((product: Product) => {
@@ -298,14 +360,16 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'set_opening_hours_modal', opening_hours_modal: false });
   };
 
-  const pressDescriptionHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    dispatch({ type: 'toogle_expanded' });
-  };
+  useEffect(() => {
+    return () => {
+      fetchStoreRequestSource && fetchStoreRequestSource.cancel();
+      fetchProductsRequestSource && fetchProductsRequestSource.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     load();
-  }, [store]);
+  }, [route.params.store]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -315,14 +379,32 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      const unsubscribe = shoppingCartCache.onChangeStore(store.id, (data) => {
-        dispatch({ type: 'set_amount', amount: getAmount(data) });
-      });
+      const unsubscribe = shoppingCartCache.onChangeStore(
+        route.params.store.id,
+        (data) => {
+          dispatch({ type: 'set_amount', amount: getAmount(data) });
+        }
+      );
       return () => {
         unsubscribe();
       };
-    }, [])
+    }, [route.params.store])
   );
+
+  useEffect(() => {
+    if (!state.store.opening_hours) {
+      dispatch({
+        type: 'set_current_opening_hours',
+      });
+    } else {
+      dispatch({
+        type: 'set_current_opening_hours',
+        current_opening_hours: extractCurrentOpeningHours(
+          state.store.opening_hours
+        ),
+      });
+    }
+  }, [state.store.opening_hours]);
 
   // render logic
   let content: ReactNode = (
@@ -342,16 +424,15 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
       >
         <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
-          Ocurrió un error inesperado
+          No se pudo cargar la información
         </Text>
-        <Text level={6} style={{ marginBottom: 10 }}>
-          El error fue registrado para su solución
+        <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
+          Pero no te desanimes, reintentalo una vez más
         </Text>
         <Button title="Reintentar" type="link" onPress={retryHandler} />
       </View>
     );
-  }
-  if (state.products) {
+  } else if (state.products) {
     if (!state.products.hits.length) {
       content = (
         <View style={{ alignItems: 'center' }}>
@@ -386,6 +467,7 @@ export default ({ navigation, route }: ScreenProps) => {
       );
     }
   }
+
   let orderButton: ReactNode = null;
   if (state.amount && state.amount > 0) {
     orderButton = (
@@ -406,19 +488,22 @@ export default ({ navigation, route }: ScreenProps) => {
       />
     );
   }
-  const currentOpeningHours = extractCurrentOpeningHours(store.opening_hours);
+
   let currentOpeningHoursMessage = '';
-  if (currentOpeningHours.status === 'closed') {
-    currentOpeningHoursMessage = humanizeCurrentClosedOpeningHours(
-      currentOpeningHours
-    );
-  } else {
-    currentOpeningHoursMessage = `Horario de atención`;
+  if (state.current_opening_hours) {
+    if (state.current_opening_hours.status === 'closed') {
+      currentOpeningHoursMessage = humanizeCurrentClosedOpeningHours(
+        state.current_opening_hours
+      );
+    } else {
+      currentOpeningHoursMessage = `Horario de atención`;
+    }
   }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <FlatList
-        data={state.products?.hits || []}
+        data={state.error ? undefined : state.products?.hits}
         numColumns={2}
         refreshing={false}
         ListHeaderComponent={
@@ -434,146 +519,139 @@ export default ({ navigation, route }: ScreenProps) => {
             >
               <Image
                 source={{
-                  uri: cloudinary.dynamicUrl(store.images[0], 'h_500'),
+                  uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500'),
                 }}
                 style={{
-                  width: Dimensions.get('window').width - 40,
-                  height: 200,
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
+                  alignSelf: 'center',
+                  height: 150,
+                  width: 150,
+                  borderRadius: 100,
                 }}
               />
               <View style={{ padding: 15 }}>
                 <Text
-                  level={4}
+                  level={3}
                   weight="bold"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                   style={{ flex: 1 }}
                 >
-                  {store.name}
+                  {state.store.name}
                 </Text>
-                {!!store.description && (
-                  <>
-                    <Touchable
-                      style={{
-                        marginTop: 5,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}
-                      onPress={pressDescriptionHandler}
+                {!!state.store.description && (
+                  <View style={{ marginTop: 5 }}>
+                    <ReadMore
+                      level={7}
+                      numberOfLines={3}
+                      style={{ lineHeight: 18 }}
                     >
-                      <Text level={6} weight="normal">
-                        Descripción
-                      </Text>
-                      {state.expanded ? (
-                        <Icon name="chevron-up" />
-                      ) : (
-                        <Icon name="chevron-down" />
-                      )}
-                    </Touchable>
-                    {state.expanded && (
-                      <View style={{ marginHorizontal: 10, marginBottom: 10 }}>
-                        <Text level={7}>{store.description}</Text>
-                      </View>
-                    )}
-                  </>
+                      {state.store.description}
+                    </ReadMore>
+                  </View>
                 )}
 
-                <View
-                  style={{
-                    marginTop: 10,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 3,
-                  }}
-                >
-                  <Icon name="clock" size={18} />
-                  <Text
-                    level={7}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ flex: 1, marginLeft: 10 }}
-                  >
-                    {durationFormatter.humanizeDurationRange(
-                      store.delivery_time.gte,
-                      store.delivery_time.lte
-                    )}
-                  </Text>
-                </View>
-                <Touchable
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 15,
-                  }}
-                  onPress={pressOpeningHourHandler}
-                >
-                  <Icon name="calendar" size={18} />
+                {!!state.store.delivery_time && (
                   <View
-                    style={{ flex: 1, marginLeft: 10, flexDirection: 'row' }}
+                    style={{
+                      marginTop: 10,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 3,
+                    }}
                   >
-                    {currentOpeningHours.status === 'closed' ? (
-                      <View
-                        style={{
-                          backgroundColor: !currentOpeningHours.next_open
-                            ? colors.black
-                            : colors.red2,
-                          alignSelf: 'flex-start',
-                          borderRadius: 10,
-                          paddingVertical: 5,
-                          paddingHorizontal: 10,
-                        }}
-                      >
-                        <Text
-                          level={7}
-                          weight="bold"
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
+                    <Icon name="clock" size={18} />
+                    <Text
+                      level={7}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={{ flex: 1, marginLeft: 10 }}
+                    >
+                      {durationFormatter.humanizeDurationRange(
+                        state.store.delivery_time.gte,
+                        state.store.delivery_time.lte
+                      )}
+                    </Text>
+                  </View>
+                )}
+
+                {!!state.current_opening_hours && (
+                  <Touchable
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 15,
+                    }}
+                    onPress={pressOpeningHourHandler}
+                  >
+                    <Icon name="calendar" size={18} />
+                    <View
+                      style={{ flex: 1, marginLeft: 10, flexDirection: 'row' }}
+                    >
+                      {state.current_opening_hours.status === 'closed' ? (
+                        <View
                           style={{
-                            color: colors.white,
+                            backgroundColor: !state.current_opening_hours
+                              .next_open
+                              ? colors.black
+                              : colors.red2,
+                            alignSelf: 'flex-start',
+                            borderRadius: 10,
+                            paddingVertical: 5,
+                            paddingHorizontal: 10,
                           }}
                         >
+                          <Text
+                            level={7}
+                            weight="bold"
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                            style={{
+                              color: colors.white,
+                            }}
+                          >
+                            {currentOpeningHoursMessage}
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text level={7} numberOfLines={1} ellipsizeMode="tail">
                           {currentOpeningHoursMessage}
                         </Text>
-                      </View>
+                      )}
+                    </View>
+
+                    {state.opening_hours_modal ? (
+                      <Icon name="chevron-up" />
                     ) : (
-                      <Text level={7} numberOfLines={1} ellipsizeMode="tail">
-                        {currentOpeningHoursMessage}
-                      </Text>
+                      <Icon name="chevron-down" />
                     )}
-                  </View>
+                  </Touchable>
+                )}
 
-                  {state.opening_hours_modal ? (
-                    <Icon name="chevron-up" />
-                  ) : (
-                    <Icon name="chevron-down" />
-                  )}
-                </Touchable>
-
-                <Touchable
-                  style={{
-                    backgroundColor: colors.blueLight3,
-                    borderWidth: 1,
-                    borderColor: colors.blueLight5,
-                    borderRadius: 13,
-                    paddingHorizontal: 20,
-                    paddingVertical: 12,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                  onPress={pressContactStoreHandler}
-                >
-                  <PhoneFilledDotsBlueIcon />
-                  <Text
-                    level={5}
-                    weight="bold"
-                    color={colors.blue}
-                    style={{ marginLeft: 15 }}
+                {!!state.store.phone && (
+                  <Touchable
+                    style={{
+                      backgroundColor: colors.blueLight3,
+                      borderWidth: 1,
+                      borderColor: colors.blueLight5,
+                      borderRadius: 13,
+                      paddingHorizontal: 20,
+                      paddingVertical: 12,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                    onPress={pressContactStoreHandler}
                   >
-                    Contactar al vendedor
-                  </Text>
-                </Touchable>
+                    <PhoneFilledDotsBlueIcon />
+                    <Text
+                      level={5}
+                      weight="bold"
+                      color={colors.blue}
+                      style={{ marginLeft: 15 }}
+                    >
+                      Contactar al vendedor
+                    </Text>
+                  </Touchable>
+                )}
               </View>
             </View>
             <Divider type="thick" />
@@ -585,7 +663,7 @@ export default ({ navigation, route }: ScreenProps) => {
           return (
             <ProductCard
               key={`${item.id}`}
-              store={store}
+              store={state.store}
               product={item}
               align={index % 2 === 0 ? 'left' : 'right'}
               onPress={pressProductHandler}
@@ -628,8 +706,12 @@ export default ({ navigation, route }: ScreenProps) => {
         }
         onRefresh={refresh}
         onEndReached={() => {
-          if (state.products && state.products.from < state.products.total) {
-            fetchMore();
+          if (
+            !state.fetching_more &&
+            state.products &&
+            state.products.from < state.products.total
+          ) {
+            fetchMoreProducts();
           }
         }}
         style={[{ flex: 1 }]}
@@ -645,13 +727,13 @@ export default ({ navigation, route }: ScreenProps) => {
       </View>
       {state.contact && (
         <ActionSheetContact
-          phone={store.phone}
+          phone={state.store.phone}
           onRequestClose={contactStoreCloseHandler}
         />
       )}
       {state.opening_hours_modal && (
         <ViewOpeningHoursModal
-          openingHours={store.opening_hours}
+          openingHours={state.store.opening_hours}
           onClose={closeOpeningHoursModal}
         />
       )}

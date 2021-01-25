@@ -239,18 +239,18 @@ export default ({ navigation, route }: ScreenProps) => {
           ellipsizeMode="tail"
           style={{ marginBottom: 10 }}
         >
-          Imagen de la tienda
+          Logo de la tienda
         </Text>
         <Text
           level={5}
           weight="light"
           style={{ marginBottom: 60, lineHeight: 23 }}
         >
-          Agrega la imagen o logotipo que representa tu tienda.
+          Agrega el logo o imagen que representa tu tienda.
         </Text>
         <InputImages
           size={1}
-          label="Imagen de la tienda"
+          label="Logo de la tienda"
           path={`beast/${Constants.manifest.extra.BEAST_ENVIRONMENT}/stores/${
             state.form.reference
           }/${new Date().getTime()}-\${}`}

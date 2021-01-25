@@ -21,9 +21,8 @@ import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 
 // local components
-import Search from './components/search';
+import Widget from './components/widget';
 import Skeleton from './components/skeleton';
-import ProductCard from './components/product-card';
 import SelectAddress from './components/select-address';
 import OnboardingModal from './components/onboarding-modal';
 import InProgressNotifications from './components/in-progress-notifications';
@@ -33,15 +32,15 @@ import ShoppingCartIcon from '../components/shopping-cart-icon';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // components
 import Text from '../../components/text';
-import Divider from '../../components/divider';
+import Icon from '../../components/icon';
+import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
-import BannerImage from '../../components/svgs/images/banner';
 import BasketCatImage from '../../components/svgs/images/basket-cat';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 // clients
 import userClient from '../../clients/user-client';
-import storeProductClient from '../../clients/store-product-client';
+import widgetClient from '../../clients/widget-client';
 // libs
 import { capture } from '../../lib/sentry';
 import deviceAgent from '../../lib/device-agent';
@@ -57,7 +56,7 @@ import {
   AddressInfo,
   Place,
   SearchResponse,
-  StoreProduct,
+  RenderedWidget,
 } from '../../types';
 // styles
 import colors from '../../styles/colors';
@@ -76,12 +75,16 @@ type SetUpdatingAction = {
   type: 'set_updating';
   updating: boolean;
 };
-type ResetAction = {
-  type: 'reset';
+type SetWidgetsAction = {
+  type: 'set_widgets';
+  widgets: SearchResponse<RenderedWidget>;
 };
-type SetProductsAction = {
-  type: 'set_products';
-  products: SearchResponse<StoreProduct>;
+type AddWidgetsAction = {
+  type: 'add_widgets';
+  widgets: SearchResponse<RenderedWidget>;
+};
+type ResetWidgetsAction = {
+  type: 'reset_widgets';
 };
 type SetErrorAction = {
   type: 'set_error';
@@ -111,10 +114,6 @@ type SetPendingAddressInfoAction = {
   type: 'set_pending_address_info';
   pending_address_info?: AddressInfo;
 };
-type SetNewSaleDialogAction = {
-  type: 'set_new_sale_dialog';
-  new_sale_dialog: string;
-};
 type SetOnboardingModalAction = {
   type: 'set_onboarding_modal';
   onboarding_modal: boolean;
@@ -122,8 +121,9 @@ type SetOnboardingModalAction = {
 type Action =
   | SetUserAction
   | SetUpdatingAction
-  | ResetAction
-  | SetProductsAction
+  | SetWidgetsAction
+  | AddWidgetsAction
+  | ResetWidgetsAction
   | SetErrorAction
   | SetRefreshingAction
   | SetFetchingMoreAction
@@ -131,12 +131,11 @@ type Action =
   | SetPendingSellerOrdersAction
   | SetAddressModalAction
   | SetPendingAddressInfoAction
-  | SetNewSaleDialogAction
   | SetOnboardingModalAction;
 type State = {
   user?: User;
   updating: boolean;
-  products?: SearchResponse<StoreProduct>;
+  widgets?: SearchResponse<RenderedWidget>;
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
@@ -144,7 +143,6 @@ type State = {
   pending_seller_orders?: number;
   address_modal: boolean;
   pending_address_info?: AddressInfo;
-  new_sale_dialog: string;
   onboarding_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
@@ -153,16 +151,39 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, user: action.user };
     case 'set_updating':
       return { ...state, updating: action.updating };
-    case 'reset':
-      return { ...state, products: undefined, error: undefined };
-    case 'set_products':
-      return { ...state, products: action.products };
+    case 'set_widgets':
+      return {
+        ...state,
+        widgets: {
+          ...action.widgets,
+          from: action.widgets.from + action.widgets.hits.length,
+        },
+      };
+    case 'add_widgets':
+      return {
+        ...state,
+        widgets: {
+          ...action.widgets,
+          from: action.widgets.from + action.widgets.hits.length,
+          hits: [...(state.widgets?.hits || []), ...action.widgets.hits],
+        },
+      };
+    case 'reset_widgets':
+      return {
+        ...state,
+        widgets: undefined,
+        error: undefined,
+      };
     case 'set_error':
       return { ...state, error: action.error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
     case 'set_fetching_more':
-      return { ...state, fetching_more: action.fetching_more };
+      return {
+        ...state,
+        fetching_more: action.fetching_more,
+        fetch_more_error: undefined,
+      };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
     case 'set_pending_seller_orders':
@@ -171,8 +192,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, address_modal: action.address_modal };
     case 'set_pending_address_info':
       return { ...state, pending_address_info: action.pending_address_info };
-    case 'set_new_sale_dialog':
-      return { ...state, new_sale_dialog: action.new_sale_dialog };
     case 'set_onboarding_modal':
       return { ...state, onboarding_modal: action.onboarding_modal };
     default:
@@ -192,7 +211,6 @@ export default ({ navigation }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
     address_modal: false,
-    new_sale_dialog: '',
     onboarding_modal: false,
   });
   const address = userCache.getAddress();
@@ -208,7 +226,8 @@ export default ({ navigation }: ScreenProps) => {
 
   // event handlers
   const fetch = async (
-    filters?: { [key: string]: any },
+    filters: { [key: string]: any },
+    context: { [key: string]: any },
     from = 0,
     size = defaultSize
   ) => {
@@ -216,29 +235,15 @@ export default ({ navigation }: ScreenProps) => {
       fetchRequestSource.cancel();
     }
     fetchRequestSource = axios.CancelToken.source();
-    const response = await storeProductClient.search(
+    const response = await widgetClient.render(
       {
         filters,
+        context,
+        sort: {
+          order: 'asc',
+        },
         from,
         size,
-        sort: {
-          updated_at: 'desc',
-        },
-        source: [
-          'id',
-          'name',
-          'price',
-          'store',
-          'enabled',
-          'reference',
-          'description',
-          'tags',
-          'images',
-          'created_at',
-          'updated_at',
-          'store_info.name',
-          'store_info.images',
-        ],
       },
       { cancelToken: fetchRequestSource.token }
     );
@@ -247,18 +252,19 @@ export default ({ navigation }: ScreenProps) => {
 
   const load = async () => {
     try {
-      dispatch({ type: 'reset' });
-      const response = await fetch({
-        enabled: true,
-        location: (address as Place).location,
-        store_enabled: true,
-      });
-      dispatch({
-        type: 'set_products',
-        products: {
-          ...response,
-          from: response.from + response.hits.length,
+      dispatch({ type: 'reset_widgets' });
+      const response = await fetch(
+        {
+          tags: ['default'],
         },
+        {
+          location: (address as Place).location,
+          store_address: (address as Place).id,
+        }
+      );
+      dispatch({
+        type: 'set_widgets',
+        widgets: response,
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
@@ -272,17 +278,18 @@ export default ({ navigation }: ScreenProps) => {
   const refresh = async () => {
     try {
       dispatch({ type: 'set_refreshing', refreshing: true });
-      const response = await fetch({
-        enabled: true,
-        location: (address as Place).location,
-        store_enabled: true,
-      });
-      dispatch({
-        type: 'set_products',
-        products: {
-          ...response,
-          from: response.from + response.hits.length,
+      const response = await fetch(
+        {
+          tags: ['default'],
         },
+        {
+          location: (address as Place).location,
+          store_address: (address as Place).id,
+        }
+      );
+      dispatch({
+        type: 'set_widgets',
+        widgets: response,
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
@@ -294,32 +301,31 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const fetchMore = async () => {
-    if (!state.products) {
-      throw new Error(`${prefix} To fetch more must be state products`);
+    if (!state.widgets) {
+      throw new Error(`${prefix} To fetch more must be state widgets`);
     }
     try {
-      dispatch({ type: 'set_fetch_more_error', fetch_more_error: undefined });
       dispatch({ type: 'set_fetching_more', fetching_more: true });
-      const products = await fetch(
-        state.products.filters,
-        state.products.from,
-        state.products.size
+      const response = await fetch(
+        {
+          tags: ['default'],
+        },
+        {
+          location: (address as Place).location,
+          store_address: (address as Place).id,
+        },
+        state.widgets.from,
+        state.widgets.size
       );
       dispatch({
-        type: 'set_products',
-        products: {
-          ...products,
-          from: products.from + products.hits.length,
-          hits: [...state.products.hits, ...products.hits],
-        },
+        type: 'add_widgets',
+        widgets: response,
       });
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Fetch more error', error);
 
         dispatch({ type: 'set_fetch_more_error', fetch_more_error: error });
-      } else {
-        console.log('fetch more is cancelled');
       }
     } finally {
       dispatch({ type: 'set_fetching_more', fetching_more: false });
@@ -443,11 +449,6 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('SellerStack');
   };
 
-  const pressSeeStoresHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('Stores');
-  };
-
   const retryHandler = () => {
     load();
   };
@@ -473,26 +474,6 @@ export default ({ navigation }: ScreenProps) => {
     });
   };
 
-  const pressProductCardHandler = useCallback((product: StoreProduct) => {
-    navigation.navigate('Product', { product });
-  }, []);
-
-  const newSaleDialogOkHandler = () => {
-    const order = state.new_sale_dialog;
-    dispatch({
-      type: 'set_new_sale_dialog',
-      new_sale_dialog: '',
-    });
-    navigation.navigate('SellerOrderDetails', { order });
-  };
-
-  const newSaleDialogCancelHandler = () => {
-    dispatch({
-      type: 'set_new_sale_dialog',
-      new_sale_dialog: '',
-    });
-  };
-
   const onBoardingModalCloseHandler = async () => {
     dispatch({ type: 'set_onboarding_modal', onboarding_modal: false });
     try {
@@ -503,6 +484,11 @@ export default ({ navigation }: ScreenProps) => {
     } catch (error) {
       capture(prefix, 'On boarding modal close handler error', error);
     }
+  };
+
+  const pressSearchIconHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('Search');
   };
 
   useFocusEffect(
@@ -641,7 +627,7 @@ export default ({ navigation }: ScreenProps) => {
         <Button title="Reintentar" type="link" onPress={retryHandler} />
       </View>
     );
-  } else if (!state.products) {
+  } else if (!state.widgets) {
     content = (
       <View
         style={{
@@ -655,59 +641,15 @@ export default ({ navigation }: ScreenProps) => {
   } else {
     content = (
       <FlatList
-        data={state.products.hits}
-        numColumns={2}
+        data={state.widgets.hits}
         refreshing={state.refreshing}
-        ListHeaderComponent={() => {
-          if (!state.products?.hits.length) {
-            return null;
-          }
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item: RenderedWidget) => item.id}
+        renderItem={({ item }) => {
           return (
-            <View>
-              <BannerImage />
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginTop: 15,
-                  marginBottom: 15,
-                }}
-              >
-                <Text
-                  level={4}
-                  weight="bold"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={{ flex: 1 }}
-                >
-                  Productos para ti
-                </Text>
-                <Button
-                  type="link"
-                  title={
-                    <Text level={6} weight="bold" color={colors.blue}>
-                      Ver tiendas
-                    </Text>
-                  }
-                  style={{ paddingRight: 0 }}
-                  onPress={pressSeeStoresHandler}
-                />
-              </View>
-            </View>
+            <Widget key={`${item.id}`} navigation={navigation} widget={item} />
           );
         }}
-        keyExtractor={(item: StoreProduct) => item.id}
-        renderItem={({ item, index }) => {
-          return (
-            <ProductCard
-              key={`${item.id}`}
-              product={item}
-              align={index % 2 === 0 ? 'left' : 'right'}
-              onPress={pressProductCardHandler}
-            />
-          );
-        }}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         ListEmptyComponent={
           <View
             style={{
@@ -783,14 +725,14 @@ export default ({ navigation }: ScreenProps) => {
         onRefresh={refresh}
         onEndReached={() => {
           if (
-            state.products &&
             !state.fetching_more &&
-            state.products.from < state.products.total
+            state.widgets &&
+            state.widgets.from < state.widgets.total
           ) {
             fetchMore();
           }
         }}
-        style={[{ flex: 1, paddingTop: 15 }, globalStyles.withPadding]}
+        style={[{ flex: 1, paddingTop: 0 }]}
       />
     );
   }
@@ -800,7 +742,7 @@ export default ({ navigation }: ScreenProps) => {
     <View
       style={{ flex: 1, backgroundColor: colors.white, paddingTop: insets.top }}
     >
-      <View style={globalStyles.withMargin}>
+      <View style={[globalStyles.withMargin, { marginBottom: 7 }]}>
         <View style={globalStyles.screenWithoutHeaderSpace} />
         <View
           style={{
@@ -820,12 +762,15 @@ export default ({ navigation }: ScreenProps) => {
           </Text>
 
           <ShoppingCartIcon />
-          <Search navigation={navigation} />
+          <Touchable
+            style={{ paddingVertical: 5, paddingLeft: 15, paddingRight: 5 }}
+            onPress={pressSearchIconHandler}
+          >
+            <Icon name="search" size={20} />
+          </Touchable>
         </View>
         {selectAddressComponent}
       </View>
-
-      <Divider type="thick" style={{ marginTop: 5 }} />
 
       {content}
 
@@ -856,16 +801,6 @@ export default ({ navigation }: ScreenProps) => {
           okText="Si, cambiar"
           onOk={confirmDialogOkHandler}
           onCancel={confirmDialogCancelHandler}
-        />
-      )}
-      {!!state.new_sale_dialog && (
-        <ConfirmDialog
-          title="¡Tienes una nueva orden!"
-          message="Uno de tus clientes acaba de realizar una orden. No lo hagas esperar."
-          okText="Ver orden"
-          cancelText="Más tarde"
-          onOk={newSaleDialogOkHandler}
-          onCancel={newSaleDialogCancelHandler}
         />
       )}
       {state.onboarding_modal && (

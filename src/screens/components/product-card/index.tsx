@@ -53,7 +53,7 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
   const size = (Dimensions.get('window').width / 2 - 20) * 0.95;
   return (
     <View style={{ width: '50%', marginBottom: 10 }}>
-      <Touchable onPress={pressProductHandler} style={{ marginBottom: 5 }}>
+      <Touchable onPress={pressProductHandler} style={{ marginBottom: 3 }}>
         <View
           style={{ alignSelf: align === 'right' ? 'flex-end' : 'flex-start' }}
         >
@@ -80,13 +80,14 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
             width: size,
             alignSelf: align === 'right' ? 'flex-end' : 'flex-start',
             paddingTop: 5,
+            minHeight: 55,
           }}
         >
           <Text
             level={7}
-            numberOfLines={1}
+            numberOfLines={2}
             ellipsizeMode="tail"
-            style={{ marginLeft: 5 }}
+            style={{ marginLeft: 5, marginBottom: 2 }}
           >
             {product.name}
           </Text>
@@ -95,7 +96,7 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
           </Text>
         </View>
       </Touchable>
-      {typeof qty !== 'undefined' && (
+      {typeof qty !== 'undefined' && !!store.reference && (
         <View style={{ minHeight: 30 }}>
           <InputNumber
             value={qty}

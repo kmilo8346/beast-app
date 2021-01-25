@@ -1,13 +1,13 @@
-import React from 'react';
-import { Animated, View, Image, Dimensions, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, Dimensions, ScrollView } from 'react-native';
 
+// components
+import Text from '../../../components/text';
 // styles
 import styles from './styles';
 import colors from '../../../styles/colors';
 
 const deviceWidth = Dimensions.get('window').width;
-const FIXED_BAR_WIDTH = 130;
-const BAR_SPACE = 10;
 
 export interface CarousellProps {
   images: string[];
@@ -28,12 +28,10 @@ const defaultImage = (
 );
 
 export default ({ images }: CarousellProps) => {
+  const [index, setIndex] = useState(1);
   const numItems = images.length;
-  const itemWidth = FIXED_BAR_WIDTH / numItems - (numItems - 1) * BAR_SPACE;
-  const animVal = new Animated.Value(0);
 
   const imageArray: any[] = [];
-  const barArray: any[] = [];
   if (images.length === 0) {
     imageArray.push(defaultImage);
   } else {
@@ -42,46 +40,12 @@ export default ({ images }: CarousellProps) => {
         <Image
           key={`image${i}`}
           source={{ uri: image }}
-          style={[styles.image, { width: deviceWidth - 40 }]}
+          style={[styles.image, { width: deviceWidth, resizeMode: 'contain' }]}
         />
       );
       imageArray.push(thisImage);
-
-      const scrollBarVal = animVal.interpolate({
-        inputRange: [
-          (deviceWidth - 40) * (i - 1),
-          (deviceWidth - 40) * (i + 1),
-        ],
-        outputRange: [-itemWidth, itemWidth],
-        extrapolate: 'clamp',
-      });
-
-      const itemBar = (
-        <View
-          key={`bar${i}`}
-          style={[
-            styles.track,
-            {
-              width: itemWidth,
-              marginLeft: i === 0 ? 0 : BAR_SPACE,
-            },
-          ]}
-        >
-          <Animated.View
-            style={[
-              styles.bar,
-              {
-                width: itemWidth,
-                transform: [{ translateX: scrollBarVal }],
-              },
-            ]}
-          />
-        </View>
-      );
-      barArray.push(itemBar);
     });
   }
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -90,15 +54,35 @@ export default ({ images }: CarousellProps) => {
         scrollEventThrottle={10}
         pagingEnabled
         centerContent
-        decelerationRate="fast"
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: animVal } } }],
-          { useNativeDriver: false }
-        )}
+        onMomentumScrollEnd={(event) => {
+          setIndex(
+            Math.round(event.nativeEvent.contentOffset.x / deviceWidth) + 1
+          );
+        }}
       >
         {imageArray}
       </ScrollView>
-      <View style={styles.barContainer}>{barArray}</View>
+      <View
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 20,
+          backgroundColor: colors.blackLight1,
+          opacity: 0.8,
+          paddingHorizontal: 7,
+          paddingVertical: 5,
+          borderRadius: 20,
+          minWidth: 40,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          level={6}
+          color={colors.white}
+          style={{ textAlign: 'center', letterSpacing: 1.2 }}
+        >{`${index}/${numItems}`}</Text>
+      </View>
     </View>
   );
 };

@@ -13,7 +13,6 @@ import {
   CreateStoreWizzardSetNameScreen,
   CreateStoreWizzardSetImageScreen,
   CreateStoreWizzardSetDeliveryAreaScreen,
-  CreateStoreScreen,
   EditStoreScreen,
   EditStoreSetImageScreen,
   EditStoreSetNameScreen,
@@ -69,11 +68,6 @@ export default () => {
           name="CreateStoreWizzardSetDeliveryArea"
           component={CreateStoreWizzardSetDeliveryAreaScreen}
           options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="CreateStore"
-          component={CreateStoreScreen}
-          options={{ title: 'Creando tienda' }}
         />
         <Stack.Screen
           name="EditStore"
