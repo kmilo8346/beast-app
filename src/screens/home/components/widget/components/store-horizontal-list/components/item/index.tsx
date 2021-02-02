@@ -15,7 +15,7 @@ import colors from '../../../../../../../../styles/colors';
 
 interface ComponentProps {
   navigation: any;
-  data: StoreProduct & { inner_hits?: StoreProduct[] };
+  data: StoreProduct & { inner_hits?: StoreProduct[]; distance?: number };
   last: boolean;
 }
 
@@ -53,15 +53,29 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
             borderColor: colors.blackLight8,
           }}
         />
-        <Text
-          level={6}
-          weight="bold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ flex: 1, marginLeft: 7, letterSpacing: -0.5 }}
-        >
-          {data.store_info.name}
-        </Text>
+        <View style={{ flex: 1, marginLeft: 7 }}>
+          <Text
+            level={6}
+            weight="bold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ letterSpacing: -0.5 }}
+          >
+            {data.store_info.name}
+          </Text>
+
+          {'distance' in data && (
+            <Text
+              level={7}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              color={colors.blackLight2}
+            >
+              {numberFormatter.humanizeDistance(data.distance as number)}
+            </Text>
+          )}
+        </View>
+
         <Icon name="chevron-right" size={20} color={colors.blackLight4} />
       </Touchable>
 

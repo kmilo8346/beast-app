@@ -14,6 +14,9 @@ class NumberFormatter {
    * @param distance distance in km
    */
   humanizeDistance(distance: number): string {
+    if (distance <= 0.01) {
+      return 'En tu dirección';
+    }
     if (distance < 1) {
       return `${(Math.round(distance * 100) / 100) * 1000} mts`;
     }

@@ -17,7 +17,7 @@ import colors from '../../../../../../../../styles/colors';
 
 interface ComponentProps {
   navigation: any;
-  data: StoreProduct & { inner_hits?: StoreProduct[] };
+  data: StoreProduct & { inner_hits?: StoreProduct[]; distance?: number };
   last: boolean;
 }
 
@@ -74,7 +74,7 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
             ellipsizeMode="tail"
             color={colors.blackLight2}
           >
-            A 200 metros
+            {numberFormatter.humanizeDistance(data.distance as number)}
           </Text>
         </View>
         <Icon name="chevron-right" size={20} color={colors.blackLight4} />

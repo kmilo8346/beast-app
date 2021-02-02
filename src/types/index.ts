@@ -53,7 +53,7 @@ export interface SearchResponse<T> {
   from: number;
   size: number;
   total: number;
-  hits: (T & { inner_hits?: T[] })[];
+  hits: (T & { inner_hits?: T[]; distance?: number })[];
   sort?: { [key: string]: 'asc' | 'desc' };
   query?: string;
   source?: string[];
