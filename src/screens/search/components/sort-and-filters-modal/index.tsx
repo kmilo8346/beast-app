@@ -14,7 +14,11 @@ import globalStyles from '../../../../styles';
 import colors from '../../../../styles/colors';
 import { Place } from '../../../../types';
 
-const options = [
+const options: { title: string; value: { [key: string]: string } }[] = [
+  {
+    title: 'Más solicitado',
+    value: { 'stats.number_of_times_in_orders': 'desc' },
+  },
   {
     title: 'Fecha en que se agregó',
     value: { created_at: 'desc' },
@@ -28,6 +32,18 @@ const options = [
     value: { price: 'desc' },
   },
 ];
+
+export const getDefaultSort = () => {
+  return options[0];
+};
+
+export const mapSort = (
+  sort: { [key: string]: string },
+  defaultSort: { title: string; value: { [key: string]: string } }
+) => {
+  const match = options.find((o) => isEqual(o.value, sort));
+  return match || defaultSort;
+};
 
 interface ComponentProps {
   sort: { title: string; value: { [key: string]: any } };

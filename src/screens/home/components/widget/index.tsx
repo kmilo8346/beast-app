@@ -3,10 +3,12 @@ import React from 'react';
 // local components
 import StoreVerticalList from './components/store-vertical-list';
 import StoreHorizontalList from './components/store-horizontal-list';
+import ProductHorizontalList from './components/product-horizontal-list';
 // libs
 import { capture } from '../../../../lib/sentry';
 // types
 import {
+  ProductHorizontalListRenderedWidget,
   RenderedWidget,
   StoreHorizontalListRenderedWidget,
   StoreVerticalListRenderedWidget,
@@ -24,6 +26,16 @@ interface ComponentProps {
 export default ({ navigation, widget }: ComponentProps) => {
   // render logic
   switch (widget.type) {
+    case WidgetType.PRODUCT_HORIZONTAL_LIST:
+      return (
+        <ProductHorizontalList
+          navigation={navigation}
+          title={(widget as ProductHorizontalListRenderedWidget).data.title}
+          response={
+            (widget as ProductHorizontalListRenderedWidget).data.response
+          }
+        />
+      );
     case WidgetType.STORE_HORIZONTAL_LIST:
       return (
         <StoreHorizontalList

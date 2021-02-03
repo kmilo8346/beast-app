@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Dimensions, View } from 'react-native';
 
 // components
@@ -7,58 +7,37 @@ import Bone from '../../../../components/bone';
 import globalStyles from '../../../../styles';
 
 export default () => {
-  const size = (Dimensions.get('window').width / 2 - 20) * 0.95;
+  // state
+  const [size] = useState((Dimensions.get('window').width * 0.97 - 20 * 2) / 2);
+
+  // render logic
+  const renderSection = useCallback(
+    () => (
+      <View style={{ marginBottom: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 15,
+          }}
+        >
+          <Bone width={size} height={35} />
+        </View>
+        <View style={{ flexDirection: 'row', overflow: 'hidden' }}>
+          <Bone width={size} height={size} style={{ marginRight: 3 }} />
+          <Bone width={size} height={size} style={{ marginRight: 3 }} />
+          <Bone width={size} height={size} />
+        </View>
+      </View>
+    ),
+    []
+  );
+
   return (
     <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
-      <Bone
-        width="100%"
-        height={67}
-        marginBottom={10}
-        style={{ marginBottom: 15 }}
-      />
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginBottom: 15,
-        }}
-      >
-        <Bone width={140} height={20} />
-        <Bone width={70} height={20} />
-      </View>
-
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone
-            width={size}
-            height={size}
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </View>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone width={size} height={size} style={{ alignSelf: 'flex-end' }} />
-        </View>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone
-            width={size}
-            height={size}
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </View>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone width={size} height={size} style={{ alignSelf: 'flex-end' }} />
-        </View>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone
-            width={size}
-            height={size}
-            style={{ alignSelf: 'flex-start' }}
-          />
-        </View>
-        <View style={{ width: '50%', marginBottom: 10 }}>
-          <Bone width={size} height={size} style={{ alignSelf: 'flex-end' }} />
-        </View>
-      </View>
+      {renderSection()}
+      {renderSection()}
+      {renderSection()}
     </View>
   );
 };

@@ -4,7 +4,6 @@ import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
 // components
 import Text from '../../../../../../../../components/text';
 import Icon from '../../../../../../../../components/icon';
-import Divider from '../../../../../../../../components/divider';
 import Touchable from '../../../../../../../../components/touchable';
 // lib
 import cloudinary from '../../../../../../../../lib/cloudinary';
@@ -18,10 +17,9 @@ import colors from '../../../../../../../../styles/colors';
 interface ComponentProps {
   navigation: any;
   data: StoreProduct & { inner_hits?: StoreProduct[]; distance?: number };
-  last: boolean;
 }
 
-export default memo(({ navigation, data, last }: ComponentProps) => {
+export default memo(({ navigation, data }: ComponentProps) => {
   // event handlers
   const goToProductScreen = (product: StoreProduct) => {
     navigation.navigate('Product', {
@@ -37,7 +35,7 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
   // render logic
   const size = (Dimensions.get('window').width / 2 - 20) * 0.98;
   return (
-    <View style={{ marginBottom: 15 }}>
+    <View style={{ marginBottom: 30 }}>
       <Touchable
         style={[
           { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
@@ -126,7 +124,6 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
           </Touchable>
         ))}
       </View>
-      {!last && <Divider type="thick" style={{ marginTop: 15 }} />}
     </View>
   );
 });

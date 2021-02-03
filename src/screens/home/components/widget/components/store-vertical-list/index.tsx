@@ -4,6 +4,7 @@ import { View, FlatList, GestureResponderEvent } from 'react-native';
 // local components
 import Item from './components/item';
 // components
+import Text from '../../../../../../components/text';
 import Divider from '../../../../../../components/divider';
 import Button from '../../../../../../components/buttons/button';
 // types
@@ -30,6 +31,16 @@ export default memo(({ navigation, response }: ComponentProps) => {
   return (
     <View style={{ marginBottom: 20 }}>
       <Divider type="thick" style={{ marginBottom: 15 }} />
+      <Text
+        level={4}
+        weight="bold"
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={[{ flex: 1, marginBottom: 20 }, globalStyles.withMargin]}
+      >
+        Tiendas cercanas 😜
+      </Text>
+      {/* <Divider type="thick" style={{ marginBottom: 15 }} /> */}
 
       <FlatList
         data={response.hits}
@@ -44,15 +55,8 @@ export default memo(({ navigation, response }: ComponentProps) => {
             <Button type="secondary" title="Ver todas las tiendas" />
           </View>
         }
-        renderItem={({ item, index }) => {
-          return (
-            <Item
-              key={item.id}
-              navigation={navigation}
-              data={item}
-              last={index === response.hits.length - 1}
-            />
-          );
+        renderItem={({ item }) => {
+          return <Item key={item.id} navigation={navigation} data={item} />;
         }}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: StoreProduct) => item.id}

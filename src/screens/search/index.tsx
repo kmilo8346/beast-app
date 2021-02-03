@@ -22,7 +22,10 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // local components
-import SortAndFiltersModal from './components/sort-and-filters-modal';
+import SortAndFiltersModal, {
+  mapSort,
+  getDefaultSort,
+} from './components/sort-and-filters-modal';
 // home components
 // TODO: move to screen components
 import ProductCard from '../home/components/product-card';
@@ -143,7 +146,7 @@ type State = {
   focused: boolean;
   query: string;
   filters: { [key: string]: any };
-  sort: { title: string; value: { [key: string]: any } };
+  sort: { title: string; value: { [key: string]: string } };
   loading: boolean;
   products?: SearchResponse<StoreProduct>;
   error?: Error;
@@ -240,6 +243,7 @@ export default ({ navigation, route }: ScreenProps) => {
     reducer,
     (() => {
       const address = userCache.getAddress() as Place;
+      const defaultSort = getDefaultSort();
       return {
         address,
         user: userCache.getData() as User,
@@ -254,10 +258,9 @@ export default ({ navigation, route }: ScreenProps) => {
           },
           route.params?.filters
         ),
-        sort: {
-          title: 'Fecha en que se agregó',
-          value: { created_at: 'desc' },
-        },
+        sort: route.params?.sort
+          ? mapSort(route.params.sort, defaultSort)
+          : defaultSort,
         loading: false,
         refreshing: false,
         fetching_more: false,

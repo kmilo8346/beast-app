@@ -619,7 +619,7 @@ export default ({ navigation }: ScreenProps) => {
         ]}
       >
         <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
-          No se pudo cargar los productos
+          No se pudo cargar la información
         </Text>
         <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
           Pero no te desanimes, reintentalo una vez más
