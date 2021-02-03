@@ -41,6 +41,15 @@ export interface SearchParams {
   size?: number;
   sort?: { [key: string]: 'asc' | 'desc' };
   source?: string[];
+  collapse?: {
+    field: string;
+    inner_hits?: {
+      name: string;
+      size?: number;
+      sort?: string[];
+      _source?: string[] | boolean;
+    };
+  };
 }
 
 export interface DeleteParams {
