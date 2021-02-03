@@ -1,15 +1,19 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../../../../../../../components/text';
 import Icon from '../../../../../../../../components/icon';
 import Touchable from '../../../../../../../../components/touchable';
+// caches
+import userCache from '../../../../../../../../cache/user';
 // lib
+import * as utils from '../../../../../../../../lib/utils';
 import cloudinary from '../../../../../../../../lib/cloudinary';
 import numberFormatter from '../../../../../../../../lib/formatters/number-formatter';
 // types
-import { StoreProduct } from '../../../../../../../../types';
+import { Place, StoreProduct, User } from '../../../../../../../../types';
 // styles
 import colors from '../../../../../../../../styles/colors';
 
@@ -20,6 +24,10 @@ interface ComponentProps {
 }
 
 export default memo(({ navigation, data, last }: ComponentProps) => {
+  // state
+  const [distance, setDistance] = useState<number | undefined>();
+  const [user, setUser] = useState(userCache.getData() as User);
+
   // event handlers
   const goToProductScreen = (product: StoreProduct) => {
     navigation.navigate('Product', {
@@ -31,6 +39,34 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
     event.stopPropagation();
     navigation.navigate('Store', { store: data.store_info });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        setUser(user as User);
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (distance) {
+      setDistance(distance);
+    } else if (data.store_info.address?.location) {
+      const address = userCache.getAddress() as Place;
+      setDistance(
+        utils.distance(
+          data.store_info.address.location.lat,
+          data.store_info.address.location.lon,
+          address.location.lat,
+          address.location.lon,
+          'K'
+        )
+      );
+    }
+  }, [user.current_address, data.store_info.address?.location, data.distance]);
 
   // render logic
   const size = (Dimensions.get('window').width * 0.97 - 20 * 2) / 2;
@@ -64,14 +100,14 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
             {data.store_info.name}
           </Text>
 
-          {'distance' in data && (
+          {distance !== undefined && (
             <Text
               level={7}
               numberOfLines={1}
               ellipsizeMode="tail"
               color={colors.blackLight2}
             >
-              {numberFormatter.humanizeDistance(data.distance as number)}
+              {numberFormatter.humanizeDistance(distance)}
             </Text>
           )}
         </View>
