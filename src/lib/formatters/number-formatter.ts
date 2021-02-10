@@ -15,7 +15,7 @@ class NumberFormatter {
    */
   humanizeDistance(distance: number): string {
     if (distance <= 0.01) {
-      return 'En tu dirección';
+      return 'En tu ubicación';
     }
     if (distance < 1) {
       return `${(Math.round(distance * 100) / 100) * 1000} mts`;

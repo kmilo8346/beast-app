@@ -1,4 +1,10 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -8,7 +14,12 @@ import Touchable from '../../../../../../../../components/touchable';
 // caches
 import userCache from '../../../../../../../../cache/user';
 // lib
-import * as utils from '../../../../../../../../lib/utils';
+import {
+  CurrentOpenginHours,
+  extractCurrentOpeningHours,
+  humanizeCurrentClosedOpeningHours,
+  distance as calculateDistance,
+} from '../../../../../../../../lib/utils';
 import cloudinary from '../../../../../../../../lib/cloudinary';
 import numberFormatter from '../../../../../../../../lib/formatters/number-formatter';
 // types
@@ -24,8 +35,12 @@ interface ComponentProps {
 
 export default memo(({ navigation, data, last }: ComponentProps) => {
   // state
+  const [size] = useState((Dimensions.get('window').width * 0.97 - 20 * 2) / 2);
   const [distance, setDistance] = useState<number | undefined>();
   const [user, setUser] = useState(userCache.getData() as User);
+  const [current_opening_hours, setCurrentOpeningHours] = useState<
+    CurrentOpenginHours | undefined
+  >();
 
   // event handlers
   const goToProductScreen = (product: StoreProduct) => {
@@ -56,7 +71,7 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
     } else if (data.store_info.address?.location) {
       const address = userCache.getAddress() as Place;
       setDistance(
-        utils.distance(
+        calculateDistance(
           data.store_info.address.location.lat,
           data.store_info.address.location.lon,
           address.location.lat,
@@ -67,8 +82,42 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
     }
   }, [user.current_address, data.store_info.address?.location, data.distance]);
 
+  useEffect(() => {
+    if (data.store_info.opening_hours) {
+      setCurrentOpeningHours(
+        extractCurrentOpeningHours(data.store_info.opening_hours)
+      );
+    }
+  }, [data.store_info.opening_hours]);
+
   // render logic
-  const size = (Dimensions.get('window').width * 0.97 - 20 * 2) / 2;
+  let info: ReactNode = null;
+  if (current_opening_hours?.status === 'closed') {
+    info = (
+      <View
+        style={{
+          backgroundColor: !current_opening_hours.next_open
+            ? colors.black
+            : colors.red2,
+          alignSelf: 'flex-start',
+          borderRadius: 10,
+          paddingVertical: 3,
+          paddingHorizontal: 10,
+          marginTop: 4,
+        }}
+      >
+        <Text
+          level={7}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          weight="bold"
+          color={colors.white}
+        >
+          {humanizeCurrentClosedOpeningHours(current_opening_hours)}
+        </Text>
+      </View>
+    );
+  }
   return (
     <View style={{ marginLeft: 20, marginRight: last ? 20 : 0 }}>
       <Touchable
@@ -88,25 +137,34 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
             borderColor: colors.blackLight8,
           }}
         />
-        <Text
-          level={6}
-          weight="bold"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ flex: 1, marginLeft: 7, letterSpacing: -0.5 }}
+        <View
+          style={{
+            flex: 1,
+            marginLeft: 7,
+            justifyContent: 'center',
+          }}
         >
-          {data.store_info.name}
-          {distance !== undefined && (
-            <Text
-              level={7}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              color={colors.blackLight2}
-            >
-              {` · ${numberFormatter.humanizeDistance(distance)}`}
-            </Text>
-          )}
-        </Text>
+          <Text
+            level={6}
+            weight="bold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ letterSpacing: -0.5 }}
+          >
+            {data.store_info.name}
+            {distance !== undefined && (
+              <Text
+                level={7}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                color={colors.blackLight2}
+              >
+                {` · ${numberFormatter.humanizeDistance(distance)}`}
+              </Text>
+            )}
+          </Text>
+          {info}
+        </View>
       </Touchable>
 
       <View style={{ flexDirection: 'row' }}>

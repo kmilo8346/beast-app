@@ -141,7 +141,7 @@ export default ({
         }}
       >
         <Text level={6} style={{ flex: 1 }}>
-          En tu dirección
+          En tu ubicación
         </Text>
         <Switch
           value={!!filters.store_address}
