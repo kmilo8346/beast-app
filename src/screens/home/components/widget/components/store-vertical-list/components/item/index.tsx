@@ -3,7 +3,6 @@ import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
 
 // components
 import Text from '../../../../../../../../components/text';
-import Icon from '../../../../../../../../components/icon';
 import Touchable from '../../../../../../../../components/touchable';
 // lib
 import cloudinary from '../../../../../../../../lib/cloudinary';
@@ -56,26 +55,23 @@ export default memo(({ navigation, data }: ComponentProps) => {
             borderColor: colors.blackLight8,
           }}
         />
-        <View style={{ flex: 1, marginLeft: 7 }}>
-          <Text
-            level={6}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ letterSpacing: -0.5 }}
-          >
-            {data.store_info.name}
-          </Text>
+        <Text
+          level={6}
+          weight="bold"
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          style={{ flex: 1, marginLeft: 7, letterSpacing: -0.5 }}
+        >
+          {data.store_info.name}
           <Text
             level={7}
             numberOfLines={1}
             ellipsizeMode="tail"
             color={colors.blackLight2}
           >
-            {numberFormatter.humanizeDistance(data.distance as number)}
+            {` · ${numberFormatter.humanizeDistance(data.distance as number)}`}
           </Text>
-        </View>
-        <Icon name="chevron-right" size={20} color={colors.blackLight4} />
+        </Text>
       </Touchable>
 
       <View

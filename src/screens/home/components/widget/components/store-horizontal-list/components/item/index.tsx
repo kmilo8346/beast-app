@@ -4,7 +4,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../../../../../../../components/text';
-import Icon from '../../../../../../../../components/icon';
 import Touchable from '../../../../../../../../components/touchable';
 // caches
 import userCache from '../../../../../../../../cache/user';
@@ -89,17 +88,14 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
             borderColor: colors.blackLight8,
           }}
         />
-        <View style={{ flex: 1, marginLeft: 7 }}>
-          <Text
-            level={6}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ letterSpacing: -0.5 }}
-          >
-            {data.store_info.name}
-          </Text>
-
+        <Text
+          level={6}
+          weight="bold"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{ flex: 1, marginLeft: 7, letterSpacing: -0.5 }}
+        >
+          {data.store_info.name}
           {distance !== undefined && (
             <Text
               level={7}
@@ -107,12 +103,10 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
               ellipsizeMode="tail"
               color={colors.blackLight2}
             >
-              {numberFormatter.humanizeDistance(distance)}
+              {` · ${numberFormatter.humanizeDistance(distance)}`}
             </Text>
           )}
-        </View>
-
-        <Icon name="chevron-right" size={20} color={colors.blackLight4} />
+        </Text>
       </Touchable>
 
       <View style={{ flexDirection: 'row' }}>
