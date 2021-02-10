@@ -647,7 +647,9 @@ export default ({ navigation, route }: ScreenProps) => {
                       level={5}
                       weight="bold"
                       color={colors.blue}
-                      style={{ marginLeft: 15 }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={{ flex: 1, marginLeft: 15 }}
                     >
                       Contactar al vendedor
                     </Text>
