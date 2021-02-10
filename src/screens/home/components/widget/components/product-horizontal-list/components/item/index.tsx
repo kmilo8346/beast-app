@@ -21,7 +21,7 @@ interface ComponentProps {
 
 export default memo(({ navigation, data, first, last }: ComponentProps) => {
   // state
-  const [size] = useState((Dimensions.get('window').width * 0.97 - 20 * 2) / 2);
+  const [size] = useState((Dimensions.get('window').width * 0.85 - 20 * 2) / 2);
 
   // event handlers
   const goToProductScreen = (product: StoreProduct) => {
