@@ -65,7 +65,7 @@ export default ({
 
   // render logic
   const text = `Enviar a ${utils.formatPlace(address)}`;
-  let icon: ReactNode = <Icon name="chevron-down" />;
+  let icon: ReactNode = <Icon name="chevron-down" color={colors.blackLight2} />;
   if (processing) {
     icon = <ActivityIndicator size="small" color={colors.black} />;
   }
@@ -78,10 +78,9 @@ export default ({
         <MapPinGreyIcon />
         <Text
           level={6}
-          color={colors.blackLight2}
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={{ marginHorizontal: 5, flex: 1 }}
+          style={{ marginHorizontal: 5, flex: 1, letterSpacing: -0.5 }}
         >
           {text}
         </Text>
