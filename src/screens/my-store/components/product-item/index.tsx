@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
-import { GestureResponderEvent, Image, View, ViewStyle } from 'react-native';
+import { GestureResponderEvent, View, ViewStyle } from 'react-native';
 
 // components
-import Touchable from '../../../../components/touchable';
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
+import Image from '../../../../components/image';
 import Divider from '../../../../components/divider';
+import Touchable from '../../../../components/touchable';
 // libs
 import cloudinary from '../../../../lib/cloudinary';
 import numberFormatter from '../../../../lib/formatters/number-formatter';

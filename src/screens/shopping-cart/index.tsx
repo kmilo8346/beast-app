@@ -12,7 +12,6 @@ import {
   GestureResponderEvent,
   ScrollView,
   View,
-  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -28,6 +27,7 @@ import InfoDialog from '../components/dialogs/info-dialog';
 // components
 import Icon from '../../components/icon';
 import Text from '../../components/text';
+import Image from '../../components/image';
 import Button from '../../components/buttons/button';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';

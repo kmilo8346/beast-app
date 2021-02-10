@@ -1,10 +1,11 @@
 import React, { useEffect, useState, memo } from 'react';
-import { Dimensions, GestureResponderEvent, View, Image } from 'react-native';
+import { Dimensions, GestureResponderEvent, View } from 'react-native';
 
 // components
-import Touchable from '../../../components/touchable';
 import Text from '../../../components/text';
+import Image from '../../../components/image';
 import Badge from '../../../components/badge';
+import Touchable from '../../../components/touchable';
 // local components
 import InputNumber from './components/input-number';
 // lib

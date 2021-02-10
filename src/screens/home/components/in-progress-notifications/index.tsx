@@ -1,7 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   View,
-  Image,
   GestureResponderEvent,
   Dimensions,
   ScrollView,
@@ -11,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 // components
 import Icon from '../../../../components/icon';
 import Text from '../../../../components/text';
+import Image from '../../../../components/image';
 import Touchable from '../../../../components/touchable';
 import BagHeadImage from '../../../../components/svgs/images/bag-head';
 // cache

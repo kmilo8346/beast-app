@@ -4,7 +4,6 @@ import {
   FlatList,
   GestureResponderEvent,
   View,
-  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
@@ -16,6 +15,7 @@ import Skeletton from './components/skeletton';
 // components
 import Icon from '../../components/icon';
 import Text from '../../components/text';
+import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import ErrorView from '../../components/error-view';

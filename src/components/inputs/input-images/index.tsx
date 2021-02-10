@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, Platform } from 'react-native';
+import { View, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios, { CancelTokenSource } from 'axios';
 import * as Linking from 'expo-linking';
@@ -9,9 +9,10 @@ import Constants from 'expo-constants';
 // screen components
 import ConfirmDialog from '../../../screens/components/dialogs/confirm-dialog';
 // components
-import Touchable from '../../touchable';
 import Icon from '../../icon';
 import Text from '../../text';
+import Image from '../../image';
+import Touchable from '../../touchable';
 import ButtonIcon from '../../buttons/button-icon';
 import ActionSheet from '../../modals/action-sheet';
 // libs

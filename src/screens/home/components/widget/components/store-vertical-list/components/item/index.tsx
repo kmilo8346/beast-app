@@ -1,8 +1,9 @@
 import React, { memo, ReactNode, useEffect, useState } from 'react';
-import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
+import { View, Dimensions, GestureResponderEvent } from 'react-native';
 
 // components
 import Text from '../../../../../../../../components/text';
+import Image from '../../../../../../../../components/image';
 import Touchable from '../../../../../../../../components/touchable';
 // lib
 import {
@@ -96,8 +97,6 @@ export default memo(({ navigation, data }: ComponentProps) => {
           style={{
             borderRadius: 100,
             resizeMode: 'cover',
-            borderWidth: 1,
-            borderColor: colors.blackLight8,
           }}
         />
         <View
@@ -169,8 +168,6 @@ export default memo(({ navigation, data }: ComponentProps) => {
               }}
               style={{
                 borderRadius: 8,
-                borderWidth: 1,
-                borderColor: colors.blackLight8,
               }}
             />
           </Touchable>

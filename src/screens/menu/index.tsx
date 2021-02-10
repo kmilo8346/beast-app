@@ -2,7 +2,6 @@ import React, { useState, ReactNode, useRef, useCallback } from 'react';
 import {
   ScrollView,
   View,
-  Image,
   GestureResponderEvent,
   Share,
   AsyncStorage,
@@ -14,6 +13,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 // components
 import Text from '../../components/text';
+import Image from '../../components/image';
 import Button from '../../components/buttons/button';
 import BagHeadImage from '../../components/svgs/images/bag-head';
 import Toast, { IToast } from '../../components/toast';

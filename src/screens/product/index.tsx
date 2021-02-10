@@ -8,7 +8,6 @@ import React, {
 import {
   View,
   ScrollView,
-  Image,
   ActivityIndicator,
   GestureResponderEvent,
   RefreshControl,
@@ -18,6 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../components/text';
+import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import Icon from '../../components/icon';

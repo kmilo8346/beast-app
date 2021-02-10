@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Image, Dimensions, ScrollView } from 'react-native';
+import { View, Dimensions, ScrollView } from 'react-native';
 
 // components
 import Text from '../../../components/text';
+import Image from '../../../components/image';
 // styles
 import styles from './styles';
 import colors from '../../../styles/colors';
