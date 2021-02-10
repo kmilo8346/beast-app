@@ -1,20 +1,30 @@
-import React, { memo, ReactNode, useEffect, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { View, Dimensions, GestureResponderEvent } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../../../../../../../components/text';
 import Image from '../../../../../../../../components/image';
 import Touchable from '../../../../../../../../components/touchable';
+// caches
+import userCache from '../../../../../../../../cache/user';
 // lib
 import {
   CurrentOpenginHours,
   extractCurrentOpeningHours,
   humanizeCurrentClosedOpeningHours,
+  distance as calculateDistance,
 } from '../../../../../../../../lib/utils';
 import cloudinary from '../../../../../../../../lib/cloudinary';
 import numberFormatter from '../../../../../../../../lib/formatters/number-formatter';
 // types
-import { StoreProduct } from '../../../../../../../../types';
+import { StoreProduct, User } from '../../../../../../../../types';
 // styles
 import globalStyles from '../../../../../../../../styles';
 import colors from '../../../../../../../../styles/colors';
@@ -27,6 +37,8 @@ interface ComponentProps {
 export default memo(({ navigation, data }: ComponentProps) => {
   // state
   const [size] = useState((Dimensions.get('window').width / 2 - 20) * 0.98);
+  const [user, setUser] = useState(userCache.getData() as User);
+  const [distance, setDistance] = useState<number | undefined>();
   const [current_opening_hours, setCurrentOpeningHours] = useState<
     CurrentOpenginHours | undefined
   >();
@@ -42,6 +54,34 @@ export default memo(({ navigation, data }: ComponentProps) => {
     event.stopPropagation();
     navigation.navigate('Store', { store: data.store_info });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = userCache.onChange((user) => {
+        setUser(user as User);
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (data.store_info.address?.location) {
+      const address = userCache.getAddress();
+      if (address) {
+        setDistance(
+          calculateDistance(
+            data.store_info.address.location.lat,
+            data.store_info.address.location.lon,
+            address.location.lat,
+            address.location.lon,
+            'K'
+          )
+        );
+      }
+    }
+  }, [user.current_address, data.store_info.address?.location]);
 
   useEffect(() => {
     if (data.store_info.opening_hours) {
@@ -114,16 +154,16 @@ export default memo(({ navigation, data }: ComponentProps) => {
             style={{ letterSpacing: -0.5 }}
           >
             {data.store_info.name}
-            <Text
-              level={7}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              color={colors.blackLight2}
-            >
-              {` · ${numberFormatter.humanizeDistance(
-                data.distance as number
-              )}`}
-            </Text>
+            {distance !== undefined && (
+              <Text
+                level={7}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                color={colors.blackLight2}
+              >
+                {` · ${numberFormatter.humanizeDistance(distance)}`}
+              </Text>
+            )}
           </Text>
           {info}
         </View>

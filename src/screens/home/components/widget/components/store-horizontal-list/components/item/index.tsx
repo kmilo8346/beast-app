@@ -24,7 +24,7 @@ import {
 import cloudinary from '../../../../../../../../lib/cloudinary';
 import numberFormatter from '../../../../../../../../lib/formatters/number-formatter';
 // types
-import { Place, StoreProduct, User } from '../../../../../../../../types';
+import { StoreProduct, User } from '../../../../../../../../types';
 // styles
 import colors from '../../../../../../../../styles/colors';
 
@@ -37,8 +37,8 @@ interface ComponentProps {
 export default memo(({ navigation, data, last }: ComponentProps) => {
   // state
   const [size] = useState((Dimensions.get('window').width * 0.97 - 20 * 2) / 2);
-  const [distance, setDistance] = useState<number | undefined>();
   const [user, setUser] = useState(userCache.getData() as User);
+  const [distance, setDistance] = useState<number | undefined>();
   const [current_opening_hours, setCurrentOpeningHours] = useState<
     CurrentOpenginHours | undefined
   >();
@@ -67,21 +67,21 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
   );
 
   useEffect(() => {
-    if (distance) {
-      setDistance(distance);
-    } else if (data.store_info.address?.location) {
-      const address = userCache.getAddress() as Place;
-      setDistance(
-        calculateDistance(
-          data.store_info.address.location.lat,
-          data.store_info.address.location.lon,
-          address.location.lat,
-          address.location.lon,
-          'K'
-        )
-      );
+    if (data.store_info.address?.location) {
+      const address = userCache.getAddress();
+      if (address) {
+        setDistance(
+          calculateDistance(
+            data.store_info.address.location.lat,
+            data.store_info.address.location.lon,
+            address.location.lat,
+            address.location.lon,
+            'K'
+          )
+        );
+      }
     }
-  }, [user.current_address, data.store_info.address?.location, data.distance]);
+  }, [user.current_address, data.store_info.address?.location]);
 
   useEffect(() => {
     if (data.store_info.opening_hours) {
