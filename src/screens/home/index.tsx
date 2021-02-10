@@ -10,7 +10,6 @@ import {
   FlatList,
   GestureResponderEvent,
   ActivityIndicator,
-  AsyncStorage,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +23,6 @@ import * as Permissions from 'expo-permissions';
 import Widget from './components/widget';
 import Skeleton from './components/skeleton';
 import SelectAddress from './components/select-address';
-import OnboardingModal from './components/onboarding-modal';
 import InProgressNotifications from './components/in-progress-notifications';
 // screen components
 import ModalManageAddress from '../components/modal-manage-address';
@@ -114,10 +112,6 @@ type SetPendingAddressInfoAction = {
   type: 'set_pending_address_info';
   pending_address_info?: AddressInfo;
 };
-type SetOnboardingModalAction = {
-  type: 'set_onboarding_modal';
-  onboarding_modal: boolean;
-};
 type Action =
   | SetUserAction
   | SetUpdatingAction
@@ -130,8 +124,7 @@ type Action =
   | SetFetchMoreErrorAction
   | SetPendingSellerOrdersAction
   | SetAddressModalAction
-  | SetPendingAddressInfoAction
-  | SetOnboardingModalAction;
+  | SetPendingAddressInfoAction;
 type State = {
   user?: User;
   updating: boolean;
@@ -143,7 +136,6 @@ type State = {
   pending_seller_orders?: number;
   address_modal: boolean;
   pending_address_info?: AddressInfo;
-  onboarding_modal: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -192,8 +184,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, address_modal: action.address_modal };
     case 'set_pending_address_info':
       return { ...state, pending_address_info: action.pending_address_info };
-    case 'set_onboarding_modal':
-      return { ...state, onboarding_modal: action.onboarding_modal };
     default:
       return state;
   }
@@ -211,7 +201,6 @@ export default ({ navigation }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
     address_modal: false,
-    onboarding_modal: false,
   });
   const address = userCache.getAddress();
   const insets = useSafeAreaInsets();
@@ -400,23 +389,6 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const showOnBoarding = async () => {
-    try {
-      const raw: string | null = await AsyncStorage.getItem(
-        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`
-      );
-
-      const onboarding = raw ? JSON.parse(raw) : undefined;
-      if (!onboarding) {
-        setTimeout(() => {
-          dispatch({ type: 'set_onboarding_modal', onboarding_modal: true });
-        }, 300);
-      }
-    } catch (error) {
-      capture(prefix, 'Show onboarding error', error);
-    }
-  };
-
   const changeAddressInfoHandler = async (info: AddressInfo) => {
     if (
       state.user?.current_address !== info.current_address &&
@@ -472,18 +444,6 @@ export default ({ navigation }: ScreenProps) => {
       type: 'set_pending_address_info',
       pending_address_info: undefined,
     });
-  };
-
-  const onBoardingModalCloseHandler = async () => {
-    dispatch({ type: 'set_onboarding_modal', onboarding_modal: false });
-    try {
-      await AsyncStorage.setItem(
-        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`,
-        JSON.stringify(true)
-      );
-    } catch (error) {
-      capture(prefix, 'On boarding modal close handler error', error);
-    }
   };
 
   const pressSearchIconHandler = (event: GestureResponderEvent) => {
@@ -542,12 +502,6 @@ export default ({ navigation }: ScreenProps) => {
       );
     };
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      showOnBoarding();
-    }, [])
-  );
 
   // render logic
   let message = '¡Hola!';
@@ -803,9 +757,6 @@ export default ({ navigation }: ScreenProps) => {
           onOk={confirmDialogOkHandler}
           onCancel={confirmDialogCancelHandler}
         />
-      )}
-      {state.onboarding_modal && (
-        <OnboardingModal onClose={onBoardingModalCloseHandler} />
       )}
     </View>
   );

@@ -16,6 +16,7 @@ import deviceAgent from './lib/device-agent';
 import Sentry, { capture } from './lib/sentry';
 // cache
 import userCache from './cache/user';
+import genericCache from './cache/generic';
 import shoppingCartCache from './cache/shopping-cart';
 // fonts
 const MonserratBold = require('../assets/fonts/monserrat/bold.ttf');
@@ -140,6 +141,7 @@ class App extends React.Component<{}, State> {
     await this.initAuth();
     await Promise.all([
       this.cacheFont(),
+      genericCache.load(),
       shoppingCartCache.load(),
       this.initUser(),
     ]);

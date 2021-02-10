@@ -1,60 +1,59 @@
 import React from 'react';
-import { Modal, GestureResponderEvent, View, ScrollView } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { GestureResponderEvent, ScrollView, View } from 'react-native';
 
 // components
-import Text from '../../../../components/text';
-import Button from '../../../../components/buttons/button';
-import HamburguerIcon from '../../../../components/svgs/icons/hamburguer';
-import NoteIcon from '../../../../components/svgs/icons/note';
-import BankIcon from '../../../../components/svgs/icons/bank';
-// lib
-import * as utils from '../../../../lib/utils';
+import Text from '../../components/text';
+import Button from '../../components/buttons/button';
+import BankIcon from '../../components/svgs/icons/bank';
+import NoteIcon from '../../components/svgs/icons/note';
+import HamburguerIcon from '../../components/svgs/icons/hamburguer';
+// cache
+import genericCache from '../../cache/generic';
 // styles
-import globalStyles from '../../../../styles';
-import colors from '../../../../styles/colors';
+import globalStyles from '../../styles';
+import colors from '../../styles/colors';
+import { capture } from '../../lib/sentry';
 
-interface ComponentProps {
-  onClose?: () => void;
+// instances outside component
+const prefix = '[onboarding screen]';
+
+interface ScreenProps {
+  navigation: any;
 }
 
-export default ({ onClose = utils.noop }: ComponentProps) => {
+export default ({ navigation }: ScreenProps) => {
   // event handlers
-  const dismissHandler = () => {
-    onClose();
-  };
-
-  const requestCloseHandler = () => {
-    onClose();
+  const goToHome = async () => {
+    genericCache.updateData({ onboarding: true });
+    navigation.replace('MainTab');
   };
 
   const continueHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    onClose();
+    goToHome();
   };
 
   const pressTermsHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    WebBrowser.openBrowserAsync(
-      `${Constants.manifest.extra.BEAST_WEB_URL}/policies`
-    );
+    try {
+      WebBrowser.openBrowserAsync(
+        `${Constants.manifest.extra.BEAST_WEB_URL}/policies`
+      );
+    } catch (error) {
+      capture(prefix, 'Press terms handler error', error);
+    }
   };
 
   // render logic
-  const insets = useSafeAreaInsets();
   return (
-    <Modal
-      statusBarTranslucent
-      animationType="slide"
-      onDismiss={dismissHandler}
-      onRequestClose={requestCloseHandler}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={[
-          { flex: 1, backgroundColor: colors.white, marginTop: insets.top },
+          { flex: 1, backgroundColor: colors.white },
           globalStyles.withPadding,
         ]}
       >
@@ -127,11 +126,6 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
       <View
         style={[
           {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingBottom: insets.bottom,
             backgroundColor: colors.white,
           },
           globalStyles.withMargin,
@@ -153,6 +147,6 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
           onPress={continueHandler}
         />
       </View>
-    </Modal>
+    </SafeAreaView>
   );
 };

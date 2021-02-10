@@ -1,3 +1,4 @@
+export { default as OnboardingScreen } from './onboarding';
 export { default as SetPhoneScreen } from './set-phone';
 export { default as VerifyPhoneScreen } from './verify-phone';
 export { default as AddUserDataScreen } from './add-user-data';

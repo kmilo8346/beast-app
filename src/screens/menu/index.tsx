@@ -1,11 +1,5 @@
 import React, { useState, ReactNode, useRef, useCallback } from 'react';
-import {
-  ScrollView,
-  View,
-  GestureResponderEvent,
-  Share,
-  AsyncStorage,
-} from 'react-native';
+import { ScrollView, View, GestureResponderEvent, Share } from 'react-native';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
@@ -25,6 +19,7 @@ import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
 // cache
 import userCache from '../../cache/user';
+import genericCache from '../../cache/generic';
 import shoppingCartCache from '../../cache/shopping-cart';
 // styles
 import globalStyles from '../../styles';
@@ -55,18 +50,11 @@ export default ({ navigation }: ScreenProps) => {
     event.stopPropagation();
     shoppingCartCache.clear();
     userCache.resetData();
-    try {
-      await AsyncStorage.setItem(
-        `@cache/${Constants.manifest.extra.BEAST_ENVIRONMENT}/onboarding`,
-        JSON.stringify(false)
-      );
-    } catch (error) {
-      capture(prefix, 'Unsetting onboarding error', error);
-    }
+    genericCache.resetData();
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
-        routes: [{ name: 'MainTab' }],
+        routes: [{ name: 'OnboardingStack' }],
       })
     );
   };

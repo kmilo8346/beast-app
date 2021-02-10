@@ -25,20 +25,16 @@ export default ({ value, onChange }: ComponentProps) => {
 
   // event handlers
   const addHandler = (place: Place) => {
-    setInfo((prevInfo) => {
-      const current_address = place.id;
-      const addresses = utils.replaceOrAdd(
-        prevInfo?.addresses || [],
-        place,
-        (i1, i2) => i1.id === i2.id
-      );
-      return {
-        ...prevInfo,
-        current_address,
-        addresses,
-      };
+    const current_address = place.id;
+    const addresses = utils.replaceOrAdd(
+      info?.addresses || [],
+      place,
+      (i1, i2) => i1.id === i2.id
+    );
+    onChange({
+      current_address,
+      addresses,
     });
-    setIsFormVisible(false);
   };
 
   const selectHandler = (key: string) => {
