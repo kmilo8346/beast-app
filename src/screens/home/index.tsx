@@ -650,6 +650,37 @@ export default ({ navigation }: ScreenProps) => {
             <Widget key={`${item.id}`} navigation={navigation} widget={item} />
           );
         }}
+        ListHeaderComponent={
+          <View style={[globalStyles.withMargin, { marginBottom: 7 }]}>
+            <View style={globalStyles.screenWithoutHeaderSpace} />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 3,
+              }}
+            >
+              <Text
+                level={2}
+                weight="bold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ flex: 1 }}
+              >
+                {message}
+              </Text>
+
+              <ShoppingCartIcon />
+              <Touchable
+                style={{ paddingVertical: 5, paddingLeft: 15, paddingRight: 5 }}
+                onPress={pressSearchIconHandler}
+              >
+                <Icon name="search" size={20} />
+              </Touchable>
+            </View>
+            {selectAddressComponent}
+          </View>
+        }
         ListEmptyComponent={
           <View
             style={{
@@ -742,36 +773,6 @@ export default ({ navigation }: ScreenProps) => {
     <View
       style={{ flex: 1, backgroundColor: colors.white, paddingTop: insets.top }}
     >
-      <View style={[globalStyles.withMargin, { marginBottom: 7 }]}>
-        <View style={globalStyles.screenWithoutHeaderSpace} />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 3,
-          }}
-        >
-          <Text
-            level={2}
-            weight="bold"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ flex: 1 }}
-          >
-            {message}
-          </Text>
-
-          <ShoppingCartIcon />
-          <Touchable
-            style={{ paddingVertical: 5, paddingLeft: 15, paddingRight: 5 }}
-            onPress={pressSearchIconHandler}
-          >
-            <Icon name="search" size={20} />
-          </Touchable>
-        </View>
-        {selectAddressComponent}
-      </View>
-
       {content}
 
       <View

@@ -77,7 +77,8 @@ export default ({
       >
         <MapPinGreyIcon />
         <Text
-          level={7}
+          level={6}
+          color={colors.blackLight2}
           numberOfLines={1}
           ellipsizeMode="tail"
           style={{ marginHorizontal: 5, flex: 1 }}
