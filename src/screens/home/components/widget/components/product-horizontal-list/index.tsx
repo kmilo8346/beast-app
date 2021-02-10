@@ -47,7 +47,7 @@ export default memo(({ navigation, title, response }: ComponentProps) => {
         <Text
           level={4}
           weight="bold"
-          numberOfLines={1}
+          numberOfLines={2}
           ellipsizeMode="tail"
           style={{ flex: 1 }}
         >

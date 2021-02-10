@@ -34,13 +34,12 @@ export default memo(({ navigation, response }: ComponentProps) => {
       <Text
         level={4}
         weight="bold"
-        numberOfLines={1}
+        numberOfLines={2}
         ellipsizeMode="tail"
         style={[{ flex: 1, marginBottom: 20 }, globalStyles.withMargin]}
       >
         Tiendas cercanas 😜
       </Text>
-      {/* <Divider type="thick" style={{ marginBottom: 15 }} /> */}
 
       <FlatList
         data={response.hits}

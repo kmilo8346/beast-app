@@ -34,6 +34,9 @@ type AddProductsAction = {
   type: 'add_products';
   products: SearchResponse<StoreProduct>;
 };
+type ResetProductsAction = {
+  type: 'reset_products';
+};
 type SetRefreshingAction = {
   type: 'set_refreshing';
   refreshing: boolean;
@@ -49,11 +52,12 @@ type SetFetchMoreErrorAction = {
 type Action =
   | SetProductsAction
   | AddProductsAction
+  | ResetProductsAction
   | SetRefreshingAction
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction;
 type State = {
-  products: SearchResponse<StoreProduct>;
+  products?: SearchResponse<StoreProduct>;
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
@@ -103,10 +107,8 @@ interface ScreenProps {
 export default ({ route, navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    products: {
-      ...route.params.response,
-      from: route.params.response.from + route.params.response.hits.length,
-    },
+    filters: route.params.filters,
+    sort: route.params.sort,
     refreshing: false,
     fetching_more: false,
   });
@@ -128,6 +130,29 @@ export default ({ route, navigation }: ScreenProps) => {
       { cancelToken: fetchRequestSource.token }
     );
     return response;
+  };
+
+  const load = async () => {
+    try {
+      dispatch({ type: 'reset_products' });
+      const response = await fetch(
+        state.query,
+        state.filters,
+        state.sort.value,
+        0,
+        10
+      );
+      dispatch({
+        type: 'set_products',
+        products: response,
+      });
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        capture(prefix, 'Load error', error);
+
+        dispatch({ type: 'set_error', error });
+      }
+    }
   };
 
   const refresh = async () => {
