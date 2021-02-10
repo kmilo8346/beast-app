@@ -4,7 +4,6 @@ import {
   View,
   Image,
   GestureResponderEvent,
-  Vibration,
   Share,
   AsyncStorage,
 } from 'react-native';
@@ -18,20 +17,12 @@ import Text from '../../components/text';
 import Button from '../../components/buttons/button';
 import BagHeadImage from '../../components/svgs/images/bag-head';
 import Toast, { IToast } from '../../components/toast';
-// screen components
-import ModalManageAddress from '../components/modal-manage-address';
-import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // local components
 import Item from './components/item';
 import ModalHelp from './components/modal-help';
-// clients
-import userClient from '../../clients/user-client';
 // lib
 import { capture } from '../../lib/sentry';
-import * as utils from '../../lib/utils';
 import cloudinary from '../../lib/cloudinary';
-// types
-import { AddressInfo } from '../../types';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache from '../../cache/shopping-cart';
@@ -49,71 +40,12 @@ interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const [user, setUser] = useState(userCache.getData());
-  const [modalManageAddress, setModalManageAddress] = useState(false);
-  const [updatingAddressInfo, setUpdatingAddressInfo] = useState(false);
   const [modalHelp, setModalHelp] = useState(false);
-  const [pendingAddressInfo, setPendingAddressInfo] = useState<
-    AddressInfo | undefined
-  >();
+
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
-  let addressInfo;
-  if (user?.current_address && user.addresses?.length) {
-    addressInfo = {
-      current_address: user.current_address,
-      addresses: user.addresses,
-    };
-  }
 
   // event handlers
-  const updateAddressInfo = async (info: AddressInfo) => {
-    try {
-      const prev_current_address = userCache.getData()?.current_address;
-      setUpdatingAddressInfo(true);
-      if (user?.id) {
-        await userClient.update({
-          pathVars: {
-            id: user.id,
-          },
-          body: {
-            current_address: info.current_address,
-            addresses: info.addresses,
-          },
-          source: ['updated_at'],
-        });
-      }
-      await userCache.updateData({
-        current_address: info.current_address,
-        addresses: info.addresses,
-      });
-      if (prev_current_address !== info.current_address) {
-        shoppingCartCache.clear();
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [{ name: 'MainTab' }],
-          })
-        );
-      }
-    } catch (error) {
-      capture(prefix, 'Update address info error', error);
-
-      Vibration.vibrate(400);
-      toastRef.current?.show({
-        message: 'No se pudo actualizar las direcciones, reintente',
-        type: 'ERROR',
-        expiration: 3,
-      });
-    } finally {
-      setUpdatingAddressInfo(false);
-    }
-  };
-
-  const pressMyAddressesHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    setModalManageAddress(true);
-  };
-
   const pressMyOrdersHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     navigation.navigate('ClientOrders');
@@ -153,33 +85,8 @@ export default ({ navigation }: ScreenProps) => {
     }
   };
 
-  const addressInfoChangeHandler = (info?: AddressInfo) => {
-    setModalManageAddress(false);
-    if (!info) {
-      return;
-    }
-    if (
-      userCache.getData()?.current_address !== info.current_address &&
-      !shoppingCartCache.isEmpty()
-    ) {
-      setPendingAddressInfo(info);
-    } else {
-      updateAddressInfo(info);
-    }
-  };
-
   const closeModalHelpHandler = () => {
     setModalHelp(false);
-  };
-
-  const confirmDialogOkHandler = () => {
-    const info = { ...(pendingAddressInfo as AddressInfo) };
-    setPendingAddressInfo(undefined);
-    updateAddressInfo(info);
-  };
-
-  const confirmDialogCancelHandler = () => {
-    setPendingAddressInfo(undefined);
   };
 
   const pressMyAccountHandler = (event: GestureResponderEvent) => {
@@ -206,8 +113,6 @@ export default ({ navigation }: ScreenProps) => {
   );
 
   // render logic
-  const address = userCache.getAddress();
-  let addressText = 'Administra tus direcciones';
   let photoComponent: ReactNode = <BagHeadImage />;
   let firstNameComponent: ReactNode = (
     <Text
@@ -222,9 +127,6 @@ export default ({ navigation }: ScreenProps) => {
   );
   let mainAction: ReactNode = null;
   let fingerprint: ReactNode = null;
-  if (address) {
-    addressText = utils.formatPlace(address);
-  }
   if (user?.photo_url) {
     photoComponent = (
       <Image
@@ -377,12 +279,6 @@ export default ({ navigation }: ScreenProps) => {
           />
         )}
         <Item
-          name="Mis direcciones"
-          description={addressText}
-          processing={updatingAddressInfo}
-          onPress={pressMyAddressesHandler}
-        />
-        <Item
           name="Compartir app"
           description="Comparte con amigos y clientes"
           onPress={pressShareHandler}
@@ -395,9 +291,13 @@ export default ({ navigation }: ScreenProps) => {
 
         {user?.phone && user.phone_verified && (
           <Button
-            title="Cerrar sesión"
+            title={
+              <Text level={7} weight="bold" color={colors.blue}>
+                Cerrar sesión
+              </Text>
+            }
             type="link"
-            style={{ alignSelf: 'center', marginTop: 20 }}
+            style={{ alignSelf: 'center', marginTop: 25 }}
             onPress={pressCloseSessionHandler}
           />
         )}
@@ -421,23 +321,7 @@ export default ({ navigation }: ScreenProps) => {
         {mainAction}
       </View>
 
-      {modalManageAddress && (
-        <ModalManageAddress
-          value={addressInfo}
-          onChange={addressInfoChangeHandler}
-        />
-      )}
-
       {modalHelp && <ModalHelp onClose={closeModalHelpHandler} />}
-      {pendingAddressInfo && (
-        <ConfirmDialog
-          title="¿Seguro que quieres cambiar dirección?"
-          message="Tienes artículos en tu carrito que se perderán al cambiar la dirección de entrega."
-          okText="Si, cambiar"
-          onOk={confirmDialogOkHandler}
-          onCancel={confirmDialogCancelHandler}
-        />
-      )}
     </View>
   );
 };
