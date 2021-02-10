@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Text from '../../../../../../../../components/text';
 import Image from '../../../../../../../../components/image';
 import Touchable from '../../../../../../../../components/touchable';
-// caches
+// cache
 import userCache from '../../../../../../../../cache/user';
 // lib
 import {

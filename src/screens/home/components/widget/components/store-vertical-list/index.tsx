@@ -27,6 +27,11 @@ export default memo(({ navigation, response }: ComponentProps) => {
     []
   );
 
+  const pressSeeAllStores = useCallback((event: GestureResponderEvent) => {
+    event.stopPropagation();
+    navigation.navigate('Stores', { title: 'Todas las tiendas 😜', response });
+  }, []);
+
   // render logic
   return (
     <View style={{ marginBottom: 20 }}>
@@ -51,7 +56,11 @@ export default memo(({ navigation, response }: ComponentProps) => {
               onPress={pressExplorOrSearchHandler}
               style={{ marginBottom: 10 }}
             />
-            <Button type="secondary" title="Ver todas las tiendas" />
+            <Button
+              type="secondary"
+              title="Ver todas las tiendas"
+              onPress={pressSeeAllStores}
+            />
           </View>
         }
         renderItem={({ item }) => {

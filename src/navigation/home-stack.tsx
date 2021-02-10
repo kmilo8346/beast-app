@@ -38,7 +38,7 @@ export default () => {
       <Stack.Screen
         name="Stores"
         component={StoresScreen}
-        options={{ title: 'Tiendas' }}
+        options={{ title: '' }}
       />
       <Stack.Screen
         name="Store"
