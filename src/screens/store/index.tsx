@@ -503,6 +503,7 @@ export default ({ navigation, route }: ScreenProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={state.error ? undefined : state.products?.hits}
         numColumns={2}
         refreshing={false}

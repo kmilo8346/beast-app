@@ -6,7 +6,6 @@ interface Styles {
   barContainer: ViewStyle;
   track: ViewStyle;
   bar: ViewStyle;
-  image: ImageStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -32,8 +31,5 @@ export default StyleSheet.create<Styles>({
     position: 'absolute',
     left: 0,
     top: 0,
-  },
-  image: {
-    borderRadius: 9,
   },
 });

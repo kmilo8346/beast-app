@@ -573,12 +573,13 @@ export default ({ navigation, route }: ScreenProps) => {
         refreshControl={
           <RefreshControl refreshing={state.refreshing} onRefresh={refresh} />
         }
+        showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
       >
         <ProductDetailsCard
           store={state.store}
           product={state.product}
-          style={[{ paddingTop: 7, marginBottom: 10 }]}
+          style={[{ marginBottom: 10 }]}
         />
         <Divider type="thick" />
         {content}

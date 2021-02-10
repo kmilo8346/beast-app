@@ -41,7 +41,7 @@ export default ({ images }: CarousellProps) => {
         <Image
           key={`image${i}`}
           source={{ uri: image }}
-          style={[styles.image, { width: deviceWidth, resizeMode: 'contain' }]}
+          style={{ width: deviceWidth }}
         />
       );
       imageArray.push(thisImage);
@@ -63,27 +63,29 @@ export default ({ images }: CarousellProps) => {
       >
         {imageArray}
       </ScrollView>
-      <View
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 20,
-          backgroundColor: colors.blackLight1,
-          opacity: 0.8,
-          paddingHorizontal: 7,
-          paddingVertical: 5,
-          borderRadius: 20,
-          minWidth: 40,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          level={6}
-          color={colors.white}
-          style={{ textAlign: 'center', letterSpacing: 1.2 }}
-        >{`${index}/${numItems}`}</Text>
-      </View>
+      {numItems > 1 && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 20,
+            backgroundColor: colors.blackLight1,
+            opacity: 0.8,
+            paddingHorizontal: 7,
+            paddingVertical: 5,
+            borderRadius: 20,
+            minWidth: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            level={6}
+            color={colors.white}
+            style={{ textAlign: 'center', letterSpacing: 1.2 }}
+          >{`${index}/${numItems}`}</Text>
+        </View>
+      )}
     </View>
   );
 };
