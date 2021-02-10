@@ -52,8 +52,9 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
       onRequestClose={requestCloseHandler}
     >
       <ScrollView
+        showsVerticalScrollIndicator={false}
         style={[
-          { flex: 1, backgroundColor: colors.white, paddingTop: insets.top },
+          { flex: 1, backgroundColor: colors.white, marginTop: insets.top },
           globalStyles.withPadding,
         ]}
       >
@@ -120,6 +121,8 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
             </Text>
           </View>
         </View>
+
+        <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View
         style={[
@@ -129,6 +132,7 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
             right: 0,
             bottom: 0,
             paddingBottom: insets.bottom,
+            backgroundColor: colors.white,
           },
           globalStyles.withMargin,
         ]}
@@ -140,7 +144,7 @@ export default ({ onClose = utils.noop }: ComponentProps) => {
             </Text>
           }
           type="link"
-          style={{ marginBottom: 15 }}
+          style={{ marginTop: 3, marginBottom: 15 }}
           onPress={pressTermsHandler}
         />
         <Button
