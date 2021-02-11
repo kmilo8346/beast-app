@@ -29,7 +29,18 @@ export default memo(({ navigation, response }: ComponentProps) => {
 
   const pressSeeAllStores = useCallback((event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('Stores', { title: 'Todas las tiendas 😜', response });
+
+    const filters = { ...(response.filters || {}) };
+    // removing filter to show all stores
+    delete filters.must_not_store_address;
+
+    navigation.navigate('Stores', {
+      title: 'Todas las tiendas 😜',
+      filters,
+      sort: response.sort,
+      source: response.source,
+      collapse: response.collapse,
+    });
   }, []);
 
   // render logic

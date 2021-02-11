@@ -5,11 +5,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { View, Image, Dimensions, GestureResponderEvent } from 'react-native';
+import { View, Dimensions, GestureResponderEvent } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../../../components/text';
+import Image from '../../../../components/image';
 import Touchable from '../../../../components/touchable';
 // cache
 import userCache from '../../../../cache/user';
@@ -136,8 +137,6 @@ export default memo(({ navigation, data }: ComponentProps) => {
           style={{
             borderRadius: 100,
             resizeMode: 'cover',
-            borderWidth: 1,
-            borderColor: colors.blackLight8,
           }}
         />
         <View

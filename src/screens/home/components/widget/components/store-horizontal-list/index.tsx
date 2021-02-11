@@ -23,7 +23,13 @@ export default memo(({ navigation, title, response }: ComponentProps) => {
   // event handlers
   const pressSeeAllHandler = useCallback((event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('Stores', { title, response });
+    navigation.navigate('Stores', {
+      title,
+      sort: response.sort,
+      source: response.source,
+      filters: response.filters,
+      collapse: response.collapse,
+    });
   }, []);
 
   // render logic
