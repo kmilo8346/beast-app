@@ -41,9 +41,9 @@ import userClient from '../../clients/user-client';
 import widgetClient from '../../clients/widget-client';
 // libs
 import { capture } from '../../lib/sentry';
-import deviceAgent from '../../lib/device-agent';
 // cache
 import userCache from '../../cache/user';
+import genericCache from '../../cache/generic';
 import shoppingCartCache from '../../cache/shopping-cart';
 import pendingSellerOrdersCache, {
   getTotal,
@@ -59,6 +59,7 @@ import {
 // styles
 import colors from '../../styles/colors';
 import globalStyles from '../../styles';
+import deviceClient, { getDeviceData } from '../../clients/device-client';
 
 // instances outside component
 const prefix = '[home screen]';
@@ -336,10 +337,21 @@ export default ({ navigation }: ScreenProps) => {
         console.log(
           `${prefix} Notification permision status after request the user, status ${status}`
         );
-      }
-      // sync user id to device
-      if (state.user?.id) {
-        deviceAgent.sync({ user_id: state.user.id });
+      } else if (genericCache.getDeviceId()) {
+        try {
+          const data = await getDeviceData();
+          await deviceClient.updateOrCreate({
+            pathVars: { id: genericCache.getDeviceId() },
+            body: data,
+            source: ['id'],
+          });
+        } catch (error) {
+          capture(
+            prefix,
+            'Request notification permisions, update device error',
+            error
+          );
+        }
       }
     }
     if (Platform.OS === 'android') {

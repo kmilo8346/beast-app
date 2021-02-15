@@ -9,11 +9,10 @@ import Navigation from './navigation/index';
 import ErrorView from './components/error-view';
 // clients
 import userClient from './clients/user-client';
+import deviceClient, { getDeviceData } from './clients/device-client';
 // libs
 import firebase from './lib/firebase';
-import * as utils from './lib/utils';
-import deviceAgent from './lib/device-agent';
-import Sentry, { capture } from './lib/sentry';
+import { capture } from './lib/sentry';
 // cache
 import userCache from './cache/user';
 import genericCache from './cache/generic';
@@ -36,48 +35,17 @@ interface State {
 }
 
 class App extends React.Component<{}, State> {
-  private unsubscribe_user_change: () => void;
-
   constructor(props: any) {
     super(props);
     this.state = {
       is_ready: false,
       has_error: false,
     };
-    this.unsubscribe_user_change = utils.noop;
   }
 
   static getDerivedStateFromError = () => {
     // Update state so the next render will show the fallback UI.
     return { has_error: true };
-  };
-
-  componentDidMount = () => {
-    // TODO: change
-    this.unsubscribe_user_change = userCache.onChange((data) => {
-      if (data) {
-        deviceAgent.sync({ user_id: data.id });
-
-        // indetify user in sentry
-        const user: Sentry.Native.User = {
-          id: data.id,
-        };
-        if (data.first_name) {
-          user.username = data.first_name;
-        }
-        if (data.email) {
-          user.email = data.email;
-        }
-        if (data.phone) {
-          user.phone = data.phone;
-        }
-        Sentry.Native.setUser(user);
-      }
-    });
-  };
-
-  componentWillUnmount = () => {
-    this.unsubscribe_user_change();
   };
 
   componentDidCatch = (error: any) => {
@@ -122,6 +90,21 @@ class App extends React.Component<{}, State> {
     }
   };
 
+  initDevice = async () => {
+    if (!genericCache.getDeviceId()) {
+      try {
+        const data = await getDeviceData();
+        const device = await deviceClient.create({
+          body: data,
+          source: ['id'],
+        });
+        await genericCache.updateData({ device_id: device.id });
+      } catch (error) {
+        capture(prefix, 'Init device error', error);
+      }
+    }
+  };
+
   cacheFont = async () => {
     await Font.loadAsync({
       MonserratBold,
@@ -145,6 +128,8 @@ class App extends React.Component<{}, State> {
       shoppingCartCache.load(),
       this.initUser(),
     ]);
+
+    await this.initDevice();
   };
 
   appLoadingErrorHandler = (error: Error) => {

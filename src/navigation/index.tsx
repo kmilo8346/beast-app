@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,9 +9,13 @@ import OboardingStackScreen from './onboarding-stack';
 import MainTabScreen from './main-tab';
 import ShoppingCartStackScreen from './shopping-cart-stack';
 import commonStackOptions from './common-stack-options';
+// clients
+import deviceClient, { getDeviceData } from '../clients/device-client';
 // cache
+import userCache from '../cache/user';
 import genericCache from '../cache/generic';
 // libs
+import Sentry, { capture } from '../lib/sentry';
 import { navigationRef, onReady } from '../lib/root-navigation';
 
 Notifications.setNotificationHandler({
@@ -22,9 +26,53 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const prefix = '[navigation index]';
 const Stack = createStackNavigator();
 
 export default () => {
+  // event handlders
+  useEffect(() => {
+    const unsubscribe = userCache.onChange(async (data) => {
+      // indetify user in sentry
+      const user: Sentry.Native.User = {
+        id: undefined,
+        first_name: undefined,
+        email: undefined,
+        phone: undefined,
+      };
+      if (data?.id) {
+        user.id = data.id;
+      }
+      if (data?.first_name) {
+        user.username = data.first_name;
+      }
+      if (data?.email) {
+        user.email = data.email;
+      }
+      if (data?.phone) {
+        user.phone = data.phone;
+      }
+      Sentry.Native.setUser(user);
+
+      if (genericCache.getDeviceId()) {
+        try {
+          const data = await getDeviceData();
+          await deviceClient.updateOrCreate({
+            pathVars: { id: genericCache.getDeviceId() },
+            body: data,
+            source: ['id'],
+          });
+        } catch (error) {
+          capture(prefix, 'User on change update device error', error);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   // render logic
   const initial = genericCache.getOnboarding() ? 'MainTab' : 'OnboardingStack';
   return (

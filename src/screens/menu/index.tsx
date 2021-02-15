@@ -50,7 +50,7 @@ export default ({ navigation }: ScreenProps) => {
     event.stopPropagation();
     shoppingCartCache.clear();
     userCache.resetData();
-    genericCache.resetData();
+    genericCache.updateData({ onboarding: false });
     navigation.dispatch(
       CommonActions.reset({
         index: 1,
