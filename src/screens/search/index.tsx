@@ -53,6 +53,23 @@ import globalStyles from '../../styles';
 // instances outside component
 const prefix = '[search screen]';
 let fetchRequestSource: CancelTokenSource;
+const sanitizeFilters = (filters?: { [key: string]: any }) => {
+  const allowed = [
+    'enabled',
+    'location',
+    'store_open',
+    'store_enabled',
+    'store_address',
+  ];
+  const f = filters || {};
+  const r: { [key: string]: any } = {};
+  Object.keys(f).forEach((k) => {
+    if (allowed.indexOf(k) !== -1) {
+      r[k] = f[k];
+    }
+  });
+  return r;
+};
 
 type SetUserAction = {
   type: 'set_user';
@@ -244,6 +261,7 @@ export default ({ navigation, route }: ScreenProps) => {
     (() => {
       const address = userCache.getAddress() as Place;
       const defaultSort = getDefaultSort();
+
       return {
         address,
         user: userCache.getData() as User,
@@ -256,7 +274,7 @@ export default ({ navigation, route }: ScreenProps) => {
             store_enabled: true,
             location: address.location,
           },
-          route.params?.filters
+          sanitizeFilters(route.params?.filters)
         ),
         sort: route.params?.sort
           ? mapSort(route.params.sort, defaultSort)
