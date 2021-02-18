@@ -1,11 +1,16 @@
 import React, { ReactNode } from 'react';
-import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import {
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  KeyboardAvoidingViewProps,
+} from 'react-native';
 
-export interface KeyboardAvoidingViewProps {
+interface ComponentProps extends KeyboardAvoidingViewProps {
   children: ReactNode;
 }
 
-export default ({ children }: KeyboardAvoidingViewProps) => {
+export default ({ children, ...others }: ComponentProps) => {
   if (Platform.OS === 'android') {
     return <View style={{ flex: 1 }}>{children}</View>;
   }
@@ -14,6 +19,7 @@ export default ({ children }: KeyboardAvoidingViewProps) => {
       behavior="padding"
       keyboardVerticalOffset={0}
       style={{ flex: 1 }}
+      {...others}
     >
       {children}
     </KeyboardAvoidingView>

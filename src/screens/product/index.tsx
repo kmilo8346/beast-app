@@ -17,10 +17,10 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // components
 import Text from '../../components/text';
+import Icon from '../../components/icon';
 import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
-import Icon from '../../components/icon';
 import Button from '../../components/buttons/button';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 
 // local components
 import ViewOpeningHoursModal from './components/view-opening-hours-modal';
@@ -28,8 +29,6 @@ import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import ReadMore from '../../components/text/read-more';
 import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
-import ActionSheetContact from '../../components/modals/action-sheet-contact';
-import PhoneFilledDotsBlueIcon from '../../components/svgs/icons/phone-filled-dots-blue';
 // clients
 import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
@@ -111,7 +110,6 @@ type Action =
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction
   | SetRefreshingAction
-  | SetContactAction
   | SetAmountAction
   | SetOpeningHoursModalAction
   | TooggleExpandedAction
@@ -123,7 +121,6 @@ type State = {
   fetching_more: boolean;
   fetch_more_error?: Error;
   refreshing: boolean;
-  contact: boolean;
   amount?: number;
   opening_hours_modal: boolean;
   current_opening_hours?: CurrentOpenginHours;
@@ -152,8 +149,6 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, fetch_more_error: action.fetch_more_error };
     case 'set_refreshing':
       return { ...state, refreshing: action.refreshing };
-    case 'set_contact':
-      return { ...state, contact: action.contact };
     case 'set_amount':
       return { ...state, amount: action.amount };
     case 'set_opening_hours_modal':
@@ -176,7 +171,6 @@ export default ({ navigation, route }: ScreenProps) => {
     store: route.params.store,
     fetching_more: false,
     refreshing: false,
-    contact: false,
     opening_hours_modal: false,
   });
 
@@ -331,15 +325,6 @@ export default ({ navigation, route }: ScreenProps) => {
   const retryFetchMoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     fetchMoreProducts();
-  };
-
-  const pressContactStoreHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    dispatch({ type: 'set_contact', contact: true });
-  };
-
-  const contactStoreCloseHandler = () => {
-    dispatch({ type: 'set_contact', contact: false });
   };
 
   const pressProductHandler = useCallback((product: Product) => {
@@ -542,7 +527,7 @@ export default ({ navigation, route }: ScreenProps) => {
                 {!!state.store.description && (
                   <View style={{ marginTop: 5 }}>
                     <ReadMore
-                      level={7}
+                      level={6}
                       numberOfLines={3}
                       style={{ lineHeight: 18 }}
                     >
@@ -629,31 +614,37 @@ export default ({ navigation, route }: ScreenProps) => {
                 )}
 
                 {!!state.store.phone && (
-                  <Touchable
-                    style={{
-                      backgroundColor: colors.blueLight3,
-                      borderWidth: 1,
-                      borderColor: colors.blueLight5,
-                      borderRadius: 13,
-                      paddingHorizontal: 20,
-                      paddingVertical: 12,
-                      flexDirection: 'row',
-                      alignItems: 'center',
+                  <Button
+                    title={
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <Icon name="whatsapp" size={20} color="#55A931" />
+                        <Text
+                          level={6}
+                          color={colors.blue}
+                          weight="bold"
+                          style={{ marginLeft: 5 }}
+                        >
+                          Hazme una pregunta
+                        </Text>
+                      </View>
+                    }
+                    type="link"
+                    style={{ marginTop: 5, marginBottom: 7 }}
+                    onPress={async (event: GestureResponderEvent) => {
+                      event.stopPropagation();
+                      try {
+                        await Linking.openURL(
+                          `whatsapp://send?text=${`Hola ${state.store.name} 👋`}&phone=${
+                            state.store.phone
+                          }`
+                        );
+                      } catch (error) {
+                        capture(prefix, 'Press ask me a question error', error);
+                      }
                     }}
-                    onPress={pressContactStoreHandler}
-                  >
-                    <PhoneFilledDotsBlueIcon />
-                    <Text
-                      level={5}
-                      weight="bold"
-                      color={colors.blue}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                      style={{ flex: 1, marginLeft: 15 }}
-                    >
-                      Contactar al vendedor
-                    </Text>
-                  </Touchable>
+                  />
                 )}
               </View>
             </View>
@@ -728,12 +719,7 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
-      {state.contact && (
-        <ActionSheetContact
-          phone={state.store.phone}
-          onRequestClose={contactStoreCloseHandler}
-        />
-      )}
+
       {state.opening_hours_modal && (
         <ViewOpeningHoursModal
           openingHours={state.store.opening_hours}

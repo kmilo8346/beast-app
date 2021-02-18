@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import React, {
   ReactNode,
   useCallback,
@@ -15,15 +14,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import axios, { CancelTokenSource } from 'axios';
-import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 
 // local components
 import ItemComponent from './components/item';
-import UnavailableProductsDialog from './components/unavailable-products-dialog';
 // screen components
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
-import InfoDialog from '../components/dialogs/info-dialog';
 // components
 import Icon from '../../components/icon';
 import Text from '../../components/text';
@@ -37,14 +33,12 @@ import LoadingOverlay, {
   ILoadingOverlay,
 } from '../../components/loading-overlay';
 import Toast, { IToast } from '../../components/toast';
-import CheckBlueThinImage from '../../components/svgs/images/check-blue-thin';
-// clients
-import orderClient from '../../clients/order-client';
 // cache
 import userCache from '../../cache/user';
 import shoppingCartCache, {
   ShoppingCartSnapshot,
   getSnapshot,
+  StoreShoppingCartSnapshot,
 } from '../../cache/shopping-cart';
 // lib
 import { capture } from '../../lib/sentry';
@@ -56,15 +50,13 @@ import {
   formatPlace,
   humanizeCurrentClosedOpeningHours,
 } from '../../lib/utils';
-import { v4 as uuidv4, generatePushID } from '../../lib/uuid';
 // types
-import { Product, Store } from '../../types';
+import { Place, Product, Store } from '../../types';
 // styles
 import globalStyles from '../../styles';
 import colors from '../../styles/colors';
 
 const prefix = '[shopping cart screen]';
-let createOrderRequestSource: CancelTokenSource;
 
 interface StateStore {
   editing: boolean;
@@ -73,14 +65,6 @@ interface StateStore {
 interface StateStores {
   [key: string]: StateStore;
 }
-enum ShoppingCartView {
-  SHOPPING_CART = 'shopping_cart',
-  ORDER_CREATED = 'order_created',
-}
-type SetViewAction = {
-  type: 'set_view';
-  view: ShoppingCartView;
-};
 type SetShoppingCartSnapshotAction = {
   type: 'set_shopping_cart_snapshot';
   shopping_cart_snapshot: ShoppingCartSnapshot;
@@ -88,6 +72,10 @@ type SetShoppingCartSnapshotAction = {
 type SetSelectedStoreAction = {
   type: 'set_selected_store';
   selected_store?: string;
+};
+type SetSelectedStoreShoppingCartSnapshotAction = {
+  type: 'set_selected_store_shopping_cart_snapshot';
+  selected_store_shopping_cart_snapshot?: StoreShoppingCartSnapshot;
 };
 type ToogleEditProductsAction = {
   type: 'toogle_edit_products';
@@ -97,80 +85,33 @@ type ToogleExpandProductAction = {
   type: 'toogle_expand_products';
   store: string;
 };
-type SetPhoneModalAction = {
-  type: 'set_phone_modal';
-  phone_modal: boolean;
-};
-type SetUpdatingPhoneAction = {
-  type: 'set_updating_phone';
-  updating_phone: boolean;
-};
 type SetPendingRemovalAction = {
   type: 'set_pending_removal';
   pending_removal?: string;
 };
-type SetIdempotencyAction = {
-  type: 'set_idempotency';
-  idempotency: string;
-};
-type SetLastOrderedStoreAction = {
-  type: 'set_last_ordered_store';
-  last_ordered_store: Store;
-};
-type SetDisabledStoreDialogAction = {
-  type: 'set_disabled_store_dialog';
-  disabled_store_dialog: string;
-};
-type SetClosedStoreDialogAction = {
-  type: 'set_closed_store_dialog';
-  closed_store_dialog: string;
-};
-type SetUnavailableProductsDialogAction = {
-  type: 'set_unavailable_products_dialog';
-  unavailable_products_dialog?: { store: Store; products: Product[] };
-};
-type SetUnexpectedErrorDialogAction = {
-  type: 'set_unexpected_error_dialog';
-  unexpected_error_dialog: boolean;
-};
-type SetMakeOrderDialogAction = {
-  type: 'set_make_order_dialog';
-  make_order_dialog: boolean;
+type SetDeleteOrderDialogAction = {
+  type: 'set_delete_order_dialog';
+  delete_order_dialog: boolean;
 };
 type Action =
-  | SetViewAction
   | SetShoppingCartSnapshotAction
   | SetSelectedStoreAction
+  | SetSelectedStoreShoppingCartSnapshotAction
   | ToogleEditProductsAction
   | ToogleExpandProductAction
-  | SetPhoneModalAction
-  | SetUpdatingPhoneAction
   | SetPendingRemovalAction
-  | SetIdempotencyAction
-  | SetLastOrderedStoreAction
-  | SetDisabledStoreDialogAction
-  | SetClosedStoreDialogAction
-  | SetUnavailableProductsDialogAction
-  | SetUnexpectedErrorDialogAction
-  | SetMakeOrderDialogAction;
+  | SetDeleteOrderDialogAction;
 type State = {
-  view: ShoppingCartView;
+  address: Place;
   shopping_cart_snapshot: ShoppingCartSnapshot;
   selected_store?: string;
+  selected_store_shopping_cart_snapshot?: StoreShoppingCartSnapshot;
   state_stores: StateStores;
   pending_removal?: string;
-  idempotency?: string;
-  last_ordered_store?: Store;
-  disabled_store_dialog: string;
-  closed_store_dialog: string;
-  unavailable_products_dialog?: { store: Store; products: Product[] };
-  unexpected_error_dialog: boolean;
-  make_order_dialog: boolean;
+  delete_order_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'set_view':
-      return { ...state, view: action.view };
     case 'set_shopping_cart_snapshot':
       return {
         ...state,
@@ -192,6 +133,12 @@ const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         selected_store: action.selected_store,
+      };
+    case 'set_selected_store_shopping_cart_snapshot':
+      return {
+        ...state,
+        selected_store_shopping_cart_snapshot:
+          action.selected_store_shopping_cart_snapshot,
       };
     case 'toogle_edit_products':
       return {
@@ -221,39 +168,10 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         pending_removal: action.pending_removal,
       };
-    case 'set_idempotency':
-      return { ...state, idempotency: action.idempotency };
-    case 'set_last_ordered_store':
+    case 'set_delete_order_dialog':
       return {
         ...state,
-        last_ordered_store: action.last_ordered_store,
-        idempotency: generatePushID(),
-        view: ShoppingCartView.ORDER_CREATED,
-      };
-    case 'set_disabled_store_dialog':
-      return {
-        ...state,
-        disabled_store_dialog: action.disabled_store_dialog,
-      };
-    case 'set_closed_store_dialog':
-      return {
-        ...state,
-        closed_store_dialog: action.closed_store_dialog,
-      };
-    case 'set_unavailable_products_dialog':
-      return {
-        ...state,
-        unavailable_products_dialog: action.unavailable_products_dialog,
-      };
-    case 'set_unexpected_error_dialog':
-      return {
-        ...state,
-        unexpected_error_dialog: action.unexpected_error_dialog,
-      };
-    case 'set_make_order_dialog':
-      return {
-        ...state,
-        make_order_dialog: action.make_order_dialog,
+        delete_order_dialog: action.delete_order_dialog,
       };
     default:
       return state;
@@ -261,21 +179,17 @@ const reducer = (state: State, action: Action): State => {
 };
 interface ScreenProps {
   navigation: any;
-  route: any;
 }
 
-export default ({ navigation, route }: ScreenProps) => {
+export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(
     reducer,
     {
-      view: ShoppingCartView.SHOPPING_CART,
+      address: userCache.getAddress() as Place,
       shopping_cart_snapshot: [],
       state_stores: {},
-      disabled_store_dialog: '',
-      closed_store_dialog: '',
-      unexpected_error_dialog: false,
-      make_order_dialog: false,
+      delete_order_dialog: false,
     },
     (initialState) => {
       const snapshot = getSnapshot(shoppingCartCache.getData());
@@ -295,145 +209,8 @@ export default ({ navigation, route }: ScreenProps) => {
       };
     }
   );
-  const insets = useSafeAreaInsets();
-  const address = userCache.getAddress();
-  if (!address) {
-    throw new Error(`${prefix} User address must be defined`);
-  }
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
-  const toastRef = useRef<IToast>(null);
 
-  // event handler
-  const createOrder = async () => {
-    const match = state.shopping_cart_snapshot.find(
-      (store_shopping_sart) =>
-        store_shopping_sart.store.id === state.selected_store
-    );
-    if (!match) {
-      throw new Error(
-        `${prefix} Selected store dont found in snapshot, selected: ${state.selected_store}`
-      );
-    }
-    try {
-      loadingOverlayRef.current?.show();
-      if (createOrderRequestSource) {
-        createOrderRequestSource.cancel();
-      }
-      createOrderRequestSource = axios.CancelToken.source();
-      const user = userCache.getData();
-
-      await orderClient.create(
-        {
-          body: {
-            idempotency: state.idempotency as string,
-            customer: {
-              id: user?.id as string,
-              email: user?.email as string,
-              first_name: user?.first_name as string,
-              last_name: user?.last_name as string,
-              photo_url: user?.photo_url as string,
-              phone: user?.phone as string,
-              created_at: user?.created_at as Date,
-            },
-            transaction: {
-              country: Constants.manifest.extra.BEAST_COUNTRY,
-              currency: Constants.manifest.extra.BEAST_CURRENCY,
-              language: Constants.manifest.extra.BEAST_LANGUAGE,
-              delivery_address: address,
-              shopping_cart: {
-                store: match.store,
-                items: match.items,
-              },
-            },
-          },
-          source: ['id'],
-        },
-        {
-          cancelToken: createOrderRequestSource.token,
-        }
-      );
-      dispatch({
-        type: 'set_last_ordered_store',
-        last_ordered_store: match.store,
-      });
-      shoppingCartCache.clearStore(match.store.id);
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        capture(prefix, 'create order error', error);
-
-        if (error.response?.status === 400 && error.response.data.reason) {
-          if (error.response.data.reason === 'SHOP_DISABLED') {
-            setTimeout(() => {
-              dispatch({
-                type: 'set_disabled_store_dialog',
-                disabled_store_dialog: match.store.name,
-              });
-            }, 500);
-            return;
-          }
-          if (error.response.data.reason === 'SHOP_CLOSED') {
-            setTimeout(() => {
-              dispatch({
-                type: 'set_closed_store_dialog',
-                closed_store_dialog: match.store.name,
-              });
-            }, 500);
-            return;
-          }
-          if (error.response.data.reason === 'PRODUCTS_NOT_AVAILABLE') {
-            setTimeout(() => {
-              dispatch({
-                type: 'set_unavailable_products_dialog',
-                unavailable_products_dialog: {
-                  store: match.store,
-                  products: error.response.data.meta_data.products,
-                },
-              });
-            }, 500);
-            return;
-          }
-        }
-
-        setTimeout(() => {
-          dispatch({
-            type: 'set_unexpected_error_dialog',
-            unexpected_error_dialog: true,
-          });
-        }, 500);
-      }
-    } finally {
-      loadingOverlayRef.current?.hide();
-    }
-  };
-
-  const pressMakeOrderHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    const user = userCache.getData();
-    if (!user?.phone || !user.phone_verified) {
-      navigation.navigate('SetPhone', {
-        redirect: {
-          name: 'ShoppingCart',
-          params: {
-            pay: uuidv4(),
-          },
-        },
-      });
-      return;
-    }
-    if (!user?.first_name) {
-      navigation.navigate('AddUserData', {
-        redirect: {
-          name: 'ShoppingCart',
-          params: {
-            pay: uuidv4(),
-          },
-        },
-      });
-      return;
-    }
-    dispatch({ type: 'set_make_order_dialog', make_order_dialog: true });
-  };
-
+  // event handlers
   const pressToogleEditHandler = (store: string) => {
     dispatch({ type: 'toogle_edit_products', store });
   };
@@ -491,79 +268,20 @@ export default ({ navigation, route }: ScreenProps) => {
     dispatch({ type: 'set_pending_removal', pending_removal: undefined });
   };
 
-  const disabledStoreDialogOkHandler = () => {
-    dispatch({ type: 'set_disabled_store_dialog', disabled_store_dialog: '' });
-  };
-
-  const closedStoreDialogOkHandler = () => {
-    dispatch({ type: 'set_closed_store_dialog', closed_store_dialog: '' });
-  };
-
-  const unavailableProductsDialogOkHandler = () => {
-    if (state.unavailable_products_dialog) {
-      // delete unavailables from shopping cart
-      state.unavailable_products_dialog.products.forEach((product) => {
-        shoppingCartCache.set(
-          state.unavailable_products_dialog?.store as Store,
-          product,
-          0
-        );
-      });
+  const deleteOrderFromCartDialogOkHandler = () => {
+    if (!state.selected_store) {
+      capture(
+        prefix,
+        'Delete order from cart dialog ok handler, selected_store must be defined'
+      );
+      return;
     }
-    dispatch({
-      type: 'set_unavailable_products_dialog',
-      unavailable_products_dialog: undefined,
-    });
+    dispatch({ type: 'set_delete_order_dialog', delete_order_dialog: false });
+    shoppingCartCache.clearStore(state.selected_store);
   };
 
-  const unavailableProductsDialogCancelHandler = () => {
-    dispatch({
-      type: 'set_unavailable_products_dialog',
-      unavailable_products_dialog: undefined,
-    });
-  };
-
-  const unexpectedErrorDialogOkHandler = () => {
-    dispatch({
-      type: 'set_unexpected_error_dialog',
-      unexpected_error_dialog: false,
-    });
-    setTimeout(() => {
-      createOrder();
-    }, 500);
-  };
-
-  const unexpectedErrorDialogCancelHandler = () => {
-    dispatch({
-      type: 'set_unexpected_error_dialog',
-      unexpected_error_dialog: false,
-    });
-  };
-
-  const pressContinueInShoppingCartHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    dispatch({ type: 'set_view', view: ShoppingCartView.SHOPPING_CART });
-  };
-
-  const goToHomeHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('Home');
-  };
-
-  const makeOrderDialogOkHandler = () => {
-    dispatch({ type: 'set_make_order_dialog', make_order_dialog: false });
-    setTimeout(() => {
-      createOrder();
-    }, 500);
-  };
-
-  const makeOrderDialogCancelHandler = () => {
-    dispatch({ type: 'set_make_order_dialog', make_order_dialog: false });
-  };
-
-  const pressSeeOrdersHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('ClientOrders');
+  const deleteOrderFromCartDialogCancelHandler = () => {
+    dispatch({ type: 'set_delete_order_dialog', delete_order_dialog: false });
   };
 
   useEffect(() => {
@@ -578,26 +296,30 @@ export default ({ navigation, route }: ScreenProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    const match = state.shopping_cart_snapshot.find(
+      (storeSnapshot) => storeSnapshot.store.id === state.selected_store
+    );
+    dispatch({
+      type: 'set_selected_store_shopping_cart_snapshot',
+      selected_store_shopping_cart_snapshot: match,
+    });
+  }, [state.shopping_cart_snapshot]);
+
   useFocusEffect(
     useCallback(() => {
-      if (
-        !state.shopping_cart_snapshot.length &&
-        state.view === ShoppingCartView.SHOPPING_CART
-      ) {
+      if (!state.shopping_cart_snapshot.length) {
         setTimeout(() => {
           navigation.goBack();
         }, 1000);
       }
-    }, [state.shopping_cart_snapshot, state.view])
+    }, [state.shopping_cart_snapshot.length])
   );
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
-        if (
-          !state.selected_store ||
-          state.view !== ShoppingCartView.SHOPPING_CART
-        ) {
+        if (!state.selected_store) {
           return null;
         }
 
@@ -614,87 +336,12 @@ export default ({ navigation, route }: ScreenProps) => {
         );
       },
     });
-  }, [state.selected_store, state.view]);
-
-  useEffect(() => {
-    dispatch({ type: 'set_idempotency', idempotency: generatePushID() });
-  }, []);
-
-  useEffect(() => {
-    if (route.params?.pay) {
-      dispatch({ type: 'set_make_order_dialog', make_order_dialog: true });
-    }
-  }, [route.params?.pay]);
+  }, [state.selected_store]);
 
   // render logic
-  if (state.view === ShoppingCartView.ORDER_CREATED) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: colors.white,
-        }}
-      >
-        <CheckBlueThinImage />
-        <Text
-          level={1}
-          weight="bold"
-          style={{ marginTop: 25, marginBottom: 10 }}
-        >
-          ¡Listo!
-        </Text>
-        <Text
-          level={5}
-          style={{
-            lineHeight: 23,
-            textAlign: 'center',
-            marginHorizontal: 20,
-          }}
-        >
-          <Text level={5} weight="bold">
-            {state.last_ordered_store?.name}
-          </Text>
-          {` `} te confirmará y te contactará en un instante 😉.
-        </Text>
-        {shoppingCartCache.isEmpty() ? (
-          <Button
-            type="link"
-            title="Ver pedidos"
-            style={{ marginTop: 50 }}
-            onPress={pressSeeOrdersHandler}
-          />
-        ) : (
-          <Button
-            type="link"
-            title="Seguir en carro"
-            style={{ marginTop: 50 }}
-            onPress={pressContinueInShoppingCartHandler}
-          />
-        )}
-
-        <View
-          style={[
-            {
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              paddingBottom: insets.bottom,
-            },
-            globalStyles.withMargin,
-          ]}
-        >
-          <Button
-            title="Ir a inicio"
-            style={globalStyles.withMainActionAir}
-            onPress={goToHomeHandler}
-          />
-        </View>
-      </View>
-    );
-  }
+  const insets = useSafeAreaInsets();
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
 
   // not data
   if (!state.shopping_cart_snapshot.length) {
@@ -708,29 +355,106 @@ export default ({ navigation, route }: ScreenProps) => {
         }}
       >
         <BasketCatImage />
-        <ActivityIndicator />
+        <ActivityIndicator size="small" color={colors.black} />
       </View>
     );
   }
 
-  let addressText = formatPlace(address);
-  if (address.apartment) {
-    addressText = `${addressText} · ${address.apartment}`;
+  let addressText = formatPlace(state.address);
+  if (state.address.apartment) {
+    addressText = `${addressText} · ${state.address.apartment}`;
   }
   let mainAction: ReactNode = null;
-  if (state.selected_store) {
-    const match = state.shopping_cart_snapshot.find(
-      (storeSnapshot) => storeSnapshot.store.id === state.selected_store
+  if (state.selected_store_shopping_cart_snapshot) {
+    mainAction = (
+      <View>
+        <Divider type="thin" style={{ marginBottom: 5 }} />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 5,
+            paddingHorizontal: 5,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 12,
+              flex: 1,
+            }}
+          >
+            <Icon name="whatsapp" size={30} color="#55A931" />
+            <Text
+              level={5}
+              color={colors.blackLight1}
+              style={{
+                marginLeft: 10,
+                marginRight: 5,
+                letterSpacing: -0.5,
+                flex: 1,
+                lineHeight: 20,
+              }}
+            >
+              {`Envía pedido en un mensaje a `}
+              <Text level={5} weight="bold">
+                {state.selected_store_shopping_cart_snapshot.store.name}
+              </Text>
+            </Text>
+          </View>
+          <Button
+            title={
+              <Text level={6} weight="bold" color={colors.white}>
+                Enviar
+              </Text>
+            }
+            style={{
+              paddingHorizontal: 17,
+              paddingVertical: 0,
+            }}
+            onPress={async (event: GestureResponderEvent) => {
+              event.stopPropagation();
+              if (!state.selected_store_shopping_cart_snapshot) {
+                capture(
+                  prefix,
+                  'Press send to chat, selected store shopping cart snapshopt must be defined'
+                );
+                return;
+              }
+
+              try {
+                let body = state.selected_store_shopping_cart_snapshot.items.reduce(
+                  (text, item) => {
+                    return `${text}✅ ${
+                      item.name
+                    } · ${numberFormatter.toCurrency(item.price)} · ${
+                      item.qty
+                    } ud.\n`;
+                  },
+                  ''
+                );
+                body = `${body}\n💰Total 👉 ${numberFormatter.toCurrency(
+                  state.selected_store_shopping_cart_snapshot.stats.amount
+                )}`;
+                await Linking.openURL(
+                  `whatsapp://send?text=${`Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`}&phone=${
+                    state.selected_store_shopping_cart_snapshot.store.phone
+                  }`
+                );
+                // show dialog to remove order
+                dispatch({
+                  type: 'set_delete_order_dialog',
+                  delete_order_dialog: true,
+                });
+              } catch (error) {
+                capture(prefix, 'Press send to chat error', error);
+              }
+            }}
+          />
+        </View>
+      </View>
     );
-    if (match) {
-      mainAction = (
-        <Button
-          title={`Hacer pedido · ${match.store.name}`}
-          style={globalStyles.withMainActionAir}
-          onPress={pressMakeOrderHandler}
-        />
-      );
-    }
   }
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
@@ -1001,45 +725,16 @@ export default ({ navigation, route }: ScreenProps) => {
           onCancel={confirmDialogCancelHandler}
         />
       )}
-      {!!state.disabled_store_dialog && (
-        <InfoDialog
-          title="Tienda cerrada"
-          message={`${state.disabled_store_dialog} ya no está aceptando pedidos.`}
-          onOk={disabledStoreDialogOkHandler}
-        />
-      )}
-      {!!state.closed_store_dialog && (
-        <InfoDialog
-          title="Tienda cerrada momentáneamente"
-          message={`${state.closed_store_dialog} ya no está aceptando pedidos. Revisa su horario e intenta más tarde.`}
-          onOk={closedStoreDialogOkHandler}
-        />
-      )}
-      {!!state.unavailable_products_dialog && (
-        <UnavailableProductsDialog
-          products={state.unavailable_products_dialog.products}
-          onOk={unavailableProductsDialogOkHandler}
-          onCancel={unavailableProductsDialogCancelHandler}
-        />
-      )}
-      {state.unexpected_error_dialog && (
-        <ConfirmDialog
-          title="No pudimos hacer el pedido"
-          message="Ocurrió un error en este instante, por favor reintente."
-          okText="Reintentar"
-          onOk={unexpectedErrorDialogOkHandler}
-          onCancel={unexpectedErrorDialogCancelHandler}
-        />
-      )}
-      {state.make_order_dialog && (
-        <ConfirmDialog
-          title="¿Desea realizar pedido?"
-          message="Realizar pedido no tiene costo, le enviaremos el detalle de tu pedido al vendedor de forma inmediata."
-          okText="Si, Continuar"
-          onOk={makeOrderDialogOkHandler}
-          onCancel={makeOrderDialogCancelHandler}
-        />
-      )}
+      {state.delete_order_dialog &&
+        state.selected_store_shopping_cart_snapshot && (
+          <ConfirmDialog
+            title={`¿Quieres eliminar del carrito el pedido de ${state.selected_store_shopping_cart_snapshot.store.name} ?`}
+            okText="Si, Eliminar"
+            onOk={deleteOrderFromCartDialogOkHandler}
+            onCancel={deleteOrderFromCartDialogCancelHandler}
+          />
+        )}
+
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>
   );

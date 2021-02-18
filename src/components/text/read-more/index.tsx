@@ -46,7 +46,7 @@ export default ({
 
       {lengthMore ? (
         <Touchable onPress={toggleNumberOfLines} style={{ marginTop: 3 }}>
-          <Text level={7} weight="bold" color={colors.black}>
+          <Text level={6} weight="bold" color={colors.black}>
             {lines === numberOfLines ? moreText : lessText}
           </Text>
         </Touchable>
