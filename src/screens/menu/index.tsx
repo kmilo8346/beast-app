@@ -13,7 +13,6 @@ import BagHeadImage from '../../components/svgs/images/bag-head';
 import Toast, { IToast } from '../../components/toast';
 // local components
 import Item from './components/item';
-import ModalHelp from './components/modal-help';
 // lib
 import { capture } from '../../lib/sentry';
 import cloudinary from '../../lib/cloudinary';
@@ -35,16 +34,11 @@ interface ScreenProps {
 export default ({ navigation }: ScreenProps) => {
   // state
   const [user, setUser] = useState(userCache.getData());
-  const [modalHelp, setModalHelp] = useState(false);
 
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
 
   // event handlers
-  const pressMyOrdersHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    navigation.navigate('ClientOrders');
-  };
 
   const pressCloseSessionHandler = async (event: GestureResponderEvent) => {
     event.stopPropagation();
@@ -66,15 +60,11 @@ export default ({ navigation }: ScreenProps) => {
   const pressShareHandler = async () => {
     try {
       await Share.share({
-        message: `Te invito a usar Shop Shop, la app para comprar y vender entre vecinos y más. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
+        message: `Te invito a usar Shop Shop, la app para comprar y vender en tu edificio. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
       });
     } catch (error) {
       capture(prefix, 'Press share handler error', error);
     }
-  };
-
-  const closeModalHelpHandler = () => {
-    setModalHelp(false);
   };
 
   const pressMyAccountHandler = (event: GestureResponderEvent) => {
@@ -113,7 +103,6 @@ export default ({ navigation }: ScreenProps) => {
       ¡Hola!
     </Text>
   );
-  let mainAction: ReactNode = null;
   let fingerprint: ReactNode = null;
   if (user?.photo_url) {
     photoComponent = (
@@ -136,22 +125,13 @@ export default ({ navigation }: ScreenProps) => {
       >{`¡Hola ${user.first_name}!`}</Text>
     );
   }
-  if (!user?.phone || !user.phone_verified) {
-    mainAction = (
-      <Button
-        title="Iniciar sesión"
-        style={globalStyles.withMainActionAir}
-        onPress={pressStartSessionHandler}
-      />
-    );
-  }
   switch (Constants.manifest.extra.BEAST_ENVIRONMENT) {
     case 'development':
       fingerprint = (
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 10,
+            paddingBottom: 12,
             backgroundColor: colors.white,
           }}
         >
@@ -173,7 +153,7 @@ export default ({ navigation }: ScreenProps) => {
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 10,
+            paddingBottom: 12,
             backgroundColor: colors.white,
           }}
         >
@@ -201,7 +181,7 @@ export default ({ navigation }: ScreenProps) => {
         <View
           style={{
             alignItems: 'center',
-            paddingBottom: 10,
+            paddingBottom: 12,
             backgroundColor: colors.white,
           }}
         >
@@ -254,13 +234,6 @@ export default ({ navigation }: ScreenProps) => {
             onPress={pressMyAccountHandler}
           />
         )}
-        {!!user?.id && (
-          <Item
-            name="Mis pedidos"
-            onPress={pressMyOrdersHandler}
-            description="Histórico de pedidos"
-          />
-        )}
         <Item
           name="Compartir app"
           description="Comparte con amigos y clientes"
@@ -271,6 +244,13 @@ export default ({ navigation }: ScreenProps) => {
           description="Revisa los términos y condiciones"
           onPress={pressTermsHandler}
         />
+        {!user?.id && (
+          <Item
+            name="Iniciar sessión"
+            description="Nunca pierdas tus datos de navegación"
+            onPress={pressStartSessionHandler}
+          />
+        )}
 
         {user?.phone && user.phone_verified && (
           <Button
@@ -301,10 +281,7 @@ export default ({ navigation }: ScreenProps) => {
       >
         <Toast ref={toastRef} containerStyle={{ marginBottom: 10 }} />
         {fingerprint}
-        {mainAction}
       </View>
-
-      {modalHelp && <ModalHelp onClose={closeModalHelpHandler} />}
     </View>
   );
 };
