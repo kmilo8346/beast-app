@@ -8,10 +8,13 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import axios, { CancelTokenSource } from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 
 // local components
-import ProductItem from './components/product-item';
 import Skeletton from './components/skeletton';
+import ProductItem from './components/product-item';
+// screen components
+import InfoDialog from '../components/dialogs/info-dialog';
 // components
 import Icon from '../../components/icon';
 import Text from '../../components/text';
@@ -98,6 +101,10 @@ type SetCurrentOpeningHoursAction = {
   type: 'set_current_opening_hours';
   current_opening_hours?: CurrentOpenginHours;
 };
+type SetWhatsappNotFoundDialogAction = {
+  type: 'set_whatsapp_not_found_dialog';
+  whatsapp_not_found_dialog: boolean;
+};
 type Action =
   | SetUserAction
   | SetStoreAction
@@ -111,7 +118,8 @@ type Action =
   | UpdateProductAction
   | DeleteProductAction
   | SetStoreMenuAction
-  | SetCurrentOpeningHoursAction;
+  | SetCurrentOpeningHoursAction
+  | SetWhatsappNotFoundDialogAction;
 type State = {
   user?: User;
   store?: Store;
@@ -122,6 +130,7 @@ type State = {
   fetch_more_error?: Error;
   store_menu: boolean;
   current_opening_hours?: CurrentOpenginHours;
+  whatsapp_not_found_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -196,6 +205,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, store_menu: action.store_menu };
     case 'set_current_opening_hours':
       return { ...state, current_opening_hours: action.current_opening_hours };
+    case 'set_whatsapp_not_found_dialog':
+      return {
+        ...state,
+        whatsapp_not_found_dialog: action.whatsapp_not_found_dialog,
+      };
     default:
       return state;
   }
@@ -213,6 +227,7 @@ export default ({ navigation, route }: ScreenProps) => {
     refreshing: false,
     fetching_more: false,
     store_menu: false,
+    whatsapp_not_found_dialog: false,
   });
 
   // event handlers
@@ -390,14 +405,30 @@ export default ({ navigation, route }: ScreenProps) => {
     });
 
     switch (key) {
-      case 'orders':
-        setTimeout(() => {
-          navigation.navigate('SellerOrders');
-        }, 300);
+      case 'help':
+        try {
+          await Linking.openURL(
+            `whatsapp://send?text=${`Hola 👋, mi tienda es ${state.store?.name}🤩\n\nId 👉 ${state.store?.id}`}&phone=+56972359928`
+          );
+        } catch (error) {
+          capture(prefix, 'Store menu call action handler error', error);
+
+          dispatch({
+            type: 'set_whatsapp_not_found_dialog',
+            whatsapp_not_found_dialog: true,
+          });
+        }
         break;
       default:
         break;
     }
+  };
+
+  const whatsappNotFoundDialogOnOkHandler = () => {
+    dispatch({
+      type: 'set_whatsapp_not_found_dialog',
+      whatsapp_not_found_dialog: false,
+    });
   };
 
   useEffect(() => {
@@ -873,13 +904,20 @@ export default ({ navigation, route }: ScreenProps) => {
         <ActionSheet
           options={[
             {
-              key: 'orders',
-              text: 'Órdenes de la tienda',
+              key: 'help',
+              text: 'Solicitar ayuda',
             },
             { key: 'cancel', text: 'Cerrar', icon: 'x', type: 'cancel' },
           ]}
           onRequestClose={storeMenuCloseHandler}
           onCallAction={storeMenuCallActionHandler}
+        />
+      )}
+      {state.whatsapp_not_found_dialog && (
+        <InfoDialog
+          title="No se pudo abrir Whatsapp"
+          message="Verifica que lo tienes instalado 😉"
+          onOk={whatsappNotFoundDialogOnOkHandler}
         />
       )}
     </View>
