@@ -83,7 +83,7 @@ export default ({ navigation }: ScreenProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Ve productos de tu edificio y cercanías
+              Explora tu edificio y cercanías
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
               Encuentra productos de tus vecinos y con la información
@@ -98,11 +98,11 @@ export default ({ navigation }: ScreenProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Enviamos tu pedido por Whatsapp
+              Envia tu pedido por Whatsapp
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Te ahorramos el trabajo de escribir lo que quieres, para que no
-              pierdas tiempo.
+              Te ahorramos el trabajo de escribir tu pedido, para que no pierdas
+              tiempo.
             </Text>
           </View>
         </View>
@@ -116,8 +116,8 @@ export default ({ navigation }: ScreenProps) => {
               Vende con facilidad
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Crea tu tienda en menos de un minuto y comenzarás a recibir
-              pedidos.
+              Crea tu tienda en menos de un minuto y recibe tus pedidos al
+              Whatsapp.
             </Text>
           </View>
         </View>
