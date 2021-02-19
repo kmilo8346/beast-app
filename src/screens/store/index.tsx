@@ -19,6 +19,7 @@ import * as Linking from 'expo-linking';
 import ViewOpeningHoursModal from './components/view-opening-hours-modal';
 // screen components
 import ProductCard from '../components/product-card';
+import InfoDialog from '../components/dialogs/info-dialog';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 // components
 import Text from '../../components/text';
@@ -102,6 +103,10 @@ type SetCurrentOpeningHoursAction = {
   type: 'set_current_opening_hours';
   current_opening_hours?: CurrentOpenginHours;
 };
+type SetWhatsappNotFoundDialogAction = {
+  type: 'set_whatsapp_not_found_dialog';
+  whatsapp_not_found_dialog: boolean;
+};
 type Action =
   | ResetAction
   | SetStoreAction
@@ -113,7 +118,8 @@ type Action =
   | SetAmountAction
   | SetOpeningHoursModalAction
   | TooggleExpandedAction
-  | SetCurrentOpeningHoursAction;
+  | SetCurrentOpeningHoursAction
+  | SetWhatsappNotFoundDialogAction;
 type State = {
   store: Store;
   products?: SearchResponse<Product>;
@@ -124,6 +130,7 @@ type State = {
   amount?: number;
   opening_hours_modal: boolean;
   current_opening_hours?: CurrentOpenginHours;
+  whatsapp_not_found_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -155,6 +162,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, opening_hours_modal: action.opening_hours_modal };
     case 'set_current_opening_hours':
       return { ...state, current_opening_hours: action.current_opening_hours };
+    case 'set_whatsapp_not_found_dialog':
+      return {
+        ...state,
+        whatsapp_not_found_dialog: action.whatsapp_not_found_dialog,
+      };
     default:
       return state;
   }
@@ -172,6 +184,7 @@ export default ({ navigation, route }: ScreenProps) => {
     fetching_more: false,
     refreshing: false,
     opening_hours_modal: false,
+    whatsapp_not_found_dialog: false,
   });
 
   // event handlers
@@ -343,6 +356,31 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const closeOpeningHoursModal = () => {
     dispatch({ type: 'set_opening_hours_modal', opening_hours_modal: false });
+  };
+
+  const whatsappNotFoundDialogOnOkHandler = () => {
+    dispatch({
+      type: 'set_whatsapp_not_found_dialog',
+      whatsapp_not_found_dialog: false,
+    });
+  };
+
+  const pressSendToWhatsappHandler = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    try {
+      await Linking.openURL(
+        `whatsapp://send?text=${`Hola ${state.store.name} 👋`}&phone=${
+          state.store.phone
+        }`
+      );
+    } catch (error) {
+      capture(prefix, 'Press ask me a question error', error);
+
+      dispatch({
+        type: 'set_whatsapp_not_found_dialog',
+        whatsapp_not_found_dialog: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -632,18 +670,7 @@ export default ({ navigation, route }: ScreenProps) => {
                     }
                     type="link"
                     style={{ marginTop: 5, marginBottom: 7 }}
-                    onPress={async (event: GestureResponderEvent) => {
-                      event.stopPropagation();
-                      try {
-                        await Linking.openURL(
-                          `whatsapp://send?text=${`Hola ${state.store.name} 👋`}&phone=${
-                            state.store.phone
-                          }`
-                        );
-                      } catch (error) {
-                        capture(prefix, 'Press ask me a question error', error);
-                      }
-                    }}
+                    onPress={pressSendToWhatsappHandler}
                   />
                 )}
               </View>
@@ -724,6 +751,13 @@ export default ({ navigation, route }: ScreenProps) => {
         <ViewOpeningHoursModal
           openingHours={state.store.opening_hours}
           onClose={closeOpeningHoursModal}
+        />
+      )}
+      {state.whatsapp_not_found_dialog && (
+        <InfoDialog
+          title="No se pudo abrir Whatsapp"
+          message="Verifica que lo tienes instalado 😉"
+          onOk={whatsappNotFoundDialogOnOkHandler}
         />
       )}
     </View>

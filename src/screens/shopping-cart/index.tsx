@@ -19,6 +19,7 @@ import * as Linking from 'expo-linking';
 // local components
 import ItemComponent from './components/item';
 // screen components
+import InfoDialog from '../components/dialogs/info-dialog';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
 // components
 import Icon from '../../components/icon';
@@ -93,6 +94,10 @@ type SetDeleteOrderDialogAction = {
   type: 'set_delete_order_dialog';
   delete_order_dialog: boolean;
 };
+type SetWhatsappNotFoundDialogAction = {
+  type: 'set_whatsapp_not_found_dialog';
+  whatsapp_not_found_dialog: boolean;
+};
 type Action =
   | SetShoppingCartSnapshotAction
   | SetSelectedStoreAction
@@ -100,7 +105,8 @@ type Action =
   | ToogleEditProductsAction
   | ToogleExpandProductAction
   | SetPendingRemovalAction
-  | SetDeleteOrderDialogAction;
+  | SetDeleteOrderDialogAction
+  | SetWhatsappNotFoundDialogAction;
 type State = {
   address: Place;
   shopping_cart_snapshot: ShoppingCartSnapshot;
@@ -109,6 +115,7 @@ type State = {
   state_stores: StateStores;
   pending_removal?: string;
   delete_order_dialog: boolean;
+  whatsapp_not_found_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -173,6 +180,11 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         delete_order_dialog: action.delete_order_dialog,
       };
+    case 'set_whatsapp_not_found_dialog':
+      return {
+        ...state,
+        whatsapp_not_found_dialog: action.whatsapp_not_found_dialog,
+      };
     default:
       return state;
   }
@@ -190,6 +202,7 @@ export default ({ navigation }: ScreenProps) => {
       shopping_cart_snapshot: [],
       state_stores: {},
       delete_order_dialog: false,
+      whatsapp_not_found_dialog: false,
     },
     (initialState) => {
       const snapshot = getSnapshot(shoppingCartCache.getData());
@@ -282,6 +295,55 @@ export default ({ navigation }: ScreenProps) => {
 
   const deleteOrderFromCartDialogCancelHandler = () => {
     dispatch({ type: 'set_delete_order_dialog', delete_order_dialog: false });
+  };
+
+  const whatsappNotFoundDialogOnOkHandler = () => {
+    dispatch({
+      type: 'set_whatsapp_not_found_dialog',
+      whatsapp_not_found_dialog: false,
+    });
+  };
+
+  const pressSendToWhatsappHandler = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    if (!state.selected_store_shopping_cart_snapshot) {
+      capture(
+        prefix,
+        'Press send to chat, selected store shopping cart snapshopt must be defined'
+      );
+      return;
+    }
+
+    try {
+      let body = state.selected_store_shopping_cart_snapshot.items.reduce(
+        (text, item) => {
+          return `${text}✅ ${item.name} · ${numberFormatter.toCurrency(
+            item.price
+          )} · ${item.qty} ud.\n`;
+        },
+        ''
+      );
+      body = `${body}\n💰Total 👉 ${numberFormatter.toCurrency(
+        state.selected_store_shopping_cart_snapshot.stats.amount
+      )}`;
+      await Linking.openURL(
+        `whatsapp://send?text=${`Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`}&phone=${
+          state.selected_store_shopping_cart_snapshot.store.phone
+        }`
+      );
+      // show dialog to remove order
+      dispatch({
+        type: 'set_delete_order_dialog',
+        delete_order_dialog: true,
+      });
+    } catch (error) {
+      capture(prefix, 'Press send to whatsapp error', error);
+
+      dispatch({
+        type: 'set_whatsapp_not_found_dialog',
+        whatsapp_not_found_dialog: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -413,44 +475,7 @@ export default ({ navigation }: ScreenProps) => {
               paddingHorizontal: 17,
               paddingVertical: 0,
             }}
-            onPress={async (event: GestureResponderEvent) => {
-              event.stopPropagation();
-              if (!state.selected_store_shopping_cart_snapshot) {
-                capture(
-                  prefix,
-                  'Press send to chat, selected store shopping cart snapshopt must be defined'
-                );
-                return;
-              }
-
-              try {
-                let body = state.selected_store_shopping_cart_snapshot.items.reduce(
-                  (text, item) => {
-                    return `${text}✅ ${
-                      item.name
-                    } · ${numberFormatter.toCurrency(item.price)} · ${
-                      item.qty
-                    } ud.\n`;
-                  },
-                  ''
-                );
-                body = `${body}\n💰Total 👉 ${numberFormatter.toCurrency(
-                  state.selected_store_shopping_cart_snapshot.stats.amount
-                )}`;
-                await Linking.openURL(
-                  `whatsapp://send?text=${`Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`}&phone=${
-                    state.selected_store_shopping_cart_snapshot.store.phone
-                  }`
-                );
-                // show dialog to remove order
-                dispatch({
-                  type: 'set_delete_order_dialog',
-                  delete_order_dialog: true,
-                });
-              } catch (error) {
-                capture(prefix, 'Press send to chat error', error);
-              }
-            }}
+            onPress={pressSendToWhatsappHandler}
           />
         </View>
       </View>
@@ -734,6 +759,13 @@ export default ({ navigation }: ScreenProps) => {
             onCancel={deleteOrderFromCartDialogCancelHandler}
           />
         )}
+      {state.whatsapp_not_found_dialog && (
+        <InfoDialog
+          title="No se pudo abrir Whatsapp"
+          message="Verifica que lo tienes instalado 😉"
+          onOk={whatsappNotFoundDialogOnOkHandler}
+        />
+      )}
 
       <LoadingOverlay ref={loadingOverlayRef} />
     </View>

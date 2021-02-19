@@ -11,6 +11,7 @@ import * as Linking from 'expo-linking';
 import NumberInput from '../number-input';
 // screen components
 import Carousell from '../../../components/carousell';
+import InfoDialog from '../../../components/dialogs/info-dialog';
 // components
 import Text from '../../../../components/text';
 import Icon from '../../../../components/icon';
@@ -40,11 +41,35 @@ interface ComponentProps {
 export default ({ store, product, style }: ComponentProps) => {
   // state
   const [qty, setQty] = useState<number | undefined>();
+  const [dialog, setDialog] = useState(false);
 
   // event handlers
 
   const changeQtyHandler = (qty: number) => {
     shoppingCartCache.set(store as Store, product, qty);
+  };
+
+  const pressSendToWhatsapp = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    if (!store || !store.phone || !product.name || !product.price) {
+      capture(prefix, 'Press send to whatsapp error, preconditions not met');
+      return;
+    }
+    try {
+      await Linking.openURL(
+        `whatsapp://send?text=${`¡Hola, me interesa!🤩\n\n✅${
+          product.name
+        } · ${numberFormatter.toCurrency(product.price)}`}&phone=${store.phone}`
+      );
+    } catch (error) {
+      capture(prefix, 'Press send to chat error', error);
+
+      setDialog(true);
+    }
+  };
+
+  const dialogOnOkHandler = () => {
+    setDialog(false);
   };
 
   useEffect(() => {
@@ -147,25 +172,19 @@ export default ({ store, product, style }: ComponentProps) => {
                     paddingHorizontal: 17,
                     paddingVertical: 0,
                   }}
-                  onPress={async (event: GestureResponderEvent) => {
-                    event.stopPropagation();
-                    try {
-                      await Linking.openURL(
-                        `whatsapp://send?text=${`¡Hola, me interesa!🤩\n\n✅${
-                          product.name
-                        } · ${numberFormatter.toCurrency(
-                          product.price
-                        )}`}&phone=${store.phone}`
-                      );
-                    } catch (error) {
-                      capture(prefix, 'Press send to chat error', error);
-                    }
-                  }}
+                  onPress={pressSendToWhatsapp}
                 />
               </View>
             )}
           </View>
         </View>
+      )}
+      {dialog && (
+        <InfoDialog
+          title="No se pudo abrir Whatsapp"
+          message="Verifica que lo tienes instalado 😉"
+          onOk={dialogOnOkHandler}
+        />
       )}
     </View>
   );
