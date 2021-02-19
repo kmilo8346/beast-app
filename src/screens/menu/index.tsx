@@ -209,12 +209,7 @@ export default ({ navigation }: ScreenProps) => {
             level={7}
             style={{ marginBottom: 5 }}
           >{`Versión ${Constants.nativeAppVersion} (${Constants.nativeBuildVersion})`}</Text>
-          <Text level={7}>
-            Creado con ❤ por{' '}
-            <Text level={7} weight="bold">
-              firedevs
-            </Text>
-          </Text>
+          <Text level={7}>Creado con ❤ en Chile 🇨🇱</Text>
         </View>
       );
       break;
