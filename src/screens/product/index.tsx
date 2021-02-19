@@ -576,11 +576,7 @@ export default ({ navigation, route }: ScreenProps) => {
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
       >
-        <ProductDetailsCard
-          store={state.store}
-          product={state.product}
-          style={[{ marginBottom: 10 }]}
-        />
+        <ProductDetailsCard store={state.store} product={state.product} />
         <Divider type="thick" />
         {content}
         <View style={globalStyles.withScreenAir} />

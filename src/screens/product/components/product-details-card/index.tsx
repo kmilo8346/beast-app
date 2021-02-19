@@ -42,6 +42,7 @@ export default ({ store, product, style }: ComponentProps) => {
   const [qty, setQty] = useState<number | undefined>();
 
   // event handlers
+
   const changeQtyHandler = (qty: number) => {
     shoppingCartCache.set(store as Store, product, qty);
   };
@@ -71,91 +72,101 @@ export default ({ store, product, style }: ComponentProps) => {
           cloudinary.dynamicUrl(image, 'h_500')
         )}
       />
-      <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
-        {!!store && typeof qty !== 'undefined' && !!product.reference && (
-          <NumberInput
-            value={qty}
-            style={{ alignSelf: 'center' }}
-            onChange={changeQtyHandler}
-          />
-        )}
-      </View>
+      {!!store && (
+        <View style={{ marginTop: 10, marginBottom: 10 }}>
+          {typeof qty !== 'undefined' && !!product.reference && (
+            <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
+              <NumberInput
+                value={qty}
+                style={{ alignSelf: 'center' }}
+                onChange={changeQtyHandler}
+              />
+            </View>
+          )}
 
-      <View style={globalStyles.withMargin}>
-        <Text level={3} weight="bold" style={{ marginBottom: 5 }}>
-          {product.name ? `${product.name} · ` : ''}
-          <Text level={3} weight="normal">
-            {numberFormatter.toCurrency(product.price)}
-          </Text>
-        </Text>
-        {!!product.description && (
-          <View style={{ marginBottom: 5 }}>
-            <ReadMore level={6} numberOfLines={3} style={{ lineHeight: 18 }}>
-              {product.description}
-            </ReadMore>
-          </View>
-        )}
-
-        {!!store?.phone && (
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 25,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                flex: 1,
-              }}
-            >
-              <Icon name="whatsapp" size={30} color="#55A931" />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text
+          <View style={globalStyles.withMargin}>
+            {!!product.name && !!product.price && (
+              <Text level={3} weight="bold" style={{ marginBottom: 5 }}>
+                {product.name}
+                <Text level={3} weight="normal">
+                  {numberFormatter.toCurrency(product.price)}
+                </Text>
+              </Text>
+            )}
+            {!!product.description && (
+              <View style={{ marginBottom: 5 }}>
+                <ReadMore
                   level={6}
-                  weight="bold"
-                  color={colors.blackLight1}
+                  numberOfLines={3}
+                  style={{ lineHeight: 18 }}
+                >
+                  {product.description}
+                </ReadMore>
+              </View>
+            )}
+
+            {!!store?.phone && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginTop: 25,
+                }}
+              >
+                <View
                   style={{
-                    letterSpacing: -0.5,
-                    marginBottom: 2,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
                   }}
                 >
-                  Envía mensaje al vendedor
-                </Text>
-                <Text level={6} weight="normal">
-                  ¡Hola, me interesa!
-                </Text>
+                  <Icon name="whatsapp" size={30} color="#55A931" />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text
+                      level={6}
+                      weight="bold"
+                      color={colors.blackLight1}
+                      style={{
+                        letterSpacing: -0.5,
+                        marginBottom: 2,
+                      }}
+                    >
+                      Envía mensaje al vendedor
+                    </Text>
+                    <Text level={6} weight="normal">
+                      ¡Hola, me interesa!
+                    </Text>
+                  </View>
+                </View>
+                <Button
+                  title={
+                    <Text level={6} weight="bold" color={colors.white}>
+                      Enviar
+                    </Text>
+                  }
+                  style={{
+                    paddingHorizontal: 17,
+                    paddingVertical: 0,
+                  }}
+                  onPress={async (event: GestureResponderEvent) => {
+                    event.stopPropagation();
+                    try {
+                      await Linking.openURL(
+                        `whatsapp://send?text=${`¡Hola, me interesa!🤩\n\n✅${
+                          product.name
+                        } · ${numberFormatter.toCurrency(
+                          product.price
+                        )}`}&phone=${store.phone}`
+                      );
+                    } catch (error) {
+                      capture(prefix, 'Press send to chat error', error);
+                    }
+                  }}
+                />
               </View>
-            </View>
-            <Button
-              title={
-                <Text level={6} weight="bold" color={colors.white}>
-                  Enviar
-                </Text>
-              }
-              style={{
-                paddingHorizontal: 17,
-                paddingVertical: 0,
-              }}
-              onPress={async (event: GestureResponderEvent) => {
-                event.stopPropagation();
-                try {
-                  await Linking.openURL(
-                    `whatsapp://send?text=${`¡Hola, me interesa!🤩\n\n✅${
-                      product.name
-                    } · ${numberFormatter.toCurrency(product.price)}`}&phone=${
-                      store.phone
-                    }`
-                  );
-                } catch (error) {
-                  capture(prefix, 'Press send to chat error', error);
-                }
-              }}
-            />
+            )}
           </View>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 };

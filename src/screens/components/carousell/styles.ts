@@ -13,7 +13,6 @@ export default StyleSheet.create<Styles>({
     alignItems: 'center',
     justifyContent: 'center',
     height: 300,
-    marginBottom: 10,
   },
   barContainer: {
     zIndex: 2,
