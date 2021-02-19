@@ -34,7 +34,7 @@ import Icon from '../../components/icon';
 import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
-import BasketCatImage from '../../components/svgs/images/basket-cat';
+import BuildingImage from '../../components/svgs/images/building';
 import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
 // clients
 import userClient from '../../clients/user-client';
@@ -544,13 +544,13 @@ export default ({ navigation }: ScreenProps) => {
           },
         ]}
       >
-        <BasketCatImage />
+        <BuildingImage />
         <Text
           level={4}
           weight="bold"
           style={{ marginTop: 25, marginBottom: 10, textAlign: 'center' }}
         >
-          ¿Donde quieres recibir tu pedido?
+          ¿Dónde queda tu edificio?
         </Text>
         <Text
           level={5}
@@ -562,10 +562,11 @@ export default ({ navigation }: ScreenProps) => {
             marginBottom: 40,
           }}
         >
-          Para comenzar, agrega una dirección donde quieres recibir tus pedidos.
+          Usamos tu dirección para mostrarte lo que venden en tu edifcio y
+          cercanías.
         </Text>
         <Button
-          title="Elegir dirección"
+          title="Ingresar dirección"
           type="link"
           loading={state.updating}
           onPress={pressAddAddressHandler}
