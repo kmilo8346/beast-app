@@ -336,14 +336,6 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressCreateStoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    if (!state.user?.first_name) {
-      navigation.navigate('AddUserData', {
-        redirect: {
-          name: 'UpsertStore',
-        },
-      });
-      return;
-    }
     navigation.navigate('CreateStoreWizzardSetName');
   };
 
@@ -821,13 +813,13 @@ export default ({ navigation, route }: ScreenProps) => {
         ListEmptyComponent={
           <View style={{ flex: 1, alignItems: 'center', marginTop: 30 }}>
             <BasketCatImage width={120} height={120} />
-            <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
+            <Text level={5} weight="bold" style={{ marginBottom: 15 }}>
               No tienes productos en tu tienda
             </Text>
             <Button
               type="link"
               title={
-                <Text level={6} weight="bold" color={colors.blue}>
+                <Text level={5} weight="bold" color={colors.blue}>
                   Añadir
                 </Text>
               }

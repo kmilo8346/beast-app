@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import {
   SetPhoneScreen,
   VerifyPhoneScreen,
-  AddUserDataScreen,
   MenuScreen,
   EditUserScreen,
   SetUserPhotoScreen,
@@ -41,11 +40,6 @@ export default () => {
         <Stack.Screen
           name="VerifyPhone"
           component={VerifyPhoneScreen}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="AddUserData"
-          component={AddUserDataScreen}
           options={{ title: '' }}
         />
         <Stack.Screen

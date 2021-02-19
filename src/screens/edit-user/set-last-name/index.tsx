@@ -68,8 +68,6 @@ const reducer = (state: State, action: Action): State => {
           last_name: action.last_name,
         },
       };
-    case 'set_form_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
     case 'set_changed':
       return { ...state, form: { ...state.form, changed: action.changed } };
     default:
@@ -129,14 +127,11 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const submit = () => {
-    dispatch({ type: 'set_form_submitted' });
-
     updateUser();
   };
 
   const changeHandler = (last_name: string | null) => {
     dispatch({ type: 'change_value', last_name });
-    dispatch({ type: 'validate_value' });
   };
 
   const pressSaveHandler = (event: GestureResponderEvent) => {

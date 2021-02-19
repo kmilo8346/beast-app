@@ -2,12 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 // screens
-import {
-  ShoppingCartScreen,
-  SetPhoneScreen,
-  VerifyPhoneScreen,
-  AddUserDataScreen,
-} from '../screens';
+import { ShoppingCartScreen } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
 
@@ -20,21 +15,6 @@ export default () => {
         name="ShoppingCart"
         component={ShoppingCartScreen}
         options={{ title: 'Mi carro' }}
-      />
-      <Stack.Screen
-        name="SetPhone"
-        component={SetPhoneScreen}
-        options={{ title: '' }}
-      />
-      <Stack.Screen
-        name="VerifyPhone"
-        component={VerifyPhoneScreen}
-        options={{ title: '' }}
-      />
-      <Stack.Screen
-        name="AddUserData"
-        component={AddUserDataScreen}
-        options={{ title: '' }}
       />
     </Stack.Navigator>
   );

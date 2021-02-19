@@ -8,8 +8,6 @@ import {
   TextInput,
 } from 'react-native';
 
-// constraints
-import constraints from './constraints';
 // components
 import Text from '../../../components/text';
 import LoadingOverlay, {
@@ -24,7 +22,6 @@ import userClient from '../../../clients/user-client';
 // cache
 import userCache from '../../../cache/user';
 // libs
-import validate from '../../../lib/validate';
 import { capture } from '../../../lib/sentry';
 // styles
 import globalStyles from '../../../styles';
@@ -35,7 +32,7 @@ const prefix = '[edit user set first_name screen]';
 
 type ChangeValueAction = {
   type: 'change_value';
-  first_name: string;
+  first_name: string | null;
 };
 type ValidateValueAction = {
   type: 'validate_value';
@@ -60,12 +57,10 @@ type Action =
 type State = {
   form: {
     // fields
-    first_name: string;
+    first_name?: string | null;
 
     // other state
     changed: boolean;
-    submitted: boolean;
-    errors?: { [key: string]: string[] };
   };
 };
 const reducer = (state: State, action: Action): State => {
@@ -78,20 +73,6 @@ const reducer = (state: State, action: Action): State => {
           first_name: action.first_name,
         },
       };
-    case 'validate_value':
-      if (!state.form.submitted) return state;
-
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          errors: validate(state.form, constraints),
-        },
-      };
-    case 'set_form_submitted':
-      return { ...state, form: { ...state.form, submitted: true } };
-    case 'set_form_errors':
-      return { ...state, form: { ...state.form, errors: action.errors } };
     case 'set_changed':
       return { ...state, form: { ...state.form, changed: action.changed } };
     default:
@@ -113,11 +94,8 @@ export default ({ navigation, route }: ScreenProps) => {
 
       // other state
       changed: false,
-      submitted: false,
     },
   });
-  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
-  const toastRef = useRef<IToast>(null);
 
   // event handlers
   const updateUser = async () => {
@@ -151,21 +129,11 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const submit = () => {
-    dispatch({ type: 'set_form_submitted' });
-    // validate
-    const errors = validate(state.form, constraints);
-    if (errors) {
-      dispatch({ type: 'set_form_errors', errors });
-      Vibration.vibrate(400);
-      return;
-    }
-
     updateUser();
   };
 
-  const changeHandler = (first_name: string) => {
+  const changeHandler = (first_name: string | null) => {
     dispatch({ type: 'change_value', first_name });
-    dispatch({ type: 'validate_value' });
   };
 
   const pressSaveHandler = (event: GestureResponderEvent) => {
@@ -184,11 +152,8 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.form.first_name]);
 
   // render logic
-  const error =
-    Array.isArray(state.form.errors?.first_name) &&
-    state.form.errors?.first_name.length
-      ? state.form.errors.first_name[0]
-      : null;
+  const loadingOverlayRef = useRef<ILoadingOverlay>(null);
+  const toastRef = useRef<IToast>(null);
   return (
     <View style={[{ flex: 1, backgroundColor: colors.white }]}>
       <ScrollView
@@ -199,23 +164,17 @@ export default ({ navigation, route }: ScreenProps) => {
           maxLength={30}
           clearButtonMode="always"
           placeholder="Añade tu nombre"
-          value={state.form.first_name}
+          value={state.form.first_name || ''}
           style={{ fontSize: 14, fontFamily: 'MonserratNormal' }}
           onChangeText={(text: string) => {
-            changeHandler(text);
+            changeHandler(text || null);
           }}
           onSubmitEditing={submitEditingHandler}
         />
         <Divider style={{ marginVertical: 15 }} />
-        {!!error && (
-          <Text level={8} color={colors.red} style={{ marginBottom: 5 }}>
-            {error}
-          </Text>
-        )}
-        <Text
-          level={7}
-          color={colors.blackLight4}
-        >{`${state.form.first_name.length}/30`}</Text>
+        <Text level={7} color={colors.blackLight4}>{`${
+          state.form.first_name?.length || 0
+        }/30`}</Text>
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
       <View style={[globalStyles.withMargin]}>

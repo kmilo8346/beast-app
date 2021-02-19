@@ -9,7 +9,6 @@ import {
   MyStoreScreen,
   SetPhoneScreen,
   VerifyPhoneScreen,
-  AddUserDataScreen,
   CreateStoreWizzardSetNameScreen,
   CreateStoreWizzardSetImageScreen,
   CreateStoreWizzardSetDeliveryAreaScreen,
@@ -47,11 +46,6 @@ export default () => {
         <Stack.Screen
           name="VerifyPhone"
           component={VerifyPhoneScreen}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="AddUserData"
-          component={AddUserDataScreen}
           options={{ title: '' }}
         />
         <Stack.Screen

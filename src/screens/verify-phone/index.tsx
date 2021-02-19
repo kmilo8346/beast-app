@@ -80,20 +80,12 @@ export default ({ navigation, route }: ScreenProps) => {
       });
       userCache.setData(created);
 
-      if (!created.first_name) {
-        setTimeout(() => {
-          navigation.navigate('AddUserData', {
-            redirect: route.params.redirect,
-          });
-        }, 300);
-      } else {
-        setTimeout(() => {
-          navigation.navigate(
-            route.params.redirect.name,
-            route.params.redirect.params
-          );
-        }, 300);
-      }
+      setTimeout(() => {
+        navigation.navigate(
+          route.params.redirect.name,
+          route.params.redirect.params
+        );
+      }, 300);
     } catch (error) {
       if (!axios.isCancel(error)) {
         capture(prefix, 'Create user error', error);
