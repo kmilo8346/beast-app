@@ -20,10 +20,7 @@ import {
   EditStoreSetDeliveryTimeScreen,
   EditStoreSetOpeningHoursScreen,
   EditStoreSetDayOpeningHoursScreen,
-  UpsertStoreScreen,
   UpsertProductScreen,
-  SellerOrdersScreen,
-  SellerOrderDetailsScreen,
 } from '../screens';
 
 const Stack = createStackNavigator();
@@ -104,24 +101,9 @@ export default () => {
           options={{ title: '' }}
         />
         <Stack.Screen
-          name="UpsertStore"
-          component={UpsertStoreScreen}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
           name="UpsertProduct"
           component={UpsertProductScreen}
           options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="SellerOrders"
-          component={SellerOrdersScreen}
-          options={{ title: 'Órdenes' }}
-        />
-        <Stack.Screen
-          name="SellerOrderDetails"
-          component={SellerOrderDetailsScreen}
-          options={{ title: 'Detalle de orden' }}
         />
       </Stack.Navigator>
     </KeyboardAvoidingView>

@@ -19,15 +19,10 @@ export { default as EditStoreSetDeliveryAreaScreen } from './edit-store/set-deli
 export { default as EditStoreSetDeliveryTimeScreen } from './edit-store/set-delivery-time';
 export { default as EditStoreSetOpeningHoursScreen } from './edit-store/set-opening-hours';
 export { default as EditStoreSetDayOpeningHoursScreen } from './edit-store/set-opening-hours/set-day-opening-hours';
-export { default as UpsertStoreScreen } from './upsert-store';
 export { default as UpsertProductScreen } from './upsert-product';
-export { default as SellerOrdersScreen } from './seller-orders';
-export { default as SellerOrderDetailsScreen } from './seller-order-details';
 export { default as MenuScreen } from './menu';
 export { default as EditUserScreen } from './edit-user';
 export { default as SetUserPhotoScreen } from './edit-user/set-photo';
 export { default as SetUserFirstNameScreen } from './edit-user/set-first-name';
 export { default as SetUserLastNameScreen } from './edit-user/set-last-name';
 export { default as SetUserEmailScreen } from './edit-user/set-email';
-export { default as ClientOrdersScreen } from './client-orders';
-export { default as ClientOrderDetailsScreen } from './client-order-details';

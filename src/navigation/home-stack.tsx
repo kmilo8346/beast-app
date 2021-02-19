@@ -8,9 +8,6 @@ import {
   ProductScreen,
   StoresScreen,
   StoreScreen,
-  ClientOrdersScreen,
-  ClientOrderDetailsScreen,
-  SellerOrderDetailsScreen,
 } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
@@ -44,21 +41,6 @@ export default () => {
         name="Store"
         component={StoreScreen}
         options={{ title: '' }}
-      />
-      <Stack.Screen
-        name="ClientOrders"
-        component={ClientOrdersScreen}
-        options={{ title: 'Pedidos' }}
-      />
-      <Stack.Screen
-        name="ClientOrderDetails"
-        component={ClientOrderDetailsScreen}
-        options={{ title: 'Detalle de pedido' }}
-      />
-      <Stack.Screen
-        name="SellerOrderDetails"
-        component={SellerOrderDetailsScreen}
-        options={{ title: 'Detalle de orden' }}
       />
     </Stack.Navigator>
   );

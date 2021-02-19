@@ -11,8 +11,6 @@ import {
   SetUserFirstNameScreen,
   SetUserLastNameScreen,
   SetUserEmailScreen,
-  ClientOrdersScreen,
-  ClientOrderDetailsScreen,
   StoreScreen,
   ProductScreen,
 } from '../screens';
@@ -66,16 +64,6 @@ export default () => {
           name="SetUserEmail"
           component={SetUserEmailScreen}
           options={{ title: 'Email' }}
-        />
-        <Stack.Screen
-          name="ClientOrders"
-          component={ClientOrdersScreen}
-          options={{ title: 'Pedidos' }}
-        />
-        <Stack.Screen
-          name="ClientOrderDetails"
-          component={ClientOrderDetailsScreen}
-          options={{ title: 'Detalle de pedido' }}
         />
         <Stack.Screen
           name="Store"
