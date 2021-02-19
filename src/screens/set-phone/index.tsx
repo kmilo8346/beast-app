@@ -318,7 +318,8 @@ export default ({ navigation, route }: ScreenProps) => {
           weight="light"
           style={{ marginBottom: 60, lineHeight: 23 }}
         >
-          Inicia sesión con tu teléfono móvil y únete a nuestra comunidad.
+          Inicia sesión con tu móvil para no perder tu información si reintalas
+          la app 😉.
         </Text>
 
         <View>
