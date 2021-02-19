@@ -408,7 +408,9 @@ export default ({ navigation, route }: ScreenProps) => {
       case 'help':
         try {
           await Linking.openURL(
-            `whatsapp://send?text=${`Hola 👋, mi tienda es ${state.store?.name}🤩\n\nId 👉 ${state.store?.id}`}&phone=+56972359928`
+            `whatsapp://send?text=${encodeURIComponent(
+              `Hola 👋, mi tienda es ${state.store?.name}🤩\n\nId 👉 ${state.store?.id}`
+            )}&phone=+56972359928`
           );
         } catch (error) {
           capture(prefix, 'Store menu call action handler error', error);

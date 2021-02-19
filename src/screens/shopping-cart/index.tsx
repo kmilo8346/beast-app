@@ -327,9 +327,9 @@ export default ({ navigation }: ScreenProps) => {
         state.selected_store_shopping_cart_snapshot.stats.amount
       )}`;
       await Linking.openURL(
-        `whatsapp://send?text=${`Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`}&phone=${
-          state.selected_store_shopping_cart_snapshot.store.phone
-        }`
+        `whatsapp://send?text=${encodeURIComponent(
+          `Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`
+        )}&phone=${state.selected_store_shopping_cart_snapshot.store.phone}`
       );
       // show dialog to remove order
       dispatch({

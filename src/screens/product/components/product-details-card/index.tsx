@@ -57,9 +57,11 @@ export default ({ store, product, style }: ComponentProps) => {
     }
     try {
       await Linking.openURL(
-        `whatsapp://send?text=${`¡Hola, me interesa!🤩\n\n✅${
-          product.name
-        } · ${numberFormatter.toCurrency(product.price)}`}&phone=${store.phone}`
+        `whatsapp://send?text=${encodeURIComponent(
+          `¡Hola, me interesa!🤩\n\n✅${
+            product.name
+          } · ${numberFormatter.toCurrency(product.price)}`
+        )}&phone=${store.phone}`
       );
     } catch (error) {
       capture(prefix, 'Press send to chat error', error);

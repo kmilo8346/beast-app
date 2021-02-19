@@ -369,9 +369,9 @@ export default ({ navigation, route }: ScreenProps) => {
     event.stopPropagation();
     try {
       await Linking.openURL(
-        `whatsapp://send?text=${`Hola ${state.store.name} 👋`}&phone=${
-          state.store.phone
-        }`
+        `whatsapp://send?text=${encodeURIComponent(
+          `Hola ${state.store.name} 👋`
+        )}&phone=${state.store.phone}`
       );
     } catch (error) {
       capture(prefix, 'Press ask me a question error', error);
