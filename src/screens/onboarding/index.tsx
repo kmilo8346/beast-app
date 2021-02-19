@@ -75,7 +75,7 @@ export default ({ navigation }: ScreenProps) => {
           Shop Shop
         </Text>
         <Text level={5} style={{ lineHeight: 23, marginBottom: 40 }}>
-          Haz tus compras a tus vecinos y ahorra tiempo.
+          La app para comprar y vender en tu edificio.
         </Text>
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
           <View style={{ marginTop: 5 }}>
@@ -83,10 +83,11 @@ export default ({ navigation }: ScreenProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Agrega productos a tu carrito
+              Ve productos de tu edificio y cercanías
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Encuentra productos recomendados o busca en tus tiendas favoritas.
+              Encuentra productos de tus vecinos y con la información
+              actualizada.
             </Text>
           </View>
         </View>
@@ -97,11 +98,11 @@ export default ({ navigation }: ScreenProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Pide primero y paga después
+              Enviamos tu pedido por Whatsapp
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Haz tu pedido desde la app y la tienda te contactará para acordar
-              el pago y despacho.
+              Te ahorramos el trabajo de escribir lo que quieres, para que no
+              pierdas tiempo.
             </Text>
           </View>
         </View>
@@ -112,11 +113,11 @@ export default ({ navigation }: ScreenProps) => {
           </View>
           <View style={{ marginLeft: 20, flex: 1 }}>
             <Text level={5} weight="bold">
-              Vende sin comisiones
+              Vende con facilidad
             </Text>
             <Text level={5} style={{ lineHeight: 23 }}>
-              Crea tu tienda, con tu horario de atención y área de despacho en
-              menos de un minuto.
+              Crea tu tienda en menos de un minuto y comenzarás a recibir
+              pedidos.
             </Text>
           </View>
         </View>
