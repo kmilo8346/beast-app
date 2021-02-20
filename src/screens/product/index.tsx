@@ -14,7 +14,14 @@ import {
 } from 'react-native';
 import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 
+// local components
+import ProductDetailsCard from './components/product-details-card';
+// screen components
+import ProductCard from '../components/product-card';
+import InfoDialog from '../components/dialogs/info-dialog';
+import ShoppingCartIcon from '../components/shopping-cart-icon';
 // components
 import Text from '../../components/text';
 import Icon from '../../components/icon';
@@ -22,11 +29,6 @@ import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
-// screen components
-import ShoppingCartIcon from '../components/shopping-cart-icon';
-import ProductCard from '../components/product-card';
-// local components
-import ProductDetailsCard from './components/product-details-card';
 // clients
 import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
@@ -86,6 +88,10 @@ type SetCurrentOpeningHoursAction = {
   type: 'set_current_opening_hours';
   current_opening_hours?: CurrentOpenginHours;
 };
+type SetWhatsappNotFoundDialogAction = {
+  type: 'set_whatsapp_not_found_dialog';
+  whatsapp_not_found_dialog: boolean;
+};
 type Action =
   | ResetAction
   | SetProductAction
@@ -94,7 +100,8 @@ type Action =
   | SetErrorAction
   | SetRefreshingAction
   | SetAmountAction
-  | SetCurrentOpeningHoursAction;
+  | SetCurrentOpeningHoursAction
+  | SetWhatsappNotFoundDialogAction;
 type State = {
   product: Product;
   store?: Store;
@@ -103,6 +110,7 @@ type State = {
   refreshing: boolean;
   amount?: number;
   current_opening_hours?: CurrentOpenginHours;
+  whatsapp_not_found_dialog: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -127,6 +135,11 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, amount: action.amount };
     case 'set_current_opening_hours':
       return { ...state, current_opening_hours: action.current_opening_hours };
+    case 'set_whatsapp_not_found_dialog':
+      return {
+        ...state,
+        whatsapp_not_found_dialog: action.whatsapp_not_found_dialog,
+      };
     default:
       return state;
   }
@@ -142,6 +155,7 @@ export default ({ navigation, route }: ScreenProps) => {
   const [state, dispatch] = useReducer(reducer, {
     product: route.params.product,
     refreshing: false,
+    whatsapp_not_found_dialog: false,
   });
 
   // event handlers
@@ -300,6 +314,33 @@ export default ({ navigation, route }: ScreenProps) => {
     navigation.navigate('ShoppingCartStack');
   };
 
+  const pressSendToWhatsappHandler = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    try {
+      await Linking.openURL(
+        `whatsapp://send?text=${encodeURIComponent(
+          `✅ ${state.product.name} · ${numberFormatter.toCurrency(
+            state.product.price
+          )}\n\nHola, ¿Está disponible? 🤩`
+        )}&phone=${state.store?.phone}`
+      );
+    } catch (error) {
+      capture(prefix, 'Press send to whatsapp hanlder error', error);
+
+      dispatch({
+        type: 'set_whatsapp_not_found_dialog',
+        whatsapp_not_found_dialog: true,
+      });
+    }
+  };
+
+  const whatsappNotFoundDialogOnOkHandler = () => {
+    dispatch({
+      type: 'set_whatsapp_not_found_dialog',
+      whatsapp_not_found_dialog: false,
+    });
+  };
+
   useEffect(() => {
     return () => {
       fetchProductRequestSource && fetchProductRequestSource.cancel();
@@ -314,9 +355,27 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <ShoppingCartIcon style={{ marginRight: 20 }} />,
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <ShoppingCartIcon />
+          <View style={{ marginRight: 20 }}>
+            {state.product.name && state.product.price && state.store?.phone && (
+              <Touchable
+                style={{
+                  paddingVertical: 5,
+                  paddingLeft: 15,
+                  paddingRight: 5,
+                }}
+                onPress={pressSendToWhatsappHandler}
+              >
+                <Icon name="whatsapp" size={28} color="#55A931" />
+              </Touchable>
+            )}
+          </View>
+        </View>
+      ),
     });
-  }, []);
+  }, [state.product.name, state.product.price, state.store?.phone]);
 
   useFocusEffect(
     useCallback(() => {
@@ -590,6 +649,13 @@ export default ({ navigation, route }: ScreenProps) => {
       >
         {orderButton}
       </View>
+      {state.whatsapp_not_found_dialog && (
+        <InfoDialog
+          title="No se pudo abrir Whatsapp"
+          message="Verifica que lo tienes instalado 😉"
+          onOk={whatsappNotFoundDialogOnOkHandler}
+        />
+      )}
     </View>
   );
 };

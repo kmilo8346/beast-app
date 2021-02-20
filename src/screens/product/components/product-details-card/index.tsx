@@ -1,25 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleProp,
-  View,
-  ViewStyle,
-  GestureResponderEvent,
-} from 'react-native';
-import * as Linking from 'expo-linking';
-
+import { StyleProp, View, ViewStyle } from 'react-native';
 // product components
 import NumberInput from '../number-input';
 // screen components
 import Carousell from '../../../components/carousell';
-import InfoDialog from '../../../components/dialogs/info-dialog';
 // components
 import Text from '../../../../components/text';
-import Icon from '../../../../components/icon';
-import Button from '../../../../components/buttons/button';
 import ReadMore from '../../../../components/text/read-more';
 // lib
 import * as utils from '../../../../lib/utils';
-import { capture } from '../../../../lib/sentry';
 import cloudinary from '../../../../lib/cloudinary';
 import numberFormatter from '../../../../lib/formatters/number-formatter';
 // cache
@@ -28,9 +17,6 @@ import shoppingCartCache from '../../../../cache/shopping-cart';
 import { Product, Store } from '../../../../types';
 // styles
 import globalStyles from '../../../../styles';
-import colors from '../../../../styles/colors';
-
-const prefix = '[product details components]';
 
 interface ComponentProps {
   store?: Store;
@@ -41,37 +27,11 @@ interface ComponentProps {
 export default ({ store, product, style }: ComponentProps) => {
   // state
   const [qty, setQty] = useState<number | undefined>();
-  const [dialog, setDialog] = useState(false);
 
   // event handlers
 
   const changeQtyHandler = (qty: number) => {
     shoppingCartCache.set(store as Store, product, qty);
-  };
-
-  const pressSendToWhatsapp = async (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    if (!store || !store.phone || !product.name || !product.price) {
-      capture(prefix, 'Press send to whatsapp error, preconditions not met');
-      return;
-    }
-    try {
-      await Linking.openURL(
-        `whatsapp://send?text=${encodeURIComponent(
-          `¡Hola, me interesa!🤩\n\n✅${
-            product.name
-          } · ${numberFormatter.toCurrency(product.price)}`
-        )}&phone=${store.phone}`
-      );
-    } catch (error) {
-      capture(prefix, 'Press send to chat error', error);
-
-      setDialog(true);
-    }
-  };
-
-  const dialogOnOkHandler = () => {
-    setDialog(false);
   };
 
   useEffect(() => {
@@ -101,20 +61,10 @@ export default ({ store, product, style }: ComponentProps) => {
       />
       {!!store && (
         <View style={{ marginTop: 10, marginBottom: 10 }}>
-          {typeof qty !== 'undefined' && !!product.reference && (
-            <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
-              <NumberInput
-                value={qty}
-                style={{ alignSelf: 'center' }}
-                onChange={changeQtyHandler}
-              />
-            </View>
-          )}
-
           <View style={globalStyles.withMargin}>
             {!!product.name && !!product.price && (
               <Text level={3} weight="bold" style={{ marginBottom: 5 }}>
-                {product.name}
+                {`${product.name} · `}
                 <Text level={3} weight="normal">
                   {numberFormatter.toCurrency(product.price)}
                 </Text>
@@ -131,62 +81,17 @@ export default ({ store, product, style }: ComponentProps) => {
                 </ReadMore>
               </View>
             )}
-
-            {!!store?.phone && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginTop: 25,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                  }}
-                >
-                  <Icon name="whatsapp" size={30} color="#55A931" />
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text
-                      level={6}
-                      weight="bold"
-                      color={colors.blackLight1}
-                      style={{
-                        letterSpacing: -0.5,
-                        marginBottom: 2,
-                      }}
-                    >
-                      Envía mensaje al vendedor
-                    </Text>
-                    <Text level={6} weight="normal">
-                      ¡Hola, me interesa!
-                    </Text>
-                  </View>
-                </View>
-                <Button
-                  title={
-                    <Text level={6} weight="bold" color={colors.white}>
-                      Enviar
-                    </Text>
-                  }
-                  style={{
-                    paddingHorizontal: 17,
-                    paddingVertical: 0,
-                  }}
-                  onPress={pressSendToWhatsapp}
-                />
-              </View>
-            )}
           </View>
+          {typeof qty !== 'undefined' && !!product.reference && (
+            <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
+              <NumberInput
+                value={qty}
+                style={{ alignSelf: 'center' }}
+                onChange={changeQtyHandler}
+              />
+            </View>
+          )}
         </View>
-      )}
-      {dialog && (
-        <InfoDialog
-          title="No se pudo abrir Whatsapp"
-          message="Verifica que lo tienes instalado 😉"
-          onOk={dialogOnOkHandler}
-        />
       )}
     </View>
   );

@@ -879,7 +879,7 @@ export default ({ navigation, route }: ScreenProps) => {
           style={{ paddingLeft: 2, paddingRight: 15, paddingVertical: 5 }}
           onPress={pressBackHandler}
         >
-          <Icon name="chevron-left" />
+          <Icon name="chevron-left" size={28} />
         </Touchable>
         <View
           style={[

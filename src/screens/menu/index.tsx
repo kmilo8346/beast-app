@@ -94,7 +94,7 @@ export default ({ navigation }: ScreenProps) => {
   let photoComponent: ReactNode = <BagHeadImage />;
   let firstNameComponent: ReactNode = (
     <Text
-      level={3}
+      level={2}
       weight="bold"
       numberOfLines={1}
       ellipsizeMode="tail"
@@ -117,7 +117,7 @@ export default ({ navigation }: ScreenProps) => {
   if (user?.first_name) {
     firstNameComponent = (
       <Text
-        level={3}
+        level={2}
         weight="bold"
         numberOfLines={1}
         ellipsizeMode="tail"
@@ -207,7 +207,7 @@ export default ({ navigation }: ScreenProps) => {
     >
       <View style={globalStyles.screenWithoutHeaderSpace} />
       <Text
-        level={2}
+        level={1}
         weight="bold"
         style={[{ marginBottom: 5 }, globalStyles.withMargin]}
       >

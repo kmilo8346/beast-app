@@ -605,7 +605,7 @@ export default ({ navigation }: ScreenProps) => {
               }}
             >
               <Text
-                level={2}
+                level={1}
                 weight="bold"
                 numberOfLines={1}
                 ellipsizeMode="tail"
@@ -619,7 +619,7 @@ export default ({ navigation }: ScreenProps) => {
                 style={{ paddingVertical: 5, paddingLeft: 15, paddingRight: 5 }}
                 onPress={pressSearchIconHandler}
               >
-                <Icon name="search" size={20} />
+                <Icon name="search" size={28} />
               </Touchable>
             </View>
             {selectAddressComponent}

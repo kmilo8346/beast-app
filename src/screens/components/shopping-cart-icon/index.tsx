@@ -76,7 +76,7 @@ export default ({ style }: ComponentProps) => {
           style={{ position: 'absolute', top: -7, left: 1 }}
         />
       </View>
-      <Icon name="shopping-cart" size={20} />
+      <Icon name="shopping-cart" size={28} />
     </Touchable>
   );
 };

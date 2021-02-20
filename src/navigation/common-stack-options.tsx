@@ -10,7 +10,7 @@ import Icon from '../components/icon';
 import Text from '../components/text';
 
 const commonStackOptions: StackNavigationOptions = {
-  headerBackImage: () => <Icon name="chevron-left" />,
+  headerBackImage: () => <Icon name="chevron-left" size={28} />,
   headerLeftContainerStyle: {
     ...Platform.select({
       ios: {
