@@ -63,8 +63,12 @@ export default ({
     onChange(value);
   };
 
+  const modalCloseHandler = () => {
+    setIsVisible(false);
+  };
+
   // render logic
-  const text = `Enviar a ${utils.formatPlace(address)}`;
+  const text = `${utils.formatPlace(address)}`;
   let icon: ReactNode = <Icon name="chevron-down" color={colors.blackLight2} />;
   if (processing) {
     icon = <ActivityIndicator size="small" color={colors.black} />;
@@ -87,7 +91,11 @@ export default ({
         {icon}
       </Touchable>
       {isVisible && (
-        <ModalManageAddress value={value} onChange={modalChangeHandler} />
+        <ModalManageAddress
+          value={value}
+          onChange={modalChangeHandler}
+          onClose={modalCloseHandler}
+        />
       )}
     </View>
   );

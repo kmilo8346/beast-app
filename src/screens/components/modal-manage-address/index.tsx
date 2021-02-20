@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
+import isEqual from 'lodash.isequal';
 
+// screen components
+import AddressInputModal from '../address-input/components/address-input-modal';
 // components
 import Modal from '../../../components/modals/modal';
 import SelectFriendly from '../../../components/select-friendly';
-// local components
-import AddAddressForm from './components/add-address-form';
 // libs
 import * as utils from '../../../lib/utils';
 // types
@@ -14,14 +15,15 @@ import { Place, AddressInfo } from '../../../types';
 import globalStyles from '../../../styles';
 
 interface ComponentProps {
-  value?: AddressInfo;
+  value: AddressInfo;
   onChange: (value?: AddressInfo) => void;
+  onClose: () => void;
 }
 
-export default ({ value, onChange }: ComponentProps) => {
+export default ({ value, onChange, onClose }: ComponentProps) => {
   // state
-  const [info, setInfo] = useState<AddressInfo | undefined>(value);
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [info, setInfo] = useState(value);
+  const [inputModal, setInputModal] = useState(false);
 
   // event handlers
   const addHandler = (place: Place) => {
@@ -31,6 +33,7 @@ export default ({ value, onChange }: ComponentProps) => {
       place,
       (i1, i2) => i1.id === i2.id
     );
+    console.log('addHandler');
     onChange({
       current_address,
       addresses,
@@ -57,32 +60,48 @@ export default ({ value, onChange }: ComponentProps) => {
   };
 
   const addOptionHandler = () => {
-    setIsFormVisible(true);
+    console.log('addOptionHandler');
+    setInputModal(true);
   };
 
   const requestCloseHandler = () => {
-    onChange(info);
+    if (isEqual(value, info)) {
+      // not change detected
+      onClose();
+    } else {
+      // change detected
+      onChange(info);
+    }
   };
 
-  let title = 'Agregar dirección';
-  let content = <AddAddressForm onAdd={addHandler} />;
+  const addressInputModalChangeHandler = (address: Place) => {
+    addHandler(address);
+  };
 
-  if (!isFormVisible && info?.addresses.length && info.current_address) {
-    title = 'Selecciona una dirección';
-    const options = info.addresses.map(
-      (address: Place, _index: number, array: Place[]) => ({
-        key: address.id,
-        title: `${utils.formatPlace(address)}`,
-        subtitle: address.apartment,
-        readonly: array.length === 1,
-      })
-    );
-    content = (
-      <View>
+  const addressInputModalCloseHandler = () => {
+    setInputModal(false);
+  };
+
+  // render logic
+  const options = info.addresses.map(
+    (address: Place, _index: number, array: Place[]) => ({
+      key: address.id,
+      title: `${utils.formatPlace(address)}`,
+      subtitle: address.apartment,
+      readonly: array.length === 1,
+    })
+  );
+  return (
+    <Modal
+      onRequestClose={requestCloseHandler}
+      title="Selecciona una dirección"
+    >
+      <View style={globalStyles.modalSubtitleSpace} />
+      <View style={[globalStyles.withMargin]}>
         <SelectFriendly
           value={info.current_address}
           options={options}
-          addMessage="Agrega una nueva dirección"
+          addMessage="Ingresa una nueva dirección"
           addDisabled={options.length >= 5}
           onSelect={selectHandler}
           onDelete={deleteHandler}
@@ -90,13 +109,12 @@ export default ({ value, onChange }: ComponentProps) => {
           style={{ marginBottom: 20 }}
         />
       </View>
-    );
-  }
-
-  return (
-    <Modal onRequestClose={requestCloseHandler} title={title}>
-      <View style={globalStyles.modalSubtitleSpace} />
-      <View style={[globalStyles.withMargin]}>{content}</View>
+      {inputModal && (
+        <AddressInputModal
+          onChange={addressInputModalChangeHandler}
+          onClose={addressInputModalCloseHandler}
+        />
+      )}
     </Modal>
   );
 };

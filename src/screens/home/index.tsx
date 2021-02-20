@@ -23,11 +23,10 @@ import * as Permissions from 'expo-permissions';
 import Widget from './components/widget';
 import Skeleton from './components/skeleton';
 import SelectAddress from './components/select-address';
-import InProgressNotifications from './components/in-progress-notifications';
 // screen components
-import ModalManageAddress from '../components/modal-manage-address';
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
+import AddressInputModal from '../components/address-input/components/address-input-modal';
 // components
 import Text from '../../components/text';
 import Icon from '../../components/icon';
@@ -45,9 +44,6 @@ import { capture } from '../../lib/sentry';
 import userCache from '../../cache/user';
 import genericCache from '../../cache/generic';
 import shoppingCartCache from '../../cache/shopping-cart';
-import pendingSellerOrdersCache, {
-  getTotal,
-} from '../../cache/pending-seller-orders-cache';
 // types
 import {
   User,
@@ -69,10 +65,6 @@ const defaultSize = 10;
 type SetUserAction = {
   type: 'set_user';
   user?: User;
-};
-type SetUpdatingAction = {
-  type: 'set_updating';
-  updating: boolean;
 };
 type SetWidgetsAction = {
   type: 'set_widgets';
@@ -101,21 +93,20 @@ type SetFetchMoreErrorAction = {
   type: 'set_fetch_more_error';
   fetch_more_error?: Error;
 };
-type SetPendingSellerOrdersAction = {
-  type: 'set_pending_seller_orders';
-  pending_seller_orders: number;
-};
-type SetAddressModalAction = {
-  type: 'set_address_modal';
-  address_modal: boolean;
+type SetAddressInputModalAction = {
+  type: 'set_address_input_modal';
+  address_input_modal: boolean;
 };
 type SetPendingAddressInfoAction = {
   type: 'set_pending_address_info';
   pending_address_info?: AddressInfo;
 };
+type SetUpdatingAddressAction = {
+  type: 'set_updating_address';
+  updating_address: boolean;
+};
 type Action =
   | SetUserAction
-  | SetUpdatingAction
   | SetWidgetsAction
   | AddWidgetsAction
   | ResetWidgetsAction
@@ -123,27 +114,24 @@ type Action =
   | SetRefreshingAction
   | SetFetchingMoreAction
   | SetFetchMoreErrorAction
-  | SetPendingSellerOrdersAction
-  | SetAddressModalAction
-  | SetPendingAddressInfoAction;
+  | SetAddressInputModalAction
+  | SetPendingAddressInfoAction
+  | SetUpdatingAddressAction;
 type State = {
   user?: User;
-  updating: boolean;
   widgets?: SearchResponse<RenderedWidget>;
   error?: Error;
   refreshing: boolean;
   fetching_more: boolean;
   fetch_more_error?: Error;
-  pending_seller_orders?: number;
-  address_modal: boolean;
+  address_input_modal: boolean;
   pending_address_info?: AddressInfo;
+  updating_address: boolean;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'set_user':
       return { ...state, user: action.user };
-    case 'set_updating':
-      return { ...state, updating: action.updating };
     case 'set_widgets':
       return {
         ...state,
@@ -179,12 +167,12 @@ const reducer = (state: State, action: Action): State => {
       };
     case 'set_fetch_more_error':
       return { ...state, fetch_more_error: action.fetch_more_error };
-    case 'set_pending_seller_orders':
-      return { ...state, pending_seller_orders: action.pending_seller_orders };
-    case 'set_address_modal':
-      return { ...state, address_modal: action.address_modal };
+    case 'set_address_input_modal':
+      return { ...state, address_input_modal: action.address_input_modal };
     case 'set_pending_address_info':
       return { ...state, pending_address_info: action.pending_address_info };
+    case 'set_updating_address':
+      return { ...state, updating_address: action.updating_address };
     default:
       return state;
   }
@@ -198,14 +186,13 @@ export default ({ navigation }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
     user: userCache.getData(),
-    updating: false,
     refreshing: false,
     fetching_more: false,
-    address_modal: false,
+    address_input_modal: false,
+    updating_address: false,
   });
+  // TODO: improve
   const address = userCache.getAddress();
-  const insets = useSafeAreaInsets();
-  const toastRef = useRef<IToast>(null);
   let addressInfo;
   if (state.user?.current_address && state.user.addresses?.length) {
     addressInfo = {
@@ -367,8 +354,8 @@ export default ({ navigation }: ScreenProps) => {
 
   const updateAddressInfo = async (info: AddressInfo) => {
     try {
+      dispatch({ type: 'set_updating_address', updating_address: true });
       const prev_current_address = state.user?.current_address;
-      dispatch({ type: 'set_updating', updating: true });
       if (state.user?.id) {
         await userClient.update({
           pathVars: {
@@ -381,29 +368,33 @@ export default ({ navigation }: ScreenProps) => {
           source: ['updated_at'],
         });
       }
+      dispatch({ type: 'set_updating_address', updating_address: false });
+
       await userCache.updateData({
         current_address: info.current_address,
         addresses: info.addresses,
       });
+
       if (prev_current_address !== info.current_address) {
         shoppingCartCache.clear();
       }
     } catch (error) {
       capture(prefix, 'Change address info handler error', error);
+      dispatch({ type: 'set_updating_address', updating_address: false });
 
       toastRef.current?.show({
         message: 'Ocurrió un error, reintente por favor',
         type: 'ERROR',
         expiration: 3,
       });
-    } finally {
-      dispatch({ type: 'set_updating', updating: false });
     }
   };
 
   const changeAddressInfoHandler = async (info: AddressInfo) => {
     if (
+      // address change
       state.user?.current_address !== info.current_address &&
+      // not empty cart
       !shoppingCartCache.isEmpty()
     ) {
       dispatch({
@@ -417,15 +408,19 @@ export default ({ navigation }: ScreenProps) => {
 
   const pressAddAddressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    dispatch({ type: 'set_address_modal', address_modal: true });
+    dispatch({ type: 'set_address_input_modal', address_input_modal: true });
   };
 
-  const addressModalChangeHandler = (info?: AddressInfo) => {
-    if (info) {
-      changeAddressInfoHandler(info);
-    }
+  const addressInputModalChangeHandler = (address: Place) => {
+    dispatch({ type: 'set_address_input_modal', address_input_modal: false });
+    changeAddressInfoHandler({
+      current_address: address.id,
+      addresses: [address],
+    });
+  };
 
-    dispatch({ type: 'set_address_modal', address_modal: false });
+  const addressInputModalCloseHandler = () => {
+    dispatch({ type: 'set_address_input_modal', address_input_modal: false });
   };
 
   const pressCreateStoreHandler = (event: GestureResponderEvent) => {
@@ -480,42 +475,9 @@ export default ({ navigation }: ScreenProps) => {
     }
   }, [state.user?.current_address, state.user?.addresses]);
 
-  useEffect(() => {
-    const unsubscribe = pendingSellerOrdersCache.onChange((data: any) => {
-      dispatch({
-        type: 'set_pending_seller_orders',
-        pending_seller_orders: getTotal(data),
-      });
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const notificationResponseReceivedListener = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data || {};
-        if (data.beast_require_store && !state.user?.current_store) {
-          return;
-        }
-
-        if (data.beast_route) {
-          setTimeout(() => {
-            navigation.navigate(data.beast_route, data.beast_params);
-          }, 300);
-        }
-      }
-    );
-    return () => {
-      Notifications.removeNotificationSubscription(
-        notificationResponseReceivedListener
-      );
-    };
-  }, []);
-
   // render logic
+  const insets = useSafeAreaInsets();
+  const toastRef = useRef<IToast>(null);
   let message = '¡Hola!';
   if (state.user?.first_name) {
     message = `¡Hola ${state.user.first_name}!`;
@@ -525,7 +487,7 @@ export default ({ navigation }: ScreenProps) => {
     selectAddressComponent = (
       <SelectAddress
         value={addressInfo as AddressInfo}
-        processing={state.updating}
+        processing={state.updating_address}
         onChange={changeAddressInfoHandler}
       />
     );
@@ -568,9 +530,24 @@ export default ({ navigation }: ScreenProps) => {
         <Button
           title="Ingresar dirección"
           type="link"
-          loading={state.updating}
+          disabled={state.updating_address}
           onPress={pressAddAddressHandler}
         />
+        {state.updating_address && (
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ActivityIndicator color={colors.black} size="large" />
+          </View>
+        )}
       </View>
     );
   } else if (state.error) {
@@ -754,18 +731,17 @@ export default ({ navigation }: ScreenProps) => {
           ref={toastRef}
           containerStyle={[{ marginBottom: 10 }, globalStyles.withMargin]}
         />
-        <InProgressNotifications navigation={navigation} />
       </View>
-      {state.address_modal && (
-        <ModalManageAddress
-          value={addressInfo}
-          onChange={addressModalChangeHandler}
+      {state.address_input_modal && (
+        <AddressInputModal
+          onChange={addressInputModalChangeHandler}
+          onClose={addressInputModalCloseHandler}
         />
       )}
       {state.pending_address_info && (
         <ConfirmDialog
           title="¿Seguro que quieres cambiar dirección?"
-          message="Tienes artículos en tu carrito que se perderán al cambiar la dirección de entrega."
+          message="Tienes artículos en tu carrito que se perderán al cambiar la dirección."
           okText="Si, cambiar"
           onOk={confirmDialogOkHandler}
           onCancel={confirmDialogCancelHandler}
