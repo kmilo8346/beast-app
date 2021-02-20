@@ -13,6 +13,7 @@ import {
   Platform,
   Dimensions,
   ScrollView,
+  Share,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -24,7 +25,7 @@ import * as Permissions from 'expo-permissions';
 // local components
 import Widget from './components/widget';
 import Skeleton from './components/skeleton';
-import SelectAddress from './components/select-address';
+import SelectAddress, { ISelectAddress } from './components/select-address';
 // screen components
 import ShoppingCartIcon from '../components/shopping-cart-icon';
 import ConfirmDialog from '../components/dialogs/confirm-dialog';
@@ -36,10 +37,10 @@ import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
 import BuildingImage from '../../components/svgs/images/building';
-import SleepingCatImage from '../../components/svgs/images/test';
-import Test2Image from '../../components/svgs/images/test2';
-import Test3Image from '../../components/svgs/images/test3';
-import Test4Image from '../../components/svgs/images/test4';
+import DesertImage from '../../components/svgs/images/desert2';
+import StoreImage from '../../components/svgs/images/store';
+import ShareImage from '../../components/svgs/images/share';
+import DirectionSignsImage from '../../components/svgs/images/direction-signs';
 // clients
 import userClient from '../../clients/user-client';
 import widgetClient from '../../clients/widget-client';
@@ -132,6 +133,7 @@ type State = {
   address_input_modal: boolean;
   pending_address_info?: AddressInfo;
   updating_address: boolean;
+  card_size: number;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -195,6 +197,7 @@ export default ({ navigation }: ScreenProps) => {
     fetching_more: false,
     address_input_modal: false,
     updating_address: false,
+    card_size: (Dimensions.get('window').width * 0.92 - 20 * 2) / 2,
   });
   // TODO: improve
   const address = userCache.getAddress();
@@ -433,6 +436,22 @@ export default ({ navigation }: ScreenProps) => {
     navigation.navigate('SellerStack');
   };
 
+  const pressShareToSellerHandler = async (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    try {
+      await Share.share({
+        message: `Te invito a usar Shop Shop, la app para comprar y vender en tu edificio. Descárgala aqui:\n${Constants.manifest.extra.BEAST_WEB_URL}`,
+      });
+    } catch (error) {
+      capture(prefix, 'Press share handler error', error);
+    }
+  };
+
+  const pressTryAnotherAddressHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    selectAddressRef.current?.show();
+  };
+
   const retryHandler = () => {
     load();
   };
@@ -483,6 +502,7 @@ export default ({ navigation }: ScreenProps) => {
   // render logic
   const insets = useSafeAreaInsets();
   const toastRef = useRef<IToast>(null);
+  const selectAddressRef = useRef<ISelectAddress>(null);
   let message = '¡Hola!';
   if (state.user?.first_name) {
     message = `¡Hola ${state.user.first_name}!`;
@@ -491,6 +511,7 @@ export default ({ navigation }: ScreenProps) => {
   if (addressInfo) {
     selectAddressComponent = (
       <SelectAddress
+        ref={selectAddressRef}
         value={addressInfo as AddressInfo}
         processing={state.updating_address}
         onChange={changeAddressInfoHandler}
@@ -499,7 +520,6 @@ export default ({ navigation }: ScreenProps) => {
   }
 
   let content: ReactNode = null;
-  const s = (Dimensions.get('window').width * 0.97 - 20 * 2) / 2;
   // not current address
   if (!address) {
     content = (
@@ -621,12 +641,18 @@ export default ({ navigation }: ScreenProps) => {
               </Text>
 
               <ShoppingCartIcon />
-              <Touchable
-                style={{ paddingVertical: 5, paddingLeft: 15, paddingRight: 5 }}
-                onPress={pressSearchIconHandler}
-              >
-                <Icon name="search" size={28} />
-              </Touchable>
+              {state.widgets && state.widgets.total > 0 && (
+                <Touchable
+                  style={{
+                    paddingVertical: 5,
+                    paddingLeft: 15,
+                    paddingRight: 5,
+                  }}
+                  onPress={pressSearchIconHandler}
+                >
+                  <Icon name="search" size={28} />
+                </Touchable>
+              )}
             </View>
             {selectAddressComponent}
           </View>
@@ -640,7 +666,7 @@ export default ({ navigation }: ScreenProps) => {
                 marginBottom: 20,
               }}
             >
-              <SleepingCatImage />
+              <DesertImage />
               <Text
                 level={6}
                 style={{
@@ -659,14 +685,51 @@ export default ({ navigation }: ScreenProps) => {
               </Text>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View
+                {!state.user?.current_store && (
+                  <Touchable
+                    style={{
+                      width: state.card_size,
+                      height: state.card_size,
+                      backgroundColor: '#F8F8F8',
+                      borderRadius: 8,
+                      marginRight: 5,
+                    }}
+                    onPress={pressCreateStoreHandler}
+                  >
+                    <View
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <StoreImage width={70} height={70} />
+                    </View>
+
+                    <Text
+                      level={6}
+                      weight="bold"
+                      style={{
+                        textAlign: 'center',
+                        marginBottom: 5,
+                        minHeight: 40,
+                        marginHorizontal: 10,
+                      }}
+                    >
+                      Crea tu tienda en un minuto
+                    </Text>
+                  </Touchable>
+                )}
+
+                <Touchable
                   style={{
-                    width: s,
-                    height: s,
+                    width: state.card_size,
+                    height: state.card_size,
                     backgroundColor: '#F8F8F8',
                     borderRadius: 8,
                     marginRight: 5,
                   }}
+                  onPress={pressShareToSellerHandler}
                 >
                   <View
                     style={{
@@ -675,40 +738,7 @@ export default ({ navigation }: ScreenProps) => {
                       alignItems: 'center',
                     }}
                   >
-                    <Test2Image width={70} height={70} />
-                  </View>
-
-                  <Text
-                    level={6}
-                    weight="bold"
-                    style={{
-                      textAlign: 'center',
-                      marginBottom: 5,
-                      minHeight: 40,
-                      marginHorizontal: 10,
-                    }}
-                  >
-                    Crea tu tienda en un minuto
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    width: s,
-                    height: s,
-                    backgroundColor: '#F8F8F8',
-                    borderRadius: 8,
-                    marginRight: 5,
-                  }}
-                >
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Test3Image width={70} height={70} />
+                    <ShareImage width={70} height={70} />
                   </View>
 
                   <Text
@@ -723,16 +753,17 @@ export default ({ navigation }: ScreenProps) => {
                   >
                     Comparte con vendedores
                   </Text>
-                </View>
+                </Touchable>
 
-                <View
+                <Touchable
                   style={{
-                    width: s,
-                    height: s,
+                    width: state.card_size,
+                    height: state.card_size,
                     backgroundColor: '#F8F8F8',
                     borderRadius: 8,
                     marginRight: 5,
                   }}
+                  onPress={pressTryAnotherAddressHandler}
                 >
                   <View
                     style={{
@@ -741,7 +772,7 @@ export default ({ navigation }: ScreenProps) => {
                       alignItems: 'center',
                     }}
                   >
-                    <Test4Image width={70} height={70} />
+                    <DirectionSignsImage width={70} height={70} />
                   </View>
 
                   <Text
@@ -756,13 +787,8 @@ export default ({ navigation }: ScreenProps) => {
                   >
                     Prueba otra dirección
                   </Text>
-                </View>
+                </Touchable>
               </ScrollView>
-              {/* <Button
-                title="¡O, crea tu tienda hoy!"
-                type="link"
-                onPress={pressCreateStoreHandler}
-              /> */}
             </View>
           </View>
         }

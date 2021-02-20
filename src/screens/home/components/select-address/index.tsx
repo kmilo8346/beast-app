@@ -1,4 +1,9 @@
-import React, { useState, ReactNode } from 'react';
+import React, {
+  useState,
+  ReactNode,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import {
   View,
   GestureResponderEvent,
@@ -23,6 +28,13 @@ import colors from '../../../../styles/colors';
 // instances outside component
 const prefix = '[select address component]';
 
+export type ISelectAddress = {
+  show: () => void;
+  hide: () => void;
+};
+
+type Ref = ISelectAddress;
+
 interface ComponentProps {
   value: AddressInfo;
   processing?: boolean;
@@ -30,73 +42,82 @@ interface ComponentProps {
   onChange: (value: AddressInfo) => void;
 }
 
-export default ({
-  value,
-  processing = false,
-  style,
-  onChange,
-}: ComponentProps) => {
-  // state
-  const [isVisible, setIsVisible] = useState(false);
-  const address = value.addresses.find(
-    (address) => address.id === value.current_address
-  );
-  if (!address) {
-    throw new Error(
-      `${prefix} Current address not match any address, current: ${value.current_address}`
+export default forwardRef<Ref, ComponentProps>(
+  ({ value, processing = false, style, onChange }, ref) => {
+    // state
+    const [isVisible, setIsVisible] = useState(false);
+    const address = value.addresses.find(
+      (address) => address.id === value.current_address
     );
-  }
-
-  // event handlers
-  const pressSelectHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    setIsVisible(true);
-  };
-
-  const modalChangeHandler = (value?: AddressInfo) => {
-    if (!value) {
+    if (!address) {
       throw new Error(
-        `${prefix} Modal manage address return an undefined address info`
+        `${prefix} Current address not match any address, current: ${value.current_address}`
       );
     }
-    setIsVisible(false);
-    onChange(value);
-  };
 
-  const modalCloseHandler = () => {
-    setIsVisible(false);
-  };
+    // event handlers
+    const pressSelectHandler = (event: GestureResponderEvent) => {
+      event.stopPropagation();
+      setIsVisible(true);
+    };
 
-  // render logic
-  const text = `${utils.formatPlace(address)}`;
-  let icon: ReactNode = <Icon name="chevron-down" color={colors.blackLight2} />;
-  if (processing) {
-    icon = <ActivityIndicator size="small" color={colors.black} />;
-  }
-  return (
-    <View style={style}>
-      <Touchable
-        style={{ flexDirection: 'row', alignItems: 'center', minHeight: 30 }}
-        onPress={pressSelectHandler}
-      >
-        <MapPinGreyIcon />
-        <Text
-          level={6}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{ marginHorizontal: 5, flex: 1, letterSpacing: -0.5 }}
+    const modalChangeHandler = (value?: AddressInfo) => {
+      if (!value) {
+        throw new Error(
+          `${prefix} Modal manage address return an undefined address info`
+        );
+      }
+      setIsVisible(false);
+      onChange(value);
+    };
+
+    const modalCloseHandler = () => {
+      setIsVisible(false);
+    };
+
+    useImperativeHandle(ref, () => ({
+      show: () => {
+        setIsVisible(true);
+      },
+
+      hide: async () => {
+        setIsVisible(false);
+      },
+    }));
+
+    // render logic
+    const text = `${utils.formatPlace(address)}`;
+    let icon: ReactNode = (
+      <Icon name="chevron-down" color={colors.blackLight2} />
+    );
+    if (processing) {
+      icon = <ActivityIndicator size="small" color={colors.black} />;
+    }
+    return (
+      <View style={style}>
+        <Touchable
+          style={{ flexDirection: 'row', alignItems: 'center', minHeight: 30 }}
+          onPress={pressSelectHandler}
         >
-          {text}
-        </Text>
-        {icon}
-      </Touchable>
-      {isVisible && (
-        <ModalManageAddress
-          value={value}
-          onChange={modalChangeHandler}
-          onClose={modalCloseHandler}
-        />
-      )}
-    </View>
-  );
-};
+          <MapPinGreyIcon />
+          <Text
+            level={6}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ marginHorizontal: 5, flex: 1, letterSpacing: -0.5 }}
+          >
+            {text}
+          </Text>
+          {icon}
+        </Touchable>
+        {isVisible && (
+          <ModalManageAddress
+            value={value}
+            onChange={modalChangeHandler}
+            onClose={modalCloseHandler}
+          />
+        )}
+      </View>
+    );
+  }
+);
