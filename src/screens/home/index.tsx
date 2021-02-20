@@ -11,6 +11,8 @@ import {
   GestureResponderEvent,
   ActivityIndicator,
   Platform,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,7 +36,10 @@ import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
 import Toast, { IToast } from '../../components/toast';
 import BuildingImage from '../../components/svgs/images/building';
-import SleepingCatImage from '../../components/svgs/images/sleeping-cat';
+import SleepingCatImage from '../../components/svgs/images/test';
+import Test2Image from '../../components/svgs/images/test2';
+import Test3Image from '../../components/svgs/images/test3';
+import Test4Image from '../../components/svgs/images/test4';
 // clients
 import userClient from '../../clients/user-client';
 import widgetClient from '../../clients/widget-client';
@@ -494,6 +499,7 @@ export default ({ navigation }: ScreenProps) => {
   }
 
   let content: ReactNode = null;
+  const s = (Dimensions.get('window').width * 0.97 - 20 * 2) / 2;
   // not current address
   if (!address) {
     content = (
@@ -626,42 +632,138 @@ export default ({ navigation }: ScreenProps) => {
           </View>
         }
         ListEmptyComponent={
-          <View
-            style={{
-              marginTop: 50,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <SleepingCatImage />
-            <Text
-              level={6}
+          <View style={[{ marginTop: 50 }, globalStyles.withMargin]}>
+            <View
               style={{
-                marginTop: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
                 marginBottom: 20,
-                textAlign: 'center',
-                width: 320,
               }}
             >
-              En este momento no hay tiendas{' '}
-              <Text level={6} weight="bold">
-                {' '}
-                abiertas
-              </Text>{' '}
-              en tu zona.
-            </Text>
-            <Text
-              level={5}
-              weight="bold"
-              style={{ marginBottom: 40, textAlign: 'center' }}
-            >
-              ¡Inténtalo de nuevo más tarde!
-            </Text>
-            <Button
-              title="¡O, crea tu tienda hoy!"
-              type="link"
-              onPress={pressCreateStoreHandler}
-            />
+              <SleepingCatImage />
+              <Text
+                level={6}
+                style={{
+                  marginTop: 20,
+                  marginBottom: 20,
+                  textAlign: 'center',
+                  width: 320,
+                }}
+              >
+                No hay tiendas cercanas, pero no te desanimes 😉
+              </Text>
+            </View>
+            <View>
+              <Text level={5} weight="bold" style={{ marginBottom: 20 }}>
+                ¿Que puedo hacer?
+              </Text>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View
+                  style={{
+                    width: s,
+                    height: s,
+                    backgroundColor: '#F8F8F8',
+                    borderRadius: 8,
+                    marginRight: 5,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Test2Image width={70} height={70} />
+                  </View>
+
+                  <Text
+                    level={6}
+                    weight="bold"
+                    style={{
+                      textAlign: 'center',
+                      marginBottom: 5,
+                      minHeight: 40,
+                      marginHorizontal: 10,
+                    }}
+                  >
+                    Crea tu tienda en un minuto
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    width: s,
+                    height: s,
+                    backgroundColor: '#F8F8F8',
+                    borderRadius: 8,
+                    marginRight: 5,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Test3Image width={70} height={70} />
+                  </View>
+
+                  <Text
+                    level={6}
+                    weight="bold"
+                    style={{
+                      textAlign: 'center',
+                      marginBottom: 5,
+                      minHeight: 40,
+                      marginHorizontal: 10,
+                    }}
+                  >
+                    Comparte con vendedores
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    width: s,
+                    height: s,
+                    backgroundColor: '#F8F8F8',
+                    borderRadius: 8,
+                    marginRight: 5,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Test4Image width={70} height={70} />
+                  </View>
+
+                  <Text
+                    level={6}
+                    weight="bold"
+                    style={{
+                      textAlign: 'center',
+                      marginBottom: 5,
+                      minHeight: 40,
+                      marginHorizontal: 10,
+                    }}
+                  >
+                    Prueba otra dirección
+                  </Text>
+                </View>
+              </ScrollView>
+              {/* <Button
+                title="¡O, crea tu tienda hoy!"
+                type="link"
+                onPress={pressCreateStoreHandler}
+              /> */}
+            </View>
           </View>
         }
         ListFooterComponent={

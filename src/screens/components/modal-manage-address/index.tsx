@@ -33,7 +33,6 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
       place,
       (i1, i2) => i1.id === i2.id
     );
-    console.log('addHandler');
     onChange({
       current_address,
       addresses,
@@ -60,7 +59,6 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
   };
 
   const addOptionHandler = () => {
-    console.log('addOptionHandler');
     setInputModal(true);
   };
 
