@@ -130,7 +130,7 @@ export default memo(({ navigation, data }: ComponentProps) => {
       >
         <Image
           source={{
-            uri: cloudinary.dynamicUrl(data.store_info.images[0], 'h_500'),
+            uri: cloudinary.dynamicUrl(data.store_info.images[0], 'h_500/q_80'),
             width: 40,
             height: 40,
           }}
@@ -202,7 +202,7 @@ export default memo(({ navigation, data }: ComponentProps) => {
             </View>
             <Image
               source={{
-                uri: cloudinary.dynamicUrl(product.images[0], 'h_500'),
+                uri: cloudinary.dynamicUrl(product.images[0], 'h_500/q_80'),
                 width: size,
                 height: size,
               }}

@@ -108,7 +108,7 @@ export default ({ navigation }: ScreenProps) => {
     photoComponent = (
       <Image
         source={{
-          uri: cloudinary.dynamicUrl(user.photo_url, 'w_100'),
+          uri: cloudinary.dynamicUrl(user.photo_url, 'w_100/q_80'),
         }}
         style={{ width: 50, height: 50, borderRadius: 100 }}
       />

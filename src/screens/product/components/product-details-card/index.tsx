@@ -56,7 +56,7 @@ export default ({ store, product, style }: ComponentProps) => {
     <View style={style}>
       <Carousell
         images={product.images.map((image: string) =>
-          cloudinary.dynamicUrl(image, 'h_500')
+          cloudinary.dynamicUrl(image, 'h_500/q_80')
         )}
       />
       {!!store && (

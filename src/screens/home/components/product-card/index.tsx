@@ -65,7 +65,10 @@ export default memo(({ product, align, onPress }: ComponentProps) => {
         >
           <Image
             source={{
-              uri: cloudinary.dynamicUrl(product.store_info.images[0], 'h_200'),
+              uri: cloudinary.dynamicUrl(
+                product.store_info.images[0],
+                'h_200/q_80'
+              ),
               width: 30,
               height: 30,
             }}
@@ -88,7 +91,7 @@ export default memo(({ product, align, onPress }: ComponentProps) => {
         </View>
         <Image
           source={{
-            uri: cloudinary.dynamicUrl(product.images[0], 'h_500'),
+            uri: cloudinary.dynamicUrl(product.images[0], 'h_500/q_80'),
           }}
           style={[
             {

@@ -561,7 +561,7 @@ export default ({ navigation }: ScreenProps) => {
                       source={{
                         uri: cloudinary.dynamicUrl(
                           storeSnapshot.store.images[0],
-                          'w_500'
+                          'w_500/q_80'
                         ),
                       }}
                       style={{

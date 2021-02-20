@@ -543,7 +543,10 @@ export default ({ navigation, route }: ScreenProps) => {
             >
               <Image
                 source={{
-                  uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500'),
+                  uri: cloudinary.dynamicUrl(
+                    state.store.images[0],
+                    'h_500/q_80'
+                  ),
                 }}
                 style={{
                   alignSelf: 'center',

@@ -443,7 +443,7 @@ export default ({ navigation, route }: ScreenProps) => {
         >
           <Image
             source={{
-              uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500'),
+              uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500/q_80'),
             }}
             style={{ width: 60, height: 60, borderRadius: 100 }}
           />
@@ -530,7 +530,10 @@ export default ({ navigation, route }: ScreenProps) => {
               >
                 <Image
                   source={{
-                    uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500'),
+                    uri: cloudinary.dynamicUrl(
+                      state.store.images[0],
+                      'h_500/q_80'
+                    ),
                   }}
                   style={{ width: 60, height: 60, borderRadius: 100 }}
                 />
