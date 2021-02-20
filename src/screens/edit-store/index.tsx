@@ -2,7 +2,6 @@ import React, { useEffect, useReducer } from 'react';
 import { View, ScrollView, Image } from 'react-native';
 
 // local components
-import MercadoPagoInput from './components/mercado-pago-input';
 import VisibilityInput from './components/visibility-input';
 // components
 import Text from '../../components/text';
@@ -182,7 +181,7 @@ export default ({ navigation }: ScreenProps) => {
       <Input
         disabled
         label="Teléfono"
-        value={stringFormatter.toPhone(state.store.phone, { prefix: true })}
+        value={stringFormatter.toPhone(state.store.phone)}
         placeholder="Añadir teléfono"
       />
       <Input
@@ -243,10 +242,6 @@ export default ({ navigation }: ScreenProps) => {
           </View>
         }
         onPress={pressOpeningHoursHandler}
-      />
-      <MercadoPagoInput
-        id={state.store.id}
-        provider={state.store.payment_provider}
       />
       <VisibilityInput id={state.store.id} enabled={state.store.enabled} />
 
