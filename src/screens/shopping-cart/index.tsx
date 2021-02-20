@@ -319,7 +319,7 @@ export default ({ navigation }: ScreenProps) => {
         (text, item) => {
           return `${text}✅ ${item.name} · ${numberFormatter.toCurrency(
             item.price
-          )} · ${item.qty} ud.\n`;
+          )} x ${item.qty} ud.\n`;
         },
         ''
       );
