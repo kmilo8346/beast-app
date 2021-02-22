@@ -15,6 +15,8 @@ import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 
+// ga
+import * as ga from './ga';
 // local components
 import ViewOpeningHoursModal from './components/view-opening-hours-modal';
 // screen components
@@ -373,6 +375,8 @@ export default ({ navigation, route }: ScreenProps) => {
           `Hola ${state.store.name} 👋`
         )}&phone=${state.store.phone}`
       );
+      // send store question message event to ga
+      await ga.sendStoreQuestionMessageEvent(state.store);
     } catch (error) {
       capture(prefix, 'Press ask me a question error', error);
 

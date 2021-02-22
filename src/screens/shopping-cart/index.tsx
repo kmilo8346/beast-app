@@ -16,6 +16,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 
+// ga
+import * as ga from './ga';
 // local components
 import ItemComponent from './components/item';
 // screen components
@@ -330,6 +332,10 @@ export default ({ navigation }: ScreenProps) => {
         `whatsapp://send?text=${encodeURIComponent(
           `Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`
         )}&phone=${state.selected_store_shopping_cart_snapshot.store.phone}`
+      );
+      // send order message event to ga
+      await ga.sendOrderMessageEvent(
+        state.selected_store_shopping_cart_snapshot
       );
       // show dialog to remove order
       dispatch({

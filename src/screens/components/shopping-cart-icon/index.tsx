@@ -16,6 +16,8 @@ import userCache from '../../../cache/user';
 import shoppingCartCache, { getTotal } from '../../../cache/shopping-cart';
 // lib
 import { navigate } from '../../../lib/root-navigation';
+// styles
+import colors from '../../../styles/colors';
 
 interface ComponentProps {
   style?: StyleProp<ViewStyle>;
@@ -76,7 +78,12 @@ export default ({ style }: ComponentProps) => {
           style={{ position: 'absolute', top: -7, left: 1 }}
         />
       </View>
-      <Icon name="shopping-cart" size={28} />
+      <Icon
+        name="shopping-cart"
+        size={28}
+        color={colors.black}
+        backgroundColor={colors.white}
+      />
     </Touchable>
   );
 };

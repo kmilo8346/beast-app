@@ -48,7 +48,8 @@
     "react-native-svg": "12.1.0",
     "react-native-web": "~0.13.12",
     "sentry-expo": "^3.0.3",
-    "validate.js": "^0.13.1"
+    "validate.js": "^0.13.1",
+    "expo-firebase-analytics": "~2.6.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

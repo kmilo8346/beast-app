@@ -4,11 +4,7 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.71",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,21 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
+    "web": {
+      "config": {
+        "firebase": {
+          "apiKey": "AIzaSyDCoPr72BKaZz92J1e7nxQcmBW0LzKmsNU",
+          "authDomain": "beast-staging.firebaseapp.com",
+          "databaseURL": "https://beast-staging.firebaseio.com",
+          "projectId": "beast-staging",
+          "storageBucket": "beast-staging.appspot.com",
+          "messagingSenderId": "547645154100",
+          "appId": "1:547645154100:web:476a0c356bc49861cd3b61",
+          "measurementId": "G-7DMLS3Q19K"
+        }
+      }
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",

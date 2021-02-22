@@ -15,6 +15,7 @@ import deviceClient, { getDeviceData } from '../clients/device-client';
 import userCache from '../cache/user';
 import genericCache from '../cache/generic';
 // libs
+import Analytics from '../lib/analytics';
 import Sentry, { capture } from '../lib/sentry';
 import { navigationRef, onReady } from '../lib/root-navigation';
 
@@ -54,6 +55,7 @@ export default () => {
       }
       Sentry.Native.setUser(user);
 
+      // sync device
       if (genericCache.getDeviceId()) {
         try {
           const data = await getDeviceData();
@@ -66,6 +68,17 @@ export default () => {
           capture(prefix, 'User on change update device error', error);
         }
       }
+
+      // identify user in google analytics
+      try {
+        await Analytics.setUserId(data?.id || null);
+      } catch (error) {
+        capture(
+          prefix,
+          'User on change sending data to analytics error',
+          error
+        );
+      }
     });
 
     return () => {
@@ -77,7 +90,21 @@ export default () => {
   const initial = genericCache.getOnboarding() ? 'MainTab' : 'OnboardingStack';
   return (
     <SafeAreaProvider>
-      <NavigationContainer ref={navigationRef} onReady={onReady}>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => {
+          const routeName = navigationRef.current?.getCurrentRoute()?.name;
+          if (routeName) {
+            Analytics.setCurrentScreen(routeName);
+          }
+          onReady();
+        }}
+        onStateChange={() => {
+          const currentRouteName = navigationRef.current?.getCurrentRoute()
+            ?.name;
+          Analytics.setCurrentScreen(currentRouteName);
+        }}
+      >
         <Stack.Navigator
           initialRouteName={initial}
           mode="modal"

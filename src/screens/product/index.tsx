@@ -16,6 +16,8 @@ import axios, { CancelTokenSource } from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 
+// ga
+import * as ga from './ga';
 // local components
 import ProductDetailsCard from './components/product-details-card';
 // screen components
@@ -324,6 +326,8 @@ export default ({ navigation, route }: ScreenProps) => {
           )}\n\nHola, ¿Está disponible? 🤩`
         )}&phone=${state.store?.phone}`
       );
+      // send product message event to ga
+      await ga.sendProductMessageEvent(state.store as Store, state.product);
     } catch (error) {
       capture(prefix, 'Press send to whatsapp hanlder error', error);
 
