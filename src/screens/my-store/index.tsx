@@ -378,7 +378,7 @@ export default ({ navigation, route }: ScreenProps) => {
     event.stopPropagation();
     navigation.navigate('SetPhone', {
       redirect: {
-        name: 'CreateStoreWizzardSetName',
+        name: 'MyStore',
       },
     });
   };
