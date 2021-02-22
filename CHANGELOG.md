@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.73](https://github.com/firedevs-team/beast-app/compare/v1.0.72...v1.0.73) (2021-02-22)
+
+
+### Bug Fixes
+
+* **my store:** redirect ([833a2e9](https://github.com/firedevs-team/beast-app/commit/833a2e9b24008bc5ac976c2528406ff71b3bc17f))
+
 ### [1.0.72](https://github.com/firedevs-team/beast-app/compare/v1.0.71...v1.0.72) (2021-02-22)
 
 

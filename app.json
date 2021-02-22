@@ -4,8 +4,12 @@
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": ["ios", "android", "web"],
-    "version": "1.0.72",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.73",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +21,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "config": {
         "firebase": {
@@ -35,7 +41,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.72",
+      "buildNumber": "1.0.73",
       "config": {
         "usesNonExemptEncryption": false,
         "googleMapsApiKey": "AIzaSyD1Gd5wIw-a6ELjxPlMMgGj1x_FKWWF61c"
@@ -50,7 +56,7 @@
     "android": {
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
-      "versionCode": 400010072,
+      "versionCode": 400010073,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
