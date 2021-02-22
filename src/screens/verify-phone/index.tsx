@@ -81,7 +81,8 @@ export default ({ navigation, route }: ScreenProps) => {
       userCache.setData(created);
 
       setTimeout(() => {
-        navigation.navigate(
+        navigation.pop();
+        navigation.replace(
           route.params.redirect.name,
           route.params.redirect.params
         );
