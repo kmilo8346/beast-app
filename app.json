@@ -1,14 +1,10 @@
 {
   "expo": {
-    "entryPoint": "./src/index.js",
+    "entryPoint": "./src/index.tsx",
     "name": "Shop Shop",
     "slug": "beast",
     "scheme": "beast",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.72",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
@@ -21,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "config": {
         "firebase": {
