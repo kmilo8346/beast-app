@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.72](https://github.com/firedevs-team/beast-app/compare/v1.0.71...v1.0.72) (2021-02-22)
+
+
+### Bug Fixes
+
+* **package json:** removing unused packages ([23dd374](https://github.com/firedevs-team/beast-app/commit/23dd3740c91e2788ea2310523b69bc5893db3c73))
+* **store screen:** text ellipsis ([104bf6f](https://github.com/firedevs-team/beast-app/commit/104bf6f6bbe3f7281c0b494871eb5f449918c3f8))
+
 ### [1.0.71](https://github.com/firedevs-team/beast-app/compare/v1.0.70...v1.0.71) (2021-01-10)
 
 ### [1.0.70](https://github.com/firedevs-team/beast-app/compare/v1.0.69...v1.0.70) (2021-01-10)
