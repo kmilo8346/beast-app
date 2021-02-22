@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar, View, LogBox } from 'react-native';
 import registerRootComponent from 'expo/build/launch/registerRootComponent';
-import { AppLoading } from 'expo';
+import AppLoading from 'expo-app-loading';
 import * as Font from 'expo-font';
 
 import Navigation from './navigation/index';
