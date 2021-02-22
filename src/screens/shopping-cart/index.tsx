@@ -366,7 +366,7 @@ export default ({ navigation }: ScreenProps) => {
       type: 'set_selected_store_shopping_cart_snapshot',
       selected_store_shopping_cart_snapshot: match,
     });
-  }, [state.shopping_cart_snapshot]);
+  }, [state.shopping_cart_snapshot, state.selected_store]);
 
   useFocusEffect(
     useCallback(() => {
@@ -430,20 +430,18 @@ export default ({ navigation }: ScreenProps) => {
   if (state.selected_store_shopping_cart_snapshot) {
     mainAction = (
       <View>
-        <Divider type="thin" style={{ marginBottom: 5 }} />
+        <Divider type="thin" style={{ marginBottom: 0 }} />
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 5,
-            paddingHorizontal: 5,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginBottom: 12,
               flex: 1,
             }}
           >
@@ -452,14 +450,14 @@ export default ({ navigation }: ScreenProps) => {
               level={5}
               color={colors.blackLight1}
               style={{
-                marginLeft: 10,
-                marginRight: 5,
+                paddingLeft: 10,
+                paddingRight: 3,
                 letterSpacing: -0.5,
                 flex: 1,
                 lineHeight: 20,
               }}
             >
-              {`Envía pedido en un mensaje a `}
+              {`Envía mensaje con el pedido de `}
               <Text level={5} weight="bold">
                 {state.selected_store_shopping_cart_snapshot.store.name}
               </Text>
