@@ -119,8 +119,9 @@ export default ({ navigation, route }: ScreenProps) => {
       navigation.setParams({
         ...route.params,
         phone: response.phone,
-        code: [...codes, response.code],
+        codes: [...codes, response.code],
       });
+
       toastRef.current?.show({
         type: 'INFO',
         message: 'Código reenviado correctamente',
@@ -190,12 +191,17 @@ export default ({ navigation, route }: ScreenProps) => {
           autoFocus
           keyboardType="numeric"
           placeholder="Introduce el código enviado"
+          style={{
+            fontSize: 18,
+            fontFamily: 'MonserratBold',
+            fontWeight: 'bold',
+          }}
           onChangeText={changeCodeHandler}
         />
         <Button
           type="link"
           title={
-            <Text level={7} color={colors.blue}>
+            <Text level={6} color={colors.blue}>
               Reenviar código sms
             </Text>
           }
