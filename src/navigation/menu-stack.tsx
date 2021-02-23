@@ -11,8 +11,6 @@ import {
   SetUserFirstNameScreen,
   SetUserLastNameScreen,
   SetUserEmailScreen,
-  StoreScreen,
-  ProductScreen,
 } from '../screens';
 // components
 import KeyboardAvoidingView from '../components/keyboard-avoiding-view';
@@ -64,16 +62,6 @@ export default () => {
           name="SetUserEmail"
           component={SetUserEmailScreen}
           options={{ title: 'Email' }}
-        />
-        <Stack.Screen
-          name="Store"
-          component={StoreScreen}
-          options={{ title: '' }}
-        />
-        <Stack.Screen
-          name="Product"
-          component={ProductScreen}
-          options={{ title: '' }}
         />
       </Stack.Navigator>
     </KeyboardAvoidingView>

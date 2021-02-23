@@ -100,14 +100,14 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
       style={{
         position: 'absolute',
         top: insets.top,
-        right: 0,
+        left: 0,
         zIndex: 9,
         paddingHorizontal: 15,
         paddingVertical: 10,
       }}
       onPress={pressCloseHandler}
     >
-      <Icon name="x" />
+      <Icon name="x" size={28} />
     </Touchable>
   );
   if (Platform.OS === 'android') {

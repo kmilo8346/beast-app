@@ -5,6 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ShoppingCartScreen } from '../screens';
 // navigation
 import commonStackOptions from './common-stack-options';
+// components
+import Icon from '../components/icon';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +16,10 @@ export default () => {
       <Stack.Screen
         name="ShoppingCart"
         component={ShoppingCartScreen}
-        options={{ title: 'Mi carro' }}
+        options={{
+          title: 'Mi carro',
+          headerBackImage: () => <Icon name="x" size={28} />,
+        }}
       />
     </Stack.Navigator>
   );

@@ -42,14 +42,14 @@ export default ({ children, onClose = utils.noop }: FullModalProps) => {
         <Touchable
           style={{
             paddingLeft: 3,
-            alignSelf: 'flex-end',
+            alignSelf: 'flex-start',
             justifyContent: 'center',
             alignItems: 'center',
             marginRight: 17,
           }}
           onPress={pressCloseHandler}
         >
-          <Icon name="x" />
+          <Icon name="x" size={28} />
         </Touchable>
         {children}
       </SafeAreaView>

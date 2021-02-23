@@ -407,7 +407,7 @@ export default ({ onChange, onClose }: ComponentProps) => {
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
         <Touchable
           style={{
-            alignSelf: 'flex-end',
+            alignSelf: 'flex-start',
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: 15,
@@ -415,7 +415,7 @@ export default ({ onChange, onClose }: ComponentProps) => {
           }}
           onPress={pressCloseHandler}
         >
-          <Icon name="x" />
+          <Icon name="x" size={28} />
         </Touchable>
         <TextInput
           ref={ref}
