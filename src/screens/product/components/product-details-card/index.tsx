@@ -3,7 +3,7 @@ import { StyleProp, View, ViewStyle } from 'react-native';
 // product components
 import NumberInput from '../number-input';
 // screen components
-import Carousell from '../../../components/carousell';
+import Carousell from './components/carousell';
 // components
 import Text from '../../../../components/text';
 import ReadMore from '../../../../components/text/read-more';
