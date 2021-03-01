@@ -58,7 +58,7 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
         <View
           style={{ alignSelf: align === 'right' ? 'flex-end' : 'flex-start' }}
         >
-          {!!qty && (
+          {!!qty && qty > 0 && (
             <View style={{ zIndex: 9, position: 'absolute', left: 2, top: 2 }}>
               <Badge count={qty} style={{ minHeight: 24, minWidth: 24 }} />
             </View>
@@ -97,7 +97,7 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
           </Text>
         </View>
       </Touchable>
-      {typeof qty !== 'undefined' && !!store.reference && (
+      {typeof qty !== 'undefined' && !!store.phone && (
         <View style={{ minHeight: 30 }}>
           <InputNumber
             value={qty}

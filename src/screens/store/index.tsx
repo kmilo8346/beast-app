@@ -200,6 +200,15 @@ export default ({ navigation, route }: ScreenProps) => {
         pathVars: {
           id: state.store.id,
         },
+        source: [
+          'id',
+          'images',
+          'name',
+          'description',
+          'phone',
+          'delivery_time',
+          'opening_hours',
+        ],
       },
       { cancelToken: fetchStoreRequestSource.token }
     );
@@ -247,6 +256,7 @@ export default ({ navigation, route }: ScreenProps) => {
         filters,
         from,
         size,
+        source: ['id', 'images', 'name', 'price', 'store'],
       },
       { cancelToken: fetchProductsRequestSource.token }
     );

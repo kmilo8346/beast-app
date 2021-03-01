@@ -82,7 +82,7 @@ export default ({ store, product, style }: ComponentProps) => {
               </View>
             )}
           </View>
-          {typeof qty !== 'undefined' && !!product.reference && (
+          {typeof qty !== 'undefined' && !!store.phone && (
             <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
               <NumberInput
                 value={qty}

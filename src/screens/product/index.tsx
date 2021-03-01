@@ -172,6 +172,7 @@ export default ({ navigation, route }: ScreenProps) => {
           storeId: state.product.store,
           id: state.product.id,
         },
+        source: ['id', 'images', 'name', 'description', 'price', 'store'],
       },
       { cancelToken: fetchProductRequestSource.token }
     );
@@ -212,6 +213,14 @@ export default ({ navigation, route }: ScreenProps) => {
         pathVars: {
           id: state.product.store,
         },
+        source: [
+          'id',
+          'images',
+          'name',
+          'delivery_time',
+          'opening_hours',
+          'phone',
+        ],
       },
       { cancelToken: fetchStoreRequestSource.token }
     );
@@ -258,6 +267,7 @@ export default ({ navigation, route }: ScreenProps) => {
         },
         from: 0,
         size: defaultSize,
+        source: ['id', 'images', 'name', 'price', 'store'],
       },
       { cancelToken: fetchProductsRequestSource.token }
     );
