@@ -319,7 +319,7 @@ export default ({ navigation, route }: ScreenProps) => {
     try {
       dispatch({ type: 'set_fetching_more', fetching_more: true });
       const products = await fetchProducts(
-        state.products.filters,
+        { enabled: true },
         state.products.from,
         state.products.size
       );
