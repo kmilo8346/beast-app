@@ -1,6 +1,4 @@
-import * as AppleAuthentication from 'expo-apple-authentication';
-
-import { Item, CreateUser, OpeningHours, Place } from '../types';
+import { Item, OpeningHours, Place } from '../types';
 import numberFormatter from './formatters/number-formatter';
 import stringFormatter from './formatters/string-formatter';
 
@@ -120,73 +118,10 @@ export const getStats = (items: Item[]) => {
   );
 };
 
-export const extract = (info: {
-  authUser: firebase.User;
-  profile?: { [key: string]: any };
-  appleCredential?: AppleAuthentication.AppleAuthenticationCredential;
-}): Partial<CreateUser> => {
-  if (info.authUser.isAnonymous) {
-    return {
-      id: info.authUser.uid,
-    };
-  }
-
-  const email = info.authUser.email as string;
-  let first_name = info.authUser.displayName as string;
-  let last_name = '';
-  let photo_url = info.authUser.photoURL as string;
-  // try to find from profile
-  if (info.profile) {
-    if (info.profile.first_name) {
-      first_name = info.profile.first_name;
-    } else if (info.profile.given_name) {
-      first_name = info.profile.given_name;
-    }
-
-    if (info.profile.last_name) {
-      last_name = info.profile.last_name;
-    } else if (info.profile.family_name) {
-      last_name = info.profile.family_name;
-    }
-  }
-
-  // try to find from appleCredential
-  if (!first_name && info.appleCredential) {
-    first_name = info.appleCredential.fullName?.givenName as string;
-    last_name = info.appleCredential.fullName?.familyName as string;
-  }
-  // fallback from email
-  if (!first_name) {
-    first_name = email.substring(0, email.indexOf('@'));
-  }
-
-  if (!photo_url) {
-    photo_url =
-      'https://res.cloudinary.com/firedevs/image/upload/v1601140373/beast/assets/blue-user-logo_wk53b4.png';
-  }
-
-  return {
-    id: info.authUser.uid,
-    email,
-    first_name,
-    last_name,
-    photo_url,
-  };
-};
-
 export const normalizeOpeningHours = (openingHours: OpeningHours) => {
   return openingHours.map((dayOpeningHours) => {
     const result = { ...dayOpeningHours };
-    if (!dayOpeningHours.hours) {
-      if (dayOpeningHours.open === 0 && dayOpeningHours.close === 0) {
-        result.hours = [];
-      } else {
-        result.hours = [
-          { open: dayOpeningHours.open, close: dayOpeningHours.close },
-        ];
-      }
-    }
-    result.hours = (result.hours || []).sort((a, b) => {
+    result.hours = result.hours.sort((a, b) => {
       if (a.open < b.open) {
         return -1;
       }

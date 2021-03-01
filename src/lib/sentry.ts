@@ -21,6 +21,7 @@ export const capture = (
     if (error) {
       logMessage = `${logMessage}: ${error}`;
     }
+    // eslint-disable-next-line no-console
     console.log(logMessage);
   }
 

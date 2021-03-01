@@ -53,7 +53,6 @@ class DeviceClient extends RestClient<Device, CreateDevice> {
       return updateResponse;
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        console.log('creating instead');
         const createResponse = await this.create(
           {
             body: { ...params.body, id: params.pathVars?.id } as CreateDevice,

@@ -134,25 +134,10 @@ export interface DayOpeningHours {
 
 export type OpeningHours = DayOpeningHours[];
 
-export interface MercadoPagoCredentials {
-  access_token: string;
-  expires_in: number;
-  live_mode: boolean;
-  public_key: string;
-  refresh_token: string;
-  scope: string;
-  token_type: string;
-  user_id: number;
-}
-
 export interface DeliveryArea {
   center: Place;
   radius: string;
   geometry: Circle;
-}
-
-export interface PaymentProvider {
-  credentials: MercadoPagoCredentials;
 }
 
 export interface CreateStore {
@@ -166,7 +151,6 @@ export interface CreateStore {
   delivery_time: IntegerRange;
   delivery_area: DeliveryArea;
   opening_hours: OpeningHours;
-  payment_provider?: PaymentProvider | null;
 }
 
 export interface Store extends CreateStore {
@@ -235,61 +219,6 @@ export interface User extends CreateUser {
   updated_at: Date;
 }
 
-export interface CreateOrder {
-  idempotency: string;
-  customer: {
-    id: string;
-    email?: string | null;
-    first_name: string;
-    last_name?: string | null;
-    photo_url?: string | null;
-    phone: string;
-    created_at?: Date;
-  };
-  transaction: {
-    country: string;
-    currency: string;
-    language: string;
-    delivery_address: Place;
-    shopping_cart: {
-      store: Store;
-      items: Item[];
-    };
-  };
-}
-
-export enum OrderStatus {
-  CREATED = 'created',
-  CONFIRMED = 'confirmed',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
-}
-
-export enum CancellationExecuter {
-  CLIENT = 'client',
-  SELLER = 'seller',
-  BEAST = 'beast',
-}
-
-export enum CancellationReason {
-  INACTIVITY = 'inactivity',
-}
-
-export interface Order extends CreateOrder {
-  id: string;
-  status: OrderStatus;
-  cancellation_information?: {
-    executer: CancellationExecuter;
-    reason?: CancellationReason;
-  };
-  stats: {
-    amount: number;
-    total: number;
-  };
-  created_at: Date;
-  updated_at: Date;
-}
-
 export interface CreateDevice {
   id?: string;
   platform: string;
@@ -314,27 +243,6 @@ export interface Device extends CreateDevice {
 export interface AddressInfo {
   current_address: string;
   addresses: Place[];
-}
-
-export interface CreateMercadoPagoCheckout {
-  customer: {
-    email: string;
-    first_name: string;
-    last_name?: string;
-    phone: string;
-  };
-  transaction: {
-    currency: string;
-    delivery_address: {
-      street_number: AddressProp;
-      route: AddressProp;
-    };
-    store: {
-      name: string;
-      payment_provider: PaymentProvider;
-    };
-    amount: number;
-  };
 }
 
 export enum WidgetType {
