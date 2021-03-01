@@ -11,18 +11,16 @@ interface Styles {
 export default StyleSheet.create<Styles>({
   container: {},
   toast: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.blackLight5,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     borderRadius: 10,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 5,
   },
   message: {
     flex: 1,
+    color: colors.white,
   },
 });

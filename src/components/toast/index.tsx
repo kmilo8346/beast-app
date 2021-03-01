@@ -9,9 +9,11 @@ import { View, ViewStyle, StyleProp, Vibration } from 'react-native';
 
 // components
 import Text from '../text';
+import Icon from '../icon';
 import Touchable from '../touchable';
 // styles
 import styles from './styles';
+import colors from '../../styles/colors';
 
 // TODO: create toast type designs with anny
 
@@ -46,7 +48,7 @@ export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
     const toastData: InternalToastData = {
       ...data,
       id: `${new Date().getTime()}`,
-      type: 'INFO',
+      type: data.type || 'INFO',
       timeoutId: null,
     };
 
@@ -64,8 +66,11 @@ export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
       }, toastData.expiration * 1000);
     }
 
-    // add to list
-    setToasts((prevToasts) => [...prevToasts, toastData]);
+    // add to list but just keep 3
+    setToasts((prevToasts) => {
+      const array = [...prevToasts, toastData];
+      return array.slice(Math.max(array.length - 3, 0));
+    });
 
     if (data.type === 'ERROR') {
       Vibration.vibrate(400);
@@ -102,6 +107,8 @@ export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
     <View style={containerStyle}>
       {toasts.map((toastData, index, array) => {
         let toastAction = null;
+        const finalToastStyle = [styles.toast];
+        let icon = <Icon name="info" color={colors.white} />;
         if (toastData.action) {
           let actionComponent = toastData.action;
           if (typeof toastData.action === 'string') {
@@ -117,17 +124,33 @@ export default forwardRef<Ref, ToastProps>(({ containerStyle }, ref) => {
             </Touchable>
           );
         }
-        const finalToastStyle = [styles.toast];
         if (index === array.length - 1) {
           finalToastStyle.push({
             marginBottom: 0,
           });
         }
+        if (toastData.type === 'ERROR') {
+          icon = <Icon name="info" color={colors.red} />;
+        } else if (toastData.type === 'SUCCESS') {
+          icon = <Icon name="info" color={colors.green} />;
+        } else if (toastData.type === 'WARNING') {
+          icon = <Icon name="info" color={colors.yellow} />;
+        }
         return (
           <View key={toastData.id} style={finalToastStyle}>
+            {icon}
+            <View
+              style={{
+                alignSelf: 'stretch',
+                borderWidth: 1,
+                borderColor: colors.blackLight3,
+                marginLeft: 7,
+                marginRight: 10,
+                borderRadius: 8,
+              }}
+            />
             <Text
               level={6}
-              weight="bold"
               numberOfLines={1}
               ellipsizeMode="tail"
               style={styles.message}
