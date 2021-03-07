@@ -1,5 +1,5 @@
 import { StyleSheet, ViewStyle } from 'react-native';
-import colors from '../../../../../../styles/colors';
+import colors from '../../../../styles/colors';
 
 interface Styles {
   container: ViewStyle;

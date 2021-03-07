@@ -26,6 +26,7 @@ interface ComponentProps {
 export default memo(({ product, store, align, onPress }: ComponentProps) => {
   // state
   const [qty, setQty] = useState<number | undefined>();
+  const [size] = useState((Dimensions.get('window').width / 2 - 20) * 0.95);
 
   // event handlers
   const pressProductHandler = (event: GestureResponderEvent) => {
@@ -51,7 +52,6 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
   }, []);
 
   // render logic
-  const size = (Dimensions.get('window').width / 2 - 20) * 0.95;
   return (
     <View style={{ width: '50%', marginBottom: 10 }}>
       <Touchable onPress={pressProductHandler} style={{ marginBottom: 3 }}>
@@ -97,15 +97,16 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
           </Text>
         </View>
       </Touchable>
-      {typeof qty !== 'undefined' && !!store.phone && (
-        <View style={{ minHeight: 30 }}>
+
+      <View style={{ minHeight: 30 }}>
+        {typeof qty !== 'undefined' && !!store.phone && (
           <InputNumber
             value={qty}
             style={{ alignSelf: 'center' }}
             onChange={changeQtyHandler}
           />
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 });

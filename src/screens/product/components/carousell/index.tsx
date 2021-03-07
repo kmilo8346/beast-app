@@ -11,13 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // components
-import Text from '../../../../../../components/text';
-import Icon from '../../../../../../components/icon';
-import Image from '../../../../../../components/image';
-import Touchable from '../../../../../../components/touchable';
+import Text from '../../../../components/text';
+import Icon from '../../../../components/icon';
+import Image from '../../../../components/image';
+import Touchable from '../../../../components/touchable';
 // styles
 import styles from './styles';
-import colors from '../../../../../../styles/colors';
+import colors from '../../../../styles/colors';
 
 // instances outside component
 const deviceWidth = Dimensions.get('window').width;

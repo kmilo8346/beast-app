@@ -26,6 +26,7 @@ import ShoppingCartIcon from '../components/shopping-cart-icon';
 // components
 import Text from '../../components/text';
 import Icon from '../../components/icon';
+import Bone from '../../components/bone';
 import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
@@ -34,7 +35,7 @@ import ReadMore from '../../components/text/read-more';
 import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
 // clients
 import storeClient from '../../clients/store-client';
-import productClient from '../../clients/product-client';
+import storeProductClient from '../../clients/store-product-client';
 // cache
 import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
 // libs
@@ -72,7 +73,7 @@ type SetProductsAction = {
 };
 type SetErrorAction = {
   type: 'set_error';
-  error: Error;
+  error?: Error;
 };
 type SetFetchingMoreAction = {
   type: 'set_fetching_more';
@@ -85,10 +86,6 @@ type SetFetchMoreErrorAction = {
 type SetRefreshingAction = {
   type: 'set_refreshing';
   refreshing: boolean;
-};
-type SetContactAction = {
-  type: 'set_contact';
-  contact: boolean;
 };
 type SetAmountAction = {
   type: 'set_amount';
@@ -182,7 +179,10 @@ interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    store: route.params.store,
+    store:
+      typeof route.params.store === 'string'
+        ? { id: route.params.store }
+        : route.params.store,
     fetching_more: false,
     refreshing: false,
     opening_hours_modal: false,
@@ -239,24 +239,21 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
-  const fetchProducts = async (
-    filters?: { [key: string]: any },
-    from = 0,
-    size = defaultSize
-  ) => {
+  const fetchProducts = async (from = 0, size = defaultSize) => {
     if (fetchProductsRequestSource) {
       fetchProductsRequestSource.cancel();
     }
     fetchProductsRequestSource = axios.CancelToken.source();
-    const products = await productClient.search(
+    const products = await storeProductClient.search(
       {
-        pathVars: {
-          storeId: state.store.id,
+        filters: {
+          enabled: true,
+          store: state.store.id,
         },
-        filters,
         from,
         size,
         source: ['id', 'images', 'name', 'price', 'store'],
+        sort: { 'stats.number_of_times_in_orders': 'desc' },
       },
       { cancelToken: fetchProductsRequestSource.token }
     );
@@ -265,7 +262,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const loadProducts = async () => {
     try {
-      const response = await fetchProducts({ enabled: true });
+      const response = await fetchProducts();
       dispatch({
         type: 'set_products',
         products: {
@@ -284,9 +281,7 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const refreshProducts = async () => {
     try {
-      const response = await fetchProducts({
-        enabled: true,
-      });
+      const response = await fetchProducts();
       dispatch({
         type: 'set_products',
         products: {
@@ -301,17 +296,6 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
-  const load = () => {
-    dispatch({ type: 'reset' });
-    Promise.all([loadStore(), loadProducts()]);
-  };
-
-  const refresh = () => {
-    dispatch({ type: 'set_refreshing', refreshing: true });
-    Promise.all([refreshStore(), refreshProducts()]);
-    dispatch({ type: 'set_refreshing', refreshing: false });
-  };
-
   const fetchMoreProducts = async () => {
     if (!state.products) {
       throw new Error(`${prefix} To fetch more must be state products`);
@@ -319,7 +303,6 @@ export default ({ navigation, route }: ScreenProps) => {
     try {
       dispatch({ type: 'set_fetching_more', fetching_more: true });
       const products = await fetchProducts(
-        { enabled: true },
         state.products.from,
         state.products.size
       );
@@ -342,14 +325,25 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
-  const retryHandler = (event: GestureResponderEvent) => {
-    event.stopPropagation();
-    load();
-  };
-
   const retryFetchMoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     fetchMoreProducts();
+  };
+
+  const load = () => {
+    dispatch({ type: 'reset' });
+    Promise.all([loadStore(), loadProducts()]);
+  };
+
+  const refresh = async () => {
+    dispatch({ type: 'set_refreshing', refreshing: true });
+    await Promise.all([refreshStore(), refreshProducts()]);
+    dispatch({ type: 'set_refreshing', refreshing: false });
+  };
+
+  const retryHandler = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    load();
   };
 
   const pressProductHandler = useCallback((product: Product) => {
@@ -397,6 +391,28 @@ export default ({ navigation, route }: ScreenProps) => {
     }
   };
 
+  const keyExtractor = useCallback((item: Product) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item, index }) => {
+      return (
+        <ProductCard
+          key={`${item.id}`}
+          store={state.store}
+          product={item}
+          align={index % 2 === 0 ? 'left' : 'right'}
+          onPress={pressProductHandler}
+        />
+      );
+    },
+    [state.store]
+  );
+
+  const itemSeparatorComponent = useCallback(
+    () => <View style={{ height: 10 }} />,
+    []
+  );
+
   useEffect(() => {
     return () => {
       fetchStoreRequestSource && fetchStoreRequestSource.cancel();
@@ -406,7 +422,13 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useEffect(() => {
     load();
-  }, [route.params.store]);
+  }, [state.store.id]);
+
+  useEffect(() => {
+    if (state.store.phone && state.products) {
+      dispatch({ type: 'set_error', error: undefined });
+    }
+  }, [state.store.phone, state.products]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -444,21 +466,48 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.store.opening_hours]);
 
   // render logic
-  let content: ReactNode = (
-    <ActivityIndicator
-      size="small"
-      color={colors.black}
-      style={{ alignSelf: 'center', marginTop: 40 }}
+
+  // image
+  let image: ReactNode = (
+    <View
+      style={{
+        alignSelf: 'center',
+        height: 150,
+        width: 150,
+        borderRadius: 100,
+        backgroundColor: colors.blackLight8,
+      }}
     />
   );
+  if (state.store.images) {
+    image = (
+      <Image
+        source={{
+          uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500/q_80'),
+        }}
+        style={{
+          alignSelf: 'center',
+          height: 150,
+          width: 150,
+          borderRadius: 100,
+        }}
+      />
+    );
+  }
+
+  // content
+  let content: ReactNode = <View />;
   if (state.error) {
     content = (
       <View
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: 40,
-        }}
+        style={[
+          {
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 40,
+          },
+          globalStyles.withMargin,
+        ]}
       >
         <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
           No se pudo cargar la información
@@ -469,42 +518,172 @@ export default ({ navigation, route }: ScreenProps) => {
         <Button title="Reintentar" type="link" onPress={retryHandler} />
       </View>
     );
-  } else if (state.products) {
-    if (!state.products.hits.length) {
-      content = (
-        <View style={{ alignItems: 'center' }}>
+  } else if (!state.store.phone || !state.products) {
+    content = (
+      <View style={[globalStyles.withMargin, { marginTop: 25 }]}>
+        <Bone width="50%" height={25} style={{ marginBottom: 15 }} />
+        <Bone width="100%" height={25} style={{ marginBottom: 7 }} />
+        <Bone width="100%" height={25} style={{ marginBottom: 7 }} />
+        <Bone width="100%" height={25} />
+      </View>
+    );
+  } else {
+    let currentOpeningHoursMessage = '';
+    if (state.current_opening_hours) {
+      if (state.current_opening_hours.status === 'closed') {
+        currentOpeningHoursMessage = humanizeCurrentClosedOpeningHours(
+          state.current_opening_hours
+        );
+      } else {
+        currentOpeningHoursMessage = `Horario de atención`;
+      }
+    }
+    content = (
+      <View>
+        <View style={[{ paddingVertical: 20 }, globalStyles.withMargin]}>
           <Text
-            level={6}
-            weight="bold"
-            style={{ marginTop: 40, marginBottom: 15 }}
-          >
-            Muy pronto
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text level={6} style={{ marginRight: 5 }}>
-              Agregaremos productos.
-            </Text>
-            <HeartBlueIcon />
-          </View>
-        </View>
-      );
-    } else {
-      content = (
-        <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
-          <Text
-            level={4}
+            level={3}
             weight="bold"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ marginBottom: 15 }}
+            style={{ flex: 1 }}
           >
-            Productos de esta tienda
+            {state.store.name}
           </Text>
+          {!!state.store.description && (
+            <View style={{ marginTop: 5 }}>
+              <ReadMore level={6} numberOfLines={3} style={{ lineHeight: 18 }}>
+                {state.store.description}
+              </ReadMore>
+            </View>
+          )}
+
+          <View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 3,
+            }}
+          >
+            <Icon name="clock" size={18} />
+            <Text
+              level={7}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ flex: 1, marginLeft: 10 }}
+            >
+              {durationFormatter.humanizeDurationRange(
+                state.store.delivery_time.gte,
+                state.store.delivery_time.lte
+              )}
+            </Text>
+          </View>
+
+          {!!state.current_opening_hours && (
+            <Touchable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 15,
+              }}
+              onPress={pressOpeningHourHandler}
+            >
+              <Icon name="calendar" size={18} />
+              <View style={{ flex: 1, marginLeft: 10, flexDirection: 'row' }}>
+                {state.current_opening_hours.status === 'closed' ? (
+                  <View
+                    style={{
+                      backgroundColor: !state.current_opening_hours.next_open
+                        ? colors.black
+                        : colors.red2,
+                      alignSelf: 'flex-start',
+                      borderRadius: 10,
+                      paddingVertical: 5,
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <Text
+                      level={7}
+                      weight="bold"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={{
+                        color: colors.white,
+                      }}
+                    >
+                      {currentOpeningHoursMessage}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text level={7} numberOfLines={1} ellipsizeMode="tail">
+                    {currentOpeningHoursMessage}
+                  </Text>
+                )}
+              </View>
+
+              {state.opening_hours_modal ? (
+                <Icon name="chevron-up" />
+              ) : (
+                <Icon name="chevron-down" />
+              )}
+            </Touchable>
+          )}
+
+          <Button
+            title={
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icon name="whatsapp" size={20} color="#55A931" />
+                <Text
+                  level={6}
+                  color={colors.blue}
+                  weight="bold"
+                  style={{ marginLeft: 5 }}
+                >
+                  Hazme una pregunta
+                </Text>
+              </View>
+            }
+            type="link"
+            style={{ marginTop: 5, marginBottom: 7 }}
+            onPress={pressSendToWhatsappHandler}
+          />
         </View>
-      );
-    }
+        <Divider type="thick" />
+        {!state.products.hits.length ? (
+          <View style={[{ alignItems: 'center' }, globalStyles.withMargin]}>
+            <Text
+              level={6}
+              weight="bold"
+              style={{ marginTop: 40, marginBottom: 15 }}
+            >
+              Muy pronto
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text level={6} style={{ marginRight: 5 }}>
+                Agregaremos productos.
+              </Text>
+              <HeartBlueIcon />
+            </View>
+          </View>
+        ) : (
+          <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
+            <Text
+              level={4}
+              weight="bold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ marginBottom: 15 }}
+            >
+              Productos de esta tienda
+            </Text>
+          </View>
+        )}
+      </View>
+    );
   }
 
+  // order button
   let orderButton: ReactNode = null;
   if (state.amount && state.amount > 0) {
     orderButton = (
@@ -526,189 +705,28 @@ export default ({ navigation, route }: ScreenProps) => {
     );
   }
 
-  let currentOpeningHoursMessage = '';
-  if (state.current_opening_hours) {
-    if (state.current_opening_hours.status === 'closed') {
-      currentOpeningHoursMessage = humanizeCurrentClosedOpeningHours(
-        state.current_opening_hours
-      );
-    } else {
-      currentOpeningHoursMessage = `Horario de atención`;
-    }
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={state.error ? undefined : state.products?.hits}
+        data={
+          state.error || !state.store.phone || !state.products
+            ? undefined
+            : state.products?.hits
+        }
         numColumns={2}
         refreshing={false}
         ListHeaderComponent={
-          <View style={{ flex: 1, backgroundColor: colors.white }}>
-            <View
-              style={[
-                {
-                  borderRadius: 20,
-                  paddingTop: 7,
-                },
-                globalStyles.withMargin,
-              ]}
-            >
-              <Image
-                source={{
-                  uri: cloudinary.dynamicUrl(
-                    state.store.images[0],
-                    'h_500/q_80'
-                  ),
-                }}
-                style={{
-                  alignSelf: 'center',
-                  height: 150,
-                  width: 150,
-                  borderRadius: 100,
-                }}
-              />
-              <View style={{ padding: 15 }}>
-                <Text
-                  level={3}
-                  weight="bold"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={{ flex: 1 }}
-                >
-                  {state.store.name}
-                </Text>
-                {!!state.store.description && (
-                  <View style={{ marginTop: 5 }}>
-                    <ReadMore
-                      level={6}
-                      numberOfLines={3}
-                      style={{ lineHeight: 18 }}
-                    >
-                      {state.store.description}
-                    </ReadMore>
-                  </View>
-                )}
-
-                {!!state.store.delivery_time && (
-                  <View
-                    style={{
-                      marginTop: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 3,
-                    }}
-                  >
-                    <Icon name="clock" size={18} />
-                    <Text
-                      level={7}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                      style={{ flex: 1, marginLeft: 10 }}
-                    >
-                      {durationFormatter.humanizeDurationRange(
-                        state.store.delivery_time.gte,
-                        state.store.delivery_time.lte
-                      )}
-                    </Text>
-                  </View>
-                )}
-
-                {!!state.current_opening_hours && (
-                  <Touchable
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 15,
-                    }}
-                    onPress={pressOpeningHourHandler}
-                  >
-                    <Icon name="calendar" size={18} />
-                    <View
-                      style={{ flex: 1, marginLeft: 10, flexDirection: 'row' }}
-                    >
-                      {state.current_opening_hours.status === 'closed' ? (
-                        <View
-                          style={{
-                            backgroundColor: !state.current_opening_hours
-                              .next_open
-                              ? colors.black
-                              : colors.red2,
-                            alignSelf: 'flex-start',
-                            borderRadius: 10,
-                            paddingVertical: 5,
-                            paddingHorizontal: 10,
-                          }}
-                        >
-                          <Text
-                            level={7}
-                            weight="bold"
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                            style={{
-                              color: colors.white,
-                            }}
-                          >
-                            {currentOpeningHoursMessage}
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text level={7} numberOfLines={1} ellipsizeMode="tail">
-                          {currentOpeningHoursMessage}
-                        </Text>
-                      )}
-                    </View>
-
-                    {state.opening_hours_modal ? (
-                      <Icon name="chevron-up" />
-                    ) : (
-                      <Icon name="chevron-down" />
-                    )}
-                  </Touchable>
-                )}
-
-                {!!state.store.phone && (
-                  <Button
-                    title={
-                      <View
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                      >
-                        <Icon name="whatsapp" size={20} color="#55A931" />
-                        <Text
-                          level={6}
-                          color={colors.blue}
-                          weight="bold"
-                          style={{ marginLeft: 5 }}
-                        >
-                          Hazme una pregunta
-                        </Text>
-                      </View>
-                    }
-                    type="link"
-                    style={{ marginTop: 5, marginBottom: 7 }}
-                    onPress={pressSendToWhatsappHandler}
-                  />
-                )}
-              </View>
-            </View>
-            <Divider type="thick" />
+          <View
+            style={{ flex: 1, backgroundColor: colors.white, paddingTop: 7 }}
+          >
+            {image}
             {content}
           </View>
         }
-        keyExtractor={(item: Product) => item.id}
-        renderItem={({ item, index }) => {
-          return (
-            <ProductCard
-              key={`${item.id}`}
-              store={state.store}
-              product={item}
-              align={index % 2 === 0 ? 'left' : 'right'}
-              onPress={pressProductHandler}
-            />
-          );
-        }}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ItemSeparatorComponent={itemSeparatorComponent}
         ListFooterComponent={
           <View
             style={[

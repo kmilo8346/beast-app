@@ -8,7 +8,6 @@ import React, {
 import {
   View,
   ScrollView,
-  ActivityIndicator,
   GestureResponderEvent,
   RefreshControl,
 } from 'react-native';
@@ -19,7 +18,8 @@ import * as Linking from 'expo-linking';
 // ga
 import * as ga from './ga';
 // local components
-import ProductDetailsCard from './components/product-details-card';
+import Carousell from './components/carousell';
+import NumberInput from './components/number-input';
 // screen components
 import ProductCard from '../components/product-card';
 import InfoDialog from '../components/dialogs/info-dialog';
@@ -27,30 +27,33 @@ import ShoppingCartIcon from '../components/shopping-cart-icon';
 // components
 import Text from '../../components/text';
 import Icon from '../../components/icon';
+import Bone from '../../components/bone';
 import Image from '../../components/image';
 import Divider from '../../components/divider';
 import Touchable from '../../components/touchable';
 import Button from '../../components/buttons/button';
+import ReadMore from '../../components/text/read-more';
 // clients
 import storeClient from '../../clients/store-client';
 import productClient from '../../clients/product-client';
 // cache
 import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
 // libs
-import numberFormatter from '../../lib/formatters/number-formatter';
-import durationFormatter from '../../lib/formatters/duration-formatter';
-import cloudinary from '../../lib/cloudinary';
-import { capture } from '../../lib/sentry';
 import {
   CurrentOpenginHours,
   extractCurrentOpeningHours,
   humanizeCurrentClosedOpeningHours,
+  noop,
 } from '../../lib/utils';
+import { capture } from '../../lib/sentry';
+import cloudinary from '../../lib/cloudinary';
+import numberFormatter from '../../lib/formatters/number-formatter';
+import durationFormatter from '../../lib/formatters/duration-formatter';
 // types
 import { Product, SearchResponse, Store } from '../../types';
 // styles
-import colors from '../../styles/colors';
 import globalStyles from '../../styles';
+import colors from '../../styles/colors';
 
 // instances outside component
 const prefix = '[product screen]';
@@ -76,7 +79,7 @@ type SetProductsAction = {
 };
 type SetErrorAction = {
   type: 'set_error';
-  error: Error;
+  error?: Error;
 };
 type SetRefreshingAction = {
   type: 'set_refreshing';
@@ -94,6 +97,10 @@ type SetWhatsappNotFoundDialogAction = {
   type: 'set_whatsapp_not_found_dialog';
   whatsapp_not_found_dialog: boolean;
 };
+type SetProductQtyAction = {
+  type: 'set_product_qty';
+  product_qty: number;
+};
 type Action =
   | ResetAction
   | SetProductAction
@@ -103,7 +110,8 @@ type Action =
   | SetRefreshingAction
   | SetAmountAction
   | SetCurrentOpeningHoursAction
-  | SetWhatsappNotFoundDialogAction;
+  | SetWhatsappNotFoundDialogAction
+  | SetProductQtyAction;
 type State = {
   product: Product;
   store?: Store;
@@ -113,6 +121,7 @@ type State = {
   amount?: number;
   current_opening_hours?: CurrentOpenginHours;
   whatsapp_not_found_dialog: boolean;
+  product_qty?: number;
 };
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -142,6 +151,11 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         whatsapp_not_found_dialog: action.whatsapp_not_found_dialog,
       };
+    case 'set_product_qty':
+      return {
+        ...state,
+        product_qty: action.product_qty,
+      };
     default:
       return state;
   }
@@ -155,7 +169,10 @@ interface ScreenProps {
 export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(reducer, {
-    product: route.params.product,
+    product:
+      typeof route.params.product === 'string'
+        ? { id: route.params.product }
+        : route.params.product,
     refreshing: false,
     whatsapp_not_found_dialog: false,
   });
@@ -300,12 +317,20 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const load = () => {
     dispatch({ type: 'reset' });
-    Promise.all([loadProduct(), loadStore(), loadProducts()]);
+    const promises: Promise<void>[] = [loadProduct()];
+    if (state.product.store) {
+      promises.push(loadStore(), loadProducts());
+    }
+    Promise.all(promises);
   };
 
-  const refresh = () => {
+  const refresh = async () => {
     dispatch({ type: 'set_refreshing', refreshing: true });
-    Promise.all([refreshProduct(), refreshStore(), refreshProducts()]);
+    const promises: Promise<void>[] = [refreshProduct()];
+    if (state.product.store) {
+      promises.push(refreshStore(), refreshProducts());
+    }
+    await Promise.all(promises);
     dispatch({ type: 'set_refreshing', refreshing: false });
   };
 
@@ -355,6 +380,10 @@ export default ({ navigation, route }: ScreenProps) => {
     });
   };
 
+  const changeProductQtyHandler = (qty: number) => {
+    shoppingCartCache.set(state.store as Store, state.product, qty);
+  };
+
   useEffect(() => {
     return () => {
       fetchProductRequestSource && fetchProductRequestSource.cancel();
@@ -364,8 +393,22 @@ export default ({ navigation, route }: ScreenProps) => {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [route.params.product]);
+    if (state.product.id) {
+      loadProduct();
+    }
+  }, [state.product.id]);
+
+  useEffect(() => {
+    if (state.product.store) {
+      Promise.all([loadStore(), loadProducts()]);
+    }
+  }, [state.product.store]);
+
+  useEffect(() => {
+    if (state.product.name && state.store && state.products) {
+      dispatch({ type: 'set_error', error: undefined });
+    }
+  }, [state.product.name, state.store, state.products]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -406,6 +449,23 @@ export default ({ navigation, route }: ScreenProps) => {
   );
 
   useEffect(() => {
+    let unsubscribe: () => void = noop;
+    if (state.store && state.product) {
+      unsubscribe = shoppingCartCache.onChangeItem(
+        state.store.id,
+        state.product.id,
+        (data) => {
+          dispatch({ type: 'set_product_qty', product_qty: data?.qty || 0 });
+        }
+      );
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [state.store, state.product]);
+
+  useEffect(() => {
     if (!state.store?.opening_hours) {
       dispatch({
         type: 'set_current_opening_hours',
@@ -421,26 +481,83 @@ export default ({ navigation, route }: ScreenProps) => {
   }, [state.store?.opening_hours]);
 
   // render logic
-  let storeComponent: ReactNode = (
-    <>
-      <ActivityIndicator
-        size="small"
-        color={colors.black}
-        style={{ alignSelf: 'center', marginVertical: 20 }}
+
+  // images
+  let images = (
+    <View style={{ height: 300, backgroundColor: colors.blackLight8 }} />
+  );
+  if (state.product.images) {
+    images = (
+      <Carousell
+        images={state.product.images.map((image) =>
+          cloudinary.dynamicUrl(image, 'h_500/q_80')
+        )}
       />
-      <Divider type="thick" />
-    </>
-  );
-  let productsComponent: ReactNode = (
-    <ActivityIndicator
-      size="small"
-      color={colors.black}
-      style={{ alignSelf: 'center', marginTop: 40 }}
-    />
-  );
-  if (state.store) {
-    storeComponent = (
-      <>
+    );
+  }
+
+  // content
+  let content: ReactNode = <View />;
+  if (state.error) {
+    content = (
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: 40,
+        }}
+      >
+        <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
+          No se pudo cargar la información
+        </Text>
+        <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
+          Pero no te desanimes, reintentalo una vez más
+        </Text>
+        <Button title="Reintentar" type="link" onPress={retryHandler} />
+      </View>
+    );
+  } else if (!state.product.name || !state.store || !state.products) {
+    content = (
+      <View style={[globalStyles.withMargin, { paddingTop: 20 }]}>
+        <Bone width="50%" height={25} style={{ marginBottom: 15 }} />
+        <Bone width="100%" height={25} style={{ marginBottom: 7 }} />
+        <Bone width="100%" height={25} style={{ marginBottom: 30 }} />
+      </View>
+    );
+  } else {
+    content = (
+      <View>
+        <View style={{ marginVertical: 10 }}>
+          <View style={globalStyles.withMargin}>
+            <Text level={3} weight="bold" style={{ marginBottom: 5 }}>
+              {`${state.product.name} · `}
+              <Text level={3} weight="normal">
+                {numberFormatter.toCurrency(state.product.price)}
+              </Text>
+            </Text>
+            {!!state.product.description && (
+              <View style={{ marginBottom: 5 }}>
+                <ReadMore
+                  level={6}
+                  numberOfLines={3}
+                  style={{ lineHeight: 18 }}
+                >
+                  {state.product.description}
+                </ReadMore>
+              </View>
+            )}
+          </View>
+          {typeof state.product_qty !== 'undefined' && (
+            <View style={{ minHeight: 45, marginTop: 10, marginBottom: 10 }}>
+              <NumberInput
+                value={state.product_qty}
+                style={{ alignSelf: 'center' }}
+                onChange={changeProductQtyHandler}
+              />
+            </View>
+          )}
+        </View>
+        <Divider type="thick" />
         <Touchable
           style={[
             {
@@ -520,15 +637,31 @@ export default ({ navigation, route }: ScreenProps) => {
           <Icon name="chevron-right" />
         </Touchable>
         <Divider type="thick" />
-      </>
-    );
-    if (state.products) {
-      productsComponent = null;
-      if (state.products.hits.length) {
-        let seeStore: ReactNode = null;
-        if (state.products.total > state.products.hits.length) {
-          seeStore = (
-            <>
+        {state.products.hits.length > 0 && (
+          <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
+            <Text
+              level={4}
+              weight="bold"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ marginBottom: 15 }}
+            >
+              Más productos de esta tienda
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {state.products.hits.map((product, index) => {
+                return (
+                  <ProductCard
+                    key={`${product.id}`}
+                    store={state.store as Store}
+                    product={product}
+                    align={index % 2 === 0 ? 'left' : 'right'}
+                    onPress={pressProductHandler}
+                  />
+                );
+              })}
+            </View>
+            {state.products.total > state.products.hits.length && (
               <Touchable
                 style={[
                   {
@@ -560,69 +693,18 @@ export default ({ navigation, route }: ScreenProps) => {
                   >
                     {state.store.name}
                   </Text>
-                  <Text level={6}>Ver más productos</Text>
+                  <Text level={6}>Ver más en tienda</Text>
                 </View>
                 <Icon name="chevron-right" />
               </Touchable>
-            </>
-          );
-        }
-        productsComponent = (
-          <View style={[{ paddingTop: 15 }, globalStyles.withMargin]}>
-            <Text
-              level={4}
-              weight="bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ marginBottom: 15 }}
-            >
-              Más productos de esta tienda
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {state.products.hits.map((product, index) => {
-                return (
-                  <ProductCard
-                    key={`${product.id}`}
-                    store={state.store as Store}
-                    product={product}
-                    align={index % 2 === 0 ? 'left' : 'right'}
-                    onPress={pressProductHandler}
-                  />
-                );
-              })}
-            </View>
-            {seeStore}
+            )}
           </View>
-        );
-      }
-    }
-  }
-
-  let content = (
-    <View>
-      {storeComponent}
-      {productsComponent}
-    </View>
-  );
-  if (state.error) {
-    content = (
-      <View
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: 40,
-        }}
-      >
-        <Text level={6} weight="bold" style={{ marginBottom: 15 }}>
-          No se pudo cargar la información
-        </Text>
-        <Text level={6} style={{ marginBottom: 10, textAlign: 'center' }}>
-          Pero no te desanimes, reintentalo una vez más
-        </Text>
-        <Button title="Reintentar" type="link" onPress={retryHandler} />
+        )}
       </View>
     );
   }
+
+  // order button
   let orderButton: ReactNode = null;
   if (state.amount && state.amount > 0) {
     orderButton = (
@@ -643,6 +725,7 @@ export default ({ navigation, route }: ScreenProps) => {
       />
     );
   }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <ScrollView
@@ -652,8 +735,7 @@ export default ({ navigation, route }: ScreenProps) => {
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
       >
-        <ProductDetailsCard store={state.store} product={state.product} />
-        <Divider type="thick" />
+        {images}
         {content}
         <View style={globalStyles.withScreenAir} />
       </ScrollView>
