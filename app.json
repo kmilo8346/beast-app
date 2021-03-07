@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.77",
+    "version": "1.0.78",
     "primaryColor": "#457AFF",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -41,7 +41,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.firedevs.beast",
-      "buildNumber": "1.0.77",
+      "buildNumber": "1.0.78",
       "config": {
         "usesNonExemptEncryption": false,
         "googleMapsApiKey": "AIzaSyD1Gd5wIw-a6ELjxPlMMgGj1x_FKWWF61c"
@@ -56,7 +56,7 @@
     "android": {
       "package": "com.firedevs.beast",
       "icon": "./assets/icon-android.png",
-      "versionCode": 400010077,
+      "versionCode": 400010078,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
