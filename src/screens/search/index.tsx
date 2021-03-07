@@ -445,9 +445,9 @@ export default ({ navigation, route }: ScreenProps) => {
     load();
   };
 
-  const pressProductHandler = (product: StoreProduct) => {
+  const pressProductHandler = useCallback((product: StoreProduct) => {
     navigation.navigate('Product', { product });
-  };
+  }, []);
 
   const retryFetchMoreHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
