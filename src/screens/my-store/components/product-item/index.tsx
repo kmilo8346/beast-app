@@ -51,7 +51,10 @@ export default memo(({ data, navigation }: ComponentProps) => {
       <View style={[containerStyle, globalStyles.withMargin]}>
         <Image
           source={{
-            uri: cloudinary.dynamicUrl(data.images[0], 'w_500/q_80'),
+            uri: cloudinary.dynamicUrl(
+              data.images[0],
+              'w_500,c_scale,q_auto,f_auto,fl_lossy'
+            ),
           }}
           style={{
             width: 50,

@@ -661,7 +661,7 @@ export default ({ navigation, route }: ScreenProps) => {
                     source={{
                       uri: cloudinary.dynamicUrl(
                         (state.store as Store).images[0],
-                        'w_214/q_80'
+                        'w_214,c_scale,q_auto,f_auto,fl_lossy'
                       ),
                     }}
                     style={{

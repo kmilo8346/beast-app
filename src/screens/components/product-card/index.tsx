@@ -65,7 +65,10 @@ export default memo(({ product, store, align, onPress }: ComponentProps) => {
           )}
           <Image
             source={{
-              uri: cloudinary.dynamicUrl(product.images[0], 'h_500/q_80'),
+              uri: cloudinary.dynamicUrl(
+                product.images[0],
+                'w_500,c_scale,q_auto,f_auto,fl_lossy'
+              ),
             }}
             style={[
               {

@@ -22,6 +22,8 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 
+// ga
+import * as ga from './ga';
 // local components
 import Widget from './components/widget';
 import Skeleton from './components/skeleton';
@@ -57,6 +59,7 @@ import {
   Place,
   SearchResponse,
   RenderedWidget,
+  NotificationPayload,
 } from '../../types';
 // styles
 import colors from '../../styles/colors';
@@ -67,6 +70,10 @@ import deviceClient, { getDeviceData } from '../../clients/device-client';
 const prefix = '[home screen]';
 let fetchRequestSource: CancelTokenSource;
 const defaultSize = 10;
+const notificationTracker: { [key: string]: boolean } = {};
+const notificationAlreadyExecuted = (id: string) => {
+  return id in notificationTracker;
+};
 
 type SetUserAction = {
   type: 'set_user';
@@ -199,6 +206,7 @@ export default ({ navigation }: ScreenProps) => {
     updating_address: false,
     card_size: (Dimensions.get('window').width * 0.92 - 20 * 2) / 2,
   });
+  const lastNotificationResponse = Notifications.useLastNotificationResponse();
   // TODO: improve
   const address = userCache.getAddress();
   let addressInfo;
@@ -492,6 +500,42 @@ export default ({ navigation }: ScreenProps) => {
       };
     }, [])
   );
+
+  useEffect(() => {
+    if (
+      lastNotificationResponse &&
+      lastNotificationResponse.notification.request.content.data &&
+      lastNotificationResponse.actionIdentifier ===
+        Notifications.DEFAULT_ACTION_IDENTIFIER &&
+      !notificationAlreadyExecuted(
+        lastNotificationResponse.notification.request.identifier
+      )
+    ) {
+      // record notification id to avoid execute twice
+      notificationTracker[
+        lastNotificationResponse.notification.request.identifier
+      ] = true;
+
+      const { attribution, navigate } = (lastNotificationResponse.notification
+        .request.content.data as any) as NotificationPayload;
+
+      // send notification open
+      ga.notificationOpenEvent(attribution);
+
+      // navigate if exist
+      if (navigate) {
+        // precondition before navigate
+        if (!userCache.hasAddress()) {
+          return;
+        }
+
+        navigation.navigate(navigate.name, {
+          ...navigate.params,
+          attribution,
+        });
+      }
+    }
+  }, [lastNotificationResponse]);
 
   useEffect(() => {
     if (state.user?.current_address && state.user?.addresses?.length) {

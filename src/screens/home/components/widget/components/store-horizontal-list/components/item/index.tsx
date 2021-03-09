@@ -127,7 +127,10 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
       >
         <Image
           source={{
-            uri: cloudinary.dynamicUrl(data.store_info.images[0], 'h_500/q_80'),
+            uri: cloudinary.dynamicUrl(
+              data.store_info.images[0],
+              'w_500,c_scale,q_auto,f_auto,fl_lossy'
+            ),
             width: 40,
             height: 40,
           }}
@@ -195,7 +198,10 @@ export default memo(({ navigation, data, last }: ComponentProps) => {
 
             <Image
               source={{
-                uri: cloudinary.dynamicUrl(product.images[0], 'h_500/q_80'),
+                uri: cloudinary.dynamicUrl(
+                  product.images[0],
+                  'w_500,c_scale,q_auto,f_auto,fl_lossy'
+                ),
                 width: size,
                 height: size,
               }}

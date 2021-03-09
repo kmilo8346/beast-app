@@ -126,7 +126,10 @@ export default ({ navigation }: ScreenProps) => {
   // render logic
   let delivery_area_text = '';
   let delivery_time_text = '';
-  const image = cloudinary.dynamicUrl(state.store.images[0], 'w_214/q_80');
+  const image = cloudinary.dynamicUrl(
+    state.store.images[0],
+    'w_214,c_scale,q_auto,f_auto,fl_lossy'
+  );
   if (state.store.delivery_area) {
     delivery_area_text = `Radio de entrega ${state.store.delivery_area.radius} · `;
     if (state.store.delivery_area.center.route) {

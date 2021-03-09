@@ -19,7 +19,12 @@ export default ({ data }: ComponentProps) => {
   return (
     <View style={{ flexDirection: 'row', marginBottom: 10 }}>
       <Image
-        source={{ uri: cloudinary.dynamicUrl(data.images[0], 'w_100/q_80') }}
+        source={{
+          uri: cloudinary.dynamicUrl(
+            data.images[0],
+            'w_100,c_scale,q_auto,f_auto,fl_lossy'
+          ),
+        }}
         style={{ width: 50, height: 50, borderRadius: 10 }}
       />
       <View

@@ -313,3 +313,20 @@ export interface ProductHorizontalListRenderedWidget extends RenderedWidget {
     response: SearchResponse<StoreProduct>;
   };
 }
+
+export interface NotificationAttribution {
+  notification_id: string;
+  utm_campaign?: string;
+  utm_medium?: string;
+  utm_source?: string;
+  utm_term?: string;
+  utm_content?: string;
+}
+
+export interface NotificationPayload {
+  attribution: NotificationAttribution;
+  navigate?: {
+    name: string;
+    params: { [key: string]: any };
+  };
+}

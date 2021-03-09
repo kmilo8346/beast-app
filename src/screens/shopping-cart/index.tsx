@@ -193,9 +193,10 @@ const reducer = (state: State, action: Action): State => {
 };
 interface ScreenProps {
   navigation: any;
+  route: any;
 }
 
-export default ({ navigation }: ScreenProps) => {
+export default ({ navigation, route }: ScreenProps) => {
   // state
   const [state, dispatch] = useReducer(
     reducer,
@@ -247,7 +248,10 @@ export default ({ navigation }: ScreenProps) => {
   };
 
   const pressSeeStoreHandler = (store: Store) => {
-    navigation.navigate('Store', { store });
+    navigation.navigate('Store', {
+      store,
+      attribution: route.params?.attribution,
+    });
   };
 
   const pressDeleteHandler = (event: GestureResponderEvent) => {
@@ -330,12 +334,13 @@ export default ({ navigation }: ScreenProps) => {
       )}`;
       await Linking.openURL(
         `whatsapp://send?text=${encodeURIComponent(
-          `Hola ${state.selected_store_shopping_cart_snapshot.store.name}👋, quiero hacer el siguiente pedido:\n\n${body}`
+          `Hola, vengo de Shop Shop 👋\n\nQuiero hacer el siguiente pedido:\n\n${body}`
         )}&phone=${state.selected_store_shopping_cart_snapshot.store.phone}`
       );
       // send order message event to ga
       await ga.sendOrderMessageEvent(
-        state.selected_store_shopping_cart_snapshot
+        state.selected_store_shopping_cart_snapshot,
+        route.params?.attribution
       );
       // show dialog to remove order
       dispatch({
@@ -494,11 +499,11 @@ export default ({ navigation }: ScreenProps) => {
             globalStyles.withMargin,
           ]}
         >
-          <View style={[{ flexDirection: 'row' }]}>
+          <View style={[{ flexDirection: 'row', marginLeft: -8 }]}>
             <MapPinShadedBlueIcon />
             <View style={{ marginLeft: 15, flex: 1 }}>
               <Text level={6} weight="bold" style={{ marginBottom: 2 }}>
-                Dirección de entrega
+                Ubicación actual
               </Text>
               <Text
                 level={6}
@@ -540,8 +545,8 @@ export default ({ navigation }: ScreenProps) => {
                   >
                     <View
                       style={{
-                        width: 20,
-                        height: 20,
+                        width: 25,
+                        height: 25,
                         borderWidth: 2,
                         borderColor: colors.blueLight1,
                         borderRadius: 50,
@@ -552,8 +557,8 @@ export default ({ navigation }: ScreenProps) => {
                       {store.id === state.selected_store && (
                         <View
                           style={{
-                            width: 14,
-                            height: 14,
+                            width: 17,
+                            height: 17,
                             backgroundColor: colors.blue,
                             borderRadius: 50,
                           }}
@@ -565,7 +570,7 @@ export default ({ navigation }: ScreenProps) => {
                       source={{
                         uri: cloudinary.dynamicUrl(
                           storeSnapshot.store.images[0],
-                          'w_500/q_80'
+                          'w_500,c_scale,q_auto,f_auto,fl_lossy'
                         ),
                       }}
                       style={{

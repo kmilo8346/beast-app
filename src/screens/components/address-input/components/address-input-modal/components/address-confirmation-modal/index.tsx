@@ -55,7 +55,7 @@ interface ComponentProps {
 
 export default ({ value, onChange, onClose }: ComponentProps) => {
   // state
-  const [state, dispatch] = useReducer(reducer, {
+  const [state] = useReducer(reducer, {
     region: {
       latitude: value.location.lat,
       longitude: value.location.lon,
@@ -78,18 +78,10 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
     onClose();
   };
 
-  const regionChangeCompleteHandler = (region: Region) => {
-    dispatch({ type: 'set_region', region });
-  };
-
   const pressConfirmHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
     onChange({
       ...value,
-      location: {
-        lat: state.region.latitude,
-        lon: state.region.longitude,
-      },
     });
   };
 
@@ -124,10 +116,11 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
         {closeButton}
         <View style={{ flex: 1 }}>
           <MapView
+            zoomEnabled={false}
+            scrollEnabled={false}
             provider={PROVIDER_GOOGLE}
             initialRegion={state.region}
             style={{ width: '100%', height: '100%' }}
-            onRegionChangeComplete={regionChangeCompleteHandler}
           />
           <View
             style={{
@@ -163,15 +156,24 @@ export default ({ value, onChange, onClose }: ComponentProps) => {
           >
             Confirma la dirección
           </Text>
-          <Text
-            level={5}
-            weight="light"
-            style={{ lineHeight: 23, marginBottom: 20 }}
+          <Touchable
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+            onPress={(event: GestureResponderEvent) => {
+              event.stopPropagation();
+              onClose();
+            }}
           >
-            {utils.formatPlace(value)}
-          </Text>
+            <Text level={5} weight="light" style={{ lineHeight: 23, flex: 1 }}>
+              {utils.formatPlace(value)}
+            </Text>
+            <Icon name="edit" size={20} />
+          </Touchable>
           <Button
-            title="Confirmar ubicación"
+            title="Confirmar"
             style={globalStyles.withMainActionAir}
             onPress={pressConfirmHandler}
           />

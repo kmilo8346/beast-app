@@ -379,7 +379,10 @@ export default ({
         {images.map((image) => {
           const uri = image.uri
             ? image.uri
-            : cloudinary.dynamicUrl(image.url, 'w_214/q_80');
+            : cloudinary.dynamicUrl(
+                image.url,
+                'w_214,c_scale,q_auto,f_auto,fl_lossy'
+              );
           return (
             <View
               key={image.id}

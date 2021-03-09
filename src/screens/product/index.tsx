@@ -284,6 +284,7 @@ export default ({ navigation, route }: ScreenProps) => {
         },
         from: 0,
         size: defaultSize,
+        sort: { updated_at: 'desc' },
         source: ['id', 'images', 'name', 'price', 'store'],
       },
       { cancelToken: fetchProductsRequestSource.token }
@@ -335,11 +336,14 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const pressProductHandler = useCallback((product: Product) => {
-    navigation.push('Product', { product });
+    navigation.push('Product', {
+      product,
+      attribution: route.params.attribution,
+    });
   }, []);
 
   const pressSeeStoreHandler = (store: Store) => {
-    navigation.push('Store', { store });
+    navigation.push('Store', { store, attribution: route.params.attribution });
   };
 
   const retryHandler = () => {
@@ -348,7 +352,10 @@ export default ({ navigation, route }: ScreenProps) => {
 
   const pressMyOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('ShoppingCartStack');
+    navigation.navigate('ShoppingCartStack', {
+      screen: 'ShoppingCart',
+      params: { attribution: route.params.attribution },
+    });
   };
 
   const pressSendToWhatsappHandler = async (event: GestureResponderEvent) => {
@@ -356,13 +363,19 @@ export default ({ navigation, route }: ScreenProps) => {
     try {
       await Linking.openURL(
         `whatsapp://send?text=${encodeURIComponent(
-          `✅ ${state.product.name} · ${numberFormatter.toCurrency(
+          `Hola, vengo de Shop Shop 👋\n\n✅ ${
+            state.product.name
+          } · ${numberFormatter.toCurrency(
             state.product.price
-          )}\n\nHola, ¿Está disponible? 🤩`
+          )}\n\n¿Está disponible? 🤔`
         )}&phone=${state.store?.phone}`
       );
       // send product message event to ga
-      await ga.sendProductMessageEvent(state.store as Store, state.product);
+      await ga.sendProductMessageEvent(
+        state.store as Store,
+        state.product,
+        route.params.attribution
+      );
     } catch (error) {
       capture(prefix, 'Press send to whatsapp hanlder error', error);
 
@@ -414,7 +427,7 @@ export default ({ navigation, route }: ScreenProps) => {
     navigation.setOptions({
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
-          <ShoppingCartIcon />
+          <ShoppingCartIcon attribution={route.params.attribution} />
           <View style={{ marginRight: 20 }}>
             {state.product.name && state.product.price && state.store?.phone && (
               <Touchable
@@ -436,16 +449,18 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      const unsubscribe = shoppingCartCache.onChangeStore(
-        route.params.product.store,
-        (data) => {
-          dispatch({ type: 'set_amount', amount: getAmount(data) });
-        }
-      );
-      return () => {
-        unsubscribe();
-      };
-    }, [route.params.product.store])
+      if (state.product.store) {
+        const unsubscribe = shoppingCartCache.onChangeStore(
+          state.product.store,
+          (data) => {
+            dispatch({ type: 'set_amount', amount: getAmount(data) });
+          }
+        );
+        return () => {
+          unsubscribe();
+        };
+      }
+    }, [state.product.store])
   );
 
   useEffect(() => {
@@ -490,7 +505,7 @@ export default ({ navigation, route }: ScreenProps) => {
     images = (
       <Carousell
         images={state.product.images.map((image) =>
-          cloudinary.dynamicUrl(image, 'h_500/q_80')
+          cloudinary.dynamicUrl(image, 'h_500,c_scale,q_auto,f_auto,fl_lossy')
         )}
       />
     );
@@ -574,7 +589,10 @@ export default ({ navigation, route }: ScreenProps) => {
         >
           <Image
             source={{
-              uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500/q_80'),
+              uri: cloudinary.dynamicUrl(
+                state.store.images[0],
+                'w_500,c_scale,q_auto,f_auto,fl_lossy'
+              ),
             }}
             style={{ width: 60, height: 60, borderRadius: 100 }}
           />
@@ -679,7 +697,7 @@ export default ({ navigation, route }: ScreenProps) => {
                   source={{
                     uri: cloudinary.dynamicUrl(
                       state.store.images[0],
-                      'h_500/q_80'
+                      'w_500,c_scale,q_auto,f_auto,fl_lossy'
                     ),
                   }}
                   style={{ width: 60, height: 60, borderRadius: 100 }}

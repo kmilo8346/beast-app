@@ -35,7 +35,7 @@ import ReadMore from '../../components/text/read-more';
 import HeartBlueIcon from '../../components/svgs/icons/heart-blue';
 // clients
 import storeClient from '../../clients/store-client';
-import storeProductClient from '../../clients/store-product-client';
+import productClient from '../../clients/product-client';
 // cache
 import shoppingCartCache, { getAmount } from '../../cache/shopping-cart';
 // libs
@@ -244,16 +244,18 @@ export default ({ navigation, route }: ScreenProps) => {
       fetchProductsRequestSource.cancel();
     }
     fetchProductsRequestSource = axios.CancelToken.source();
-    const products = await storeProductClient.search(
+    const products = await productClient.search(
       {
+        pathVars: {
+          storeId: state.store.id,
+        },
         filters: {
           enabled: true,
-          store: state.store.id,
         },
         from,
         size,
+        sort: { updated_at: 'desc' },
         source: ['id', 'images', 'name', 'price', 'store'],
-        sort: { 'stats.number_of_times_in_orders': 'desc' },
       },
       { cancelToken: fetchProductsRequestSource.token }
     );
@@ -347,12 +349,18 @@ export default ({ navigation, route }: ScreenProps) => {
   };
 
   const pressProductHandler = useCallback((product: Product) => {
-    navigation.push('Product', { product });
+    navigation.push('Product', {
+      product,
+      attribution: route.params.attribution,
+    });
   }, []);
 
   const pressMyOrderHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigation.navigate('ShoppingCartStack');
+    navigation.navigate('ShoppingCartStack', {
+      screen: 'ShoppingCart',
+      params: { attribution: route.params.attribution },
+    });
   };
 
   const pressOpeningHourHandler = (event: GestureResponderEvent) => {
@@ -376,11 +384,14 @@ export default ({ navigation, route }: ScreenProps) => {
     try {
       await Linking.openURL(
         `whatsapp://send?text=${encodeURIComponent(
-          `Hola ${state.store.name} 👋`
+          `Hola, vengo de Shop Shop 👋`
         )}&phone=${state.store.phone}`
       );
       // send store question message event to ga
-      await ga.sendStoreQuestionMessageEvent(state.store);
+      await ga.sendStoreQuestionMessageEvent(
+        state.store,
+        route.params.attribution
+      );
     } catch (error) {
       capture(prefix, 'Press ask me a question error', error);
 
@@ -432,14 +443,19 @@ export default ({ navigation, route }: ScreenProps) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <ShoppingCartIcon style={{ marginRight: 20 }} />,
+      headerRight: () => (
+        <ShoppingCartIcon
+          style={{ marginRight: 20 }}
+          attribution={route.params.attribution}
+        />
+      ),
     });
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = shoppingCartCache.onChangeStore(
-        route.params.store.id,
+        state.store.id,
         (data) => {
           dispatch({ type: 'set_amount', amount: getAmount(data) });
         }
@@ -447,7 +463,7 @@ export default ({ navigation, route }: ScreenProps) => {
       return () => {
         unsubscribe();
       };
-    }, [route.params.store])
+    }, [state.store.id])
   );
 
   useEffect(() => {
@@ -483,13 +499,18 @@ export default ({ navigation, route }: ScreenProps) => {
     image = (
       <Image
         source={{
-          uri: cloudinary.dynamicUrl(state.store.images[0], 'h_500/q_80'),
+          uri: cloudinary.dynamicUrl(
+            state.store.images[0],
+            'w_500,c_scale,q_auto,f_auto,fl_lossy'
+          ),
         }}
         style={{
           alignSelf: 'center',
           height: 150,
           width: 150,
           borderRadius: 100,
+          borderWidth: 1,
+          borderColor: '#F3F3F3',
         }}
       />
     );
@@ -540,18 +561,23 @@ export default ({ navigation, route }: ScreenProps) => {
     }
     content = (
       <View>
-        <View style={[{ paddingVertical: 20 }, globalStyles.withMargin]}>
+        <View
+          style={[
+            { paddingTop: 10, paddingBottom: 20 },
+            globalStyles.withMargin,
+          ]}
+        >
           <Text
             level={3}
             weight="bold"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ flex: 1 }}
+            style={{ flex: 1, textAlign: 'center', marginBottom: 10 }}
           >
             {state.store.name}
           </Text>
           {!!state.store.description && (
-            <View style={{ marginTop: 5 }}>
+            <View style={{ marginTop: 5, marginBottom: 10 }}>
               <ReadMore level={6} numberOfLines={3} style={{ lineHeight: 18 }}>
                 {state.store.description}
               </ReadMore>

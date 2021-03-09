@@ -18,12 +18,14 @@ import shoppingCartCache, { getTotal } from '../../../cache/shopping-cart';
 import { navigate } from '../../../lib/root-navigation';
 // styles
 import colors from '../../../styles/colors';
+import { NotificationAttribution } from '../../../types';
 
 interface ComponentProps {
   style?: StyleProp<ViewStyle>;
+  attribution?: NotificationAttribution;
 }
 
-export default ({ style }: ComponentProps) => {
+export default ({ style, attribution }: ComponentProps) => {
   // state
   const [total, setTotal] = useState<number | undefined>();
   const address = userCache.getAddress();
@@ -31,7 +33,12 @@ export default ({ style }: ComponentProps) => {
   // event handlers
   const pressHandler = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    navigate('ShoppingCartStack');
+    navigate('ShoppingCartStack', {
+      screen: 'ShoppingCart',
+      params: {
+        attribution,
+      },
+    });
   };
 
   useFocusEffect(

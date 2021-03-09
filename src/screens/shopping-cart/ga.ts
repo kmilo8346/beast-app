@@ -3,11 +3,13 @@ import { StoreShoppingCartSnapshot } from '../../cache/shopping-cart';
 // lib
 import { capture } from '../../lib/sentry';
 import Analtytics from '../../lib/analytics';
+import { NotificationAttribution } from '../../types';
 
 const prefix = '[shopping cart screen ga]';
 
 export const sendOrderMessageEvent = async (
-  data: StoreShoppingCartSnapshot
+  data: StoreShoppingCartSnapshot,
+  attribution?: NotificationAttribution
 ) => {
   try {
     const params: { [key: string]: any } = {
@@ -15,6 +17,7 @@ export const sendOrderMessageEvent = async (
       store_name: data.store.name,
       stats_ammount: data.stats.amount,
       stats_total: data.stats.total,
+      ...(attribution || {}),
     };
     data.items.forEach((item, index) => {
       params[`items_${index}`] = `${item.id}|${item.price}|${item.qty}`;
