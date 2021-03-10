@@ -40,6 +40,7 @@ export const getDeviceData = async (): Promise<CreateDevice> => {
     user_id: user?.id || null,
     user_location: address?.location || null,
     user_current_store: user?.current_store || null,
+    user_current_address: user?.current_address || null,
   };
 };
 

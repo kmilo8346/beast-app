@@ -232,6 +232,7 @@ export interface CreateDevice {
     lon: number;
   } | null;
   user_current_store: string | null;
+  user_current_address: string | null;
 }
 
 export interface Device extends CreateDevice {

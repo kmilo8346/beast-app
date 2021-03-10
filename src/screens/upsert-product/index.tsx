@@ -352,7 +352,7 @@ export default ({ navigation, route }: ScreenProps) => {
         <InputTags
           label="Tags"
           placeHolder="Agrega palabras claves. Ej: colación"
-          size={3}
+          size={20}
           maxLength={23}
           value={state.form.product?.tags}
           onChange={(key: string[]) => {

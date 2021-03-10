@@ -505,7 +505,7 @@ export default ({ navigation, route }: ScreenProps) => {
     images = (
       <Carousell
         images={state.product.images.map((image) =>
-          cloudinary.dynamicUrl(image, 'h_500,c_scale,q_auto,f_auto,fl_lossy')
+          cloudinary.dynamicUrl(image, 'w_500,c_scale,q_auto,f_auto,fl_lossy')
         )}
       />
     );
